@@ -35,8 +35,9 @@ Implemented:
 - Rematch (host) or return to lobby; automatic return to the lobby 20 s after results
 - Disconnect handling for every phase, host transfer, joins rejected during matches, empty rooms disposed by Colyseus
 - Input validation, name sanitisation and per-client rate limiting (token bucket)
-- 3D procedural low-poly art (no image assets): sumo characters with squash-and-stretch, walk cycle, blinking, dash lean, ring-out fall and tumble, victory hop; dohyo with straw boundary, starting lines, corner tassel posts and cushions
+- 3D procedural low-poly art (no image assets in the 3D scene): sumo characters with squash-and-stretch, walk cycle, blinking, dash lean, ring-out fall and tumble, victory hop; dohyo with straw boundary, starting lines, corner tassel posts and cushions
 - Effects: pooled dust particles, impact shockwave rings, camera shake on strong hits
+- Game logo (transparent PNG/WebP) on the main menu, plus favicon, Apple touch icon and web app manifest icons in `apps/client/public/`
 - Synthesised Web Audio sound effects (no files), mute toggle, unlocked on first gesture
 - Keyboard (WASD/arrows, Space, Esc) and touch (virtual joystick + dash button with cooldown ring)
 - Responsive camera that always fits the ring in portrait and landscape; safe-area aware UI

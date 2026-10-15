@@ -25,9 +25,11 @@ export function MainMenu() {
   return (
     <main className="menu">
       <header className="menu__title">
-        <h1 className="logo" aria-label="Mini Sumo">
-          <span className="logo__mini">Mini</span>
-          <span className="logo__sumo">Sumo</span>
+        <h1 className="logo">
+          <picture>
+            <source srcSet="/logo.webp" type="image/webp" />
+            <img className="logo__img" src="/logo.png" alt="Mini Sumo" width={768} height={768} decoding="async" />
+          </picture>
         </h1>
         <p className="menu__tagline">Push your friends out of the ring. Last one standing wins.</p>
       </header>

@@ -305,36 +305,14 @@ body {
 
 .logo {
   margin: 0;
-  line-height: 0.82;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  color: var(--paper);
-  -webkit-text-stroke: 3px var(--ink);
-  paint-order: stroke fill;
-  text-shadow: 0 6px 0 var(--ink);
+  line-height: 0;
 }
 
-.logo__mini {
-  font-size: clamp(1.6rem, 5vw, 2.4rem);
-  font-weight: 800;
-  background: var(--coral);
-  border: 3px solid var(--ink);
-  border-radius: 12px;
-  padding: 0 14px 4px;
-  transform: rotate(-4deg) translateY(10px);
-  -webkit-text-stroke: 0;
-  text-shadow: none;
-  box-shadow: 0 4px 0 var(--ink);
-  position: relative;
-  z-index: 1;
-}
-
-.logo__sumo {
-  font-size: clamp(4.5rem, 16vw, 8.5rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--clay);
+.logo__img {
+  display: block;
+  width: clamp(180px, min(46vw, 34vh), 340px);
+  height: auto;
+  filter: drop-shadow(0 6px 0 rgba(43, 35, 64, 0.55));
 }
 
 .menu__tagline {
@@ -859,8 +837,8 @@ body {
   .menu__title {
     margin-top: 0;
   }
-  .logo__sumo {
-    font-size: 4.2rem;
+  .logo__img {
+    width: clamp(140px, 42vh, 240px);
   }
   .panel {
     max-height: calc(100vh - 24px);
