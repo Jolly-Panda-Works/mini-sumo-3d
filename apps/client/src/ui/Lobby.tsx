@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MIN_PLAYERS, Phase } from "@mini-sumo/shared";
+import { networkStore } from "../network/networkMode";
 import { gameStore, roomManager, sessionStore } from "../network/RoomManager";
 import { useStore } from "../store";
 import { setSettingsOpen, setWardrobeOpen } from "../uiStore";
@@ -10,6 +11,8 @@ export function Lobby() {
   const game = useStore(gameStore);
   const session = useStore(sessionStore);
   const [copied, setCopied] = useState<"" | "link" | "failed">("");
+  const { mode } = useStore(networkStore);
+  const offline = mode === "offline";
   const you = game.players.find((p) => p.isYou);
   const isHost = Boolean(you?.isHost);
   const connected = game.players.filter((p) => p.connected);
@@ -44,16 +47,21 @@ export function Lobby() {
       <section className="panel lobby__panel" aria-label="Room lobby">
         <div className="lobby__head">
           <div>
-            <p className="field__label">{game.isPrivate ? "Private room" : "Public room"}</p>
-            <p className="room-code" aria-label={`Room code ${session.roomId}`}>
-              {session.roomId}
-            </p>
+            <p className="field__label">{offline ? "Offline practice" : game.isPrivate ? "Private room" : "Public room"}</p>
+            {offline ? (
+              <p className="room-code room-code--offline">You vs bots</p>
+            ) : (
+              <p className="room-code" aria-label={`Room code ${session.roomId}`}>
+                {session.roomId}
+              </p>
+            )}
           </div>
           <button className="icon-btn" onClick={() => setSettingsOpen(true)} aria-label="Settings">
             <GearIcon />
           </button>
         </div>
 
+        {!offline && (
         <div className="row">
           <button className="btn btn--grow" onClick={() => void copy()}>
             {copied === "link" ? "Invite link copied" : "Copy invite link"}
@@ -64,7 +72,8 @@ export function Lobby() {
             </button>
           )}
         </div>
-        {copied === "failed" && (
+        )}
+        {copied === "failed" && !offline && (
           <label className="field">
             <span className="field__label">Copy this link</span>
             <input className="input input--code" readOnly value={link} onFocus={(e) => e.currentTarget.select()} />
@@ -125,7 +134,11 @@ export function Lobby() {
             {!canStart && !searching && (
               <p className="hint">
                 You need at least {MIN_PLAYERS} wrestlers.{" "}
-                {game.isPrivate ? "Add a bot or send the invite link to a friend." : "Waiting for another player to join."}
+                {offline
+                  ? "Add a bot to start."
+                  : game.isPrivate
+                    ? "Add a bot or send the invite link to a friend."
+                    : "Waiting for another player to join."}
               </p>
             )}
           </>

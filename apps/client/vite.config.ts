@@ -1,5 +1,6 @@
 /// <reference types="node" />
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -10,6 +11,12 @@ export default defineConfig({
   // "/" for normal hosting, Electron and Capacitor; "/<repo>/" for GitHub Pages (set VITE_BASE in CI).
   base: process.env.VITE_BASE || "/",
   plugins: [react()],
+  resolve: {
+    alias: {
+      // Offline mode runs the server's framework-free simulation in the browser.
+      "@mini-sumo/sim": fileURLToPath(new URL("../server/src/sim.ts", import.meta.url)),
+    },
+  },
   // One .env at the repository root serves both server and client (only VITE_* reaches the client).
   envDir: "../..",
   server: {

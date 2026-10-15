@@ -27,7 +27,7 @@
   <img src="docs/screenshots/bout.png" alt="Three sumo wrestlers colliding in the ring" width="900" />
 </p>
 
-> **Server status:** the public game server is not online yet. Until it is, play on your own computer or network by running the server from source (see [Run from source](#run-from-source)).
+> **Server status:** the public game server is not online yet. Until it is, every build runs in **offline practice mode**: rooms are created on your device and you play against bots. Online play switches on by itself once a server is configured (see [Offline mode](#offline-mode)).
 
 ---
 
@@ -36,6 +36,7 @@
 - [Why Mini Sumo?](#why-mini-sumo)
 - [How to play](#how-to-play)
 - [Screenshots](#screenshots)
+- [Offline mode](#offline-mode)
 - [Download and install](#download-and-install)
 - [Run from source](#run-from-source)
 - [Build the apps yourself](#build-the-apps-yourself)
@@ -110,6 +111,18 @@ Tuning lives in `apps/server/src/simulation/SimulationConfig.ts` (acceleration 2
 <p align="center"><img src="docs/screenshots/mobile.png" alt="Mini Sumo on a phone with touch controls" width="260" /><br /><i>Touch controls on a phone.</i></p>
 
 Screenshots come from a real three-player match played by the [Screenshots workflow](.github/workflows/screenshots.yml) (*Actions → Screenshots → Run workflow*), which commits fresh images to `docs/screenshots/`.
+
+## Offline mode
+
+Mini Sumo runs the **same authoritative game session** the server uses directly in your browser or app when no server is available. Rooms are then local and your opponents are bots with ordinary names, so the game is fully playable before (or without) a server.
+
+| Situation | What happens |
+| --- | --- |
+| Build without `VITE_SERVER_URL` (current releases, GitHub Pages) | Offline from the start. |
+| `VITE_SERVER_URL` set, server reachable | Online: real rooms, invite links, quick match with other players. |
+| Server set but unreachable (down, no internet) | Falls back to offline when you press *Play now* or create a room. |
+
+Offline, *Play now* searches for a few seconds and fills the ring with bots; *Create room with bots* opens a lobby where you add bots yourself. Joining friends by code needs the online server. Force a mode with `VITE_NETWORK_MODE=online|offline|auto` (default `auto`). *Settings → About* shows the current mode.
 
 ## Download and install
 

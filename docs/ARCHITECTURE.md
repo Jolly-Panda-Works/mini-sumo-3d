@@ -100,3 +100,14 @@ Quick-match bots get ordinary names (`botNames.ts`) and ids shaped like Colyseus
 ## Character customisation
 
 The look is four small indexes (`hair`, `hairColor`, `face`, `outfit`) defined in `packages/shared/src/appearance.ts`. The client saves them in settings, sends them in the join options and with `setAppearance` while in the lobby. The server validates every field with `sanitizeAppearance` (out-of-range values fall back to the default), only accepts changes in `waiting`/`lobby`, and syncs them per player. The belt colour is never customisable: it is the slot colour, which keeps players identifiable together with the P1–P4 number.
+
+## Offline mode
+
+`apps/server/src/sim.ts` exports the framework-free parts of the server (`GameSession`, config, helpers). The web client imports them through the `@mini-sumo/sim` alias (Vite `resolve.alias` + TypeScript `paths`), so offline mode runs the exact same rules as the server instead of a separate client-side copy.
+
+`apps/client/src/network/connection.ts` defines `GameConnection`, the small surface `RoomManager` uses (`send`, `onStateChange`, `onMessage`, `leave`, live `state`). Two implementations:
+
+- `wrapColyseusRoom(room)`: the online Colyseus room.
+- `LocalConnection`: a `GameSession` ticking at 30 Hz in the browser, mirroring `MiniSumoRoom.syncState` into a plain object with the `SyncedState` shape and emitting the same `impact`/`dash`/`eliminated`/`error` messages. Offline quick match uses a 4 s search before bots fill the ring.
+
+`networkMode.ts` decides the mode (`VITE_NETWORK_MODE`, missing `VITE_SERVER_URL` in production, or a `/health` probe), and `RoomManager` falls back to a `LocalConnection` when joining fails because the server is unreachable.

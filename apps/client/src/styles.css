@@ -239,6 +239,15 @@ body {
   border: 2.5px solid var(--coral);
 }
 
+.notice--offline {
+  background: #e3eefb;
+  border: 2.5px solid var(--sky);
+}
+
+.room-code--offline {
+  letter-spacing: 0;
+}
+
 .notice--invite {
   background: #fff1cc;
   border: 2.5px dashed var(--ink);

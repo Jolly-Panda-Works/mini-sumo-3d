@@ -1,4 +1,4 @@
-import { Client, type Room } from "colyseus.js";
+import { Client } from "colyseus.js";
 import {
   ClientMessage,
   Phase,
@@ -14,6 +14,9 @@ import {
   type Appearance,
 } from "@mini-sumo/shared";
 import { settingsStore } from "../settings";
+import { wrapColyseusRoom, type GameConnection } from "./connection";
+import { LocalConnection, type LocalRoomOptions } from "./LocalConnection";
+import { detectNetworkMode, networkStore } from "./networkMode";
 import { audio } from "../audio/AudioManager";
 import { resolveServerUrl } from "../config";
 import { dustBus, impactBus, lastHitAt, shakeBus } from "../game/effectsBus";
@@ -107,16 +110,36 @@ function friendlyError(error: unknown, serverUrl: string): string {
   return `Can't reach the game server at ${serverUrl}. Make sure it is running.`;
 }
 
+/** Errors that mean "no server reachable" (as opposed to a refusal from a running server). */
+function isUnreachable(error: unknown): boolean {
+  const raw = error instanceof Error ? error.message : typeof error === "string" ? error : "";
+  const message = raw.toLowerCase();
+  return !raw || /fetch|network|xmlhttprequest|econnrefused|failed to|load failed|timeout|offline/.test(message);
+}
+
 class RoomManager {
   readonly serverUrl = resolveServerUrl();
   private client = new Client(this.serverUrl);
-  private _room: Room | null = null;
+  private _room: GameConnection | null = null;
+  private modeReady: Promise<void>;
+
+  constructor() {
+    this.modeReady = detectNetworkMode(this.serverUrl).then((mode) => {
+      networkStore.set({ mode });
+      if (mode === "offline") console.info("[mini-sumo] Offline mode: rooms run on this device against bots.");
+    });
+  }
+
+  /** True when rooms run locally against bots (no online server yet). */
+  get offline(): boolean {
+    return networkStore.get().mode === "offline";
+  }
   private snapshotKey = "";
   private lastPatchAt = 0;
   private lastCountdownSecond = -1;
   private watchdog = 0;
 
-  get room(): Room | null {
+  get room(): GameConnection | null {
     return this._room;
   }
 
@@ -130,13 +153,21 @@ class RoomManager {
   }
 
   quickPlay(name: string): Promise<boolean> {
-    const options: JoinOptions = { name, private: false, maxPlayers: 4, appearance: settingsStore.get().appearance };
-    return this.connect(() => this.client.joinOrCreate(ROOM_NAME, options));
+    const appearance = settingsStore.get().appearance;
+    const options: JoinOptions = { name, private: false, maxPlayers: 4, appearance };
+    return this.connect(
+      async () => wrapColyseusRoom(await this.client.joinOrCreate(ROOM_NAME, options)),
+      { name, appearance, isPrivate: false, maxPlayers: 4 },
+    );
   }
 
   createPrivate(name: string, maxPlayers: number): Promise<boolean> {
-    const options: JoinOptions = { name, private: true, maxPlayers, appearance: settingsStore.get().appearance };
-    return this.connect(() => this.client.create(ROOM_NAME, options));
+    const appearance = settingsStore.get().appearance;
+    const options: JoinOptions = { name, private: true, maxPlayers, appearance };
+    return this.connect(
+      async () => wrapColyseusRoom(await this.client.create(ROOM_NAME, options)),
+      { name, appearance, isPrivate: true, maxPlayers },
+    );
   }
 
   joinByCode(code: string, name: string): Promise<boolean> {
@@ -145,8 +176,12 @@ class RoomManager {
       sessionStore.update({ error: "Room codes are letters and numbers. Paste the code or open the invite link." });
       return Promise.resolve(false);
     }
+    if (this.offline) {
+      sessionStore.update({ error: "Joining friends needs the online server, which isn't live yet. Play now or create a room with bots meanwhile." });
+      return Promise.resolve(false);
+    }
     const options: JoinOptions = { name, appearance: settingsStore.get().appearance };
-    return this.connect(() => this.client.joinById(trimmed, options));
+    return this.connect(async () => wrapColyseusRoom(await this.client.joinById(trimmed, options)));
   }
 
   async leave(): Promise<void> {
@@ -211,22 +246,36 @@ class RoomManager {
 
   // ------------------------------------------------------------------ internals
 
-  private async connect(join: () => Promise<Room>): Promise<boolean> {
+  /**
+   * Joins online, or creates a local bot room when offline. If the server turns out to be
+   * unreachable while joining and an offline fallback is possible, switches to offline mode.
+   */
+  private async connect(join: () => Promise<GameConnection>, offlineRoom?: LocalRoomOptions): Promise<boolean> {
     if (sessionStore.get().status === "connecting") return false;
     if (this._room) await this.leave();
     sessionStore.update({ status: "connecting", error: null });
+    await this.modeReady;
+
+    if (this.offline && offlineRoom) {
+      this.attach(new LocalConnection(offlineRoom));
+      return true;
+    }
     try {
-      const room = await join();
-      this.attach(room);
+      this.attach(await join());
       return true;
     } catch (error) {
       console.error("[mini-sumo] join failed", error);
+      if (offlineRoom && isUnreachable(error) && String(import.meta.env.VITE_NETWORK_MODE ?? "auto") !== "online") {
+        networkStore.set({ mode: "offline" });
+        this.attach(new LocalConnection(offlineRoom));
+        return true;
+      }
       sessionStore.update({ status: "idle", error: friendlyError(error, this.serverUrl) });
       return false;
     }
   }
 
-  private attach(room: Room): void {
+  private attach(room: GameConnection): void {
     this._room = room;
     // Make sure the server has the latest look, even if it changed while joining.
     room.send(ClientMessage.SetAppearance, settingsStore.get().appearance);
@@ -235,9 +284,11 @@ class RoomManager {
     this.lastCountdownSecond = -1;
     sessionStore.set({ status: "connected", roomId: room.roomId, sessionId: room.sessionId, error: null, unstable: false });
 
-    const url = new URL(window.location.href);
-    url.searchParams.set("room", room.roomId);
-    window.history.replaceState(null, "", url.toString());
+    if (!room.offline) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("room", room.roomId);
+      window.history.replaceState(null, "", url.toString());
+    }
 
     room.onStateChange(() => {
       this.lastPatchAt = performance.now();

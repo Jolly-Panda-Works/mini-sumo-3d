@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { CREDITS, MAX_PLAYERS, MIN_PLAYERS, NAME_MAX_LENGTH } from "@mini-sumo/shared";
+import { networkStore } from "../network/networkMode";
 import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
@@ -12,6 +13,8 @@ export function MainMenu() {
   const settings = useStore(settingsStore);
   const [code, setCode] = useState(inviteCode);
   const [maxPlayers, setMaxPlayers] = useState(MAX_PLAYERS);
+  const { mode } = useStore(networkStore);
+  const offline = mode === "offline";
   const busy = session.status === "connecting";
   const name = settings.name;
 
@@ -35,7 +38,14 @@ export function MainMenu() {
       </header>
 
       <section className="panel menu__panel" aria-label="Start playing">
-        {inviteCode && (
+        {offline && (
+          <p className="notice notice--offline">
+            <strong>Offline practice.</strong> The online server is on its way. Until then every room runs on this device
+            against bots.
+          </p>
+        )}
+
+        {inviteCode && !offline && (
           <p className="notice notice--invite">
             You were invited to room <strong>{inviteCode}</strong>. Pick a name and join.
           </p>
@@ -58,12 +68,13 @@ export function MainMenu() {
           Customise wrestler
         </button>
 
-        {!inviteCode && (
+        {(!inviteCode || offline) && (
           <button className="btn btn--primary btn--big" disabled={busy} onClick={() => void roomManager.quickPlay(name)}>
             {busy ? "Finding a room…" : "Play now"}
           </button>
         )}
 
+        {!offline && (
         <form className="row" onSubmit={join}>
           <label className="field field--grow">
             <span className="field__label">Room code</span>
@@ -82,6 +93,7 @@ export function MainMenu() {
             {inviteCode && busy ? "Joining…" : "Join room"}
           </button>
         </form>
+        )}
 
         <div className="row row--split">
           <label className="field">
@@ -95,7 +107,7 @@ export function MainMenu() {
             </select>
           </label>
           <button className="btn" disabled={busy} onClick={() => void roomManager.createPrivate(name, maxPlayers)}>
-            Create private room
+            {offline ? "Create room with bots" : "Create private room"}
           </button>
         </div>
 

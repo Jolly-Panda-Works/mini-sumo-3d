@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { CREDITS } from "@mini-sumo/shared";
+import { networkStore } from "../network/networkMode";
 import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore, type JoystickMode, type TouchMode } from "../settings";
 import { useStore } from "../store";
@@ -10,6 +11,7 @@ export function SettingsPanel() {
   const session = useStore(sessionStore);
   const closeRef = useRef<HTMLButtonElement>(null);
   const inRoom = session.roomId !== "";
+  const { mode } = useStore(networkStore);
 
   useEffect(() => {
     closeRef.current?.focus();
@@ -51,6 +53,13 @@ export function SettingsPanel() {
           <p className="about__text">
             Mini Sumo {import.meta.env.VITE_APP_VERSION ? `v${import.meta.env.VITE_APP_VERSION}` : ""} is made by{" "}
             <strong>{CREDITS.author}</strong> and is open source under the MIT License.
+          </p>
+          <p className="hint">
+            {mode === "offline"
+              ? "Mode: offline practice against bots (online server coming soon)."
+              : mode === "online"
+                ? "Mode: online."
+                : "Mode: checking the server…"}
           </p>
           <p className="about__links">
             <a href={CREDITS.projectUrl} target="_blank" rel="noopener noreferrer">

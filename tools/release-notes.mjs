@@ -6,9 +6,8 @@ const f = (kind) => `MiniSumo-${version}-${kind}`;
 
 const serverNote = server
   ? `These builds connect to the game server at \`${server}\`.`
-  : `> [!WARNING]
-> **The public game server is not live yet.** These builds were made without \`VITE_SERVER_URL\`, so they can't find an online room on their own.
-> You can still play on your own network: run the server from source (\`npm run dev:server\`) and open the game on the same machine.`;
+  : `> [!NOTE]
+> **Offline practice build.** The public game server is not live yet, so these builds run every room on your device against bots. Online play with friends arrives in a later release once the server is up.`;
 
 console.log(`## Mini Sumo ${version}
 
