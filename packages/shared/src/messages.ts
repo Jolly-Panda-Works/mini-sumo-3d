@@ -5,6 +5,10 @@ export const ClientMessage = {
   StartMatch: "start",
   Rematch: "rematch",
   ReturnToLobby: "returnToLobby",
+  /** Host of a private room: add a computer-controlled wrestler. */
+  AddBot: "addBot",
+  /** Host of a private room: remove a computer-controlled wrestler ({ id }). */
+  RemoveBot: "removeBot",
 } as const;
 export type ClientMessage = (typeof ClientMessage)[keyof typeof ClientMessage];
 
@@ -41,6 +45,10 @@ export interface EliminatedPayload {
 
 export interface DashPayload {
   sessionId: string;
+}
+
+export interface RemoveBotPayload {
+  id: string;
 }
 
 export interface ErrorPayload {

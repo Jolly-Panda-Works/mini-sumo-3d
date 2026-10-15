@@ -6,12 +6,14 @@ export interface Settings {
   sound: boolean;
   touchControls: TouchMode;
   name: string;
+  /** The first-run name prompt has been completed. */
+  onboarded: boolean;
 }
 
 const KEY = "mini-sumo:settings";
 
 function load(): Settings {
-  const defaults: Settings = { sound: true, touchControls: "auto", name: "" };
+  const defaults: Settings = { sound: true, touchControls: "auto", name: "", onboarded: false };
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return defaults;
@@ -20,6 +22,7 @@ function load(): Settings {
       sound: typeof parsed.sound === "boolean" ? parsed.sound : defaults.sound,
       touchControls: parsed.touchControls === "on" || parsed.touchControls === "off" ? parsed.touchControls : "auto",
       name: typeof parsed.name === "string" ? parsed.name.slice(0, 32) : "",
+      onboarded: typeof parsed.onboarded === "boolean" ? parsed.onboarded : Boolean(parsed.name?.trim()),
     };
   } catch {
     return defaults;

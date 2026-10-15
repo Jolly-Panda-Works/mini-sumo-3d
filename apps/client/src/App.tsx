@@ -10,6 +10,7 @@ import { Countdown } from "./ui/Countdown";
 import { HUD } from "./ui/HUD";
 import { Lobby } from "./ui/Lobby";
 import { MainMenu } from "./ui/MainMenu";
+import { NameGate } from "./ui/NameGate";
 import { Results } from "./ui/Results";
 import { SettingsPanel } from "./ui/SettingsPanel";
 import { Toasts } from "./ui/Toasts";
@@ -64,6 +65,7 @@ export function App() {
         {screen}
         {inRoom && <Toasts />}
         {ui.settingsOpen && <SettingsPanel />}
+        {!inRoom && !settings.onboarded && <NameGate />}
       </div>
     </div>
   );

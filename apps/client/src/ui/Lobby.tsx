@@ -14,6 +14,9 @@ export function Lobby() {
   const isHost = Boolean(you?.isHost);
   const connected = game.players.filter((p) => p.connected);
   const canStart = isHost && game.phase === Phase.Lobby && connected.length >= MIN_PLAYERS;
+  const full = connected.length >= game.maxPlayers;
+  const searching = !game.isPrivate && game.searchRemainingMs > 0;
+  const searchSeconds = Math.ceil(game.searchRemainingMs / 1000);
   const link = roomManager.inviteLink();
 
   const copy = async () => {
@@ -79,6 +82,12 @@ export function Lobby() {
                 <span className="roster__name">{p.name}</span>
                 {p.isYou && <span className="tag">You</span>}
                 {p.isHost && <span className="tag tag--host">Host</span>}
+                {p.isBot && <span className="tag tag--bot">Bot</span>}
+                {p.isBot && isHost && (
+                  <button className="roster__remove" onClick={() => roomManager.removeBot(p.id)} aria-label={`Remove bot ${p.name}`}>
+                    Remove
+                  </button>
+                )}
               </li>
             ) : (
               <li key={`empty-${i}`} className="roster__item roster__item--empty">
@@ -88,12 +97,33 @@ export function Lobby() {
           )}
         </ul>
 
+        {searching && (
+          <div className="search" role="status" aria-live="polite">
+            <span className="search__spinner" aria-hidden="true" />
+            <div>
+              <p className="search__title">Looking for wrestlers… {searchSeconds}s</p>
+              <p className="hint">The bout starts automatically.</p>
+            </div>
+          </div>
+        )}
+
+        {isHost && game.isPrivate && (
+          <button className="btn" disabled={full} onClick={() => roomManager.addBot()}>
+            {full ? "Room is full" : "Add bot"}
+          </button>
+        )}
+
         {isHost ? (
           <>
             <button className="btn btn--primary btn--big" disabled={!canStart} onClick={() => roomManager.startMatch()}>
               Start match
             </button>
-            {!canStart && <p className="hint">You need at least {MIN_PLAYERS} wrestlers. Send the invite link to a friend.</p>}
+            {!canStart && !searching && (
+              <p className="hint">
+                You need at least {MIN_PLAYERS} wrestlers.{" "}
+                {game.isPrivate ? "Add a bot or send the invite link to a friend." : "Waiting for another player to join."}
+              </p>
+            )}
           </>
         ) : (
           <p className="hint hint--center">Waiting for the host to start the match.</p>

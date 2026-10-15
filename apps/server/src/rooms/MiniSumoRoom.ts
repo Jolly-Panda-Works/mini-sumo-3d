@@ -15,6 +15,7 @@ const roundUp100 = (ms: number) => Math.ceil(ms / 100) * 100;
 export class MiniSumoRoom extends Room<MiniSumoState> {
   private session!: GameSession;
   private standingsKey = "";
+  private locked = false;
 
   override onCreate(options: JoinOptions = {}): void {
     const maxPlayers = sanitizeMaxPlayers(options.maxPlayers);
@@ -22,7 +23,8 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
 
     this.state = new MiniSumoState();
     this.maxClients = maxPlayers;
-    this.session = new GameSession(DEFAULT_CONFIG, maxPlayers);
+    // Public rooms are quick-match rooms: a lone player gets bots after a short wait.
+    this.session = new GameSession(DEFAULT_CONFIG, maxPlayers, { quickMatch: !isPrivate });
     this.state.maxPlayers = maxPlayers;
     this.state.isPrivate = isPrivate;
     // Private rooms are excluded from joinOrCreate, but still joinable by id.
@@ -46,6 +48,13 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
     });
     this.onMessage(ClientMessage.ReturnToLobby, (client) => {
       this.reply(client, this.session.requestReturnToLobby(client.sessionId));
+    });
+    this.onMessage(ClientMessage.AddBot, (client) => {
+      this.reply(client, this.session.addBot(client.sessionId));
+    });
+    this.onMessage(ClientMessage.RemoveBot, (client, message: unknown) => {
+      const id = typeof message === "object" && message !== null ? (message as Record<string, unknown>).id : undefined;
+      this.reply(client, this.session.removeBot(client.sessionId, id));
     });
 
     this.setSimulationInterval((deltaTime) => {
@@ -103,7 +112,6 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
           this.broadcast(ServerMessage.Dash, { sessionId: event.id });
           break;
         case "phase":
-          this.onPhaseChanged(event.to);
           break;
         case "roundOver":
           break;
@@ -111,13 +119,19 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
     }
   }
 
-  private onPhaseChanged(to: Phase): void {
-    if (to === Phase.Countdown) {
-      // Keep matchmaking from routing new players into a running match.
-      void this.lock();
-    } else if (to === Phase.Lobby || to === Phase.Waiting) {
-      if (this.clients.length < this.maxClients) void this.unlock();
-    }
+  /**
+   * Lock the room for matchmaking while a match runs or while bots fill it, so new players
+   * are routed elsewhere; unlock in the lobby when there is space again.
+   */
+  private updateLock(): void {
+    const s = this.session;
+    const inLobby = s.phase === Phase.Lobby || s.phase === Phase.Waiting;
+    const shouldLock = !inLobby || s.connectedPlayers.length >= s.maxPlayers;
+    if (shouldLock === this.locked) return;
+    this.locked = shouldLock;
+    if (shouldLock) void this.lock();
+    else if (this.clients.length < this.maxClients) void this.unlock();
+    else this.locked = true;
   }
 
   private syncState(): void {
@@ -130,6 +144,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
     state.isDraw = s.isDraw;
     state.round = s.round;
     state.aliveCount = s.alivePlayers.length;
+    state.searchRemainingMs = roundUp100(s.searchRemainingMs);
 
     for (const id of [...state.players.keys()]) {
       if (!s.players.has(id)) state.players.delete(id);
@@ -154,7 +169,11 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
       ps.dashCooldownMs = Math.min(65_000, roundUp100(Math.max(0, p.dashReadyAt - s.time)));
       ps.placement = p.placement;
       ps.elimReason = p.elimReason;
+      // Quick-match bots are indistinguishable from players on the wire.
+      ps.isBot = p.isBot && !s.quickMatch;
     }
+
+    this.updateLock();
 
     const key = s.standings.join(",");
     if (key !== this.standingsKey) {

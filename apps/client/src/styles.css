@@ -287,6 +287,79 @@ body {
   background: var(--sun);
 }
 
+.tag--bot {
+  background: #dfe9f5;
+}
+
+.roster__remove {
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--ink);
+  background: transparent;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  padding: 2px 10px;
+  min-height: 32px;
+  cursor: pointer;
+}
+
+.roster__remove:focus-visible {
+  outline: 3px solid var(--coral);
+  outline-offset: 2px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 2.5px dashed var(--ink);
+  border-radius: var(--radius-control);
+  background: #fff1cc;
+}
+
+.search__title {
+  margin: 0;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.search__spinner {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  border: 4px solid var(--ink-soft);
+  border-top-color: var(--coral);
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- First-run name prompt ---------- */
+
+.name-gate {
+  align-items: stretch;
+  text-align: center;
+}
+
+.name-gate__logo {
+  align-self: center;
+  width: 120px;
+  height: 120px;
+}
+
+.name-gate__title {
+  margin: 0;
+  font-size: 1.6rem;
+  line-height: 1.15;
+}
+
 /* ---------- Credits ---------- */
 
 .credit {
@@ -923,7 +996,8 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .countdown__num,
-  .toast {
+  .toast,
+  .search__spinner {
     animation: none;
   }
   .btn {

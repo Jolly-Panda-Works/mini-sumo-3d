@@ -34,8 +34,13 @@ async function player(name, options = { viewport: { width: 1280, height: 720 } }
   return { page, name };
 }
 
+// First launch shows the name prompt; fill it in and continue to the menu.
 async function setName(page, name) {
-  await page.getByPlaceholder("Little Yokozuna").fill(name);
+  const gate = page.locator(".name-gate");
+  await gate.waitFor({ timeout: 10_000 });
+  await gate.getByRole("textbox").fill(name);
+  await gate.getByRole("button", { name: "Save name" }).click();
+  await gate.waitFor({ state: "detached" });
 }
 
 try {
@@ -43,8 +48,10 @@ try {
   const host = await player("Usef");
   await host.page.goto(BASE);
   await host.page.waitForSelector("canvas");
-  await sleep(3500);
+  await sleep(2500);
+  await shot(host.page, "welcome");
   await setName(host.page, host.name);
+  await sleep(800);
   await shot(host.page, "menu");
 
   await host.page.getByRole("button", { name: "Create private room" }).click();

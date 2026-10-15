@@ -56,7 +56,7 @@ export function MainMenu() {
 
         {!inviteCode && (
           <button className="btn btn--primary btn--big" disabled={busy} onClick={() => void roomManager.quickPlay(name)}>
-            {busy ? "Connecting…" : "Play now"}
+            {busy ? "Finding a room…" : "Play now"}
           </button>
         )}
 

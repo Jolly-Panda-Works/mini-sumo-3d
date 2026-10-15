@@ -16,6 +16,8 @@ export interface SyncedPlayer {
   dashCooldownMs: number;
   placement: number;
   elimReason: string;
+  /** True only in private rooms, where the host manages bots. Always false in quick match. */
+  isBot: boolean;
 }
 
 /** Minimal read-only view of a Colyseus MapSchema. */
@@ -37,5 +39,7 @@ export interface SyncedState {
   maxPlayers: number;
   isPrivate: boolean;
   aliveCount: number;
+  /** Quick match: time left before opponents are filled in (0 when not searching). */
+  searchRemainingMs: number;
   standings: Iterable<string>;
 }

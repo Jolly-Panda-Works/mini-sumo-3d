@@ -21,6 +21,8 @@ export const PLAYER_RADIUS = 0.75;
 export const DASH_COOLDOWN_MS = 3000;
 export const MATCH_DURATION_MS = 90_000;
 export const COUNTDOWN_MS = 3000;
+/** Quick match: how long a lone player waits for others before opponents are filled in. */
+export const QUICK_MATCH_WAIT_MS = 30_000;
 
 export const NAME_MAX_LENGTH = 16;
 

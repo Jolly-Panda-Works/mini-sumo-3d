@@ -5,6 +5,7 @@ import {
   ELIMINATION_TOLERANCE,
   MATCH_DURATION_MS,
   PLAYER_RADIUS,
+  QUICK_MATCH_WAIT_MS,
 } from "@mini-sumo/shared";
 
 /**
@@ -60,6 +61,12 @@ export interface SimulationConfig {
   /** Timeout tiebreaker: distances to centre closer than this (m) are a draw. */
   timeoutDrawEpsilon: number;
 
+  /** Quick match: wait this long for other players before filling the room with bots. */
+  quickMatchWaitMs: number;
+  /** Bot reaction delay range (ms between decisions). */
+  botThinkMinMs: number;
+  botThinkMaxMs: number;
+
   /** Sustained messages per second per client (input + dash). */
   inputRateLimitPerSec: number;
   /** Token-bucket burst size. */
@@ -100,6 +107,10 @@ export const DEFAULT_CONFIG: Readonly<SimulationConfig> = Object.freeze({
   spawnRadiusFactor: 0.55,
   lobbyRadiusFactor: 0.45,
   timeoutDrawEpsilon: 0.05,
+
+  quickMatchWaitMs: QUICK_MATCH_WAIT_MS,
+  botThinkMinMs: 120,
+  botThinkMaxMs: 280,
 
   inputRateLimitPerSec: 60,
   inputBurst: 30,

@@ -6,6 +6,12 @@ Builds from `main` are released automatically as `MAJOR.MINOR.<build number>`; t
 
 ## [Unreleased]
 
+### Added
+
+- Bots: the host of a private room can add and remove computer-controlled wrestlers in the lobby.
+- Quick match: *Play now* waits up to 30 seconds for other players, then fills the room with bots (ordinary random names, same look as players) and starts automatically.
+- First-launch name prompt; the name is saved for next time.
+
 ## [0.1.0] - 2026-10-15
 
 ### Added

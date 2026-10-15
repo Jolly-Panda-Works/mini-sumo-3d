@@ -9,6 +9,7 @@ import {
   type ErrorPayload,
   type ImpactPayload,
   type JoinOptions,
+  type RemoveBotPayload,
   type SyncedState,
 } from "@mini-sumo/shared";
 import { audio } from "../audio/AudioManager";
@@ -28,6 +29,8 @@ export interface UIPlayer {
   placement: number;
   elimReason: string;
   dashCooldownMs: number;
+  /** Only true in private rooms; quick-match bots look like everyone else. */
+  isBot: boolean;
   isHost: boolean;
   isYou: boolean;
 }
@@ -43,6 +46,8 @@ export interface GameSnapshot {
   maxPlayers: number;
   isPrivate: boolean;
   aliveCount: number;
+  /** Quick match: ms until opponents are filled in (0 when not searching). */
+  searchRemainingMs: number;
   players: UIPlayer[];
   standings: string[];
 }
@@ -66,6 +71,7 @@ const EMPTY_GAME: GameSnapshot = {
   maxPlayers: 4,
   isPrivate: false,
   aliveCount: 0,
+  searchRemainingMs: 0,
   players: [],
   standings: [],
 };
@@ -170,6 +176,15 @@ class RoomManager {
 
   returnToLobby(): void {
     this._room?.send(ClientMessage.ReturnToLobby);
+  }
+
+  addBot(): void {
+    this._room?.send(ClientMessage.AddBot);
+  }
+
+  removeBot(id: string): void {
+    const payload: RemoveBotPayload = { id };
+    this._room?.send(ClientMessage.RemoveBot, payload);
   }
 
   /**
@@ -312,6 +327,7 @@ class RoomManager {
         placement: p.placement,
         elimReason: p.elimReason,
         dashCooldownMs: p.dashCooldownMs,
+        isBot: Boolean(p.isBot),
         isHost: id === state.hostId,
         isYou: id === you,
       });
@@ -328,6 +344,7 @@ class RoomManager {
       maxPlayers: state.maxPlayers,
       isPrivate: state.isPrivate,
       aliveCount: state.aliveCount,
+      searchRemainingMs: state.searchRemainingMs ?? 0,
       players,
       standings: Array.from(state.standings ?? []),
     };

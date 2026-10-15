@@ -17,6 +17,8 @@ export class PlayerState extends Schema {
   @type("uint16") dashCooldownMs = 0;
   @type("uint8") placement = 0;
   @type("string") elimReason = "";
+  /** Only true in private rooms (the host manages bots there). Never set in quick match. */
+  @type("boolean") isBot = false;
 }
 
 export class MiniSumoState extends Schema {
@@ -31,6 +33,8 @@ export class MiniSumoState extends Schema {
   @type("uint8") maxPlayers = 4;
   @type("boolean") isPrivate = false;
   @type("uint8") aliveCount = 0;
+  /** Quick match: time left before opponents are filled in, rounded up to 100 ms. */
+  @type("uint32") searchRemainingMs = 0;
   /** Session ids ordered by final placement (filled when a round ends). */
   @type(["string"]) standings = new ArraySchema<string>();
 }

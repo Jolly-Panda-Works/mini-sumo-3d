@@ -82,4 +82,17 @@ Design decisions:
 | Leave during results | Marked disconnected, removed on return to lobby or rematch. |
 | Host leaves | Host moves to the earliest-joined connected player. |
 | Everyone leaves | Colyseus auto-disposes the room. |
+| Quick match (public room) | A lone player waits up to 30 s (`quickMatchWaitMs`). If no other human joins, bots fill the room to its limit and the countdown starts automatically. A second human joining cancels the wait. On *Rematch* the bots stay; on returning to the lobby they are removed and the wait starts again. |
+| Bots in private rooms | The host adds or removes bots in the lobby (`addBot`, `removeBot { id }`). Bots count toward the player limit and can never be host. |
 | Reconnection | **Not supported.** Any disconnect is final; rejoin with the invite link while the room is in its lobby. |
+
+## Bots
+
+Bots live entirely on the server (`apps/server/src/game/BotBrain.ts`). Every 120–280 ms of simulation time a bot picks a direction and, sometimes, a dash. That input is applied exactly like validated human input and runs through the same `stepMovement`, collision and dash rules, so bots can't do anything a human can't.
+
+- Target choice: the opponent that is close and near the edge.
+- Approach from the centre side, then charge outward through the target; dash when close and aligned.
+- Edge safety: the closer a bot is to the rope (from 72 % of the radius), the more it steers back.
+- Random noise and the reaction delay keep it beatable.
+
+Quick-match bots get ordinary names (`botNames.ts`) and ids shaped like Colyseus session ids, and `isBot` is never sent for quick-match rooms, so they look like everyone else. In private rooms `isBot` is synced so the host can manage them.

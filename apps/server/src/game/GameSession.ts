@@ -6,6 +6,8 @@ import { stepMovement, tryDash } from "../simulation/MovementSystem.js";
 import { createBody, type SimBody } from "../simulation/SimBody.js";
 import { DEFAULT_CONFIG, type SimulationConfig } from "../simulation/SimulationConfig.js";
 import { sanitizeName, validateMoveInput } from "../validation/InputValidator.js";
+import { decideBot } from "./BotBrain.js";
+import { createRng, pickBotName, randomId } from "./botNames.js";
 
 export interface SessionPlayer extends SimBody {
   name: string;
@@ -17,6 +19,20 @@ export interface SessionPlayer extends SimBody {
   /** Token bucket for rate limiting client messages. */
   tokens: number;
   tokensUpdatedAt: number;
+  /** Computer-controlled wrestler (driven by BotBrain through the normal input path). */
+  isBot: boolean;
+  /** Simulation time of the bot's next decision. */
+  nextThinkAt: number;
+}
+
+export interface SessionOptions {
+  /**
+   * Quick match room: a lone player waits up to cfg.quickMatchWaitMs for others, then the
+   * room is filled with bots and the match starts automatically.
+   */
+  quickMatch?: boolean;
+  /** Seed for bot names/ids/behaviour (deterministic tests). */
+  seed?: number;
 }
 
 export type SessionEvent =
@@ -39,7 +55,11 @@ const fail = (error: string): ActionResult => ({ ok: false, error });
  * - waiting / lobby / countdown: the player is removed immediately.
  * - playing: the player is eliminated ("left") and kept until the round ends (for standings).
  * - roundOver: the player is marked disconnected and removed when the room returns to the lobby.
- * - The host role moves to the earliest-joined connected player.
+ * - The host role moves to the earliest-joined connected human.
+ *
+ * Bots: the host of a private room can add/remove bots in the lobby. In quick match rooms
+ * bots fill the room after the wait time. Bots look like normal players and use the same
+ * input and physics; in quick match they are removed again when the room returns to the lobby.
  */
 export class GameSession {
   readonly players = new Map<string, SessionPlayer>();
@@ -57,12 +77,18 @@ export class GameSession {
   round = 0;
   standings: string[] = [];
 
+  readonly quickMatch: boolean;
+  /** Simulation time when the quick-match wait started, -1 when not searching. */
+  private searchStartedAt = -1;
+  private readonly rng: () => number;
   private accumulator = 0;
   private joinCounter = 0;
   private events: SessionEvent[] = [];
 
-  constructor(cfg: SimulationConfig = DEFAULT_CONFIG, maxPlayers: number = MAX_PLAYERS) {
+  constructor(cfg: SimulationConfig = DEFAULT_CONFIG, maxPlayers: number = MAX_PLAYERS, options: SessionOptions = {}) {
     this.cfg = cfg;
+    this.quickMatch = options.quickMatch === true;
+    this.rng = createRng(options.seed ?? Math.floor(Math.random() * 2 ** 32));
     this.maxPlayers = Math.max(MIN_PLAYERS, Math.min(MAX_PLAYERS, Math.floor(maxPlayers)));
     this.stepMs = 1000 / cfg.tickRate;
   }
@@ -71,6 +97,20 @@ export class GameSession {
 
   get connectedPlayers(): SessionPlayer[] {
     return [...this.players.values()].filter((p) => p.connected).sort((a, b) => a.joinOrder - b.joinOrder);
+  }
+
+  get humans(): SessionPlayer[] {
+    return this.connectedPlayers.filter((p) => !p.isBot);
+  }
+
+  get bots(): SessionPlayer[] {
+    return this.connectedPlayers.filter((p) => p.isBot);
+  }
+
+  /** Quick match: ms left before bots fill the room (0 when not searching). */
+  get searchRemainingMs(): number {
+    if (this.searchStartedAt < 0) return 0;
+    return Math.max(0, this.searchStartedAt + this.cfg.quickMatchWaitMs - this.time);
   }
 
   get alivePlayers(): SessionPlayer[] {
@@ -105,13 +145,43 @@ export class GameSession {
     const check = this.canJoin();
     if (!check.ok) return check;
 
+    this.insertPlayer(id, (colorIndex) => sanitizeName(rawName, `Sumo ${colorIndex + 1}`), false);
+    if (!this.hostId) this.hostId = id;
+    this.afterRosterChange();
+    return OK;
+  }
+
+  /** Host of a private room adds a bot while in the lobby. */
+  addBot(requesterId: string): ActionResult {
+    if (this.quickMatch) return fail("Bots can only be added in private rooms.");
+    if (requesterId !== this.hostId) return fail("Only the host can add bots.");
+    const check = this.canJoin();
+    if (!check.ok) return check;
+    this.createBot();
+    this.afterRosterChange();
+    return OK;
+  }
+
+  /** Host of a private room removes a bot while in the lobby. */
+  removeBot(requesterId: string, botId: unknown): ActionResult {
+    if (this.quickMatch) return fail("Bots can only be managed in private rooms.");
+    if (requesterId !== this.hostId) return fail("Only the host can remove bots.");
+    if (this.phase !== Phase.Waiting && this.phase !== Phase.Lobby) return fail("Bots can only be removed in the lobby.");
+    const bot = typeof botId === "string" ? this.players.get(botId) : undefined;
+    if (!bot || !bot.isBot) return fail("That player is not a bot.");
+    this.players.delete(bot.id);
+    this.afterRosterChange();
+    return OK;
+  }
+
+  private insertPlayer(id: string, name: (colorIndex: number) => string, isBot: boolean): SessionPlayer {
     const used = new Set([...this.players.values()].map((p) => p.colorIndex));
     let colorIndex = 0;
     while (used.has(colorIndex) && colorIndex < PLAYER_COLORS.length - 1) colorIndex++;
 
     const player: SessionPlayer = {
       ...createBody(id),
-      name: sanitizeName(rawName, `Sumo ${colorIndex + 1}`),
+      name: name(colorIndex),
       colorIndex,
       joinOrder: this.joinCounter++,
       connected: true,
@@ -119,12 +189,24 @@ export class GameSession {
       elimReason: "",
       tokens: this.cfg.inputBurst,
       tokensUpdatedAt: this.time,
+      isBot,
+      nextThinkAt: 0,
     };
     this.players.set(id, player);
-    if (!this.hostId) this.hostId = id;
+    return player;
+  }
+
+  private createBot(): SessionPlayer {
+    let id = randomId(this.rng);
+    while (this.players.has(id)) id = randomId(this.rng);
+    const names = [...this.players.values()].map((p) => p.name);
+    return this.insertPlayer(id, () => pickBotName(names, this.rng), true);
+  }
+
+  private afterRosterChange(): void {
     this.refreshLobbyPhase();
     this.layoutLobby();
-    return OK;
+    this.updateSearch();
   }
 
   removePlayer(id: string): void {
@@ -143,15 +225,14 @@ export class GameSession {
         this.players.delete(id);
     }
 
-    if (this.hostId === id) this.hostId = this.connectedPlayers[0]?.id ?? "";
+    if (this.hostId === id) this.hostId = this.firstHumanId();
 
     if (this.phase === Phase.Countdown) {
       if (this.connectedPlayers.length < MIN_PLAYERS) this.goToLobby();
     } else if (this.phase === Phase.Playing) {
       this.checkLastStanding();
     } else if (this.phase === Phase.Waiting || this.phase === Phase.Lobby) {
-      this.refreshLobbyPhase();
-      this.layoutLobby();
+      this.afterRosterChange();
     }
   }
 
@@ -234,6 +315,7 @@ export class GameSession {
         if (this.time >= this.phaseEndsAt) this.goToLobby();
         break;
       default:
+        this.tickSearch();
         break;
     }
   }
@@ -245,6 +327,7 @@ export class GameSession {
    */
   private simulate(dt: number): void {
     const bodies = this.alivePlayers.sort((a, b) => a.joinOrder - b.joinOrder);
+    this.driveBots(bodies);
     for (const body of bodies) stepMovement(body, dt, this.cfg, this.time);
 
     for (const impact of resolveCollisions(bodies, this.cfg, this.time)) {
@@ -340,11 +423,14 @@ export class GameSession {
   /** Return to waiting/lobby from countdown or results. */
   private goToLobby(): void {
     this.purgeDisconnected();
+    // Quick match: drop the fill-in bots so real players can join again.
+    if (this.quickMatch) for (const bot of this.bots) this.players.delete(bot.id);
     const target = this.connectedPlayers.length >= MIN_PLAYERS ? Phase.Lobby : Phase.Waiting;
     if (!this.transition(target)) return;
     this.phaseEndsAt = 0;
     for (const player of this.players.values()) player.placement = 0;
     this.layoutLobby();
+    this.updateSearch();
   }
 
   private refreshLobbyPhase(): void {
@@ -355,7 +441,7 @@ export class GameSession {
 
   private purgeDisconnected(): void {
     for (const [id, player] of this.players) if (!player.connected) this.players.delete(id);
-    if (!this.players.has(this.hostId)) this.hostId = this.connectedPlayers[0]?.id ?? "";
+    if (!this.players.has(this.hostId)) this.hostId = this.firstHumanId();
   }
 
   /** Lobby players stand in a loose circle so the 3D view has something to show. */
@@ -383,6 +469,43 @@ export class GameSession {
     player.dashReadyAt = 0;
     player.placement = 0;
     player.elimReason = "";
+  }
+
+  private firstHumanId(): string {
+    return this.humans[0]?.id ?? "";
+  }
+
+  // ---------------------------------------------------------------- quick match & bots
+
+  /** Starts or stops the quick-match wait depending on who is in the room. */
+  private updateSearch(): void {
+    const lobby = this.phase === Phase.Waiting || this.phase === Phase.Lobby;
+    const lonely = this.humans.length === 1 && this.bots.length === 0;
+    if (!this.quickMatch || !lobby || !lonely) {
+      this.searchStartedAt = -1;
+    } else if (this.searchStartedAt < 0) {
+      this.searchStartedAt = this.time;
+    }
+  }
+
+  /** Nobody joined in time: fill the room with bots and start. */
+  private tickSearch(): void {
+    if (this.searchStartedAt < 0 || this.time - this.searchStartedAt < this.cfg.quickMatchWaitMs) return;
+    this.searchStartedAt = -1;
+    while (this.connectedPlayers.length < this.maxPlayers) this.createBot();
+    this.refreshLobbyPhase();
+    this.startCountdown();
+  }
+
+  private driveBots(alive: readonly SessionPlayer[]): void {
+    for (const bot of alive) {
+      if (!bot.isBot || this.time < bot.nextThinkAt) continue;
+      const decision = decideBot(bot, alive, this.cfg, this.rng);
+      bot.inputX = decision.x;
+      bot.inputY = decision.y;
+      if (decision.dash && tryDash(bot, this.time, this.cfg)) this.events.push({ type: "dash", id: bot.id });
+      bot.nextThinkAt = this.time + this.cfg.botThinkMinMs + this.rng() * (this.cfg.botThinkMaxMs - this.cfg.botThinkMinMs);
+    }
   }
 
   private consumeToken(player: SessionPlayer): boolean {
