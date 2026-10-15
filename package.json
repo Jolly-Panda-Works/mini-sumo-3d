@@ -5,8 +5,9 @@
   "type": "module",
   "description": "Mini Sumo: a browser-based 3D multiplayer party game built with React Three Fiber and Colyseus.",
   "workspaces": [
-    "packages/*",
-    "apps/*"
+    "packages/shared",
+    "apps/server",
+    "apps/client"
   ],
   "engines": {
     "node": ">=20.12"
@@ -23,9 +24,11 @@
     "test": "npm run build:shared && npm run test -w @mini-sumo/server",
     "typecheck": "npm run build:shared && npm run typecheck -w @mini-sumo/server && npm run typecheck -w @mini-sumo/client",
     "build:web": "npm run build:shared && npm run build -w @mini-sumo/client",
-    "desktop": "npm run build:web && npm run start -w @mini-sumo/desktop",
-    "build:desktop": "npm run build:web && npm run dist -w @mini-sumo/desktop",
-    "build:android": "npm run build:web && npm run android:sync -w @mini-sumo/mobile"
+    "desktop": "npm run build:web && npm run desktop:install && npm start --prefix apps/desktop",
+    "build:desktop": "npm run build:web && npm run desktop:install && npm run dist --prefix apps/desktop",
+    "build:android": "npm run build:web && npm run android:install && npm run android:sync --prefix apps/mobile",
+    "desktop:install": "npm install --prefix apps/desktop",
+    "android:install": "npm install --prefix apps/mobile"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",

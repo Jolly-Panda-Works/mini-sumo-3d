@@ -270,6 +270,8 @@ VITE_SERVER_URL=wss://sumo-api.example.com npm run build
 | Android | ubuntu (JDK 21) | `MiniSumo-android-debug.apk`, plus signed release `.apk`/`.aab` if a keystore is configured |
 | GitHub Release | ubuntu | on `v*` tags: everything above attached to a release |
 
+`apps/desktop` and `apps/mobile` are **not** npm workspaces: a plain `npm install` at the root never downloads Electron or Capacitor. They install on demand (`npm run desktop:install`, `npm run android:install`).
+
 Desktop is an **Electron** shell (`apps/desktop`) that serves the built client from `http://127.0.0.1:41730`. Android is a **Capacitor** shell (`apps/mobile`); the native project is generated in CI (`cap add android`), so `apps/mobile/android/` is not committed. Icons and splash come from `apps/desktop/build/icon.png` and `apps/mobile/assets/`.
 
 **The apps are clients only.** The Colyseus server still has to run somewhere (see [Deployment](#deployment)). Configure the repository under *Settings → Secrets and variables → Actions*:
@@ -293,8 +295,8 @@ Local equivalents:
 ```bash
 npm run desktop          # build web + launch Electron
 npm run build:desktop    # build web + package for the current OS (apps/desktop/release/)
-cd apps/mobile && npx cap add android   # once; needs Android Studio / SDK + JDK 21
-npm run build:android    # build web + cap sync; then: npm run android:open -w @mini-sumo/mobile
+npm run android:install && cd apps/mobile && npx cap add android && cd ../..   # once; needs Android SDK + JDK 21
+npm run build:android    # build web + cap sync; then: npm run android:open --prefix apps/mobile
 ```
 
 ## Troubleshooting
@@ -304,6 +306,9 @@ npm run build:android    # build web + cap sync; then: npm run android:open -w @
 - **Mixed content / WebSocket blocked in production:** an `https` page cannot open `ws://`. Use `wss://` behind TLS.
 - **"That room doesn't exist anymore":** rooms are disposed once empty, and codes are case-sensitive. Use the invite link.
 - **"That room is full or a match is already running":** wait for the round to end, or create a new room.
+- **`'tsc' is not recognized`:** dependencies are not installed (or `npm install` failed). Run `npm install` at the repository root first.
+- **Electron download fails (`ECONNRESET` in `node_modules/electron`):** GitHub downloads are blocked or unstable on your network. Retry with a mirror: `set ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/` (cmd) or `$env:ELECTRON_MIRROR="https://npmmirror.com/mirrors/electron/"` (PowerShell), then `npm run desktop:install`.
+- **`EPERM: operation not permitted, rmdir` on Windows:** another program locks `node_modules` (VS Code, antivirus, OneDrive sync, a running dev server). Close it, delete `node_modules` (`rmdir /s /q node_modules`) and install again.
 - **`process.loadEnvFile is not a function`:** upgrade to Node.js 20.12+.
 - **Decorator or schema errors on the server:** `experimentalDecorators: true` and `useDefineForClassFields: false` must stay in `apps/server/tsconfig.json`.
 

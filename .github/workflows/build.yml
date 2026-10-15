@@ -136,10 +136,13 @@ jobs:
       - name: Install dependencies
         shell: bash
         run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - name: Install desktop dependencies
+        shell: bash
+        run: npm install --prefix apps/desktop
       - name: Set app version from tag
         if: startsWith(github.ref, 'refs/tags/v')
         shell: bash
-        run: npm pkg set version="${GITHUB_REF_NAME#v}" -w @mini-sumo/desktop
+        run: npm pkg set version="${GITHUB_REF_NAME#v}" --prefix apps/desktop
       - run: npm run build:web
       - name: Package
         working-directory: apps/desktop
@@ -188,6 +191,8 @@ jobs:
       - name: Install dependencies
         run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
       - run: npm run build:web
+      - name: Install mobile dependencies
+        run: npm install --prefix apps/mobile
 
       - name: Create Android project
         working-directory: apps/mobile
