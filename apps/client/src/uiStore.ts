@@ -6,11 +6,24 @@ export interface Toast {
   tone: "info" | "out" | "error";
 }
 
-export const uiStore = createStore<{ settingsOpen: boolean; wardrobeOpen: boolean; arenasOpen: boolean; walletOpen: boolean; toasts: Toast[] }>({
+export interface UIState {
+  settingsOpen: boolean;
+  aboutOpen: boolean;
+  wardrobeOpen: boolean;
+  walletOpen: boolean;
+  friendsOpen: boolean;
+  /** Arena previewed in the 3D background of the home screen. */
+  homeArena: string;
+  toasts: Toast[];
+}
+
+export const uiStore = createStore<UIState>({
   settingsOpen: false,
+  aboutOpen: false,
   wardrobeOpen: false,
-  arenasOpen: false,
   walletOpen: false,
+  friendsOpen: false,
+  homeArena: "training",
   toasts: [],
 });
 
@@ -25,8 +38,16 @@ export function pushToast(text: string, tone: Toast["tone"] = "info", durationMs
   }, durationMs);
 }
 
-export function setArenasOpen(open: boolean): void {
-  uiStore.update({ arenasOpen: open });
+export function setAboutOpen(open: boolean): void {
+  uiStore.update({ aboutOpen: open });
+}
+
+export function setFriendsOpen(open: boolean): void {
+  uiStore.update({ friendsOpen: open });
+}
+
+export function setHomeArena(arenaId: string): void {
+  if (uiStore.get().homeArena !== arenaId) uiStore.update({ homeArena: arenaId });
 }
 
 export function setWalletOpen(open: boolean): void {

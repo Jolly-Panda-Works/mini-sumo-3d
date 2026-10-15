@@ -37,7 +37,9 @@ export function Wallet() {
           Wallet
         </h2>
         {!profile ? (
-          <p className="notice notice--offline">Your wallet needs the online server, which isn't live yet.</p>
+          <p className="notice notice--offline">
+            <strong>Coming soon.</strong> Sumo Coins, rewards and your history arrive with online play.
+          </p>
         ) : (
           <>
             <p className="wallet__balance">

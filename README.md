@@ -81,6 +81,8 @@ Party games are best when everyone understands them in five seconds. Mini Sumo h
 
 On phones and tablets the touch controls appear automatically during a bout (*Settings → Touch controls* can force them on or off). Steering and dashing work at the same time with two thumbs, and supported Android devices vibrate on dashes and hits (*Settings → Vibration*).
 
+*Settings* has your name and avatar, music and sound-effect volumes, controls, *About*, and *Save progress to Google account* (coming soon). The game plays original synthesised music: a calm pentatonic theme on menus and a faster taiko-driven one during bouts. The Android app always runs in landscape.
+
 Settings never pause the shared match. *Settings → About* shows the version, the creator and links to the game page and source code.
 
 <details>
@@ -115,6 +117,14 @@ Tuning lives in `apps/server/src/simulation/SimulationConfig.ts` (acceleration 2
 Screenshots come from a real three-player match played by the [Screenshots workflow](.github/workflows/screenshots.yml) (*Actions → Screenshots → Run workflow*), which commits fresh images to `docs/screenshots/`.
 
 ## Arenas and coins
+
+Every arena has its own look and mood, in the 3D ring and on its card:
+
+| Training Dojo | Festival Street (Rookie) | Moonlit Temple (Pro) | Golden Palace (Champion) |
+| --- | --- | --- | --- |
+| <img src="docs/arenas/training.svg" alt="Training Dojo: morning light in a bamboo garden" width="220" /> | <img src="docs/arenas/rookie.svg" alt="Festival Street: paper lanterns at a summer festival" width="220" /> | <img src="docs/arenas/pro.svg" alt="Moonlit Temple: a temple yard under the full moon" width="220" /> | <img src="docs/arenas/champion.svg" alt="Golden Palace: crimson halls and a ring of gold" width="220" /> |
+
+The home screen shows the paid arenas side by side with entry fee and prize; hovering or focusing a card switches the 3D background to that arena. *Training* (free) has its own button. Features that need the online server show *Coming soon* until it is live.
 
 | Arena | Entry | Winner gets (4 players) | Opponents |
 | --- | ---: | ---: | --- |

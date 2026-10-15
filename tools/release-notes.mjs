@@ -7,7 +7,7 @@ const f = (kind) => `MiniSumo-${version}-${kind}`;
 const serverNote = server
   ? `These builds connect to the game server at \`${server}\`.`
   : `> [!NOTE]
-> **Offline practice build.** The public game server is not live yet, so these builds run every room on your device against bots. Online play with friends arrives in a later release once the server is up.`;
+> **Online play is coming soon.** This build includes the free Training Arena against bots; paid arenas, coins, the shop and playing with friends arrive once the game server is live.`;
 
 console.log(`## Mini Sumo ${version}
 

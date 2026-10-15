@@ -351,21 +351,26 @@ body {
 
 /* ---------- Wardrobe ---------- */
 
+/* The preview stays visible: only the option list scrolls. */
 .wardrobe {
-  width: min(780px, 100%);
-  max-height: calc(100vh - 32px);
-  overflow-y: auto;
+  width: min(860px, 100%);
+  height: min(620px, calc(100vh - 24px));
+  height: min(620px, calc(100dvh - 24px));
+  overflow: hidden;
+  gap: 10px;
 }
 
 .wardrobe__body {
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: minmax(200px, 280px) 1fr;
-  gap: 18px;
-  align-items: start;
+  grid-template-columns: minmax(200px, 38%) 1fr;
+  gap: 16px;
 }
 
 .wardrobe__preview {
-  aspect-ratio: 3 / 4;
+  height: 100%;
+  min-height: 0;
   border: 3px solid var(--ink);
   border-radius: var(--radius-control);
   background: radial-gradient(circle at 50% 35%, #8fb6e0, var(--sky));
@@ -377,6 +382,10 @@ body {
   flex-direction: column;
   gap: 12px;
   min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+  overscroll-behavior: contain;
 }
 
 .wardrobe__group {
@@ -426,14 +435,286 @@ body {
   border: 2px solid var(--ink);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 640px) and (orientation: portrait) {
   .wardrobe__body {
     grid-template-columns: 1fr;
+    grid-template-rows: 34vh 1fr;
   }
-  .wardrobe__preview {
-    aspect-ratio: auto;
-    height: 220px;
+}
+
+@media (max-height: 480px) {
+  .wardrobe {
+    height: calc(100dvh - 16px);
+    padding: 12px;
   }
+  .wardrobe .settings__title {
+    font-size: 1.2rem;
+  }
+}
+
+/* ---------- Home ---------- */
+
+.home {
+  pointer-events: auto;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vh, 18px);
+  align-items: center;
+}
+
+.home__top {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.home__title {
+  margin: 0;
+  font-size: clamp(2rem, 7vh, 3.6rem);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--paper);
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 0 5px 0 var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.home__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.home__coins {
+  min-height: 46px;
+  padding: 6px 14px;
+}
+
+.home__note {
+  max-width: 620px;
+}
+
+.arena-row {
+  list-style: none;
+  margin: 0;
+  padding: 4px 4px 10px;
+  width: 100%;
+  max-width: 1040px;
+  display: flex;
+  gap: clamp(10px, 1.6vw, 18px);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  justify-content: safe center;
+}
+
+.arena-tile {
+  position: relative;
+  flex: 1 0 clamp(190px, 28vw, 320px);
+  max-width: 320px;
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-panel);
+  background: var(--paper);
+  box-shadow: 0 5px 0 var(--ink);
+  overflow: hidden;
+}
+
+.arena-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 6px;
+  background: var(--accent);
+  z-index: 1;
+}
+
+.arena-tile__art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  max-height: 26vh;
+  object-fit: cover;
+  border-bottom: 3px solid var(--ink);
+  background: var(--tile-sky);
+}
+
+.arena-tile__badge {
+  position: absolute;
+  top: 12px;
+  right: 10px;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 800;
+  font-size: 0.78rem;
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+.arena-tile__body {
+  padding: 8px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.arena-tile__name {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.1;
+  color: var(--tile-ink);
+}
+
+.arena-tile__mood {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(43, 35, 64, 0.65);
+}
+
+.arena-tile__facts {
+  margin: 2px 0 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.arena-tile__facts div {
+  display: flex;
+  flex-direction: column;
+}
+
+.arena-tile__facts dt {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(43, 35, 64, 0.6);
+}
+
+.arena-tile__facts dd {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.arena-tile__status {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #b8344a;
+}
+
+.arena-tile__btn {
+  margin-top: auto;
+  min-height: 42px;
+}
+
+.arena-tile--off .arena-tile__art {
+  filter: saturate(0.75);
+}
+
+.home__bottom {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: auto;
+}
+
+.home__training {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  min-width: 220px;
+}
+
+.home__sub {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.tag--soon {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* ---------- Settings & about ---------- */
+
+.settings {
+  width: min(880px, 100%);
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+}
+
+.settings__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.settings__section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 2.5px solid var(--ink-soft);
+  border-radius: var(--radius-control);
+}
+
+.settings__heading {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.slider {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 700;
+}
+
+.slider__label {
+  display: flex;
+  justify-content: space-between;
+}
+
+.slider__value {
+  font-variant-numeric: tabular-nums;
+  color: rgba(43, 35, 64, 0.65);
+}
+
+.slider input {
+  width: 100%;
+  accent-color: var(--coral);
+  min-height: 32px;
+}
+
+.about-panel {
+  align-items: center;
+  text-align: center;
+}
+
+.about-panel__logo {
+  width: 110px;
+  height: 110px;
+}
+
+.about-panel p {
+  margin: 0;
+}
+
+.friends {
+  width: min(480px, 100%);
 }
 
 /* ---------- Economy ---------- */
@@ -1334,6 +1615,24 @@ body {
 }
 
 /* ---------- Responsive ---------- */
+
+@media (max-height: 420px) {
+  .home__title {
+    font-size: 1.8rem;
+    -webkit-text-stroke: 2px var(--ink);
+    text-shadow: 0 3px 0 var(--ink);
+  }
+  .arena-tile__mood {
+    display: none;
+  }
+  .arena-tile__body {
+    padding: 6px 10px 10px;
+  }
+  .home__bottom .btn--big {
+    min-height: 48px;
+    font-size: 1.05rem;
+  }
+}
 
 @media (max-height: 560px) and (orientation: landscape) {
   .menu {

@@ -2,7 +2,6 @@ import { PLAYER_COLORS } from "@mini-sumo/shared";
 import { gameStore, roomManager } from "../network/RoomManager";
 import { useStore } from "../store";
 import { economyStore } from "../network/economyClient";
-import { setArenasOpen } from "../uiStore";
 import { Coins } from "./Coins";
 import { PlayerBadge } from "./PlayerBadge";
 
@@ -92,7 +91,7 @@ export function Results() {
             <button
               className="btn btn--primary btn--grow"
               onClick={() => {
-                void roomManager.leave().then(() => setArenasOpen(true));
+                void roomManager.leave();
               }}
             >
               Play again

@@ -222,6 +222,8 @@ jobs:
           npx cap add android
           npx capacitor-assets generate --android --iconBackgroundColor "#2F5C8A" --splashBackgroundColor "#2F5C8A" || echo "::warning::Icon generation failed; using default icons."
           npx cap sync android
+          # Always landscape (either way round).
+          node scripts/landscape.mjs
 
       - name: Set version
         working-directory: apps/mobile/android

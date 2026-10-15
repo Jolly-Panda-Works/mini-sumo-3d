@@ -6,6 +6,19 @@ Builds from `main` are released automatically as `MAJOR.MINOR.<build number>`; t
 
 ## [Unreleased]
 
+### Changed
+
+- New home screen: the game title, the paid arenas side by side (art, mood, entry fee, prize) and a separate Training button; *Play now*, the logo and the name field moved out. Private rooms live under *Play with friends*.
+- Each arena has its own theme in 3D and on its card: Training Dojo, Festival Street, Moonlit Temple, Golden Palace. Card art is in `docs/arenas/`.
+- Wardrobe: the 3D preview always stays visible; only the options scroll.
+- Settings: name, avatar, music and sound-effect volume, controls, About, and *Save progress to Google account* (coming soon).
+- Server-only features show *Coming soon* instead of offline-mode messages.
+- Android app is locked to landscape (`scripts/landscape.mjs`).
+
+### Added
+
+- Original procedural background music (menu and bout themes).
+
 ### Added
 
 - Virtual-currency economy (server-authoritative): device-bound guest accounts, Sumo Coin wallet, append-only ledger with idempotency keys, SQLite persistence via `node:sqlite`.

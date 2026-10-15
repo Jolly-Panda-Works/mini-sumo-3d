@@ -130,7 +130,7 @@ class RoomManager {
   constructor() {
     this.modeReady = detectNetworkMode(this.serverUrl).then((mode) => {
       networkStore.set({ mode });
-      if (mode === "offline") console.info("[mini-sumo] Offline mode: rooms run on this device against bots.");
+      if (mode === "offline") console.info("[mini-sumo] No server: rooms run on this device.");
       else void loadEconomy();
     });
   }
@@ -170,7 +170,7 @@ class RoomManager {
     const appearance = settingsStore.get().appearance;
     await this.modeReady;
     if (arenaId !== "training" && this.offline) {
-      sessionStore.update({ error: "Paid arenas need the online server, which isn't live yet. Train for free meanwhile." });
+      sessionStore.update({ error: "This arena is coming soon. Try Training meanwhile." });
       return false;
     }
     const options: JoinOptions = { name, private: false, maxPlayers: 4, appearance, arenaId };
@@ -213,7 +213,7 @@ class RoomManager {
       return Promise.resolve(false);
     }
     if (this.offline) {
-      sessionStore.update({ error: "Joining friends needs the online server, which isn't live yet. Play now or create a room with bots meanwhile." });
+      sessionStore.update({ error: "Playing with friends is coming soon." });
       return Promise.resolve(false);
     }
     const options: JoinOptions = { name, appearance: settingsStore.get().appearance };

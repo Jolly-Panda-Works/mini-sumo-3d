@@ -54,8 +54,16 @@ try {
   await sleep(800);
   await shot(host.page, "menu");
 
+  // Each arena's mood in the 3D background (hover the cards).
+  for (const name of ["Rookie Arena", "Pro Arena", "Champion Arena"]) {
+    await host.page.locator(".arena-tile", { hasText: name }).hover();
+    await sleep(1200);
+    await shot(host.page, `home-${name.split(" ")[0].toLowerCase()}`);
+  }
+  await host.page.locator(".home__training").hover();
+
   // Wardrobe: give the host a custom look.
-  await host.page.getByRole("button", { name: "Customise wrestler" }).click();
+  await host.page.getByRole("button", { name: "Customise your wrestler" }).click();
   for (const option of ["Mohawk", "Ginger", "Fierce", "Champion"]) {
     await host.page.getByRole("button", { name: option, exact: true }).click();
   }
@@ -63,6 +71,7 @@ try {
   await shot(host.page, "wardrobe");
   await host.page.getByRole("button", { name: "Done" }).click();
 
+  await host.page.getByRole("button", { name: "Play with friends" }).click();
   await host.page.getByRole("button", { name: "Create private room" }).click();
   await host.page.waitForSelector(".room-code");
   const code = (await host.page.locator(".room-code").innerText()).trim();
@@ -74,9 +83,7 @@ try {
     await guest.page.goto(`${BASE}?room=${encodeURIComponent(code)}`);
     await guest.page.waitForSelector("canvas");
     await setName(guest.page, guest.name);
-    await guest.page.getByRole("button", { name: "Customise wrestler" }).click();
-    await guest.page.getByRole("button", { name: "Surprise me" }).click();
-    await guest.page.getByRole("button", { name: "Done" }).click();
+    // The invite link opens the friends panel with the code filled in.
     await guest.page.getByRole("button", { name: "Join room" }).click();
     await guest.page.waitForSelector(".roster");
   }

@@ -5,7 +5,10 @@ export type TouchMode = "auto" | "on" | "off";
 export type JoystickMode = "floating" | "fixed";
 
 export interface Settings {
-  sound: boolean;
+  /** 0..1 */
+  musicVolume: number;
+  /** 0..1 */
+  sfxVolume: number;
   touchControls: TouchMode;
   /** Floating: the stick appears where you touch. Fixed: always bottom-left. */
   joystick: JoystickMode;
@@ -21,13 +24,16 @@ export interface Settings {
 const KEY = "mini-sumo:settings";
 
 function load(): Settings {
-  const defaults: Settings = { sound: true, touchControls: "auto", joystick: "floating", vibration: true, name: "", onboarded: false, appearance: { ...DEFAULT_APPEARANCE } };
+  const defaults: Settings = { musicVolume: 0.5, sfxVolume: 0.8, touchControls: "auto", joystick: "floating", vibration: true, name: "", onboarded: false, appearance: { ...DEFAULT_APPEARANCE } };
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return defaults;
-    const parsed = JSON.parse(raw) as Partial<Settings>;
+    const parsed = JSON.parse(raw) as Partial<Settings> & { sound?: boolean };
+    const volume = (value: unknown, fallback: number) =>
+      typeof value === "number" && Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : fallback;
     return {
-      sound: typeof parsed.sound === "boolean" ? parsed.sound : defaults.sound,
+      musicVolume: volume(parsed.musicVolume, parsed.sound === false ? 0 : defaults.musicVolume),
+      sfxVolume: volume(parsed.sfxVolume, parsed.sound === false ? 0 : defaults.sfxVolume),
       touchControls: parsed.touchControls === "on" || parsed.touchControls === "off" ? parsed.touchControls : "auto",
       joystick: parsed.joystick === "fixed" ? "fixed" : "floating",
       vibration: typeof parsed.vibration === "boolean" ? parsed.vibration : true,

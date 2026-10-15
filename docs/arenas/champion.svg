@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" width="640" height="360">
+  <defs>
+    <linearGradient id="sky-champion" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#A3283C"/>
+      <stop offset="1" stop-color="#5A1424"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="180" fill="url(#sky-champion)"/>
+  <path d="M160 109.6 L 480 109.6" stroke="#F2C14E" stroke-width="10" opacity="0.18"/>
+  <path d="M160 109.6 L 469.09626441250185 63.012571881546265" stroke="#F2C14E" stroke-width="10" opacity="0.18"/>
+  <path d="M160 109.6 L 437.1281292110204 19.60000000000001" stroke="#F2C14E" stroke-width="10" opacity="0.18"/>
+  <path d="M160 109.6 L 386.2741699796952 -17.67922061357855" stroke="#F2C14E" stroke-width="10" opacity="0.18"/>
+  <path d="M160 109.6 L 320 -46.284572681198966" stroke="#F2C14E" stroke-width="10" opacity="0.18"/>
+  <path d="M160 109.6 L 242.82209443280664 -64.26664873203231" stroke="#F2C14E" stroke-width="10" opacity="0.18"/>
+  <path d="M160 109.6 L 160.00000000000003 -70.4" stroke="#F2C14E" stroke-width="10" opacity="0.18"/>
+  <path d="M160 109.6 L 77.17790556719333 -64.26664873203231" stroke="#F2C14E" stroke-width="10" opacity="0.18"/>
+  <path d="M160 109.6 L 5.684341886080802e-14 -46.284572681198966" stroke="#F2C14E" stroke-width="10" opacity="0.18"/>
+  <path d="M160 109.6 L -66.27416997969519 -17.679220613578565" stroke="#F2C14E" stroke-width="10" opacity="0.18"/>
+  <path d="M160 109.6 L -117.1281292110204 19.60000000000001" stroke="#F2C14E" stroke-width="10" opacity="0.18"/>
+  <path d="M160 109.6 L -149.0962644125018 63.01257188154621" stroke="#F2C14E" stroke-width="10" opacity="0.18"/>
+  <path d="M134 46 l 8 -18 l 10 12 l 8 -16 l 8 16 l 10 -12 l 8 18 z" fill="#F2C14E" stroke="#3A0D18" stroke-width="2"/>
+  <rect x="12" y="20" width="16" height="99.00000000000001" fill="#B3123A"/><rect x="292" y="20" width="16" height="99.00000000000001" fill="#B3123A"/>
+  <rect x="0" y="125.6" width="320" height="54.400000000000006" fill="#3A0D18"/>
+  <circle cx="38.4" cy="98.6" r="5" fill="#FFC94A" opacity="0.9"/>
+  <circle cx="87.04" cy="92.6" r="5" fill="#FFC94A" opacity="0.9"/>
+  <circle cx="135.68" cy="86.6" r="5" fill="#FFC94A" opacity="0.9"/>
+  <circle cx="184.32" cy="86.6" r="5" fill="#FFC94A" opacity="0.9"/>
+  <circle cx="232.96000000000004" cy="92.6" r="5" fill="#FFC94A" opacity="0.9"/>
+  <circle cx="281.6" cy="98.6" r="5" fill="#FFC94A" opacity="0.9"/>
+  <ellipse cx="160" cy="139.6" rx="134.4" ry="25.200000000000003" fill="#8E2A2A"/>
+  <ellipse cx="160" cy="129.6" rx="128" ry="21.599999999999998" fill="#F0D9A0"/>
+  <ellipse cx="160" cy="129.6" rx="105.60000000000001" ry="17.1" fill="none" stroke="#F2C14E" stroke-width="5"/>
+  <ellipse cx="160" cy="139.6" rx="134.4" ry="25.200000000000003" fill="none" stroke="#F2C14E" stroke-width="3"/>
+  
+    <g transform="translate(134 111.6) scale(1 1)">
+      <ellipse cx="0" cy="12" rx="17" ry="4" fill="#000" opacity="0.18"/>
+      <ellipse cx="0" cy="-2" rx="15" ry="13" fill="#FFD3B0" stroke="#3A0D18" stroke-width="2"/>
+      <rect x="-15" y="2" width="30" height="6" rx="3" fill="#FF5D73" stroke="#3A0D18" stroke-width="1.5"/>
+      <circle cx="0" cy="-20" r="10" fill="#FFD3B0" stroke="#3A0D18" stroke-width="2"/>
+      <circle cx="-1" cy="-31" r="3.5" fill="#3A0D18"/>
+      <circle cx="4" cy="-21" r="1.4" fill="#3A0D18"/>
+      <rect x="10" y="-6" width="12" height="6" rx="3" fill="#FFD3B0" stroke="#3A0D18" stroke-width="1.5"/>
+    </g>
+  
+    <g transform="translate(186 111.6) scale(-1 1)">
+      <ellipse cx="0" cy="12" rx="17" ry="4" fill="#000" opacity="0.18"/>
+      <ellipse cx="0" cy="-2" rx="15" ry="13" fill="#FFD3B0" stroke="#3A0D18" stroke-width="2"/>
+      <rect x="-15" y="2" width="30" height="6" rx="3" fill="#2EC4B6" stroke="#3A0D18" stroke-width="1.5"/>
+      <circle cx="0" cy="-20" r="10" fill="#FFD3B0" stroke="#3A0D18" stroke-width="2"/>
+      <circle cx="-1" cy="-31" r="3.5" fill="#3A0D18"/>
+      <circle cx="4" cy="-21" r="1.4" fill="#3A0D18"/>
+      <rect x="10" y="-6" width="12" height="6" rx="3" fill="#FFD3B0" stroke="#3A0D18" stroke-width="1.5"/>
+    </g>
+  
+</svg>

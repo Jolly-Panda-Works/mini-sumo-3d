@@ -201,7 +201,9 @@ export function Wardrobe() {
                 </button>
               </>
             ) : (
-              <span>You're previewing an item you don't own. The shop needs the online server, so you'll wear your owned look in bouts.</span>
+              <span>
+                Previewing a shop item. <span className="tag tag--soon">Shop coming soon</span>
+              </span>
             )}
           </div>
         )}

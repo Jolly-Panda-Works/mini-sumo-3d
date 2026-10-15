@@ -1,13 +1,42 @@
 import { settingsStore } from "../settings";
 
 /**
- * Synthesized sound effects via Web Audio: no audio files to load or fail.
+ * Synthesized audio via Web Audio: no files to load or fail, no licensing.
+ * Graph: sources -> sfx bus / music bus -> master -> speakers.
  * The context is created on the first user gesture to respect autoplay rules.
  */
 class AudioManager {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
+  private sfxBus: GainNode | null = null;
+  private musicBus: GainNode | null = null;
   private noise: AudioBuffer | null = null;
+  private readyListeners = new Set<() => void>();
+
+  constructor() {
+    settingsStore.subscribe(() => this.applyVolumes());
+  }
+
+  get context(): AudioContext | null {
+    return this.ctx && this.ctx.state === "running" ? this.ctx : null;
+  }
+
+  get music(): GainNode | null {
+    return this.musicBus;
+  }
+
+  get noiseBuffer(): AudioBuffer | null {
+    return this.noise;
+  }
+
+  /** Called once the context runs (after the first gesture). */
+  onReady(listener: () => void): () => void {
+    this.readyListeners.add(listener);
+    if (this.context) listener();
+    return () => {
+      this.readyListeners.delete(listener);
+    };
+  }
 
   unlock(): void {
     try {
@@ -16,27 +45,43 @@ class AudioManager {
         if (!Ctor) return;
         this.ctx = new Ctor();
         this.master = this.ctx.createGain();
-        this.master.gain.value = 0.45;
+        this.master.gain.value = 0.9;
         this.master.connect(this.ctx.destination);
+        this.sfxBus = this.ctx.createGain();
+        this.musicBus = this.ctx.createGain();
+        this.sfxBus.connect(this.master);
+        this.musicBus.connect(this.master);
+        this.applyVolumes();
         const length = Math.floor(this.ctx.sampleRate * 0.4);
         this.noise = this.ctx.createBuffer(1, length, this.ctx.sampleRate);
         const data = this.noise.getChannelData(0);
         for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
       }
-      if (this.ctx.state === "suspended") void this.ctx.resume().catch(() => undefined);
+      const notify = () => this.readyListeners.forEach((l) => l());
+      if (this.ctx.state === "suspended") void this.ctx.resume().then(notify, () => undefined);
+      else notify();
     } catch {
       this.ctx = null;
     }
   }
 
+  private applyVolumes(): void {
+    if (!this.ctx || !this.sfxBus || !this.musicBus) return;
+    const { sfxVolume, musicVolume } = settingsStore.get();
+    const t = this.ctx.currentTime;
+    // Perceptual curve: squares feel more even on a slider.
+    this.sfxBus.gain.setTargetAtTime(sfxVolume * sfxVolume * 0.6, t, 0.05);
+    this.musicBus.gain.setTargetAtTime(musicVolume * musicVolume * 0.5, t, 0.05);
+  }
+
   private get ready(): AudioContext | null {
-    if (!settingsStore.get().sound || !this.ctx || !this.master || this.ctx.state !== "running") return null;
-    return this.ctx;
+    if (settingsStore.get().sfxVolume <= 0 || !this.sfxBus) return null;
+    return this.context;
   }
 
   private tone(freq: number, duration: number, type: OscillatorType, gain: number, slideTo?: number, delay = 0): void {
     const ctx = this.ready;
-    if (!ctx || !this.master) return;
+    if (!ctx || !this.sfxBus) return;
     const t = ctx.currentTime + delay;
     const osc = ctx.createOscillator();
     const env = ctx.createGain();
@@ -46,14 +91,14 @@ class AudioManager {
     env.gain.setValueAtTime(0.0001, t);
     env.gain.exponentialRampToValueAtTime(gain, t + 0.01);
     env.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-    osc.connect(env).connect(this.master);
+    osc.connect(env).connect(this.sfxBus);
     osc.start(t);
     osc.stop(t + duration + 0.05);
   }
 
   private thud(duration: number, gain: number, cutoff: number): void {
     const ctx = this.ready;
-    if (!ctx || !this.master || !this.noise) return;
+    if (!ctx || !this.sfxBus || !this.noise) return;
     const t = ctx.currentTime;
     const src = ctx.createBufferSource();
     src.buffer = this.noise;
@@ -63,7 +108,7 @@ class AudioManager {
     const env = ctx.createGain();
     env.gain.setValueAtTime(gain, t);
     env.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-    src.connect(filter).connect(env).connect(this.master);
+    src.connect(filter).connect(env).connect(this.sfxBus);
     src.start(t);
     src.stop(t + duration + 0.05);
   }

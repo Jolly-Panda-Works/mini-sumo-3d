@@ -4,6 +4,7 @@ import { networkStore } from "../network/networkMode";
 import { gameStore, roomManager, sessionStore } from "../network/RoomManager";
 import { economyStore } from "../network/economyClient";
 import { Coins } from "./Coins";
+import { themeFor } from "../game/arenaThemes";
 import { useStore } from "../store";
 import { setSettingsOpen, setWardrobeOpen } from "../uiStore";
 import { GearIcon } from "./MainMenu";
@@ -53,10 +54,10 @@ export function Lobby() {
         <div className="lobby__head">
           <div>
             <p className="field__label">
-              {offline ? "Offline practice" : game.isPrivate ? "Private room" : (arena?.name ?? "Public room")}
+              {offline ? "Training" : game.isPrivate ? "Private room" : (arena?.name ?? "Training")}
             </p>
             {offline ? (
-              <p className="room-code room-code--offline">You vs bots</p>
+              <p className="room-code room-code--offline">{themeFor(game.arenaId).title}</p>
             ) : (
               <p className="room-code" aria-label={`Room code ${session.roomId}`}>
                 {session.roomId}

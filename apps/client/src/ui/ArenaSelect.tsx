@@ -1,132 +1,112 @@
 import { useState } from "react";
 import type { ArenaInfo } from "@mini-sumo/shared";
+import { arenaArtDataUri, themeFor } from "../game/arenaThemes";
 import { economyStore } from "../network/economyClient";
-import { networkStore } from "../network/networkMode";
 import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
-import { setArenasOpen } from "../uiStore";
+import { setHomeArena } from "../uiStore";
 import { Coins } from "./Coins";
 
-const TRAINING_FALLBACK: ArenaInfo = {
-  id: "training",
-  name: "Training Arena",
-  description: "Free practice against bots.",
-  entryFee: 0,
-  currency: "coins",
-  minPlayers: 2,
-  maxPlayers: 4,
-  economyFeePercent: 0,
-  maxPrize: 0,
-  payoutRule: "Free. Practice as much as you like.",
-  drawPolicy: "refund",
-  bots: true,
-  requires: { matches: 0, wins: 0 },
-  enabled: true,
-};
+/**
+ * Display-only preview of the paid arenas for when the server's catalog isn't available.
+ * The server (economy/config.ts) is the authority for real fees and prizes.
+ */
+function preview(id: string, name: string, entryFee: number, maxPrize: number, matches: number, wins: number): ArenaInfo {
+  return {
+    id,
+    name,
+    description: "",
+    entryFee,
+    currency: "coins",
+    minPlayers: 2,
+    maxPlayers: 4,
+    economyFeePercent: 10,
+    maxPrize,
+    payoutRule: "",
+    drawPolicy: "refund",
+    bots: false,
+    requires: { matches, wins },
+    enabled: true,
+  };
+}
 
-/** Arena tiers with entry fee, possible prize, rules and the player's balance. */
-export function ArenaSelect() {
+const PREVIEW: ArenaInfo[] = [
+  preview("rookie", "Rookie Arena", 100, 360, 0, 0),
+  preview("pro", "Pro Arena", 500, 1800, 10, 0),
+  preview("champion", "Champion Arena", 2000, 7200, 20, 10),
+];
+
+/** Paid arenas side by side: art, mood, entry fee, prize and an Enter button. */
+export function ArenaRow() {
   const economy = useStore(economyStore);
-  const { mode } = useStore(networkStore);
   const session = useStore(sessionStore);
   const settings = useStore(settingsStore);
   const [confirm, setConfirm] = useState<ArenaInfo | null>(null);
-  const online = mode === "online" && economy.status === "ready" && economy.profile !== null;
+  const live = economy.status === "ready" && economy.profile !== null;
   const balance = economy.profile?.balances.coins ?? 0;
   const stats = economy.profile?.stats ?? { matches: 0, wins: 0 };
-  const arenas = economy.catalog?.arenas.filter((a) => a.enabled) ?? [TRAINING_FALLBACK];
+  const arenas = (live ? economy.catalog?.arenas : null)?.filter((a) => a.enabled && a.entryFee > 0) ?? PREVIEW;
   const busy = session.status === "connecting";
 
   const enter = async (arena: ArenaInfo) => {
     setConfirm(null);
-    const ok = await roomManager.enterArena(arena.id, settings.name);
-    if (ok) setArenasOpen(false);
+    await roomManager.enterArena(arena.id, settings.name);
   };
 
   return (
-    <div className="overlay" onClick={(e) => e.target === e.currentTarget && setArenasOpen(false)}>
-      <section className="panel arenas" role="dialog" aria-modal="true" aria-labelledby="arenas-title">
-        <div className="arenas__head">
-          <h2 id="arenas-title" className="settings__title">
-            Arenas
-          </h2>
-          {online && (
-            <p className="arenas__balance" aria-label={`Your balance: ${balance} Sumo Coins`}>
-              <Coins amount={balance} />
-            </p>
-          )}
-        </div>
-
-        {!online && (
-          <p className="notice notice--offline">
-            {mode === "offline"
-              ? "Paid arenas, coins and the shop need the online server, which isn't live yet. Training is free and always open."
-              : economy.status === "error"
-                ? `Couldn't load your wallet: ${economy.error ?? "unknown error"}. Training is still open.`
-                : "Loading your wallet…"}
-          </p>
-        )}
-
-        <ul className="arena-list">
-          {arenas.map((arena) => {
-            const paid = arena.entryFee > 0;
-            const locked = paid && (stats.matches < arena.requires.matches || stats.wins < arena.requires.wins);
-            const affordable = !paid || balance >= arena.entryFee;
-            const available = !paid || (online && !locked && affordable);
-            let status = "";
-            if (paid && !online) status = "Needs the online server";
-            else if (locked) status = `Unlocks after ${arena.requires.matches} bouts${arena.requires.wins ? ` and ${arena.requires.wins} wins` : ""}`;
-            else if (!affordable) status = `You need ${arena.entryFee - balance} more coins`;
-            return (
-              <li key={arena.id} className={`arena-card${available ? "" : " arena-card--off"}`}>
-                <div className="arena-card__main">
-                  <h3 className="arena-card__name">{arena.name}</h3>
-                  <p className="hint">{arena.description}</p>
-                  <dl className="arena-card__facts">
-                    <div>
-                      <dt>Entry fee</dt>
-                      <dd>{paid ? <Coins amount={arena.entryFee} /> : "Free"}</dd>
-                    </div>
-                    <div>
-                      <dt>{paid ? "Winner gets up to" : "Rewards"}</dt>
-                      <dd>{paid ? <Coins amount={arena.maxPrize} /> : "A few coins per bout"}</dd>
-                    </div>
-                    <div>
-                      <dt>Players</dt>
-                      <dd>
-                        {arena.minPlayers}–{arena.maxPlayers}
-                        {arena.bots ? ", bots fill in" : ", players only"}
-                      </dd>
-                    </div>
-                  </dl>
-                  <p className="arena-card__rule">{arena.payoutRule}</p>
-                  {status && <p className="arena-card__status">{status}</p>}
-                </div>
+    <>
+      <ul className="arena-row" aria-label="Arenas">
+        {arenas.map((arena) => {
+          const theme = themeFor(arena.id);
+          const locked = live && (stats.matches < arena.requires.matches || stats.wins < arena.requires.wins);
+          const affordable = live && balance >= arena.entryFee;
+          const available = live && !locked && affordable;
+          let status = "";
+          if (!live) status = "Coming soon";
+          else if (locked) status = `Unlocks after ${arena.requires.matches} bouts${arena.requires.wins ? `, ${arena.requires.wins} wins` : ""}`;
+          else if (!affordable) status = `Need ${arena.entryFee - balance} more coins`;
+          return (
+            <li
+              key={arena.id}
+              className={`arena-tile${available ? "" : " arena-tile--off"}`}
+              style={{ ["--accent" as string]: theme.accent, ["--tile-ink" as string]: theme.ink, ["--tile-sky" as string]: theme.sky }}
+              onPointerEnter={() => setHomeArena(arena.id)}
+              onFocus={() => setHomeArena(arena.id)}
+            >
+              <img className="arena-tile__art" src={arenaArtDataUri(arena.id)} alt="" width={320} height={180} />
+              {!live && <span className="arena-tile__badge">Coming soon</span>}
+              <div className="arena-tile__body">
+                <h3 className="arena-tile__name">{arena.name}</h3>
+                <p className="arena-tile__mood">{theme.title}</p>
+                <dl className="arena-tile__facts">
+                  <div>
+                    <dt>Entry</dt>
+                    <dd>
+                      <Coins amount={arena.entryFee} />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Prize up to</dt>
+                    <dd>
+                      <Coins amount={arena.maxPrize} />
+                    </dd>
+                  </div>
+                </dl>
+                {status && live && <p className="arena-tile__status">{status}</p>}
                 <button
-                  className={`btn ${available ? "btn--primary" : ""}`}
+                  className="btn btn--primary arena-tile__btn"
                   disabled={!available || busy}
-                  onClick={() => (paid ? setConfirm(arena) : void enter(arena))}
+                  onClick={() => setConfirm(arena)}
+                  aria-label={live ? `Enter ${arena.name} for ${arena.entryFee} Sumo Coins` : `${arena.name}: coming soon`}
                 >
-                  {paid ? "Enter" : "Play free"}
+                  {live ? "Enter" : "Coming soon"}
                 </button>
-              </li>
-            );
-          })}
-        </ul>
-
-        <p className="hint">
-          Sumo Coins are virtual. They can't be bought with money, sent to other players or cashed out.
-        </p>
-        {session.error && (
-          <p className="notice notice--error" role="alert">
-            {session.error}
-          </p>
-        )}
-        <button className="btn btn--ghost" onClick={() => setArenasOpen(false)}>
-          Close
-        </button>
-      </section>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
 
       {confirm && (
         <div className="overlay" onClick={(e) => e.target === e.currentTarget && setConfirm(null)}>
@@ -145,6 +125,7 @@ export function ArenaSelect() {
                 The winner gets the pool minus a {confirm.economyFeePercent}% economy fee: up to <Coins amount={confirm.maxPrize} /> with{" "}
                 {confirm.maxPlayers} players. Winning is never guaranteed.
               </li>
+              <li>Sumo Coins are virtual: they can't be bought with money or cashed out.</li>
             </ul>
             <div className="row">
               <button className="btn btn--grow" onClick={() => setConfirm(null)}>
@@ -157,6 +138,6 @@ export function ArenaSelect() {
           </section>
         </div>
       )}
-    </div>
+    </>
   );
 }

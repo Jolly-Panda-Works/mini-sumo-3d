@@ -1,3 +1,6 @@
+/** Game title shown on the home screen. */
+export const GAME_TITLE = "Mini Sumo";
+
 /**
  * Resolve the Colyseus endpoint.
  * - VITE_SERVER_URL wins (set it for production, e.g. wss://sumo.example.com).
