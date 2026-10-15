@@ -8,15 +8,15 @@
     "name": "Mini Sumo",
     "email": "dev@mini-sumo.local"
   },
-  "homepage": "https://github.com/",
+  "homepage": "https://github.com/Jolly-Panda-Works/mini-sumo-3d",
   "main": "main.cjs",
   "scripts": {
     "prepare:web": "node scripts/copy-web.mjs",
     "start": "npm run prepare:web && electron .",
-    "dist": "npm run prepare:web && electron-builder --publish never",
-    "dist:win": "npm run prepare:web && electron-builder --win --publish never",
-    "dist:mac": "npm run prepare:web && electron-builder --mac --publish never",
-    "dist:linux": "npm run prepare:web && electron-builder --linux --publish never"
+    "dist": "npm run prepare:web && node scripts/package.mjs",
+    "dist:win": "npm run prepare:web && node scripts/package.mjs --win",
+    "dist:mac": "npm run prepare:web && node scripts/package.mjs --mac",
+    "dist:linux": "npm run prepare:web && node scripts/package.mjs --linux"
   },
   "devDependencies": {
     "electron": "^37.2.0",
@@ -29,11 +29,6 @@
       "output": "release",
       "buildResources": "build"
     },
-    "files": [
-      "main.cjs",
-      "web/**/*",
-      "package.json"
-    ],
     "win": {
       "target": [
         "nsis",
@@ -69,7 +64,10 @@
       ],
       "category": "Game",
       "maintainer": "Mini Sumo <dev@mini-sumo.local>",
-      "artifactName": "MiniSumo-${version}-Linux-${arch}.${ext}"
+      "artifactName": "MiniSumo-${version}-Linux-${arch}.${ext}",
+      "executableName": "mini-sumo"
     }
-  }
+  },
+  "repository": "https://github.com/Jolly-Panda-Works/mini-sumo-3d",
+  "license": "UNLICENSED"
 }

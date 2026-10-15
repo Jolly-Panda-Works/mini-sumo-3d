@@ -39,8 +39,8 @@ jobs:
     env:
       ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -62,8 +62,8 @@ jobs:
       # GitHub Pages serves the site from /<repo>/
       VITE_BASE: /${{ github.event.repository.name }}/
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -123,8 +123,8 @@ jobs:
       # Unsigned builds: don't look for signing certificates.
       CSC_IDENTITY_AUTO_DISCOVERY: "false"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -147,9 +147,7 @@ jobs:
       - name: Package
         working-directory: apps/desktop
         shell: bash
-        run: npm run prepare:web && npx electron-builder ${{ matrix.target }} --publish never
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run prepare:web && node scripts/package.mjs ${{ matrix.target }}
       - uses: actions/upload-artifact@v4
         with:
           name: mini-sumo-desktop-${{ matrix.name }}
@@ -170,8 +168,8 @@ jobs:
       VITE_BASE: /
       HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm

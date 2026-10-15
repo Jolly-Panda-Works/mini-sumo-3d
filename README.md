@@ -272,7 +272,7 @@ VITE_SERVER_URL=wss://sumo-api.example.com npm run build
 
 `apps/desktop` and `apps/mobile` are **not** npm workspaces: a plain `npm install` at the root never downloads Electron or Capacitor. They install on demand (`npm run desktop:install`, `npm run android:install`).
 
-Desktop is an **Electron** shell (`apps/desktop`) that serves the built client from `http://127.0.0.1:41730`. Android is a **Capacitor** shell (`apps/mobile`); the native project is generated in CI (`cap add android`), so `apps/mobile/android/` is not committed. Icons and splash come from `apps/desktop/build/icon.png` and `apps/mobile/assets/`.
+Desktop is an **Electron** shell (`apps/desktop`) that serves the built client from `http://127.0.0.1:41730`. It is packaged by `apps/desktop/scripts/package.mjs`, which runs electron-builder from an isolated staging folder so the surrounding npm workspace is never bundled into the app. Set `repository` in `apps/desktop/package.json` to your GitHub repo (CI overrides it with `GITHUB_REPOSITORY`). Android is a **Capacitor** shell (`apps/mobile`); the native project is generated in CI (`cap add android`), so `apps/mobile/android/` is not committed. Icons and splash come from `apps/desktop/build/icon.png` and `apps/mobile/assets/`.
 
 **The apps are clients only.** The Colyseus server still has to run somewhere (see [Deployment](#deployment)). Configure the repository under *Settings → Secrets and variables → Actions*:
 
