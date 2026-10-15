@@ -6,6 +6,14 @@ Builds from `main` are released automatically as `MAJOR.MINOR.<build number>`; t
 
 ## [Unreleased]
 
+### Changed
+
+- Home: the Training Arena is a card next to the other three; the title is centred; the home screen has its own backdrop (spotlights, stars, seigaiha waves) and the 3D arenas are only rendered inside rooms.
+
+### Fixed
+
+- Arena card accent bars and edges showed through dialogs (wardrobe, settings): dialogs now sit on their own layer with a darker backdrop.
+
 ### Added
 
 - Loading screen with the game logo and a filling progress bar with percentage (artwork, fonts, server check and first 3D frame).

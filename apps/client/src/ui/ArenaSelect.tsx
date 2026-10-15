@@ -5,7 +5,6 @@ import { economyStore } from "../network/economyClient";
 import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
-import { setHomeArena } from "../uiStore";
 import { Coins } from "./Coins";
 
 /**
@@ -32,6 +31,7 @@ function preview(id: string, name: string, entryFee: number, maxPrize: number, m
 }
 
 const PREVIEW: ArenaInfo[] = [
+  preview("training", "Training Arena", 0, 0, 0, 0),
   preview("rookie", "Rookie Arena", 100, 360, 0, 0),
   preview("pro", "Pro Arena", 500, 1800, 10, 0),
   preview("champion", "Champion Arena", 2000, 7200, 20, 10),
@@ -46,7 +46,7 @@ export function ArenaRow() {
   const live = economy.status === "ready" && economy.profile !== null;
   const balance = economy.profile?.balances.coins ?? 0;
   const stats = economy.profile?.stats ?? { matches: 0, wins: 0 };
-  const arenas = (live ? economy.catalog?.arenas : null)?.filter((a) => a.enabled && a.entryFee > 0) ?? PREVIEW;
+  const arenas = (live ? economy.catalog?.arenas : null)?.filter((a) => a.enabled) ?? PREVIEW;
   const busy = session.status === "connecting";
 
   const enter = async (arena: ArenaInfo) => {
@@ -59,11 +59,13 @@ export function ArenaRow() {
       <ul className="arena-row" aria-label="Arenas">
         {arenas.map((arena) => {
           const theme = themeFor(arena.id);
+          const free = arena.entryFee === 0;
           const locked = live && (stats.matches < arena.requires.matches || stats.wins < arena.requires.wins);
-          const affordable = live && balance >= arena.entryFee;
-          const available = live && !locked && affordable;
+          const affordable = free || (live && balance >= arena.entryFee);
+          const available = free || (live && !locked && affordable);
+          const soon = !free && !live;
           let status = "";
-          if (!live) status = "Coming soon";
+          if (soon) status = "Coming soon";
           else if (locked) status = `Unlocks after ${arena.requires.matches} bouts${arena.requires.wins ? `, ${arena.requires.wins} wins` : ""}`;
           else if (!affordable) status = `Need ${arena.entryFee - balance} more coins`;
           return (
@@ -71,36 +73,33 @@ export function ArenaRow() {
               key={arena.id}
               className={`arena-tile${available ? "" : " arena-tile--off"}`}
               style={{ ["--accent" as string]: theme.accent, ["--tile-ink" as string]: theme.ink, ["--tile-sky" as string]: theme.sky }}
-              onPointerEnter={() => setHomeArena(arena.id)}
-              onFocus={() => setHomeArena(arena.id)}
             >
               <img className="arena-tile__art" src={arenaImage(arena.id)} alt="" width={960} height={536} decoding="async" />
-              {!live && <span className="arena-tile__badge">Coming soon</span>}
+              {soon && <span className="arena-tile__badge">Coming soon</span>}
+              {free && <span className="arena-tile__badge arena-tile__badge--free">Free</span>}
               <div className="arena-tile__body">
                 <h3 className="arena-tile__name">{arena.name}</h3>
                 <p className="arena-tile__mood">{theme.title}</p>
                 <dl className="arena-tile__facts">
                   <div>
                     <dt>Entry</dt>
-                    <dd>
-                      <Coins amount={arena.entryFee} />
-                    </dd>
+                    <dd>{free ? "Free" : <Coins amount={arena.entryFee} />}</dd>
                   </div>
                   <div>
-                    <dt>Prize up to</dt>
-                    <dd>
-                      <Coins amount={arena.maxPrize} />
-                    </dd>
+                    <dt>{free ? "Opponents" : "Prize up to"}</dt>
+                    <dd>{free ? "Bots & players" : <Coins amount={arena.maxPrize} />}</dd>
                   </div>
                 </dl>
-                {status && live && <p className="arena-tile__status">{status}</p>}
+                {status && !soon && <p className="arena-tile__status">{status}</p>}
                 <button
                   className="btn btn--primary arena-tile__btn"
                   disabled={!available || busy}
-                  onClick={() => setConfirm(arena)}
-                  aria-label={live ? `Enter ${arena.name} for ${arena.entryFee} Sumo Coins` : `${arena.name}: coming soon`}
+                  onClick={() => (free ? void roomManager.quickPlay(settings.name) : setConfirm(arena))}
+                  aria-label={
+                    free ? `Play ${arena.name} for free` : soon ? `${arena.name}: coming soon` : `Enter ${arena.name} for ${arena.entryFee} Sumo Coins`
+                  }
                 >
-                  {live ? "Enter" : "Coming soon"}
+                  {free ? (busy ? "Finding a room…" : "Play") : soon ? "Coming soon" : "Enter"}
                 </button>
               </div>
             </li>

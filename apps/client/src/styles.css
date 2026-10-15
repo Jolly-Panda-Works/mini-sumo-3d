@@ -454,6 +454,63 @@ body {
 
 /* ---------- Home ---------- */
 
+.home-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 38%, rgba(86, 116, 184, 0.55), transparent 60%),
+    linear-gradient(180deg, #1d2a52 0%, #172142 55%, #121a35 100%);
+}
+
+.home-bg__beam {
+  position: absolute;
+  top: -20%;
+  width: 34%;
+  height: 140%;
+  background: linear-gradient(180deg, rgba(160, 190, 255, 0.22), rgba(160, 190, 255, 0));
+  filter: blur(2px);
+}
+
+.home-bg__beam--left {
+  left: -6%;
+  transform: rotate(-24deg);
+  transform-origin: top left;
+}
+
+.home-bg__beam--right {
+  right: -6%;
+  transform: rotate(24deg);
+  transform-origin: top right;
+}
+
+.home-bg__star {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: #ffc23c;
+  clip-path: polygon(50% 0, 61% 38%, 100% 50%, 61% 62%, 50% 100%, 39% 62%, 0 50%, 39% 38%);
+  animation: twinkle 2.4s ease-in-out infinite;
+}
+
+.home-bg__waves {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 28%;
+  background-repeat: repeat;
+  background-size: 80px 40px;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 60%);
+  mask-image: linear-gradient(180deg, transparent, #000 60%);
+}
+
+@keyframes twinkle {
+  50% {
+    opacity: 0.35;
+  }
+}
+
 .home {
   pointer-events: auto;
   height: 100%;
@@ -465,11 +522,12 @@ body {
 }
 
 .home__top {
+  position: relative;
   width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 56px;
 }
 
 .home__title {
@@ -479,12 +537,15 @@ body {
 
 .home__title img {
   display: block;
-  height: clamp(72px, 24vh, 190px);
+  height: clamp(72px, 22vh, 180px);
   width: auto;
   filter: drop-shadow(0 4px 0 rgba(43, 35, 64, 0.45));
 }
 
 .home__actions {
+  position: absolute;
+  top: 0;
+  right: 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -501,10 +562,10 @@ body {
 
 .arena-row {
   list-style: none;
-  margin: 0;
+  margin: auto 0;
   padding: 4px 4px 10px;
   width: 100%;
-  max-width: 1040px;
+  max-width: 1240px;
   display: flex;
   gap: clamp(10px, 1.6vw, 18px);
   overflow-x: auto;
@@ -514,8 +575,9 @@ body {
 
 .arena-tile {
   position: relative;
-  flex: 1 0 clamp(190px, 28vw, 320px);
-  max-width: 320px;
+  isolation: isolate;
+  flex: 1 0 clamp(170px, 22vw, 290px);
+  max-width: 290px;
   scroll-snap-align: center;
   display: flex;
   flex-direction: column;
@@ -544,6 +606,12 @@ body {
   object-fit: cover;
   border-bottom: 3px solid var(--ink);
   background: var(--tile-sky);
+}
+
+.arena-tile__badge--free {
+  background: var(--accent);
+  color: var(--paper);
+  -webkit-text-stroke: 0;
 }
 
 .arena-tile__badge {
@@ -1416,10 +1484,13 @@ body {
 .overlay {
   position: absolute;
   inset: 0;
+  z-index: 30;
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgba(43, 35, 64, 0.35);
+  background: rgba(20, 16, 34, 0.72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 /* Full-screen backdrop that hides the game and the menu (first-launch name prompt). */
@@ -1707,6 +1778,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .home-bg__star,
   .countdown__num,
   .toast,
   .search__spinner {

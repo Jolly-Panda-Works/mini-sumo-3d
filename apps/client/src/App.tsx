@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from "react";
 import { Phase } from "@mini-sumo/shared";
 import { GameCanvas } from "./game/GameCanvas";
+import { HomeBackground } from "./ui/HomeBackground";
 import { inputController } from "./input/InputController";
 import { gameStore, sessionStore } from "./network/RoomManager";
 import { settingsStore, touchControlsEnabled } from "./settings";
@@ -83,9 +84,8 @@ export function App() {
 
   return (
     <div className="app">
-      <div className="stage">
-        <GameCanvas />
-      </div>
+      {/* The 3D arena is the match environment: only mounted in a room. Home has its own backdrop. */}
+      <div className="stage">{inRoom ? <GameCanvas /> : <HomeBackground />}</div>
       <div className="ui">
         {screen}
         {inRoom && <Toasts />}

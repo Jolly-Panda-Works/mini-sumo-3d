@@ -2,12 +2,10 @@ import { useEffect } from "react";
 import { GAME_TITLE } from "../config";
 import { economyStore } from "../network/economyClient";
 import { networkStore } from "../network/networkMode";
-import { roomManager, sessionStore } from "../network/RoomManager";
-import { settingsStore } from "../settings";
+import { sessionStore } from "../network/RoomManager";
 import { useStore } from "../store";
-import { setFriendsOpen, setHomeArena, setSettingsOpen, setWalletOpen, setWardrobeOpen } from "../uiStore";
+import { setFriendsOpen, setSettingsOpen, setWalletOpen, setWardrobeOpen } from "../uiStore";
 import { ArenaRow } from "./ArenaSelect";
-import { arenaImage } from "../game/arenaThemes";
 import { Coins } from "./Coins";
 
 const inviteCode = new URLSearchParams(window.location.search).get("room") ?? "";
@@ -15,7 +13,6 @@ const inviteCode = new URLSearchParams(window.location.search).get("room") ?? ""
 /** Home: title, the arenas side by side, free training and friends. */
 export function MainMenu() {
   const session = useStore(sessionStore);
-  const settings = useStore(settingsStore);
   const economy = useStore(economyStore);
   const { mode } = useStore(networkStore);
   const online = mode === "online";
@@ -68,19 +65,6 @@ export function MainMenu() {
       <ArenaRow />
 
       <div className="home__bottom">
-        <button
-          className="btn btn--primary btn--big home__training"
-          disabled={busy}
-          onPointerEnter={() => setHomeArena("training")}
-          onFocus={() => setHomeArena("training")}
-          onClick={() => void roomManager.quickPlay(settings.name)}
-        >
-          <img className="home__training-art" src={arenaImage("training")} alt="" width={960} height={536} />
-          <span className="home__training-text">
-            {busy ? "Finding a room…" : "Training"}
-            <span className="home__sub">Free practice bout</span>
-          </span>
-        </button>
         <button className="btn btn--big" disabled={!online || busy} onClick={() => setFriendsOpen(true)}>
           Play with friends
           {!online && <span className="tag tag--soon">Coming soon</span>}

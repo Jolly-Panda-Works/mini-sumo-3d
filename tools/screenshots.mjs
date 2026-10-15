@@ -54,13 +54,6 @@ try {
   await sleep(800);
   await shot(host.page, "menu");
 
-  // Each arena's mood in the 3D background (hover the cards).
-  for (const name of ["Rookie Arena", "Pro Arena", "Champion Arena"]) {
-    await host.page.locator(".arena-tile", { hasText: name }).hover();
-    await sleep(1200);
-    await shot(host.page, `home-${name.split(" ")[0].toLowerCase()}`);
-  }
-  await host.page.locator(".home__training").hover();
 
   // Wardrobe: give the host a custom look.
   await host.page.getByRole("button", { name: "Customise your wrestler" }).click();

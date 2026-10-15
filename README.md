@@ -124,7 +124,7 @@ Every arena has its own artwork, colours and mood, in the 3D ring and on its car
 | --- | --- | --- | --- |
 | <img src="docs/arenas/training.jpg" alt="Training Arena artwork: a sumo pushing a straw dummy while an old coach watches" width="220" /> | <img src="docs/arenas/rookie.jpg" alt="Rookie Arena artwork: two young sumo in a park with bunting and cheering kids" width="220" /> | <img src="docs/arenas/pro.jpg" alt="Pro Arena artwork: two sumo locked together in a night stadium with banners" width="220" /> | <img src="docs/arenas/champion.jpg" alt="Champion Arena artwork: two sumo beside a golden trophy with confetti" width="220" /> |
 
-The home screen shows the paid arenas side by side with entry fee and prize; hovering or focusing a card switches the 3D background to that arena. *Training* (free) has its own button. Features that need the online server show *Coming soon* until it is live.
+The home screen has its own night-stage backdrop with the title in the middle and all four arenas side by side (artwork, entry fee, prize); the free Training Arena is the first card. Each arena's 3D environment appears only once you're in a room. Features that need the online server show *Coming soon* until it is live.
 
 | Arena | Entry | Winner gets (4 players) | Opponents |
 | --- | ---: | ---: | --- |
