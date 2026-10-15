@@ -1,5 +1,5 @@
 {
-  "appId": "io.minisumo.game",
+  "appId": "com.jollypanda.minisumo",
   "appName": "Mini Sumo",
   "webDir": "../client/dist",
   "backgroundColor": "#2F5C8A",
