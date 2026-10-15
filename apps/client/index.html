@@ -17,8 +17,77 @@
         <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet" />
+    <style>
+      /* Boot screen: inline so it shows before the app's CSS and JavaScript arrive. */
+      #boot {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 28px;
+        background: radial-gradient(circle at 50% 40%, #3a5f94, #1d2b4d 70%);
+        transition: opacity 0.35s ease;
+        font-family: "Baloo 2", ui-rounded, "Arial Rounded MT Bold", system-ui, sans-serif;
+      }
+      #boot.boot--done {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .boot__logo {
+        width: min(42vmin, 260px);
+        height: auto;
+        filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.25));
+        animation: boot-bob 1.6s ease-in-out infinite;
+      }
+      .boot__bar {
+        position: relative;
+        width: min(70vw, 420px);
+        height: 34px;
+        border-radius: 999px;
+        border: 3px solid #2b2340;
+        background: #ffffff;
+        box-shadow: 0 5px 0 #2b2340;
+        overflow: hidden;
+      }
+      .boot__fill {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 0%;
+        background: repeating-linear-gradient(-45deg, #ffc23c 0 16px, #ffb21a 16px 32px);
+        transition: width 0.15s linear;
+      }
+      .boot__pct {
+        position: relative;
+        display: grid;
+        place-items: center;
+        height: 100%;
+        font-weight: 800;
+        font-size: 17px;
+        color: #2b2340;
+        font-variant-numeric: tabular-nums;
+      }
+      @keyframes boot-bob {
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot__logo {
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
+    <div id="boot" role="progressbar" aria-label="Loading Mini Sumo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="5">
+      <img class="boot__logo" src="/logo.webp" alt="Mini Sumo" width="260" height="260" />
+      <div class="boot__bar">
+        <div class="boot__fill" style="width: 5%"></div>
+        <span class="boot__pct">5%</span>
+      </div>
+    </div>
     <div id="root"></div>
     <noscript>Mini Sumo needs JavaScript to run.</noscript>
     <script type="module" src="/src/main.tsx"></script>

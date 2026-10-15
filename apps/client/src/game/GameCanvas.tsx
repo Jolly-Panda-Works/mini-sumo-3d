@@ -8,6 +8,7 @@ import { MenuSumos } from "./MenuSumos";
 import { NetSumo } from "./NetSumo";
 import { themeFor } from "./arenaThemes";
 import { uiStore } from "../uiStore";
+import { bootDone } from "../boot";
 
 export function GameCanvas() {
   const session = useStore(sessionStore);
@@ -24,6 +25,7 @@ export function GameCanvas() {
       camera={{ fov: 40, near: 0.1, far: 200, position: [0, 15, 12] }}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       aria-label="Mini Sumo arena"
+      onCreated={() => requestAnimationFrame(() => requestAnimationFrame(() => bootDone("scene")))}
     >
       <color attach="background" args={[theme.sky]} />
       <fog attach="fog" args={[theme.sky, 32, 70]} />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ArenaInfo } from "@mini-sumo/shared";
-import { arenaArtDataUri, themeFor } from "../game/arenaThemes";
+import { arenaImage, themeFor } from "../game/arenaThemes";
 import { economyStore } from "../network/economyClient";
 import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore } from "../settings";
@@ -74,7 +74,7 @@ export function ArenaRow() {
               onPointerEnter={() => setHomeArena(arena.id)}
               onFocus={() => setHomeArena(arena.id)}
             >
-              <img className="arena-tile__art" src={arenaArtDataUri(arena.id)} alt="" width={320} height={180} />
+              <img className="arena-tile__art" src={arenaImage(arena.id)} alt="" width={960} height={536} decoding="async" />
               {!live && <span className="arena-tile__badge">Coming soon</span>}
               <div className="arena-tile__body">
                 <h3 className="arena-tile__name">{arena.name}</h3>

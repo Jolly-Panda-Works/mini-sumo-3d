@@ -6,6 +6,16 @@ Builds from `main` are released automatically as `MAJOR.MINOR.<build number>`; t
 
 ## [Unreleased]
 
+### Added
+
+- Loading screen with the game logo and a filling progress bar with percentage (artwork, fonts, server check and first 3D frame).
+
+### Changed
+
+- Arena cards and the Training button use the new arena artwork; the 3D themes follow it (Training Grounds, Park Festival, Night Stadium, Grand Final).
+- The home title is the new *Mini Sumo* typography artwork.
+- Removed the generated SVG card art (`tools/arena-art.ts`, `docs/arenas/*.svg`).
+
 ### Changed
 
 - New home screen: the game title, the paid arenas side by side (art, mood, entry fee, prize) and a separate Training button; *Play now*, the logo and the name field moved out. Private rooms live under *Play with friends*.

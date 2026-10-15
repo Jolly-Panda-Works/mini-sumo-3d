@@ -135,6 +135,11 @@ class RoomManager {
     });
   }
 
+  /** Resolves once the online/offline decision has been made. */
+  get ready(): Promise<void> {
+    return this.modeReady;
+  }
+
   /** True when rooms run locally against bots (no online server yet). */
   get offline(): boolean {
     return networkStore.get().mode === "offline";

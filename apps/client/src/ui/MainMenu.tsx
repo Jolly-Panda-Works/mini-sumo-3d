@@ -7,6 +7,7 @@ import { settingsStore } from "../settings";
 import { useStore } from "../store";
 import { setFriendsOpen, setHomeArena, setSettingsOpen, setWalletOpen, setWardrobeOpen } from "../uiStore";
 import { ArenaRow } from "./ArenaSelect";
+import { arenaImage } from "../game/arenaThemes";
 import { Coins } from "./Coins";
 
 const inviteCode = new URLSearchParams(window.location.search).get("room") ?? "";
@@ -30,7 +31,9 @@ export function MainMenu() {
   return (
     <main className="home">
       <header className="home__top">
-        <h1 className="home__title">{GAME_TITLE}</h1>
+        <h1 className="home__title">
+          <img src={`${import.meta.env.BASE_URL}title.webp`} alt={GAME_TITLE} width={1200} height={621} />
+        </h1>
         <div className="home__actions">
           {balance !== undefined && (
             <button className="btn home__coins" onClick={() => setWalletOpen(true)} aria-label={`Wallet: ${balance} Sumo Coins`}>
@@ -72,8 +75,11 @@ export function MainMenu() {
           onFocus={() => setHomeArena("training")}
           onClick={() => void roomManager.quickPlay(settings.name)}
         >
-          {busy ? "Finding a room…" : "Training"}
-          <span className="home__sub">Free practice bout</span>
+          <img className="home__training-art" src={arenaImage("training")} alt="" width={960} height={536} />
+          <span className="home__training-text">
+            {busy ? "Finding a room…" : "Training"}
+            <span className="home__sub">Free practice bout</span>
+          </span>
         </button>
         <button className="btn btn--big" disabled={!online || busy} onClick={() => setFriendsOpen(true)}>
           Play with friends

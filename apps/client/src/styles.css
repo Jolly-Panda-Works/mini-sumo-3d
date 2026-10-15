@@ -474,14 +474,14 @@ body {
 
 .home__title {
   margin: 0;
-  font-size: clamp(2rem, 7vh, 3.6rem);
-  font-weight: 800;
-  line-height: 1;
-  color: var(--paper);
-  -webkit-text-stroke: 3px var(--ink);
-  paint-order: stroke fill;
-  text-shadow: 0 5px 0 var(--ink);
-  letter-spacing: -0.01em;
+  line-height: 0;
+}
+
+.home__title img {
+  display: block;
+  height: clamp(72px, 24vh, 190px);
+  width: auto;
+  filter: drop-shadow(0 4px 0 rgba(43, 35, 64, 0.45));
 }
 
 .home__actions {
@@ -540,7 +540,7 @@ body {
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 9;
-  max-height: 26vh;
+  max-height: 30vh;
   object-fit: cover;
   border-bottom: 3px solid var(--ink);
   background: var(--tile-sky);
@@ -629,10 +629,26 @@ body {
 
 .home__training {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 12px;
+  padding: 6px 18px 6px 6px;
   line-height: 1.1;
-  min-width: 220px;
+  min-width: 240px;
+  text-align: left;
+}
+
+.home__training-art {
+  width: 88px;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2.5px solid var(--ink);
+}
+
+.home__training-text {
+  display: flex;
+  flex-direction: column;
 }
 
 .home__sub {
@@ -1617,10 +1633,11 @@ body {
 /* ---------- Responsive ---------- */
 
 @media (max-height: 420px) {
-  .home__title {
-    font-size: 1.8rem;
-    -webkit-text-stroke: 2px var(--ink);
-    text-shadow: 0 3px 0 var(--ink);
+  .home__title img {
+    height: 64px;
+  }
+  .home__training-art {
+    width: 64px;
   }
   .arena-tile__mood {
     display: none;

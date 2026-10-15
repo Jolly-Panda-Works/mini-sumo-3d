@@ -118,11 +118,11 @@ Screenshots come from a real three-player match played by the [Screenshots workf
 
 ## Arenas and coins
 
-Every arena has its own look and mood, in the 3D ring and on its card:
+Every arena has its own artwork, colours and mood, in the 3D ring and on its card:
 
-| Training Dojo | Festival Street (Rookie) | Moonlit Temple (Pro) | Golden Palace (Champion) |
+| Training Grounds | Park Festival (Rookie) | Night Stadium (Pro) | Grand Final (Champion) |
 | --- | --- | --- | --- |
-| <img src="docs/arenas/training.svg" alt="Training Dojo: morning light in a bamboo garden" width="220" /> | <img src="docs/arenas/rookie.svg" alt="Festival Street: paper lanterns at a summer festival" width="220" /> | <img src="docs/arenas/pro.svg" alt="Moonlit Temple: a temple yard under the full moon" width="220" /> | <img src="docs/arenas/champion.svg" alt="Golden Palace: crimson halls and a ring of gold" width="220" /> |
+| <img src="docs/arenas/training.jpg" alt="Training Arena artwork: a sumo pushing a straw dummy while an old coach watches" width="220" /> | <img src="docs/arenas/rookie.jpg" alt="Rookie Arena artwork: two young sumo in a park with bunting and cheering kids" width="220" /> | <img src="docs/arenas/pro.jpg" alt="Pro Arena artwork: two sumo locked together in a night stadium with banners" width="220" /> | <img src="docs/arenas/champion.jpg" alt="Champion Arena artwork: two sumo beside a golden trophy with confetti" width="220" /> |
 
 The home screen shows the paid arenas side by side with entry fee and prize; hovering or focusing a card switches the 3D background to that arena. *Training* (free) has its own button. Features that need the online server show *Coming soon* until it is live.
 
