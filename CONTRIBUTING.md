@@ -10,7 +10,7 @@ Thanks for wanting to help! Bug reports, ideas, art, tuning feedback and code ar
 
 ## Development setup
 
-Requirements: Node.js 20.12+ (22 recommended) and npm 10+.
+Requirements: Node.js 22.13+ and npm 10+.
 
 ```bash
 git clone https://github.com/Jolly-Panda-Works/mini-sumo-3d.git

@@ -15,7 +15,7 @@
     "apps/client"
   ],
   "engines": {
-    "node": ">=20.12"
+    "node": ">=22.13"
   },
   "scripts": {
     "build:shared": "npm run build -w @mini-sumo/shared",

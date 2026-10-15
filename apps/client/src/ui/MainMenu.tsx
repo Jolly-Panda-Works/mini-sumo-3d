@@ -4,7 +4,9 @@ import { networkStore } from "../network/networkMode";
 import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
-import { setSettingsOpen, setWardrobeOpen } from "../uiStore";
+import { setArenasOpen, setSettingsOpen, setWalletOpen, setWardrobeOpen } from "../uiStore";
+import { economyStore } from "../network/economyClient";
+import { Coins } from "./Coins";
 
 const inviteCode = new URLSearchParams(window.location.search).get("room") ?? "";
 
@@ -16,6 +18,9 @@ export function MainMenu() {
   const { mode } = useStore(networkStore);
   const offline = mode === "offline";
   const busy = session.status === "connecting";
+  const economy = useStore(economyStore);
+  const balance = economy.profile?.balances.coins;
+  const last = economy.lastResult;
   const name = settings.name;
 
   const setName = (value: string) => settingsStore.update({ name: value.slice(0, NAME_MAX_LENGTH) });
@@ -64,14 +69,42 @@ export function MainMenu() {
           />
         </label>
 
-        <button className="btn" onClick={() => setWardrobeOpen(true)}>
-          Customise wrestler
-        </button>
+        {last && (last.kind !== "rewarded" || last.rewards > 0) && (
+          <p className="notice notice--result" role="status">
+            {last.kind === "settled" && last.prize > 0 ? (
+              <>
+                Last bout: you won <Coins amount={last.prize} />!
+              </>
+            ) : last.kind === "rewarded" ? (
+              <>
+                Last bout: <Coins amount={last.rewards} signed /> reward.
+              </>
+            ) : (
+              <>Last bout: {last.note}</>
+            )}
+          </p>
+        )}
+
+        <div className="row">
+          <button className="btn btn--grow" onClick={() => setWardrobeOpen(true)}>
+            {economy.profile ? "Wardrobe & shop" : "Customise wrestler"}
+          </button>
+          {balance !== undefined && (
+            <button className="btn" onClick={() => setWalletOpen(true)} aria-label={`Wallet: ${balance} Sumo Coins`}>
+              <Coins amount={balance} />
+            </button>
+          )}
+        </div>
 
         {(!inviteCode || offline) && (
-          <button className="btn btn--primary btn--big" disabled={busy} onClick={() => void roomManager.quickPlay(name)}>
-            {busy ? "Finding a room…" : "Play now"}
-          </button>
+          <div className="row">
+            <button className="btn btn--primary btn--big btn--grow" disabled={busy} onClick={() => void roomManager.quickPlay(name)}>
+              {busy ? "Finding a room…" : "Play now"}
+            </button>
+            <button className="btn btn--big" disabled={busy} onClick={() => setArenasOpen(true)}>
+              Arenas
+            </button>
+          </div>
         )}
 
         {!offline && (

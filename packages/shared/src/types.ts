@@ -45,5 +45,7 @@ export interface SyncedState {
   aliveCount: number;
   /** Quick match: time left before opponents are filled in (0 when not searching). */
   searchRemainingMs: number;
+  /** Arena of this room ("training", "rookie", … or "private"). */
+  arenaId: string;
   standings: Iterable<string>;
 }

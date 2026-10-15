@@ -10,6 +10,7 @@ import {
   type ImpactPayload,
   type JoinOptions,
   type RemoveBotPayload,
+  type EconomyResultMessage,
   type SyncedState,
   type Appearance,
 } from "@mini-sumo/shared";
@@ -17,6 +18,7 @@ import { settingsStore } from "../settings";
 import { wrapColyseusRoom, type GameConnection } from "./connection";
 import { LocalConnection, type LocalRoomOptions } from "./LocalConnection";
 import { detectNetworkMode, networkStore } from "./networkMode";
+import { accountToken, economyStore, ensureAccount, loadEconomy, refreshProfile, setLastResult } from "./economyClient";
 import { audio } from "../audio/AudioManager";
 import { resolveServerUrl } from "../config";
 import { dustBus, impactBus, lastHitAt, shakeBus } from "../game/effectsBus";
@@ -55,6 +57,7 @@ export interface GameSnapshot {
   aliveCount: number;
   /** Quick match: ms until opponents are filled in (0 when not searching). */
   searchRemainingMs: number;
+  arenaId: string;
   players: UIPlayer[];
   standings: string[];
 }
@@ -79,6 +82,7 @@ const EMPTY_GAME: GameSnapshot = {
   isPrivate: false,
   aliveCount: 0,
   searchRemainingMs: 0,
+  arenaId: "training",
   players: [],
   standings: [],
 };
@@ -127,6 +131,7 @@ class RoomManager {
     this.modeReady = detectNetworkMode(this.serverUrl).then((mode) => {
       networkStore.set({ mode });
       if (mode === "offline") console.info("[mini-sumo] Offline mode: rooms run on this device against bots.");
+      else void loadEconomy();
     });
   }
 
@@ -152,20 +157,51 @@ class RoomManager {
     return this._room?.sessionId ?? "";
   }
 
+  /** Free training arena: quick match, bots fill in (offline: a local bot room). */
   quickPlay(name: string): Promise<boolean> {
+    return this.enterArena("training", name);
+  }
+
+  /**
+   * Joins an arena's matchmaking. Paid arenas charge the entry fee on the server when the
+   * room accepts you; they need the online server.
+   */
+  async enterArena(arenaId: string, name: string): Promise<boolean> {
     const appearance = settingsStore.get().appearance;
-    const options: JoinOptions = { name, private: false, maxPlayers: 4, appearance };
+    await this.modeReady;
+    if (arenaId !== "training" && this.offline) {
+      sessionStore.update({ error: "Paid arenas need the online server, which isn't live yet. Train for free meanwhile." });
+      return false;
+    }
+    const options: JoinOptions = { name, private: false, maxPlayers: 4, appearance, arenaId };
     return this.connect(
-      async () => wrapColyseusRoom(await this.client.joinOrCreate(ROOM_NAME, options)),
-      { name, appearance, isPrivate: false, maxPlayers: 4 },
+      async () => {
+        options.authToken = await this.authToken();
+        return wrapColyseusRoom(await this.client.joinOrCreate(ROOM_NAME, options));
+      },
+      arenaId === "training" ? { name, appearance, isPrivate: false, maxPlayers: 4 } : undefined,
     );
+  }
+
+  /** Guest token for the economy (created on first online use). */
+  private async authToken(): Promise<string | undefined> {
+    const catalog = economyStore.get().catalog;
+    if (catalog && !catalog.flags.economy) return undefined;
+    try {
+      return (await ensureAccount()).token;
+    } catch {
+      return accountToken();
+    }
   }
 
   createPrivate(name: string, maxPlayers: number): Promise<boolean> {
     const appearance = settingsStore.get().appearance;
-    const options: JoinOptions = { name, private: true, maxPlayers, appearance };
+    const options: JoinOptions = { name, private: true, maxPlayers, appearance, arenaId: "private" };
     return this.connect(
-      async () => wrapColyseusRoom(await this.client.create(ROOM_NAME, options)),
+      async () => {
+        options.authToken = await this.authToken();
+        return wrapColyseusRoom(await this.client.create(ROOM_NAME, options));
+      },
       { name, appearance, isPrivate: true, maxPlayers },
     );
   }
@@ -181,7 +217,10 @@ class RoomManager {
       return Promise.resolve(false);
     }
     const options: JoinOptions = { name, appearance: settingsStore.get().appearance };
-    return this.connect(async () => wrapColyseusRoom(await this.client.joinById(trimmed, options)));
+    return this.connect(async () => {
+      options.authToken = await this.authToken();
+      return wrapColyseusRoom(await this.client.joinById(trimmed, options));
+    });
   }
 
   async leave(): Promise<void> {
@@ -283,6 +322,9 @@ class RoomManager {
     this.lastPatchAt = performance.now();
     this.lastCountdownSecond = -1;
     sessionStore.set({ status: "connected", roomId: room.roomId, sessionId: room.sessionId, error: null, unstable: false });
+    setLastResult(null);
+    // The entry fee (if any) was charged when the room accepted us.
+    if (!room.offline) void refreshProfile();
 
     if (!room.offline) {
       const url = new URL(window.location.href);
@@ -328,6 +370,12 @@ class RoomManager {
       }
       audio.eliminated();
       if (isYou) vibrate(120);
+    });
+
+    room.onMessage(ServerMessage.Economy, (msg: EconomyResultMessage) => {
+      setLastResult(msg);
+      if (msg.kind === "cancelled") pushToast(msg.note, "info", 4000);
+      void refreshProfile();
     });
 
     room.onMessage(ServerMessage.Error, (msg: ErrorPayload) => {
@@ -411,6 +459,7 @@ class RoomManager {
       isPrivate: state.isPrivate,
       aliveCount: state.aliveCount,
       searchRemainingMs: state.searchRemainingMs ?? 0,
+      arenaId: state.arenaId ?? "training",
       players,
       standings: Array.from(state.standings ?? []),
     };

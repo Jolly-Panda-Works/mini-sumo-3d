@@ -66,6 +66,7 @@ export class LocalConnection implements GameConnection {
       isPrivate: options.isPrivate,
       aliveCount: 0,
       searchRemainingMs: 0,
+      arenaId: options.isPrivate ? "private" : "training",
       standings: [],
     };
     this.session.addPlayer(this.sessionId, options.name, options.appearance);

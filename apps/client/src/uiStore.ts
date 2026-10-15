@@ -6,9 +6,11 @@ export interface Toast {
   tone: "info" | "out" | "error";
 }
 
-export const uiStore = createStore<{ settingsOpen: boolean; wardrobeOpen: boolean; toasts: Toast[] }>({
+export const uiStore = createStore<{ settingsOpen: boolean; wardrobeOpen: boolean; arenasOpen: boolean; walletOpen: boolean; toasts: Toast[] }>({
   settingsOpen: false,
   wardrobeOpen: false,
+  arenasOpen: false,
+  walletOpen: false,
   toasts: [],
 });
 
@@ -21,6 +23,14 @@ export function pushToast(text: string, tone: Toast["tone"] = "info", durationMs
   window.setTimeout(() => {
     uiStore.update({ toasts: uiStore.get().toasts.filter((t) => t.id !== id) });
   }, durationMs);
+}
+
+export function setArenasOpen(open: boolean): void {
+  uiStore.update({ arenasOpen: open });
+}
+
+export function setWalletOpen(open: boolean): void {
+  uiStore.update({ walletOpen: open });
 }
 
 export function setWardrobeOpen(open: boolean): void {

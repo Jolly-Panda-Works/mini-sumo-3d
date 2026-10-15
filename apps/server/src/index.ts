@@ -5,6 +5,11 @@ import { Server } from "colyseus";
 import { WebSocketTransport } from "@colyseus/ws-transport";
 import { CREDITS, ROOM_NAME } from "@mini-sumo/shared";
 import { MiniSumoRoom } from "./rooms/MiniSumoRoom.js";
+import { loadFlags } from "./economy/config.js";
+import { Economy } from "./economy/Economy.js";
+import { setEconomy } from "./economy/instance.js";
+import { PaymentService } from "./economy/payments.js";
+import { createApiHandler } from "./http/api.js";
 
 // Load the repository-level .env (if present) without extra dependencies (Node >= 20.12).
 const envPath = fileURLToPath(new URL("../../../.env", import.meta.url));
@@ -13,11 +18,22 @@ if (existsSync(envPath)) process.loadEnvFile(envPath);
 const port = Number.parseInt(process.env.PORT ?? "2567", 10) || 2567;
 const host = process.env.HOST || "0.0.0.0";
 
+// Economy: SQLite file (DATABASE_PATH), guest accounts, wallet, ledger, arenas, shop.
+const flags = loadFlags();
+const economy = flags.economy ? new Economy(process.env.DATABASE_PATH || "data/mini-sumo.db", flags) : null;
+setEconomy(economy);
+if (economy) {
+  const refunded = economy.recoverOrphanedEntries();
+  if (refunded > 0) console.log(`[mini-sumo] refunded ${refunded} arena entries left over from the last run`);
+}
+const handleApi = createApiHandler(economy, new PaymentService(flags));
+
 // Plain HTTP handler for non-matchmaking routes. Colyseus attaches /matchmake/* itself.
-const httpServer = createServer((req, res) => {
+const httpServer = createServer(async (req, res) => {
+  if (await handleApi(req, res)) return;
   if (req.url === "/health" || req.url === "/") {
     res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
-    res.end(JSON.stringify({ ok: true, game: "mini-sumo", author: CREDITS.author, website: CREDITS.projectUrl }));
+    res.end(JSON.stringify({ ok: true, game: "mini-sumo", economy: flags.economy, author: CREDITS.author, website: CREDITS.projectUrl }));
     return;
   }
   res.writeHead(404, { "Content-Type": "text/plain" });
@@ -28,7 +44,8 @@ const gameServer = new Server({
   transport: new WebSocketTransport({ server: httpServer }),
 });
 
-gameServer.define(ROOM_NAME, MiniSumoRoom);
+// Matchmaking groups rooms by arena, so "Play" in the Rookie Arena only finds Rookie rooms.
+gameServer.define(ROOM_NAME, MiniSumoRoom).filterBy(["arenaId"]);
 
 await gameServer.listen(port, host);
 console.log(`[mini-sumo] Mini Sumo by ${CREDITS.author} (${CREDITS.projectUrl})`);

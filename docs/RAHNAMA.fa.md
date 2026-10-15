@@ -3,7 +3,7 @@
 سازنده: **Usef Farahmand** ([useffarahmand.com](https://www.useffarahmand.com)) | صفحه‌ی بازی: <https://www.useffarahmand.com/en/projects/mini-sumo>
 
 ## پیش‌نیاز
-- Node.js نسخه ۲۰٫۱۲ یا جدیدتر (پیشنهاد: ۲۲)
+- Node.js نسخه ۲۲٫۱۳ یا جدیدتر
 - npm نسخه ۱۰ به بالا
 
 ## نصب

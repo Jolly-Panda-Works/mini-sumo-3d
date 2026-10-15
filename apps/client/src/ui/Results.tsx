@@ -1,6 +1,9 @@
 import { PLAYER_COLORS } from "@mini-sumo/shared";
 import { gameStore, roomManager } from "../network/RoomManager";
 import { useStore } from "../store";
+import { economyStore } from "../network/economyClient";
+import { setArenasOpen } from "../uiStore";
+import { Coins } from "./Coins";
 import { PlayerBadge } from "./PlayerBadge";
 
 function ordinal(n: number): string {
@@ -11,6 +14,10 @@ export function Results() {
   const game = useStore(gameStore);
   const you = game.players.find((p) => p.isYou);
   const isHost = Boolean(you?.isHost);
+  const economy = useStore(economyStore);
+  const result = economy.lastResult;
+  const arena = economy.catalog?.arenas.find((a) => a.id === game.arenaId);
+  const paid = (arena?.entryFee ?? 0) > 0;
   const winner = game.players.find((p) => p.id === game.winnerId);
   const byId = new Map(game.players.map((p) => [p.id, p]));
   const standings = game.standings.map((id) => byId.get(id)).filter((p): p is NonNullable<typeof p> => Boolean(p));
@@ -44,7 +51,55 @@ export function Results() {
           ))}
         </ol>
 
-        {isHost ? (
+        {result && (result.kind !== "rewarded" || result.rewards > 0) && (
+          <div className="economy-result" role="status">
+            {paid && (
+              <p>
+                <span>Entry fee</span>
+                <Coins amount={-result.entryFee} signed />
+              </p>
+            )}
+            {result.prize > 0 && (
+              <p>
+                <span>Prize</span>
+                <Coins amount={result.prize} signed />
+              </p>
+            )}
+            {result.economyFee > 0 && (
+              <p className="hint">
+                <span>Economy fee kept from the pool</span>
+                <Coins amount={result.economyFee} />
+              </p>
+            )}
+            {result.rewards > 0 && (
+              <p>
+                <span>Bout reward</span>
+                <Coins amount={result.rewards} signed />
+              </p>
+            )}
+            {result.note && <p className="hint">{result.note}</p>}
+            {result.balance !== null && (
+              <p className="economy-result__balance">
+                <span>Balance</span>
+                <Coins amount={result.balance} />
+              </p>
+            )}
+          </div>
+        )}
+
+        {paid ? (
+          <div className="row">
+            <button
+              className="btn btn--primary btn--grow"
+              onClick={() => {
+                void roomManager.leave().then(() => setArenasOpen(true));
+              }}
+            >
+              Play again
+            </button>
+            <p className="hint">Each paid bout needs a new entry. Back to the arenas in {seconds}s.</p>
+          </div>
+        ) : isHost ? (
           <div className="row">
             <button className="btn btn--primary btn--grow" onClick={() => roomManager.rematch()}>
               Rematch

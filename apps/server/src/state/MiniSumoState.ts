@@ -40,6 +40,8 @@ export class MiniSumoState extends Schema {
   @type("uint8") aliveCount = 0;
   /** Quick match: time left before opponents are filled in, rounded up to 100 ms. */
   @type("uint32") searchRemainingMs = 0;
+  /** Arena of this room (training, rookie, pro, champion or private). */
+  @type("string") arenaId = "training";
   /** Session ids ordered by final placement (filled when a round ends). */
   @type(["string"]) standings = new ArraySchema<string>();
 }

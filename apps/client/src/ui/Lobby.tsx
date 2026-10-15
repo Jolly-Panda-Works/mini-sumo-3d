@@ -2,6 +2,8 @@ import { useState } from "react";
 import { MIN_PLAYERS, Phase } from "@mini-sumo/shared";
 import { networkStore } from "../network/networkMode";
 import { gameStore, roomManager, sessionStore } from "../network/RoomManager";
+import { economyStore } from "../network/economyClient";
+import { Coins } from "./Coins";
 import { useStore } from "../store";
 import { setSettingsOpen, setWardrobeOpen } from "../uiStore";
 import { GearIcon } from "./MainMenu";
@@ -13,6 +15,9 @@ export function Lobby() {
   const [copied, setCopied] = useState<"" | "link" | "failed">("");
   const { mode } = useStore(networkStore);
   const offline = mode === "offline";
+  const economy = useStore(economyStore);
+  const arena = economy.catalog?.arenas.find((a) => a.id === game.arenaId);
+  const paid = (arena?.entryFee ?? 0) > 0;
   const you = game.players.find((p) => p.isYou);
   const isHost = Boolean(you?.isHost);
   const connected = game.players.filter((p) => p.connected);
@@ -47,7 +52,9 @@ export function Lobby() {
       <section className="panel lobby__panel" aria-label="Room lobby">
         <div className="lobby__head">
           <div>
-            <p className="field__label">{offline ? "Offline practice" : game.isPrivate ? "Private room" : "Public room"}</p>
+            <p className="field__label">
+              {offline ? "Offline practice" : game.isPrivate ? "Private room" : (arena?.name ?? "Public room")}
+            </p>
             {offline ? (
               <p className="room-code room-code--offline">You vs bots</p>
             ) : (
@@ -110,7 +117,23 @@ export function Lobby() {
           Customise wrestler
         </button>
 
-        {searching && (
+        {paid && arena && (
+          <div className="search" role="status" aria-live="polite">
+            <span className="search__spinner" aria-hidden="true" />
+            <div>
+              <p className="search__title">
+                {connected.length >= 2
+                  ? `Bout starts in ${searchSeconds}s`
+                  : `Looking for opponents… ${searchSeconds}s`}
+              </p>
+              <p className="hint">
+                Entry paid: <Coins amount={arena.entryFee} />. Refunded if the bout doesn't start or you leave before it does.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {searching && !paid && (
           <div className="search" role="status" aria-live="polite">
             <span className="search__spinner" aria-hidden="true" />
             <div>
@@ -126,7 +149,7 @@ export function Lobby() {
           </button>
         )}
 
-        {isHost ? (
+        {paid ? null : isHost ? (
           <>
             <button className="btn btn--primary btn--big" disabled={!canStart} onClick={() => roomManager.startMatch()}>
               Start match
@@ -147,7 +170,7 @@ export function Lobby() {
         )}
 
         <button className="btn btn--ghost" onClick={() => void roomManager.leave()}>
-          Leave room
+          {paid ? "Leave and get a refund" : "Leave room"}
         </button>
       </section>
     </main>

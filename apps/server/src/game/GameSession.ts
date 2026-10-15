@@ -44,6 +44,12 @@ export interface SessionOptions {
   quickMatch?: boolean;
   /** Seed for bot names/ids/behaviour (deterministic tests). */
   seed?: number;
+  /**
+   * Paid arena room: humans only, single round, automatic start. The bout starts
+   * startDelayMs after a second player joins (at once when full); a lone player is
+   * cancelled after cancelAfterMs.
+   */
+  paidArena?: { startDelayMs: number; cancelAfterMs: number };
 }
 
 export type SessionEvent =
@@ -51,7 +57,11 @@ export type SessionEvent =
   | { type: "impact"; a: string; b: string; x: number; y: number; strength: number }
   | { type: "eliminated"; id: string; name: string; reason: EliminationReason }
   | { type: "dash"; id: string }
-  | { type: "roundOver"; winnerId: string | null; draw: boolean };
+  | { type: "roundOver"; winnerId: string | null; draw: boolean; durationMs: number }
+  /** Paid arena: nobody else joined in time; the room should refund and close. */
+  | { type: "cancelled" }
+  /** Paid arena: results shown; the room should close (each bout needs a new entry). */
+  | { type: "finished" };
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -89,6 +99,12 @@ export class GameSession {
   standings: string[] = [];
 
   readonly quickMatch: boolean;
+  readonly paidArena: { startDelayMs: number; cancelAfterMs: number } | null;
+  /** Paid arena: simulation time at which the bout starts / the room is cancelled (-1 = none). */
+  private autoStartAt = -1;
+  private cancelAt = -1;
+  private cancelled = false;
+  private playStartedAt = 0;
   /** Simulation time when the quick-match wait started, -1 when not searching. */
   private searchStartedAt = -1;
   private readonly rng: () => number;
@@ -98,7 +114,8 @@ export class GameSession {
 
   constructor(cfg: SimulationConfig = DEFAULT_CONFIG, maxPlayers: number = MAX_PLAYERS, options: SessionOptions = {}) {
     this.cfg = cfg;
-    this.quickMatch = options.quickMatch === true;
+    this.paidArena = options.paidArena ?? null;
+    this.quickMatch = options.quickMatch === true && !this.paidArena;
     this.rng = createRng(options.seed ?? Math.floor(Math.random() * 2 ** 32));
     this.maxPlayers = Math.max(MIN_PLAYERS, Math.min(MAX_PLAYERS, Math.floor(maxPlayers)));
     this.stepMs = 1000 / cfg.tickRate;
@@ -120,6 +137,10 @@ export class GameSession {
 
   /** Quick match: ms left before bots fill the room (0 when not searching). */
   get searchRemainingMs(): number {
+    if (this.paidArena) {
+      const at = this.autoStartAt >= 0 ? this.autoStartAt : this.cancelAt;
+      return at >= 0 ? Math.max(0, at - this.time) : 0;
+    }
     if (this.searchStartedAt < 0) return 0;
     return Math.max(0, this.searchStartedAt + this.cfg.quickMatchWaitMs - this.time);
   }
@@ -164,6 +185,7 @@ export class GameSession {
 
   /** Host of a private room adds a bot while in the lobby. */
   addBot(requesterId: string): ActionResult {
+    if (this.paidArena) return fail("Bots can't join paid arenas.");
     if (this.quickMatch) return fail("Bots can only be added in private rooms.");
     if (requesterId !== this.hostId) return fail("Only the host can add bots.");
     const check = this.canJoin();
@@ -283,6 +305,7 @@ export class GameSession {
   }
 
   requestStart(id: string): ActionResult {
+    if (this.paidArena) return fail("Paid bouts start automatically.");
     if (id !== this.hostId) return fail("Only the host can start the match.");
     if (this.phase === Phase.Waiting) return fail(`You need at least ${MIN_PLAYERS} players to start.`);
     if (this.phase !== Phase.Lobby) return fail("The match has already started.");
@@ -291,6 +314,7 @@ export class GameSession {
   }
 
   requestRematch(id: string): ActionResult {
+    if (this.paidArena) return fail("Each paid bout needs a new entry. Pick the arena again.");
     if (id !== this.hostId) return fail("Only the host can start a rematch.");
     if (this.phase !== Phase.RoundOver) return fail("A rematch is only possible after a round ends.");
     this.purgeDisconnected();
@@ -302,6 +326,7 @@ export class GameSession {
   }
 
   requestReturnToLobby(id: string): ActionResult {
+    if (this.paidArena) return fail("Each paid bout needs a new entry. Pick the arena again.");
     if (id !== this.hostId) return fail("Only the host can return the room to the lobby.");
     if (this.phase !== Phase.RoundOver) return fail("The room is not showing results.");
     this.goToLobby();
@@ -334,10 +359,18 @@ export class GameSession {
         this.simulate(this.stepMs / 1000);
         break;
       case Phase.RoundOver:
-        if (this.time >= this.phaseEndsAt) this.goToLobby();
+        if (this.time >= this.phaseEndsAt) {
+          if (this.paidArena) {
+            if (this.phaseEndsAt >= 0) this.events.push({ type: "finished" });
+            this.phaseEndsAt = Number.POSITIVE_INFINITY;
+          } else {
+            this.goToLobby();
+          }
+        }
         break;
       default:
-        this.tickSearch();
+        if (this.paidArena) this.tickPaidArena();
+        else this.tickSearch();
         break;
     }
   }
@@ -416,6 +449,7 @@ export class GameSession {
 
   private beginPlaying(): void {
     if (!this.transition(Phase.Playing)) return;
+    this.playStartedAt = this.time;
     this.phaseEndsAt = this.time + this.cfg.matchDurationMs;
   }
 
@@ -438,7 +472,7 @@ export class GameSession {
       player.inputY = 0;
     }
     this.phaseEndsAt = this.time + this.cfg.resultsDurationMs;
-    this.events.push({ type: "roundOver", winnerId: outcome.winnerId, draw: outcome.draw });
+    this.events.push({ type: "roundOver", winnerId: outcome.winnerId, draw: outcome.draw, durationMs: this.time - this.playStartedAt });
     return true;
   }
 
@@ -500,7 +534,43 @@ export class GameSession {
   // ---------------------------------------------------------------- quick match & bots
 
   /** Starts or stops the quick-match wait depending on who is in the room. */
+  /** Paid arena timers: auto start with 2+ players, cancel when alone too long. */
+  private updatePaidArena(): void {
+    const lobby = this.phase === Phase.Waiting || this.phase === Phase.Lobby;
+    const humans = this.humans.length;
+    if (!this.paidArena || !lobby || this.cancelled) {
+      this.autoStartAt = -1;
+      this.cancelAt = -1;
+      return;
+    }
+    if (humans >= 2) {
+      this.cancelAt = -1;
+      if (humans >= this.maxPlayers) this.autoStartAt = this.time;
+      else if (this.autoStartAt < 0) this.autoStartAt = this.time + this.paidArena.startDelayMs;
+    } else {
+      this.autoStartAt = -1;
+      if (humans === 1 && this.cancelAt < 0) this.cancelAt = this.time + this.paidArena.cancelAfterMs;
+      if (humans === 0) this.cancelAt = -1;
+    }
+  }
+
+  private tickPaidArena(): void {
+    if (this.autoStartAt >= 0 && this.time >= this.autoStartAt) {
+      this.autoStartAt = -1;
+      this.refreshLobbyPhase();
+      this.startCountdown();
+    } else if (this.cancelAt >= 0 && this.time >= this.cancelAt) {
+      this.cancelAt = -1;
+      this.cancelled = true;
+      this.events.push({ type: "cancelled" });
+    }
+  }
+
   private updateSearch(): void {
+    if (this.paidArena) {
+      this.updatePaidArena();
+      return;
+    }
     const lobby = this.phase === Phase.Waiting || this.phase === Phase.Lobby;
     const lonely = this.humans.length === 1 && this.bots.length === 0;
     if (!this.quickMatch || !lobby || !lonely) {

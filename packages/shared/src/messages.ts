@@ -20,6 +20,8 @@ export const ServerMessage = {
   Eliminated: "eliminated",
   Dash: "dash",
   Error: "error",
+  /** Personal economy result (EconomyResultMessage): prize, refund or rewards. */
+  Economy: "economy",
 } as const;
 export type ServerMessage = (typeof ServerMessage)[keyof typeof ServerMessage];
 
@@ -60,6 +62,10 @@ export interface ErrorPayload {
 /** Options accepted by client.create / joinOrCreate / joinById. */
 export interface JoinOptions {
   name?: string;
+  /** Guest account token (economy). Never a player id: the server resolves the account. */
+  authToken?: string;
+  /** Arena to play in (see /api/catalog). Defaults to the free training arena. */
+  arenaId?: string;
   /** Initial character look (see appearance.ts); validated by the server. */
   appearance?: { hair: number; hairColor: number; face: number; outfit: number };
   private?: boolean;

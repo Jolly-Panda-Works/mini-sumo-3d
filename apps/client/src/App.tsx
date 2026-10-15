@@ -5,13 +5,15 @@ import { inputController } from "./input/InputController";
 import { gameStore, sessionStore } from "./network/RoomManager";
 import { settingsStore, touchControlsEnabled } from "./settings";
 import { useStore } from "./store";
-import { setSettingsOpen, setWardrobeOpen, uiStore } from "./uiStore";
+import { setArenasOpen, setSettingsOpen, setWalletOpen, setWardrobeOpen, uiStore } from "./uiStore";
 import { Countdown } from "./ui/Countdown";
 import { HUD } from "./ui/HUD";
 import { Lobby } from "./ui/Lobby";
 import { MainMenu } from "./ui/MainMenu";
 import { NameGate } from "./ui/NameGate";
 import { Wardrobe } from "./ui/Wardrobe";
+import { ArenaSelect } from "./ui/ArenaSelect";
+import { Wallet } from "./ui/Wallet";
 import { Results } from "./ui/Results";
 import { SettingsPanel } from "./ui/SettingsPanel";
 import { Toasts } from "./ui/Toasts";
@@ -42,6 +44,8 @@ export function App() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || !settingsStore.get().onboarded) return;
       if (uiStore.get().wardrobeOpen) setWardrobeOpen(false);
+      else if (uiStore.get().arenasOpen) setArenasOpen(false);
+      else if (uiStore.get().walletOpen) setWalletOpen(false);
       else setSettingsOpen(!uiStore.get().settingsOpen);
     };
     window.addEventListener("keydown", onKey);
@@ -78,6 +82,8 @@ export function App() {
         {screen}
         {inRoom && <Toasts />}
         {ui.wardrobeOpen && !needsName && (!inRoom || game.phase === Phase.Waiting || game.phase === Phase.Lobby) && <Wardrobe />}
+        {ui.arenasOpen && !inRoom && !needsName && <ArenaSelect />}
+        {ui.walletOpen && !needsName && <Wallet />}
         {ui.settingsOpen && !needsName && <SettingsPanel />}
       </div>
     </div>

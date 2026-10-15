@@ -111,3 +111,7 @@ The look is four small indexes (`hair`, `hairColor`, `face`, `outfit`) defined i
 - `LocalConnection`: a `GameSession` ticking at 30 Hz in the browser, mirroring `MiniSumoRoom.syncState` into a plain object with the `SyncedState` shape and emitting the same `impact`/`dash`/`eliminated`/`error` messages. Offline quick match uses a 4 s search before bots fill the ring.
 
 `networkMode.ts` decides the mode (`VITE_NETWORK_MODE`, missing `VITE_SERVER_URL` in production, or a `/health` probe), and `RoomManager` falls back to a `LocalConnection` when joining fails because the server is unreachable.
+
+## Economy
+
+See [ECONOMY.md](ECONOMY.md). In short: `apps/server/src/economy/` (config, `Economy` service on `node:sqlite`, prize formula, disabled payments, events), `apps/server/src/http/api.ts` (JSON API on the game port), and hooks in `MiniSumoRoom` (`onAuth` resolves the guest token; paid joins reserve the entry; `playing` locks entries; `roundOver` settles and records rewards; cancel/dispose refund). `GameSession` gained a `paidArena` mode (humans only, automatic start, cancel when alone, single round). The client side is `apps/client/src/network/economyClient.ts` plus the arena, wallet, wardrobe-shop and results UI.

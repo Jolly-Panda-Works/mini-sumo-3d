@@ -36,6 +36,7 @@
 - [Why Mini Sumo?](#why-mini-sumo)
 - [How to play](#how-to-play)
 - [Screenshots](#screenshots)
+- [Arenas and coins](#arenas-and-coins)
 - [Offline mode](#offline-mode)
 - [Download and install](#download-and-install)
 - [Run from source](#run-from-source)
@@ -58,6 +59,7 @@ Party games are best when everyone understands them in five seconds. Mini Sumo h
 - **Invite with a link:** create a private room and share it, or jump into a public quick match.
 - **Never wait long:** *Play now* finds an open room or creates one. If nobody shows up within 30 seconds, computer-controlled wrestlers with ordinary names fill the ring and the bout starts.
 - **Practice with bots:** the host of a private room can add or remove bots in the lobby.
+- **Arenas and Sumo Coins:** earn free coins in the Training Arena, pay a coin entry fee in the Rookie, Pro or Champion arena, and the server pays the winner the pool minus a small economy fee. Spend coins on cosmetics in the wardrobe. Coins are virtual: no real money in, no cash out. See [docs/ECONOMY.md](docs/ECONOMY.md).
 - **Make it yours:** pick a hair style and colour, a face and an outfit before the bout. Your belt keeps your player colour and number, so everyone can still tell who is who.
 
 ## How to play
@@ -112,6 +114,24 @@ Tuning lives in `apps/server/src/simulation/SimulationConfig.ts` (acceleration 2
 
 Screenshots come from a real three-player match played by the [Screenshots workflow](.github/workflows/screenshots.yml) (*Actions → Screenshots → Run workflow*), which commits fresh images to `docs/screenshots/`.
 
+## Arenas and coins
+
+| Arena | Entry | Winner gets (4 players) | Opponents |
+| --- | ---: | ---: | --- |
+| Training | free | small free rewards | players, bots fill in |
+| Rookie | 100 coins | up to 360 | players only |
+| Pro | 500 coins | up to 1,800 | players only, unlocks after 10 bouts |
+| Champion | 2,000 coins | up to 7,200 | players only, unlocks after 20 bouts and 10 wins |
+
+- New players get 500 coins. Training pays +5 per finished bout, +15 for a win and +50 for the first bout of the day, up to 300 per day.
+- Prize = pool − 10 % economy fee (integer, `floor`). Draws and bouts that never start are refunded; leaving during a bout is a loss.
+- The **wardrobe is the shop**: priced options can be tried on and bought with coins. Looks never affect gameplay.
+- Everything (balances, prices, entries, prizes, ownership) is decided by the server and recorded in an append-only ledger with idempotency keys. *Settings* never stores coins.
+- Accounts are device-bound guest accounts for now; coins don't sync between devices.
+- Real-money purchases and premium currency are **disabled**; the payment boundary is prepared but no provider is selected.
+
+Full rules, ledger model, refund policy, API and configuration: [docs/ECONOMY.md](docs/ECONOMY.md). The economy needs the online server; offline builds keep the free Training Arena.
+
 ## Offline mode
 
 Mini Sumo runs the **same authoritative game session** the server uses directly in your browser or app when no server is available. Rooms are then local and your opponents are bots with ordinary names, so the game is fully playable before (or without) a server.
@@ -141,7 +161,7 @@ Offline, *Play now* searches for a few seconds and fills the ring with bots; *Cr
 
 ## Run from source
 
-Requirements: **Node.js 20.12+** (22 recommended) and npm 10+.
+Requirements: **Node.js 22.13+** (the server uses the built-in `node:sqlite`) and npm 10+.
 
 ```bash
 git clone https://github.com/Jolly-Panda-Works/mini-sumo-3d.git
