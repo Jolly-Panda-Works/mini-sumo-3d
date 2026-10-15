@@ -19,6 +19,7 @@ import { resolveServerUrl } from "../config";
 import { dustBus, impactBus, lastHitAt, shakeBus } from "../game/effectsBus";
 import { createStore } from "../store";
 import { pushToast } from "../uiStore";
+import { vibrate } from "../haptics";
 
 export type ConnectionStatus = "idle" | "connecting" | "connected";
 
@@ -251,6 +252,7 @@ class RoomManager {
       dustBus.emit({ x: msg.x, y: msg.y, count: Math.min(14, 4 + Math.round(msg.strength)), speed: 1 + msg.strength * 0.25 });
       if (msg.strength > 6) shakeBus.emit(Math.min(1, msg.strength / 14));
       audio.impact(msg.strength);
+      if (msg.a === this.sessionId || msg.b === this.sessionId) vibrate(Math.min(60, 15 + Math.round(msg.strength * 4)));
     });
 
     room.onMessage(ServerMessage.Dash, (msg: DashPayload) => {
@@ -274,6 +276,7 @@ class RoomManager {
         shakeBus.emit(0.7);
       }
       audio.eliminated();
+      if (isYou) vibrate(120);
     });
 
     room.onMessage(ServerMessage.Error, (msg: ErrorPayload) => {

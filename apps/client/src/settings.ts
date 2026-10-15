@@ -2,10 +2,15 @@ import { DEFAULT_APPEARANCE, sanitizeAppearance, type Appearance } from "@mini-s
 import { createStore } from "./store";
 
 export type TouchMode = "auto" | "on" | "off";
+export type JoystickMode = "floating" | "fixed";
 
 export interface Settings {
   sound: boolean;
   touchControls: TouchMode;
+  /** Floating: the stick appears where you touch. Fixed: always bottom-left. */
+  joystick: JoystickMode;
+  /** Short vibrations on dash and hits (supported Android devices). */
+  vibration: boolean;
   name: string;
   /** The first-run name prompt has been completed. */
   onboarded: boolean;
@@ -16,7 +21,7 @@ export interface Settings {
 const KEY = "mini-sumo:settings";
 
 function load(): Settings {
-  const defaults: Settings = { sound: true, touchControls: "auto", name: "", onboarded: false, appearance: { ...DEFAULT_APPEARANCE } };
+  const defaults: Settings = { sound: true, touchControls: "auto", joystick: "floating", vibration: true, name: "", onboarded: false, appearance: { ...DEFAULT_APPEARANCE } };
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return defaults;
@@ -24,6 +29,8 @@ function load(): Settings {
     return {
       sound: typeof parsed.sound === "boolean" ? parsed.sound : defaults.sound,
       touchControls: parsed.touchControls === "on" || parsed.touchControls === "off" ? parsed.touchControls : "auto",
+      joystick: parsed.joystick === "fixed" ? "fixed" : "floating",
+      vibration: typeof parsed.vibration === "boolean" ? parsed.vibration : true,
       name: typeof parsed.name === "string" ? parsed.name.slice(0, 32) : "",
       onboarded: typeof parsed.onboarded === "boolean" ? parsed.onboarded : Boolean(parsed.name?.trim()),
       appearance: sanitizeAppearance(parsed.appearance),

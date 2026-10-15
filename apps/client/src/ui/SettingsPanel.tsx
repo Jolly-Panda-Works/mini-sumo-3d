@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { CREDITS } from "@mini-sumo/shared";
 import { roomManager, sessionStore } from "../network/RoomManager";
-import { settingsStore, type TouchMode } from "../settings";
+import { settingsStore, type JoystickMode, type TouchMode } from "../settings";
 import { useStore } from "../store";
 import { setSettingsOpen } from "../uiStore";
 
@@ -64,6 +64,29 @@ export function SettingsPanel() {
             </a>
           </p>
         </section>
+
+        <fieldset className="field">
+          <legend className="field__label">Joystick</legend>
+          <div className="segmented">
+            {(["floating", "fixed"] as JoystickMode[]).map((mode) => (
+              <label key={mode} className={`segmented__opt${settings.joystick === mode ? " segmented__opt--on" : ""}`}>
+                <input
+                  type="radio"
+                  name="joystick"
+                  value={mode}
+                  checked={settings.joystick === mode}
+                  onChange={() => settingsStore.update({ joystick: mode })}
+                />
+                {mode === "floating" ? "Under your thumb" : "Fixed corner"}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <label className="toggle">
+          <input type="checkbox" checked={settings.vibration} onChange={(e) => settingsStore.update({ vibration: e.target.checked })} />
+          <span>Vibration on dash and hits</span>
+        </label>
 
         <button ref={closeRef} className="btn btn--primary" onClick={() => setSettingsOpen(false)}>
           {inRoom ? "Back to the bout" : "Done"}

@@ -74,7 +74,6 @@ body {
 .icon-btn,
 .btn,
 .toast,
-.touch > *,
 .overlay {
   pointer-events: auto;
 }
@@ -972,26 +971,47 @@ body {
 
 .touch {
   position: absolute;
-  left: calc(16px + var(--safe-left));
-  right: calc(16px + var(--safe-right));
-  bottom: calc(18px + var(--safe-bottom));
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  inset: 0;
   pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Area that catches the movement thumb: left part of the screen, below the HUD. */
+.touch__zone {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 52%;
+  height: 68%;
+  padding-bottom: var(--safe-bottom);
+  pointer-events: auto;
+  touch-action: none;
 }
 
 .joystick {
+  position: absolute;
+  left: 0;
+  top: 0;
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.28);
-  border: 3px solid rgba(43, 35, 64, 0.65);
+  background: rgba(255, 255, 255, 0.22);
+  border: 3px solid rgba(43, 35, 64, 0.55);
   display: grid;
   place-items: center;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.touch__zone--floating .joystick:not(.joystick--active) {
+  opacity: 0.45;
+}
+
+.joystick--active {
+  background: rgba(255, 255, 255, 0.32);
+  border-color: var(--ink);
 }
 
 .joystick__knob {
@@ -1004,8 +1024,11 @@ body {
 }
 
 .dash-btn {
-  width: 104px;
-  height: 104px;
+  position: absolute;
+  right: calc(22px + var(--safe-right));
+  bottom: calc(28px + var(--safe-bottom));
+  width: 112px;
+  height: 112px;
   border-radius: 50%;
   border: 3px solid var(--ink);
   box-shadow: 0 5px 0 var(--ink);
@@ -1013,19 +1036,21 @@ body {
   place-items: center;
   font: inherit;
   font-weight: 800;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
   color: var(--ink);
+  pointer-events: auto;
   touch-action: none;
-  user-select: none;
   -webkit-user-select: none;
+  user-select: none;
   cursor: pointer;
 }
 
 .dash-btn span {
   display: grid;
   place-items: center;
-  width: 78px;
-  height: 78px;
+  width: 84px;
+  height: 84px;
   border-radius: 50%;
   background: var(--paper);
   border: 2.5px solid var(--ink);
@@ -1036,7 +1061,7 @@ body {
 }
 
 .dash-btn:active span {
-  transform: scale(0.94);
+  transform: scale(0.92);
 }
 
 /* ---------- Responsive ---------- */
@@ -1066,9 +1091,16 @@ body {
   .toasts {
     top: calc(96px + var(--safe-top));
   }
-  .joystick {
-    width: 130px;
-    height: 130px;
+  .touch__zone {
+    height: 80%;
+  }
+  .dash-btn {
+    width: 100px;
+    height: 100px;
+  }
+  .dash-btn span {
+    width: 74px;
+    height: 74px;
   }
 }
 

@@ -72,9 +72,11 @@ Party games are best when everyone understands them in five seconds. Mini Sumo h
 
 | Action | Keyboard | Touch |
 | --- | --- | --- |
-| Move | WASD or arrow keys | Left joystick |
-| Dash (3 s cooldown) | Space | Dash button (fills as it recharges) |
+| Move | WASD or arrow keys | Joystick on the left: touch anywhere on the left side and it appears under your thumb (or keep it fixed in the corner) |
+| Dash (3 s cooldown) | Space | Big dash button on the right; the ring fills and counts down while it recharges |
 | Settings | Esc | Gear button |
+
+On phones and tablets the touch controls appear automatically during a bout (*Settings → Touch controls* can force them on or off). Steering and dashing work at the same time with two thumbs, and supported Android devices vibrate on dashes and hits (*Settings → Vibration*).
 
 Settings never pause the shared match. *Settings → About* shows the version, the creator and links to the game page and source code.
 
