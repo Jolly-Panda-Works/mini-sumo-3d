@@ -1,0 +1,20 @@
+{
+  "name": "@mini-sumo/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mini Sumo Android app (Capacitor shell around the web client).",
+  "scripts": {
+    "android:add": "cap add android",
+    "android:assets": "capacitor-assets generate --android --iconBackgroundColor \"#2F5C8A\" --splashBackgroundColor \"#2F5C8A\"",
+    "android:sync": "cap sync android",
+    "android:open": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.0",
+    "@capacitor/core": "^7.4.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.4.0"
+  }
+}

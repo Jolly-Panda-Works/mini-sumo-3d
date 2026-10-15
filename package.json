@@ -21,7 +21,11 @@
     "start": "npm run start -w @mini-sumo/server",
     "preview": "npm run preview -w @mini-sumo/client",
     "test": "npm run build:shared && npm run test -w @mini-sumo/server",
-    "typecheck": "npm run build:shared && npm run typecheck -w @mini-sumo/server && npm run typecheck -w @mini-sumo/client"
+    "typecheck": "npm run build:shared && npm run typecheck -w @mini-sumo/server && npm run typecheck -w @mini-sumo/client",
+    "build:web": "npm run build:shared && npm run build -w @mini-sumo/client",
+    "desktop": "npm run build:web && npm run start -w @mini-sumo/desktop",
+    "build:desktop": "npm run build:web && npm run dist -w @mini-sumo/desktop",
+    "build:android": "npm run build:web && npm run android:sync -w @mini-sumo/mobile"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",

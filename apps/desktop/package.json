@@ -1,0 +1,75 @@
+{
+  "name": "@mini-sumo/desktop",
+  "productName": "Mini Sumo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mini Sumo desktop app (Electron shell around the web client).",
+  "author": {
+    "name": "Mini Sumo",
+    "email": "dev@mini-sumo.local"
+  },
+  "homepage": "https://github.com/",
+  "main": "main.cjs",
+  "scripts": {
+    "prepare:web": "node scripts/copy-web.mjs",
+    "start": "npm run prepare:web && electron .",
+    "dist": "npm run prepare:web && electron-builder --publish never",
+    "dist:win": "npm run prepare:web && electron-builder --win --publish never",
+    "dist:mac": "npm run prepare:web && electron-builder --mac --publish never",
+    "dist:linux": "npm run prepare:web && electron-builder --linux --publish never"
+  },
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "io.minisumo.desktop",
+    "productName": "Mini Sumo",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.cjs",
+      "web/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "MiniSumo-${version}-Windows-Setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "MiniSumo-${version}-Windows-Portable.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.games",
+      "identity": null,
+      "artifactName": "MiniSumo-${version}-macOS-${arch}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Game",
+      "maintainer": "Mini Sumo <dev@mini-sumo.local>",
+      "artifactName": "MiniSumo-${version}-Linux-${arch}.${ext}"
+    }
+  }
+}

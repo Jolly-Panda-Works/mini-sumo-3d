@@ -1,7 +1,10 @@
+/// <reference types="node" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
+  // "/" for normal hosting, Electron and Capacitor; "/<repo>/" for GitHub Pages (set VITE_BASE in CI).
+  base: process.env.VITE_BASE || "/",
   plugins: [react()],
   // One .env at the repository root serves both server and client (only VITE_* reaches the client).
   envDir: "../..",

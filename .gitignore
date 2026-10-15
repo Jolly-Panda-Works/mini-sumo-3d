@@ -7,3 +7,7 @@ coverage/
 .DS_Store
 .vite/
 *.tsbuildinfo
+apps/desktop/web/
+apps/desktop/release/
+apps/mobile/android/
+apps/mobile/ios/

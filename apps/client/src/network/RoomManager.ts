@@ -172,8 +172,13 @@ class RoomManager {
     this._room?.send(ClientMessage.ReturnToLobby);
   }
 
+  /**
+   * Shareable link. Desktop/Android builds run from a local origin, so they use the
+   * public web address from VITE_PUBLIC_URL (e.g. the GitHub Pages URL) instead.
+   */
   inviteLink(): string {
-    const url = new URL(window.location.href);
+    const publicUrl = (import.meta.env.VITE_PUBLIC_URL as string | undefined)?.trim();
+    const url = new URL(publicUrl || window.location.href);
     url.search = "";
     url.hash = "";
     if (this._room) url.searchParams.set("room", this._room.roomId);

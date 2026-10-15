@@ -73,6 +73,8 @@ One `.env` file at the repository root serves both apps. Only variables prefixed
 | `HOST` | server | `0.0.0.0` | Bind address (`0.0.0.0` lets phones on your LAN connect) |
 | `VITE_SERVER_URL` | client (build time) | empty | Public WebSocket endpoint, e.g. `wss://sumo-api.example.com`. **Set this in production.** |
 | `VITE_SERVER_PORT` | client (build time) | `2567` | Port for the fallback URL when `VITE_SERVER_URL` is empty |
+| `VITE_PUBLIC_URL` | client (build time) | empty | Public web address for invite links (needed by desktop/Android builds) |
+| `VITE_BASE` | client (build time) | `/` | Base path, e.g. `/<repo>/` for GitHub Pages |
 
 If `VITE_SERVER_URL` is empty, the client connects to `ws(s)://<page hostname>:<VITE_SERVER_PORT>`. That makes local and LAN development work with no configuration and never hard-codes `localhost`.
 
@@ -143,6 +145,9 @@ mini-sumo/
 │  ├─ src/simulation/        SimulationConfig, SimBody, Movement, Collision, Arena, Match systems
 │  ├─ src/validation/        InputValidator
 │  └─ test/                  vitest suites
+├─ apps/desktop/           Electron shell (main.cjs) + electron-builder config
+├─ apps/mobile/            Capacitor config + Android icon/splash sources
+├─ .github/workflows/build.yml   CI: test, web, desktop, Android, release
 └─ apps/client/
    ├─ index.html, vite.config.ts
    └─ src/
@@ -252,6 +257,45 @@ VITE_SERVER_URL=wss://sumo-api.example.com npm run build
 ```
 
 `VITE_SERVER_URL` is read at build time; rebuild when it changes. Pages served over `https://` must use a `wss://` server URL.
+
+## CI builds: web, desktop and Android (GitHub Actions)
+
+`.github/workflows/build.yml` runs on every push/PR to `main`, on tags `v*` and manually:
+
+| Job | Runner | Output artifact |
+| --- | --- | --- |
+| Typecheck & test | ubuntu | (server tests, server build) |
+| Web | ubuntu | `mini-sumo-web` (static site, built for `/<repo>/`); optional GitHub Pages deploy |
+| Desktop | windows / macos / ubuntu | `.exe` installer + portable, `.dmg` (x64 + arm64), `.AppImage` + `.deb` |
+| Android | ubuntu (JDK 21) | `MiniSumo-android-debug.apk`, plus signed release `.apk`/`.aab` if a keystore is configured |
+| GitHub Release | ubuntu | on `v*` tags: everything above attached to a release |
+
+Desktop is an **Electron** shell (`apps/desktop`) that serves the built client from `http://127.0.0.1:41730`. Android is a **Capacitor** shell (`apps/mobile`); the native project is generated in CI (`cap add android`), so `apps/mobile/android/` is not committed. Icons and splash come from `apps/desktop/build/icon.png` and `apps/mobile/assets/`.
+
+**The apps are clients only.** The Colyseus server still has to run somewhere (see [Deployment](#deployment)). Configure the repository under *Settings → Secrets and variables → Actions*:
+
+| Name | Kind | Required | Purpose |
+| --- | --- | --- | --- |
+| `VITE_SERVER_URL` | variable | yes | Public server, e.g. `wss://sumo-api.example.com`. Android requires `wss://`. |
+| `VITE_PUBLIC_URL` | variable | no | Web address used in invite links from the apps. Defaults to `https://<owner>.github.io/<repo>/`. |
+| `DEPLOY_PAGES` | variable | no | `true` to publish the web build to GitHub Pages from `main` (also set *Settings → Pages → Source: GitHub Actions*). |
+| `ANDROID_KEYSTORE_BASE64` | secret | no | `base64 -w0 release.keystore` |
+| `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | secrets | no | Keystore credentials |
+
+Create a release: `git tag v1.0.0 && git push origin v1.0.0`. The tag sets the desktop version and Android `versionName`; the Android `versionCode` is the workflow run number.
+
+Notes:
+- Desktop builds are **unsigned**. Windows SmartScreen shows a warning ("More info → Run anyway"); on macOS right-click the app and choose *Open*, or run `xattr -dr com.apple.quarantine "/Applications/Mini Sumo.app"`.
+- The debug APK installs directly on a phone (allow "install unknown apps"). Use the signed AAB for Google Play.
+
+Local equivalents:
+
+```bash
+npm run desktop          # build web + launch Electron
+npm run build:desktop    # build web + package for the current OS (apps/desktop/release/)
+cd apps/mobile && npx cap add android   # once; needs Android Studio / SDK + JDK 21
+npm run build:android    # build web + cap sync; then: npm run android:open -w @mini-sumo/mobile
+```
 
 ## Troubleshooting
 

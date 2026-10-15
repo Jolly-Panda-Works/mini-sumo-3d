@@ -1,0 +1,12 @@
+{
+  "appId": "io.minisumo.game",
+  "appName": "Mini Sumo",
+  "webDir": "../client/dist",
+  "backgroundColor": "#2F5C8A",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
