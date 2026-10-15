@@ -37,6 +37,7 @@ export interface UIPlayer {
   placement: number;
   elimReason: string;
   dashCooldownMs: number;
+  dashCooldownTotalMs: number;
   /** Only true in private rooms; quick-match bots look like everyone else. */
   isBot: boolean;
   appearance: Appearance;
@@ -58,6 +59,7 @@ export interface GameSnapshot {
   /** Quick match: ms until opponents are filled in (0 when not searching). */
   searchRemainingMs: number;
   arenaId: string;
+  botLevel: string;
   players: UIPlayer[];
   standings: string[];
 }
@@ -83,6 +85,7 @@ const EMPTY_GAME: GameSnapshot = {
   aliveCount: 0,
   searchRemainingMs: 0,
   arenaId: "training",
+  botLevel: "",
   players: [],
   standings: [],
 };
@@ -178,13 +181,14 @@ class RoomManager {
       sessionStore.update({ error: "This arena is coming soon. Try Training meanwhile." });
       return false;
     }
-    const options: JoinOptions = { name, private: false, maxPlayers: 4, appearance, arenaId };
+    const botLevel = settingsStore.get().botLevel;
+    const options: JoinOptions = { name, private: false, maxPlayers: 4, appearance, arenaId, botLevel: arenaId === "training" ? botLevel : undefined };
     return this.connect(
       async () => {
         options.authToken = await this.authToken();
         return wrapColyseusRoom(await this.client.joinOrCreate(ROOM_NAME, options));
       },
-      arenaId === "training" ? { name, appearance, isPrivate: false, maxPlayers: 4 } : undefined,
+      arenaId === "training" ? { name, appearance, isPrivate: false, maxPlayers: 4, botLevel } : undefined,
     );
   }
 
@@ -201,13 +205,14 @@ class RoomManager {
 
   createPrivate(name: string, maxPlayers: number): Promise<boolean> {
     const appearance = settingsStore.get().appearance;
-    const options: JoinOptions = { name, private: true, maxPlayers, appearance, arenaId: "private" };
+    const botLevel = settingsStore.get().botLevel;
+    const options: JoinOptions = { name, private: true, maxPlayers, appearance, arenaId: "private", botLevel };
     return this.connect(
       async () => {
         options.authToken = await this.authToken();
         return wrapColyseusRoom(await this.client.create(ROOM_NAME, options));
       },
-      { name, appearance, isPrivate: true, maxPlayers },
+      { name, appearance, isPrivate: true, maxPlayers, botLevel },
     );
   }
 
@@ -445,6 +450,7 @@ class RoomManager {
         placement: p.placement,
         elimReason: p.elimReason,
         dashCooldownMs: p.dashCooldownMs,
+        dashCooldownTotalMs: p.dashCooldownTotalMs || 3000,
         isBot: Boolean(p.isBot),
         appearance: { hair: p.hair ?? 0, hairColor: p.hairColor ?? 0, face: p.face ?? 0, outfit: p.outfit ?? 0 },
         isHost: id === state.hostId,
@@ -465,6 +471,7 @@ class RoomManager {
       aliveCount: state.aliveCount,
       searchRemainingMs: state.searchRemainingMs ?? 0,
       arenaId: state.arenaId ?? "training",
+      botLevel: state.botLevel ?? "",
       players,
       standings: Array.from(state.standings ?? []),
     };

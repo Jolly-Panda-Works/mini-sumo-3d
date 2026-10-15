@@ -21,6 +21,17 @@ export const PLAYER_RADIUS = 0.75;
 export const DASH_COOLDOWN_MS = 3000;
 export const MATCH_DURATION_MS = 90_000;
 export const COUNTDOWN_MS = 3000;
+/** Bot difficulty levels (training and private rooms). */
+export const BOT_LEVELS = ["easy", "normal", "hard"] as const;
+export type BotLevel = (typeof BOT_LEVELS)[number];
+
+export function sanitizeBotLevel(raw: unknown): BotLevel {
+  return BOT_LEVELS.includes(raw as BotLevel) ? (raw as BotLevel) : "normal";
+}
+
+/** In the last part of a bout, players' dash recharges faster and bots ease off. */
+export const LATE_GAME_MS = 30_000;
+
 /** Quick match: how long a lone player waits for others before opponents are filled in. */
 export const QUICK_MATCH_WAIT_MS = 30_000;
 

@@ -44,8 +44,9 @@ const gameServer = new Server({
   transport: new WebSocketTransport({ server: httpServer }),
 });
 
-// Matchmaking groups rooms by arena, so "Play" in the Rookie Arena only finds Rookie rooms.
-gameServer.define(ROOM_NAME, MiniSumoRoom).filterBy(["arenaId"]);
+// Matchmaking groups rooms by arena (and bot difficulty for training), so players only meet
+// rooms of the arena and difficulty they picked.
+gameServer.define(ROOM_NAME, MiniSumoRoom).filterBy(["arenaId", "botLevel"]);
 
 await gameServer.listen(port, host);
 console.log(`[mini-sumo] Mini Sumo by ${CREDITS.author} (${CREDITS.projectUrl})`);

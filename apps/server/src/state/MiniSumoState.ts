@@ -15,6 +15,7 @@ export class PlayerState extends Schema {
   @type("boolean") dashing = false;
   /** Remaining dash cooldown, rounded up to 100 ms to limit patch traffic. */
   @type("uint16") dashCooldownMs = 0;
+  @type("uint16") dashCooldownTotalMs = 3000;
   @type("uint8") placement = 0;
   @type("string") elimReason = "";
   /** Only true in private rooms (the host manages bots there). Never set in quick match. */
@@ -42,6 +43,8 @@ export class MiniSumoState extends Schema {
   @type("uint32") searchRemainingMs = 0;
   /** Arena of this room (training, rookie, pro, champion or private). */
   @type("string") arenaId = "training";
+  /** Bot difficulty ("easy" | "normal" | "hard"; empty in paid arenas). */
+  @type("string") botLevel = "normal";
   /** Session ids ordered by final placement (filled when a round ends). */
   @type(["string"]) standings = new ArraySchema<string>();
 }

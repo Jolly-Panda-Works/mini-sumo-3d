@@ -15,7 +15,7 @@ describe("bot brain", () => {
     const target = body("t", 2, 0);
     const d = decideBot(bot, [bot, target], cfg, createRng(1));
     expect(d.x).toBeGreaterThan(0.5);
-    expect(Math.hypot(d.x, d.y)).toBeCloseTo(1, 6);
+    expect(Math.hypot(d.x, d.y)).toBeCloseTo(0.9, 6); // normal level input scale
   });
 
   it("steers back to the centre near the edge", () => {

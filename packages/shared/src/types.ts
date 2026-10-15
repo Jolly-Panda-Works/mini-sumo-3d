@@ -14,6 +14,8 @@ export interface SyncedPlayer {
   connected: boolean;
   dashing: boolean;
   dashCooldownMs: number;
+  /** Length of the current cooldown (shorter late in the bout), for the recharge meter. */
+  dashCooldownTotalMs: number;
   placement: number;
   elimReason: string;
   /** True only in private rooms, where the host manages bots. Always false in quick match. */
@@ -47,5 +49,6 @@ export interface SyncedState {
   searchRemainingMs: number;
   /** Arena of this room ("training", "rookie", … or "private"). */
   arenaId: string;
+  botLevel: string;
   standings: Iterable<string>;
 }

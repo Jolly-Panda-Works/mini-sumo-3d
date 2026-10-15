@@ -1,3 +1,4 @@
+import type { BotLevel } from "@mini-sumo/shared";
 import type { SimBody } from "../simulation/SimBody.js";
 import type { SimulationConfig } from "../simulation/SimulationConfig.js";
 
@@ -5,6 +6,44 @@ export interface BotDecision {
   x: number;
   y: number;
   dash: boolean;
+}
+
+/** How strong a bot plays. Every value is applied through the normal input path. */
+export interface BotTuning {
+  /** Reaction delay range between decisions (ms). */
+  thinkMinMs: number;
+  thinkMaxMs: number;
+  /** Max steering error (radians, full width). */
+  noise: number;
+  /** Chance to dash when lined up. */
+  dashChance: number;
+  /** Fraction of full input (below 1 = slower bot). */
+  inputScale: number;
+  /** Starts retreating at this fraction of the ring radius. */
+  edgeStart: number;
+}
+
+export const BOT_TUNING: Readonly<Record<BotLevel, BotTuning>> = Object.freeze({
+  easy: { thinkMinMs: 240, thinkMaxMs: 440, noise: 0.95, dashChance: 0.15, inputScale: 0.72, edgeStart: 0.66 },
+  normal: { thinkMinMs: 140, thinkMaxMs: 300, noise: 0.5, dashChance: 0.35, inputScale: 0.9, edgeStart: 0.72 },
+  hard: { thinkMinMs: 90, thinkMaxMs: 180, noise: 0.22, dashChance: 0.55, inputScale: 1, edgeStart: 0.76 },
+});
+
+/**
+ * Tuning for a level, eased off by `ease` (0..1): slower reactions, weaker input, fewer dashes.
+ * Used for the final stretch of a bout so the ending stays winnable.
+ */
+export function easedTuning(level: BotLevel, ease: number): BotTuning {
+  const t = BOT_TUNING[level];
+  const e = Math.max(0, Math.min(1, ease));
+  return {
+    thinkMinMs: t.thinkMinMs * (1 + 0.6 * e),
+    thinkMaxMs: t.thinkMaxMs * (1 + 0.6 * e),
+    noise: t.noise * (1 + 0.5 * e),
+    dashChance: t.dashChance * (1 - 0.6 * e),
+    inputScale: t.inputScale * (1 - 0.3 * e),
+    edgeStart: t.edgeStart,
+  };
 }
 
 /**
@@ -16,9 +55,15 @@ export interface BotDecision {
  * 2. Approach from the centre side, so a push sends the target outward.
  * 3. Once inside the target, charge straight at it and sometimes dash.
  * 4. The closer the bot is to the edge, the more it steers back to the centre.
- * Small random noise and a reaction delay (set by the caller) keep it beatable.
+ * Noise, a reaction delay and the input scale (from BotTuning) set the difficulty.
  */
-export function decideBot(bot: SimBody, opponents: readonly SimBody[], cfg: SimulationConfig, rng: () => number): BotDecision {
+export function decideBot(
+  bot: SimBody,
+  opponents: readonly SimBody[],
+  cfg: SimulationConfig,
+  rng: () => number,
+  tuning: BotTuning = BOT_TUNING.normal,
+): BotDecision {
   const R = cfg.arenaRadius;
   const botDist = Math.hypot(bot.x, bot.y);
 
@@ -51,7 +96,7 @@ export function decideBot(bot: SimBody, opponents: readonly SimBody[], cfg: Simu
       dx = toTx;
       dy = toTy;
       const align = gap > 0 ? (toTx * outX + toTy * outY) / gap : 0;
-      dash = gap < cfg.playerRadius * 3.6 && align > 0.6 && rng() < 0.4;
+      dash = gap < cfg.playerRadius * 3.6 && align > 0.6 && rng() < tuning.dashChance;
     } else {
       // Get between the target and the centre first.
       dx = target.x - outX * cfg.playerRadius * 1.8 - bot.x;
@@ -66,7 +111,8 @@ export function decideBot(bot: SimBody, opponents: readonly SimBody[], cfg: Simu
   }
 
   // Edge safety: blend toward the centre as the bot nears the rope.
-  const danger = Math.max(0, Math.min(1, (botDist - R * 0.72) / (R * 0.24)));
+  const span = Math.max(0.1, 0.96 - tuning.edgeStart);
+  const danger = Math.max(0, Math.min(1, (botDist - R * tuning.edgeStart) / (R * span)));
   if (danger > 0 && botDist > 1e-6) {
     dx = dx * (1 - danger) - (bot.x / botDist) * danger * 1.5;
     dy = dy * (1 - danger) - (bot.y / botDist) * danger * 1.5;
@@ -74,7 +120,7 @@ export function decideBot(bot: SimBody, opponents: readonly SimBody[], cfg: Simu
   }
 
   // Imperfection.
-  const noise = (rng() - 0.5) * 0.5;
+  const noise = (rng() - 0.5) * tuning.noise;
   const cos = Math.cos(noise);
   const sin = Math.sin(noise);
   const nx = dx * cos - dy * sin;
@@ -82,5 +128,6 @@ export function decideBot(bot: SimBody, opponents: readonly SimBody[], cfg: Simu
 
   len = Math.hypot(nx, ny);
   if (len < 1e-6) return { x: 0, y: 0, dash: false };
-  return { x: nx / len, y: ny / len, dash };
+  const scale = Math.max(0, Math.min(1, tuning.inputScale)) / len;
+  return { x: nx * scale, y: ny * scale, dash };
 }

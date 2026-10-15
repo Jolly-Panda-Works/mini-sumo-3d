@@ -67,7 +67,7 @@ export function stepMovement(body: SimBody, dt: number, cfg: SimulationConfig, t
  * Attempt a dash. Returns false (and changes nothing) when the body is eliminated
  * or still cooling down. The dash direction is the current input, else the facing angle.
  */
-export function tryDash(body: SimBody, timeMs: number, cfg: SimulationConfig): boolean {
+export function tryDash(body: SimBody, timeMs: number, cfg: SimulationConfig, cooldownMs: number = cfg.dashCooldownMs): boolean {
   if (!body.alive) return false;
   if (timeMs < body.dashReadyAt) return false;
 
@@ -87,6 +87,6 @@ export function tryDash(body: SimBody, timeMs: number, cfg: SimulationConfig): b
   clampVelocity(body, cfg.maxVelocity);
   body.angle = Math.atan2(dy, dx);
   body.dashEndsAt = timeMs + cfg.dashDurationMs;
-  body.dashReadyAt = timeMs + cfg.dashCooldownMs;
+  body.dashReadyAt = timeMs + Math.max(0, cooldownMs);
   return true;
 }

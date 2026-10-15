@@ -1427,6 +1427,61 @@ body {
   color: var(--coral);
 }
 
+.hud__boost {
+  margin: 0;
+  background: var(--sun);
+  color: var(--ink);
+  border: 2.5px solid var(--ink);
+  border-radius: 12px;
+  padding: 2px 12px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  animation: boost-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes boost-pulse {
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.level-picker {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.level-picker__label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: rgba(43, 35, 64, 0.65);
+  margin-right: 2px;
+}
+
+.level-picker__opt {
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--ink);
+  background: #fbf6ee;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  padding: 1px 9px;
+  min-height: 30px;
+  cursor: pointer;
+}
+
+.level-picker__opt--on {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.level-picker__opt:focus-visible {
+  outline: 3px solid var(--coral);
+  outline-offset: 2px;
+}
+
 .hud__warning,
 .hud__spectate {
   margin: 0;
@@ -1864,6 +1919,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hud__boost,
   .home-bg__star,
   .countdown__num,
   .toast,

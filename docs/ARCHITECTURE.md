@@ -93,7 +93,17 @@ Bots live entirely on the server (`apps/server/src/game/BotBrain.ts`). Every 120
 - Target choice: the opponent that is close and near the edge.
 - Approach from the centre side, then charge outward through the target; dash when close and aligned.
 - Edge safety: the closer a bot is to the rope (from 72 % of the radius), the more it steers back.
-- Random noise and the reaction delay keep it beatable.
+- Random noise, the reaction delay and an input scale keep it beatable. Three levels (`BOT_TUNING` in `BotBrain.ts`):
+
+| Level | Reaction | Steering noise | Dash chance | Input |
+| --- | --- | --- | --- | --- |
+| Easy | 240–440 ms | ±0.48 rad | 15 % | 72 % |
+| Normal | 140–300 ms | ±0.25 rad | 35 % | 90 % |
+| Hard | 90–180 ms | ±0.11 rad | 55 % | 100 % |
+
+The level comes from the join options (`botLevel`), is fixed per room, and training matchmaking is filtered by it.
+
+**Final stretch** (`lateGameMs`, last 30 s): human dash cooldown ramps from 3 s down to `lateDashCooldownFactor` (55 %), and bots ease off (`easedTuning`: slower reactions, up to 30 % weaker input, 60 % fewer dashes). Bots keep the normal cooldown. In simulations of an average player against three bots this gives roughly 70 % / 45 % / 30 % wins on Easy / Normal / Hard.
 
 Quick-match bots get ordinary names (`botNames.ts`) and ids shaped like Colyseus session ids, and `isBot` is never sent for quick-match rooms, so they look like everyone else. In private rooms `isBot` is synced so the host can manage them.
 

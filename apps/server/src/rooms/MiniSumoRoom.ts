@@ -3,6 +3,7 @@ import {
   ClientMessage,
   Phase,
   ServerMessage,
+  sanitizeBotLevel,
   type EconomyResultMessage,
   type ErrorPayload,
   type JoinOptions,
@@ -64,11 +65,13 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
     // Training: quick match with bot fill. Paid: humans only, automatic start. Private: host starts.
     this.session = new GameSession(DEFAULT_CONFIG, maxPlayers, {
       quickMatch: !isPrivate && !this.paid,
+      botLevel: sanitizeBotLevel(options.botLevel),
       paidArena: this.paid ? { startDelayMs: ECONOMY.paidStartDelayMs, cancelAfterMs: ECONOMY.paidCancelAfterMs } : undefined,
     });
     this.state.maxPlayers = maxPlayers;
     this.state.isPrivate = isPrivate;
     this.state.arenaId = this.arenaId;
+    this.state.botLevel = this.paid ? "" : this.session.botLevel;
     // Private rooms are excluded from joinOrCreate, but still joinable by id.
     if (isPrivate) void this.setPrivate(true);
 
@@ -329,6 +332,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
       ps.connected = p.connected;
       ps.dashing = isDashing(p, s.time);
       ps.dashCooldownMs = Math.min(65_000, roundUp100(Math.max(0, p.dashReadyAt - s.time)));
+      ps.dashCooldownTotalMs = Math.min(65_000, p.dashCooldownTotal);
       ps.placement = p.placement;
       ps.elimReason = p.elimReason;
       // Quick-match bots are indistinguishable from players on the wire.

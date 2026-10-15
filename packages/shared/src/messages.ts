@@ -66,6 +66,8 @@ export interface JoinOptions {
   authToken?: string;
   /** Arena to play in (see /api/catalog). Defaults to the free training arena. */
   arenaId?: string;
+  /** Bot difficulty for rooms that use bots: "easy" | "normal" | "hard". */
+  botLevel?: string;
   /** Initial character look (see appearance.ts); validated by the server. */
   appearance?: { hair: number; hairColor: number; face: number; outfit: number };
   private?: boolean;

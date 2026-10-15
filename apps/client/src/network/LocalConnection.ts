@@ -1,6 +1,7 @@
 import {
   ClientMessage,
   ServerMessage,
+  sanitizeBotLevel,
   type Phase,
   type SyncedPlayer,
   type SyncedState,
@@ -30,6 +31,7 @@ export interface LocalRoomOptions {
   appearance: unknown;
   isPrivate: boolean;
   maxPlayers: number;
+  botLevel: string;
 }
 
 /**
@@ -53,6 +55,7 @@ export class LocalConnection implements GameConnection {
     this.isPrivate = options.isPrivate;
     this.session = new GameSession(createConfig({ quickMatchWaitMs: OFFLINE_SEARCH_MS }), options.maxPlayers, {
       quickMatch: !options.isPrivate,
+      botLevel: sanitizeBotLevel(options.botLevel),
     });
     this.state = {
       players: new Map(),
@@ -67,6 +70,7 @@ export class LocalConnection implements GameConnection {
       aliveCount: 0,
       searchRemainingMs: 0,
       arenaId: options.isPrivate ? "private" : "training",
+      botLevel: sanitizeBotLevel(options.botLevel),
       standings: [],
     };
     this.session.addPlayer(this.sessionId, options.name, options.appearance);
@@ -216,6 +220,7 @@ export class LocalConnection implements GameConnection {
       ps.connected = p.connected;
       ps.dashing = isDashing(p, s.time);
       ps.dashCooldownMs = roundUp100(Math.max(0, p.dashReadyAt - s.time));
+      ps.dashCooldownTotalMs = p.dashCooldownTotal;
       ps.placement = p.placement;
       ps.elimReason = p.elimReason;
       ps.isBot = p.isBot && this.isPrivate;

@@ -6,6 +6,7 @@ import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
 import { Coins } from "./Coins";
+import { BotLevelPicker } from "./BotLevelPicker";
 
 /**
  * Display-only preview of the paid arenas for when the server's catalog isn't available.
@@ -91,6 +92,7 @@ export function ArenaRow() {
                   </div>
                 </dl>
                 {status && !soon && <p className="arena-tile__status">{status}</p>}
+                {free && <BotLevelPicker />}
                 <button
                   className="btn btn--primary arena-tile__btn"
                   disabled={!available || busy}

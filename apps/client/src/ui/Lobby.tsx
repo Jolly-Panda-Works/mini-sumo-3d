@@ -88,6 +88,9 @@ export function Lobby() {
           </label>
         )}
 
+        {game.botLevel && !paid && (
+          <p className="hint">Bot difficulty: {game.botLevel[0]!.toUpperCase() + game.botLevel.slice(1)}</p>
+        )}
         <h2 className="lobby__count">
           Wrestlers {connected.length} of {game.maxPlayers}
         </h2>

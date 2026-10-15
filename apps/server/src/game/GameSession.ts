@@ -4,6 +4,8 @@ import {
   PLAYER_COLORS,
   Phase,
   randomAppearance,
+  sanitizeBotLevel,
+  type BotLevel,
   sanitizeAppearance,
   type Appearance,
   type EliminationReason,
@@ -15,7 +17,7 @@ import { stepMovement, tryDash } from "../simulation/MovementSystem.js";
 import { createBody, type SimBody } from "../simulation/SimBody.js";
 import { DEFAULT_CONFIG, type SimulationConfig } from "../simulation/SimulationConfig.js";
 import { sanitizeName, validateMoveInput } from "../validation/InputValidator.js";
-import { decideBot } from "./BotBrain.js";
+import { decideBot, easedTuning } from "./BotBrain.js";
 import { createRng, pickBotName, randomId } from "./botNames.js";
 
 export interface SessionPlayer extends SimBody {
@@ -34,6 +36,8 @@ export interface SessionPlayer extends SimBody {
   nextThinkAt: number;
   /** Hair, face and outfit. The belt colour always comes from colorIndex. */
   appearance: Appearance;
+  /** Length of the cooldown started by the last dash (ms). */
+  dashCooldownTotal: number;
 }
 
 export interface SessionOptions {
@@ -44,6 +48,8 @@ export interface SessionOptions {
   quickMatch?: boolean;
   /** Seed for bot names/ids/behaviour (deterministic tests). */
   seed?: number;
+  /** Bot difficulty (default "normal"). */
+  botLevel?: BotLevel;
   /**
    * Paid arena room: humans only, single round, automatic start. The bout starts
    * startDelayMs after a second player joins (at once when full); a lone player is
@@ -99,6 +105,7 @@ export class GameSession {
   standings: string[] = [];
 
   readonly quickMatch: boolean;
+  readonly botLevel: BotLevel;
   readonly paidArena: { startDelayMs: number; cancelAfterMs: number } | null;
   /** Paid arena: simulation time at which the bout starts / the room is cancelled (-1 = none). */
   private autoStartAt = -1;
@@ -116,6 +123,7 @@ export class GameSession {
     this.cfg = cfg;
     this.paidArena = options.paidArena ?? null;
     this.quickMatch = options.quickMatch === true && !this.paidArena;
+    this.botLevel = sanitizeBotLevel(options.botLevel);
     this.rng = createRng(options.seed ?? Math.floor(Math.random() * 2 ** 32));
     this.maxPlayers = Math.max(MIN_PLAYERS, Math.min(MAX_PLAYERS, Math.floor(maxPlayers)));
     this.stepMs = 1000 / cfg.tickRate;
@@ -235,6 +243,7 @@ export class GameSession {
       isBot,
       nextThinkAt: 0,
       appearance,
+      dashCooldownTotal: this.cfg.dashCooldownMs,
     };
     this.players.set(id, player);
     return player;
@@ -299,7 +308,9 @@ export class GameSession {
     if (!this.consumeToken(player)) return fail("Too many requests.");
     if (this.phase !== Phase.Playing) return fail("Dash is only available during a bout.");
     if (!player.alive) return fail("You are out of this round.");
-    if (!tryDash(player, this.time, this.cfg)) return fail("Dash is cooling down.");
+    const cooldown = this.humanDashCooldownMs();
+    if (!tryDash(player, this.time, this.cfg, cooldown)) return fail("Dash is cooling down.");
+    player.dashCooldownTotal = cooldown;
     this.events.push({ type: "dash", id });
     return OK;
   }
@@ -589,14 +600,34 @@ export class GameSession {
     this.startCountdown();
   }
 
+  /**
+   * 0 for most of the bout, rising to 1 over the final stretch (cfg.lateGameMs). Drives the
+   * comeback balance: faster dash recharge for players, gentler bots.
+   */
+  get lateness(): number {
+    if (this.phase !== Phase.Playing || this.cfg.lateGameMs <= 0) return 0;
+    const remaining = Math.max(0, this.phaseEndsAt - this.time);
+    return Math.max(0, Math.min(1, (this.cfg.lateGameMs - remaining) / this.cfg.lateGameMs));
+  }
+
+  /** Dash cooldown for human players right now (shorter near the end of the bout). */
+  humanDashCooldownMs(): number {
+    const factor = 1 - (1 - this.cfg.lateDashCooldownFactor) * this.lateness;
+    return Math.round(this.cfg.dashCooldownMs * factor);
+  }
+
   private driveBots(alive: readonly SessionPlayer[]): void {
+    const tuning = easedTuning(this.botLevel, this.lateness * this.cfg.lateBotEase);
     for (const bot of alive) {
       if (!bot.isBot || this.time < bot.nextThinkAt) continue;
-      const decision = decideBot(bot, alive, this.cfg, this.rng);
+      const decision = decideBot(bot, alive, this.cfg, this.rng, tuning);
       bot.inputX = decision.x;
       bot.inputY = decision.y;
-      if (decision.dash && tryDash(bot, this.time, this.cfg)) this.events.push({ type: "dash", id: bot.id });
-      bot.nextThinkAt = this.time + this.cfg.botThinkMinMs + this.rng() * (this.cfg.botThinkMaxMs - this.cfg.botThinkMinMs);
+      if (decision.dash && tryDash(bot, this.time, this.cfg)) {
+        bot.dashCooldownTotal = this.cfg.dashCooldownMs;
+        this.events.push({ type: "dash", id: bot.id });
+      }
+      bot.nextThinkAt = this.time + tuning.thinkMinMs + this.rng() * (tuning.thinkMaxMs - tuning.thinkMinMs);
     }
   }
 

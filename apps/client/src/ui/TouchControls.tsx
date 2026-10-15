@@ -1,5 +1,4 @@
 import { useRef, useState, type PointerEvent } from "react";
-import { DASH_COOLDOWN_MS } from "@mini-sumo/shared";
 import { vibrate } from "../haptics";
 import { inputController } from "../input/InputController";
 import { gameStore } from "../network/RoomManager";
@@ -96,7 +95,7 @@ export function TouchControls() {
 
   const cooldown = you?.dashCooldownMs ?? 0;
   const ready = cooldown <= 0;
-  const progress = 1 - Math.min(1, cooldown / DASH_COOLDOWN_MS);
+  const progress = 1 - Math.min(1, cooldown / Math.max(1, you?.dashCooldownTotalMs ?? 3000));
   const base = stick.active ? stick : { ...restingBase(), kx: 0, ky: 0 };
 
   return (

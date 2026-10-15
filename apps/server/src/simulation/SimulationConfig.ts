@@ -6,6 +6,7 @@ import {
   MATCH_DURATION_MS,
   PLAYER_RADIUS,
   QUICK_MATCH_WAIT_MS,
+  LATE_GAME_MS,
 } from "@mini-sumo/shared";
 
 /**
@@ -67,6 +68,13 @@ export interface SimulationConfig {
   botThinkMinMs: number;
   botThinkMaxMs: number;
 
+  /** Final stretch of a bout (ms before the timer ends). */
+  lateGameMs: number;
+  /** Human dash cooldown multiplier at the very end (ramps from 1 during the final stretch). */
+  lateDashCooldownFactor: number;
+  /** How much bots ease off at the very end (0 = not at all, 1 = fully). */
+  lateBotEase: number;
+
   /** Sustained messages per second per client (input + dash). */
   inputRateLimitPerSec: number;
   /** Token-bucket burst size. */
@@ -111,6 +119,10 @@ export const DEFAULT_CONFIG: Readonly<SimulationConfig> = Object.freeze({
   quickMatchWaitMs: QUICK_MATCH_WAIT_MS,
   botThinkMinMs: 120,
   botThinkMaxMs: 280,
+
+  lateGameMs: LATE_GAME_MS,
+  lateDashCooldownFactor: 0.55,
+  lateBotEase: 1,
 
   inputRateLimitPerSec: 60,
   inputBurst: 30,

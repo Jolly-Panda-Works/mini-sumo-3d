@@ -58,7 +58,8 @@ Party games are best when everyone understands them in five seconds. Mini Sumo h
 - **Play anywhere:** browser, Windows, macOS, Linux and Android, with keyboard or touch controls.
 - **Invite with a link:** create a private room and share it, or jump into a public quick match.
 - **Never wait long:** *Play now* finds an open room or creates one. If nobody shows up within 30 seconds, computer-controlled wrestlers with ordinary names fill the ring and the bout starts.
-- **Practice with bots:** the host of a private room can add or remove bots in the lobby.
+- **Practice with bots:** three difficulty levels (Easy, Normal, Hard) on the Training card or in *Settings → Gameplay*; the host of a private room can add or remove bots in the lobby.
+- **Comeback balance:** in the last 30 seconds of a bout every player's dash recharges faster (down to about half the cooldown) and bots ease off a little, so endings stay exciting.
 - **Arenas and Sumo Coins:** earn free coins in the Training Arena, pay a coin entry fee in the Rookie, Pro or Champion arena, and the server pays the winner the pool minus a small economy fee. Spend coins on cosmetics in the wardrobe. Coins are virtual: no real money in, no cash out. See [docs/ECONOMY.md](docs/ECONOMY.md).
 - **Make it yours:** pick a hair style and colour, a face and an outfit before the bout. Your belt keeps your player colour and number, so everyone can still tell who is who.
 

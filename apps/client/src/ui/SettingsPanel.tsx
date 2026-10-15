@@ -4,6 +4,7 @@ import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore, type JoystickMode, type TouchMode } from "../settings";
 import { useStore } from "../store";
 import { setAboutOpen, setSettingsOpen } from "../uiStore";
+import { BotLevelPicker } from "./BotLevelPicker";
 
 function Segmented<T extends string>({
   label,
@@ -103,6 +104,12 @@ export function SettingsPanel() {
             <h3 className="settings__heading">Audio</h3>
             <Slider label="Music" value={settings.musicVolume} onChange={(musicVolume) => settingsStore.update({ musicVolume })} />
             <Slider label="Sound effects" value={settings.sfxVolume} onChange={(sfxVolume) => settingsStore.update({ sfxVolume })} />
+          </section>
+
+          <section className="settings__section" aria-label="Gameplay">
+            <h3 className="settings__heading">Gameplay</h3>
+            <BotLevelPicker label="Bot difficulty" />
+            <p className="hint">Used in Training and private rooms. In the last 30 seconds of a bout your dash recharges faster.</p>
           </section>
 
           <section className="settings__section" aria-label="Controls">

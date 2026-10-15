@@ -1,4 +1,4 @@
-import { DASH_COOLDOWN_MS, MATCH_DURATION_MS, Phase } from "@mini-sumo/shared";
+import { LATE_GAME_MS, MATCH_DURATION_MS, Phase } from "@mini-sumo/shared";
 import { gameStore, sessionStore } from "../network/RoomManager";
 import { useStore } from "../store";
 import { setSettingsOpen } from "../uiStore";
@@ -19,7 +19,8 @@ export function HUD({ touch }: { touch: boolean }) {
   const playing = game.phase === Phase.Playing;
   const lowTime = playing && game.remainingMs <= 10_000;
   const dashReady = !you || you.dashCooldownMs <= 0;
-  const dashProgress = you ? 1 - Math.min(1, you.dashCooldownMs / DASH_COOLDOWN_MS) : 1;
+  const dashProgress = you ? 1 - Math.min(1, you.dashCooldownMs / Math.max(1, you.dashCooldownTotalMs)) : 1;
+  const finalStretch = playing && game.remainingMs > 0 && game.remainingMs <= LATE_GAME_MS;
 
   return (
     <div className="hud">
@@ -46,6 +47,8 @@ export function HUD({ touch }: { touch: boolean }) {
       </ul>
 
       {session.unstable && <p className="hud__warning">Connection unstable. Waiting for the server…</p>}
+
+      {finalStretch && you?.alive && <p className="hud__boost">Final stretch: your dash recharges faster!</p>}
 
       {you && !you.alive && playing && <p className="hud__spectate">You're out. Watching the rest of the bout.</p>}
 
