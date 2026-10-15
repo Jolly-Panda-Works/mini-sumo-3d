@@ -40,7 +40,7 @@ export function App() {
   // Escape opens/closes the local settings overlay. It never pauses the shared match.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      if (e.key !== "Escape" || !settingsStore.get().onboarded) return;
       if (uiStore.get().wardrobeOpen) setWardrobeOpen(false);
       else setSettingsOpen(!uiStore.get().settingsOpen);
     };
@@ -48,8 +48,13 @@ export function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  const needsName = !inRoom && !settings.onboarded;
+
   let screen: ReactNode;
-  if (!inRoom) {
+  if (needsName) {
+    // First launch: only the name prompt, nothing behind it.
+    screen = <NameGate />;
+  } else if (!inRoom) {
     screen = <MainMenu />;
   } else if (game.phase === Phase.Waiting || game.phase === Phase.Lobby) {
     screen = <Lobby />;
@@ -72,9 +77,8 @@ export function App() {
       <div className="ui">
         {screen}
         {inRoom && <Toasts />}
-        {ui.wardrobeOpen && (!inRoom || game.phase === Phase.Waiting || game.phase === Phase.Lobby) && <Wardrobe />}
-        {ui.settingsOpen && <SettingsPanel />}
-        {!inRoom && !settings.onboarded && <NameGate />}
+        {ui.wardrobeOpen && !needsName && (!inRoom || game.phase === Phase.Waiting || game.phase === Phase.Lobby) && <Wardrobe />}
+        {ui.settingsOpen && !needsName && <SettingsPanel />}
       </div>
     </div>
   );

@@ -857,6 +857,14 @@ body {
   background: rgba(43, 35, 64, 0.35);
 }
 
+/* Full-screen backdrop that hides the game and the menu (first-launch name prompt). */
+.overlay--solid {
+  background: rgba(20, 16, 34, 0.94);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 20;
+}
+
 .results__headline {
   margin: 0;
   font-size: clamp(2rem, 8vw, 2.8rem);

@@ -14,7 +14,7 @@ export function NameGate() {
   };
 
   return (
-    <div className="overlay">
+    <div className="overlay overlay--solid">
       <form className="panel name-gate" onSubmit={submit} aria-labelledby="name-gate-title">
         <img className="name-gate__logo" src={`${import.meta.env.BASE_URL}logo.webp`} alt="" width={120} height={120} />
         <h2 id="name-gate-title" className="name-gate__title">

@@ -15,7 +15,12 @@ const roundUp100 = (ms: number) => Math.ceil(ms / 100) * 100;
 export class MiniSumoRoom extends Room<MiniSumoState> {
   private session!: GameSession;
   private standingsKey = "";
-  private locked = false;
+  /**
+   * Our own record of the matchmaking lock. Must not be called `locked`: Colyseus' Room
+   * already has a read-only `locked` getter, and assigning to it throws while the room is
+   * being created (which made every quick match fail).
+   */
+  private matchmakingLocked = false;
 
   override onCreate(options: JoinOptions = {}): void {
     const maxPlayers = sanitizeMaxPlayers(options.maxPlayers);
@@ -130,11 +135,11 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
     const s = this.session;
     const inLobby = s.phase === Phase.Lobby || s.phase === Phase.Waiting;
     const shouldLock = !inLobby || s.connectedPlayers.length >= s.maxPlayers;
-    if (shouldLock === this.locked) return;
-    this.locked = shouldLock;
+    if (shouldLock === this.matchmakingLocked) return;
+    this.matchmakingLocked = shouldLock;
     if (shouldLock) void this.lock();
     else if (this.clients.length < this.maxClients) void this.unlock();
-    else this.locked = true;
+    else this.matchmakingLocked = true;
   }
 
   private syncState(): void {

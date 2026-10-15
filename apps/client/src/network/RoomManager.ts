@@ -97,7 +97,7 @@ function friendlyError(error: unknown, serverUrl: string): string {
   if (message.includes("not found") || message.includes("invalid room")) {
     return "That room doesn't exist anymore. Check the code or ask for a new invite.";
   }
-  if (message.includes("locked") || message.includes("full")) {
+  if (/room is locked|room is full|is full|match is in progress|maxclients/.test(message)) {
     return "That room is full or a match is already running.";
   }
   if (raw && !message.includes("fetch") && !message.includes("network") && !message.includes("xmlhttprequest") && !message.includes("econnrefused")) {
@@ -219,6 +219,7 @@ class RoomManager {
       this.attach(room);
       return true;
     } catch (error) {
+      console.error("[mini-sumo] join failed", error);
       sessionStore.update({ status: "idle", error: friendlyError(error, this.serverUrl) });
       return false;
     }

@@ -6,6 +6,11 @@ Builds from `main` are released automatically as `MAJOR.MINOR.<build number>`; t
 
 ## [Unreleased]
 
+### Fixed
+
+- *Play now* always failed with "That room is full or a match is already running": the room assigned to Colyseus' read-only `locked` property while being created.
+- The first-launch name prompt now covers the game with a dark backdrop and nothing else is shown behind it.
+
 ### Added
 
 - Bots: the host of a private room can add and remove computer-controlled wrestlers in the lobby.
