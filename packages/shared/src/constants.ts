@@ -1,3 +1,10 @@
+/** Game credits shown in the menu, settings, apps and server responses. */
+export const CREDITS = {
+  author: "Usef Farahmand",
+  website: "https://www.useffarahmand.com",
+  projectUrl: "https://www.useffarahmand.com/en/projects/mini-sumo",
+} as const;
+
 /** Colyseus room type name registered on the server. */
 export const ROOM_NAME = "mini_sumo";
 

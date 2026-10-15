@@ -55,6 +55,19 @@ function startStaticServer() {
   });
 }
 
+const CREDITS = {
+  author: "Usef Farahmand",
+  website: "https://www.useffarahmand.com/en/projects/mini-sumo",
+};
+
+app.setAboutPanelOptions({
+  applicationName: "Mini Sumo",
+  applicationVersion: app.getVersion(),
+  copyright: `Copyright © 2026 ${CREDITS.author}`,
+  authors: [CREDITS.author],
+  website: CREDITS.website,
+});
+
 let mainWindow = null;
 
 async function createWindow() {

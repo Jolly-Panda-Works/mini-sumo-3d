@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { MAX_PLAYERS, MIN_PLAYERS, NAME_MAX_LENGTH } from "@mini-sumo/shared";
+import { CREDITS, MAX_PLAYERS, MIN_PLAYERS, NAME_MAX_LENGTH } from "@mini-sumo/shared";
 import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
@@ -100,6 +100,13 @@ export function MainMenu() {
             {session.error}
           </p>
         )}
+
+        <p className="credit">
+          A game by{" "}
+          <a href={CREDITS.projectUrl} target="_blank" rel="noopener noreferrer">
+            {CREDITS.author}
+          </a>
+        </p>
       </section>
 
       <button className="icon-btn menu__settings" onClick={() => setSettingsOpen(true)} aria-label="Settings">

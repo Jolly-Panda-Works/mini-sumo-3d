@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "description": "Mini Sumo: a browser-based 3D multiplayer party game built with React Three Fiber and Colyseus.",
+  "author": {
+    "name": "Usef Farahmand",
+    "url": "https://www.useffarahmand.com"
+  },
+  "homepage": "https://www.useffarahmand.com/en/projects/mini-sumo",
   "workspaces": [
     "packages/shared",
     "apps/server",

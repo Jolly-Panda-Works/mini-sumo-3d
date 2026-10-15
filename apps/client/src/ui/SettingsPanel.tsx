@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { CREDITS } from "@mini-sumo/shared";
 import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore, type TouchMode } from "../settings";
 import { useStore } from "../store";
@@ -44,6 +45,21 @@ export function SettingsPanel() {
             ))}
           </div>
         </fieldset>
+
+        <section className="about" aria-label="About Mini Sumo">
+          <p className="field__label">About</p>
+          <p className="about__text">
+            Mini Sumo is made by <strong>{CREDITS.author}</strong>.
+          </p>
+          <p className="about__links">
+            <a href={CREDITS.projectUrl} target="_blank" rel="noopener noreferrer">
+              Game page
+            </a>
+            <a href={CREDITS.website} target="_blank" rel="noopener noreferrer">
+              useffarahmand.com
+            </a>
+          </p>
+        </section>
 
         <button ref={closeRef} className="btn btn--primary" onClick={() => setSettingsOpen(false)}>
           {inRoom ? "Back to the bout" : "Done"}

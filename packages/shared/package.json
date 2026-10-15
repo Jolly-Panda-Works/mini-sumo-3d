@@ -1,6 +1,11 @@
 {
   "name": "@mini-sumo/shared",
   "version": "0.1.0",
+  "author": {
+    "name": "Usef Farahmand",
+    "url": "https://www.useffarahmand.com"
+  },
+  "homepage": "https://www.useffarahmand.com/en/projects/mini-sumo",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -11,7 +16,9 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput"

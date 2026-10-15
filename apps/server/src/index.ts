@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
 import { Server } from "colyseus";
 import { WebSocketTransport } from "@colyseus/ws-transport";
-import { ROOM_NAME } from "@mini-sumo/shared";
+import { CREDITS, ROOM_NAME } from "@mini-sumo/shared";
 import { MiniSumoRoom } from "./rooms/MiniSumoRoom.js";
 
 // Load the repository-level .env (if present) without extra dependencies (Node >= 20.12).
@@ -17,7 +17,7 @@ const host = process.env.HOST || "0.0.0.0";
 const httpServer = createServer((req, res) => {
   if (req.url === "/health" || req.url === "/") {
     res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
-    res.end(JSON.stringify({ ok: true, game: "mini-sumo" }));
+    res.end(JSON.stringify({ ok: true, game: "mini-sumo", author: CREDITS.author, website: CREDITS.projectUrl }));
     return;
   }
   res.writeHead(404, { "Content-Type": "text/plain" });
@@ -31,4 +31,5 @@ const gameServer = new Server({
 gameServer.define(ROOM_NAME, MiniSumoRoom);
 
 await gameServer.listen(port, host);
+console.log(`[mini-sumo] Mini Sumo by ${CREDITS.author} (${CREDITS.projectUrl})`);
 console.log(`[mini-sumo] Colyseus server listening on ws://${host}:${port} (health: http://${host}:${port}/health)`);

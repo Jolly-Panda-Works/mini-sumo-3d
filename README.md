@@ -1,5 +1,7 @@
 # Mini Sumo
 
+**Created by [Usef Farahmand](https://www.useffarahmand.com)** · Game page: <https://www.useffarahmand.com/en/projects/mini-sumo>
+
 A fast, cute, browser-based **3D** multiplayer party game. Two to four toy sumo wrestlers share a raised dohyo; push everyone else out of the ring and be the last one standing.
 
 - **Client:** React 19 + React Three Fiber (three.js) + Vite, TypeScript
@@ -323,3 +325,12 @@ npm run build:android    # build web + cap sync; then: npm run android:open --pr
 - Name tags use a canvas texture; they redraw once the web font loads, and fall back to system rounded fonts offline.
 - Google Fonts is loaded from the network; the game works without it using fallback fonts.
 - Colyseus 0.16 is used deliberately (stable, well known APIs). Newer 0.17/0.18 releases rename the client SDK (`@colyseus/sdk`) and change server bootstrapping; upgrade following the official migration guides.
+
+## Credits
+
+Mini Sumo is designed and developed by **Usef Farahmand**.
+
+- Website: <https://www.useffarahmand.com>
+- Game page: <https://www.useffarahmand.com/en/projects/mini-sumo>
+
+The credit appears in the main menu, the settings "About" section, the desktop app metadata (About panel, installer, copyright) and the server's `/health` response.

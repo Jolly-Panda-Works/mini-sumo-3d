@@ -5,10 +5,11 @@
   "private": true,
   "description": "Mini Sumo desktop app (Electron shell around the web client).",
   "author": {
-    "name": "Mini Sumo",
-    "email": "dev@mini-sumo.local"
+    "name": "Usef Farahmand",
+    "email": "dev@mini-sumo.local",
+    "url": "https://www.useffarahmand.com"
   },
-  "homepage": "https://github.com/Jolly-Panda-Works/mini-sumo-3d",
+  "homepage": "https://www.useffarahmand.com/en/projects/mini-sumo",
   "main": "main.cjs",
   "scripts": {
     "prepare:web": "node scripts/copy-web.mjs",
@@ -63,10 +64,12 @@
         "deb"
       ],
       "category": "Game",
-      "maintainer": "Mini Sumo <dev@mini-sumo.local>",
+      "maintainer": "Usef Farahmand <dev@mini-sumo.local>",
       "artifactName": "MiniSumo-${version}-Linux-${arch}.${ext}",
-      "executableName": "mini-sumo"
-    }
+      "executableName": "mini-sumo",
+      "vendor": "Usef Farahmand"
+    },
+    "copyright": "Copyright © 2026 Usef Farahmand"
   },
   "repository": "https://github.com/Jolly-Panda-Works/mini-sumo-3d",
   "license": "UNLICENSED"

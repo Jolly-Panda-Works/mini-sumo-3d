@@ -1,5 +1,7 @@
 # راهنمای سریع راه‌اندازی Mini Sumo
 
+سازنده: **Usef Farahmand** ([useffarahmand.com](https://www.useffarahmand.com)) | صفحه‌ی بازی: <https://www.useffarahmand.com/en/projects/mini-sumo>
+
 ## پیش‌نیاز
 - Node.js نسخه ۲۰٫۱۲ یا جدیدتر (پیشنهاد: ۲۲)
 - npm نسخه ۱۰ به بالا

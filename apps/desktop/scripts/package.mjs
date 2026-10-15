@@ -57,7 +57,7 @@ const stagedPkg = {
   version: pkg.version,
   description: pkg.description,
   author: pkg.author,
-  homepage: `https://github.com/${owner}/${repo}`,
+  homepage: pkg.homepage || `https://github.com/${owner}/${repo}`,
   repository: `https://github.com/${owner}/${repo}`,
   license: pkg.license ?? "UNLICENSED",
   desktopName: "mini-sumo.desktop",

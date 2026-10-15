@@ -1,6 +1,11 @@
 {
   "name": "@mini-sumo/client",
   "version": "0.1.0",
+  "author": {
+    "name": "Usef Farahmand",
+    "url": "https://www.useffarahmand.com"
+  },
+  "homepage": "https://www.useffarahmand.com/en/projects/mini-sumo",
   "private": true,
   "type": "module",
   "scripts": {

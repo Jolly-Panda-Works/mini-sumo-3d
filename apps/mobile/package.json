@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "description": "Mini Sumo Android app (Capacitor shell around the web client).",
+  "author": {
+    "name": "Usef Farahmand",
+    "url": "https://www.useffarahmand.com"
+  },
+  "homepage": "https://www.useffarahmand.com/en/projects/mini-sumo",
   "scripts": {
     "android:add": "cap add android",
     "android:assets": "capacitor-assets generate --android --iconBackgroundColor \"#2F5C8A\" --splashBackgroundColor \"#2F5C8A\"",
