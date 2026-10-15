@@ -9,6 +9,10 @@ export const HAIR_STYLES = [
   { id: "spiky", label: "Spiky" },
   { id: "bowl", label: "Bowl cut" },
   { id: "mohawk", label: "Mohawk" },
+  { id: "ponytail", label: "Ponytail" },
+  { id: "afro", label: "Afro" },
+  { id: "buns", label: "Twin buns" },
+  { id: "samurai", label: "Samurai band" },
 ] as const;
 
 export const HAIR_COLORS = [
@@ -17,6 +21,11 @@ export const HAIR_COLORS = [
   { hex: "#E07A2E", label: "Ginger" },
   { hex: "#C9CED8", label: "Silver" },
   { hex: "#3B6FD6", label: "Blue" },
+  { hex: "#FF8FB8", label: "Pink" },
+  { hex: "#4CB86B", label: "Green" },
+  { hex: "#8E6CEF", label: "Purple" },
+  { hex: "#E8B730", label: "Gold" },
+  { hex: "#F3F1EA", label: "White" },
 ] as const;
 
 export const FACES = [
@@ -25,6 +34,10 @@ export const FACES = [
   { id: "cool", label: "Cool" },
   { id: "sleepy", label: "Sleepy" },
   { id: "fierce", label: "Fierce" },
+  { id: "wink", label: "Wink" },
+  { id: "surprised", label: "Surprised" },
+  { id: "grumpy", label: "Grumpy" },
+  { id: "sparkly", label: "Sparkly eyes" },
 ] as const;
 
 export const OUTFITS = [
@@ -32,6 +45,10 @@ export const OUTFITS = [
   { id: "striped", label: "Striped" },
   { id: "apron", label: "Apron" },
   { id: "champion", label: "Champion" },
+  { id: "polka", label: "Polka dots" },
+  { id: "sagari", label: "Sagari fringe" },
+  { id: "cape", label: "Hero cape" },
+  { id: "armbands", label: "Armbands" },
 ] as const;
 
 export interface Appearance {

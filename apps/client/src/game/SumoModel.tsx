@@ -4,6 +4,7 @@ import {
   CapsuleGeometry,
   CircleGeometry,
   ConeGeometry,
+  OctahedronGeometry,
   CylinderGeometry,
   IcosahedronGeometry,
   MeshBasicMaterial,
@@ -45,6 +46,17 @@ const GEO = {
   mouthO: new SphereGeometry(0.04, 8, 6),
   mustache: new CapsuleGeometry(0.035, 0.12, 2, 6),
   arm: new CapsuleGeometry(0.15, 0.3, 3, 8),
+  ponytail: new CapsuleGeometry(0.11, 0.38, 3, 8),
+  afro: new IcosahedronGeometry(0.6, 1),
+  bun: new IcosahedronGeometry(0.17, 1),
+  headband: new TorusGeometry(0.535, 0.055, 6, 28),
+  bandTail: new BoxGeometry(0.08, 0.26, 0.03),
+  bigEye: new SphereGeometry(0.09, 10, 8),
+  star: new OctahedronGeometry(0.095, 0),
+  dot: new SphereGeometry(0.05, 6, 4),
+  sagari: new CylinderGeometry(0.025, 0.025, 0.3, 5),
+  cape: new BoxGeometry(1.05, 0.95, 0.04),
+  armband: new TorusGeometry(0.16, 0.045, 6, 16),
   leg: new CylinderGeometry(0.2, 0.23, 0.34, 8),
   ring: new RingGeometry(0.86, 1.02, 32),
 };
@@ -54,6 +66,8 @@ const INK = new MeshStandardMaterial({ color: "#2B2340", roughness: 0.6, flatSha
 const WHITE = new MeshStandardMaterial({ color: "#FBF8F2", roughness: 0.7, flatShading: true });
 const GOLD = new MeshStandardMaterial({ color: "#F2C14E", roughness: 0.4, metalness: 0.3, flatShading: true });
 const CHEEK = new MeshBasicMaterial({ color: "#FF8FA3", transparent: true, opacity: 0.75 });
+const BAND = new MeshStandardMaterial({ color: "#E2443A", roughness: 0.6, flatShading: true });
+const SPARKLE = new MeshStandardMaterial({ color: "#FFD23F", roughness: 0.3, emissive: "#8A6400", flatShading: true });
 
 const materialCache = new Map<string, MeshStandardMaterial>();
 const ringMaterials = new Map<string, MeshBasicMaterial>();
@@ -142,6 +156,32 @@ function Hair({ style, color }: { style: string; color: string }) {
           ))}
         </group>
       );
+    case "ponytail":
+      return (
+        <group>
+          <mesh geometry={GEO.knot} material={mat} position={[0, 0.36, -0.45]} />
+          <mesh geometry={GEO.ponytail} material={mat} position={[0, 0.1, -0.6]} rotation-x={0.35} castShadow />
+        </group>
+      );
+    case "afro":
+      return <mesh geometry={GEO.afro} material={mat} position={[0, 0.28, -0.2]} scale={[1.12, 1, 1]} castShadow />;
+    case "buns":
+      return (
+        <group>
+          <mesh geometry={GEO.bun} material={mat} position={[-0.3, 0.44, -0.06]} castShadow />
+          <mesh geometry={GEO.bun} material={mat} position={[0.3, 0.44, -0.06]} castShadow />
+        </group>
+      );
+    case "samurai":
+      return (
+        <group>
+          <mesh geometry={GEO.knot} material={mat} position={[0, 0.5, -0.1]} />
+          <mesh geometry={GEO.knotFan} material={mat} position={[0, 0.6, -0.02]} />
+          <mesh geometry={GEO.headband} material={BAND} position-y={0.16} rotation-x={Math.PI / 2} />
+          <mesh geometry={GEO.bandTail} material={BAND} position={[0.08, 0.02, -0.55]} rotation-z={0.3} />
+          <mesh geometry={GEO.bandTail} material={BAND} position={[-0.06, 0.0, -0.55]} rotation-z={-0.25} />
+        </group>
+      );
     default: // topknot (chonmage)
       return (
         <group>
@@ -215,6 +255,57 @@ function Face({ style, eyesRef }: { style: string; eyesRef: RefObject<Group | nu
           {cheeks}
         </>
       );
+    case "wink":
+      return (
+        <>
+          <group ref={eyesRef} position={[0, 0.05, 0.47]}>
+            <mesh geometry={GEO.eyeClosed} material={INK} position={[-0.17, 0, 0.01]} rotation-z={0.15} />
+            <mesh geometry={GEO.eye} material={INK} position-x={0.17} />
+          </group>
+          <mesh geometry={GEO.brow} material={INK} position={[0.17, 0.2, 0.46]} rotation-z={-0.1} />
+          <mesh geometry={GEO.smile} material={INK} position={[0.03, -0.1, 0.49]} rotation-z={Math.PI} />
+          {cheeks}
+        </>
+      );
+    case "surprised":
+      return (
+        <>
+          <group ref={eyesRef} position={[0, 0.06, 0.46]}>
+            <mesh geometry={GEO.bigEye} material={INK} position-x={-0.17} />
+            <mesh geometry={GEO.bigEye} material={INK} position-x={0.17} />
+          </group>
+          <mesh geometry={GEO.brow} material={INK} position={[-0.17, 0.25, 0.44]} rotation-z={-0.2} />
+          <mesh geometry={GEO.brow} material={INK} position={[0.17, 0.25, 0.44]} rotation-z={0.2} />
+          <mesh geometry={GEO.mouthO} material={INK} position={[0, -0.15, 0.48]} scale={[1.2, 1.5, 1]} />
+          {cheeks}
+        </>
+      );
+    case "grumpy":
+      return (
+        <>
+          <group ref={eyesRef} position={[0, 0.03, 0.47]}>
+            <mesh geometry={GEO.eye} material={INK} position-x={-0.17} scale={[1, 0.6, 1]} />
+            <mesh geometry={GEO.eye} material={INK} position-x={0.17} scale={[1, 0.6, 1]} />
+          </group>
+          <mesh geometry={GEO.browThick} material={INK} position={[-0.17, 0.13, 0.47]} rotation-z={-0.3} />
+          <mesh geometry={GEO.browThick} material={INK} position={[0.17, 0.13, 0.47]} rotation-z={0.3} />
+          <mesh geometry={GEO.smile} material={INK} position={[0, -0.18, 0.49]} />
+          {cheeks}
+        </>
+      );
+    case "sparkly":
+      return (
+        <>
+          <group ref={eyesRef} position={[0, 0.06, 0.48]}>
+            <mesh geometry={GEO.star} material={SPARKLE} position-x={-0.17} scale={[1, 1, 0.45]} rotation-z={Math.PI / 4} />
+            <mesh geometry={GEO.star} material={SPARKLE} position-x={0.17} scale={[1, 1, 0.45]} rotation-z={Math.PI / 4} />
+          </group>
+          <mesh geometry={GEO.brow} material={INK} position={[-0.17, 0.21, 0.46]} rotation-z={0.1} />
+          <mesh geometry={GEO.brow} material={INK} position={[0.17, 0.21, 0.46]} rotation-z={-0.1} />
+          <mesh geometry={GEO.smile} material={INK} position={[0, -0.1, 0.49]} rotation-z={Math.PI} />
+          {cheeks}
+        </>
+      );
     default: // determined
       return (
         <>
@@ -265,7 +356,38 @@ function Outfit({ style, color }: { style: string; color: string }) {
           <mesh geometry={GEO.flap} material={belt} position={[0, 0.12, 0.66]} castShadow />
         </>
       );
-    default: // classic
+    case "polka":
+      return (
+        <>
+          {base}
+          {Array.from({ length: 10 }, (_, i) => {
+            const a = (i / 10) * Math.PI * 2;
+            return <mesh key={i} geometry={GEO.dot} material={WHITE} position={[Math.sin(a) * 0.75, 0.2 + (i % 2 ? 0.06 : -0.06), Math.cos(a) * 0.75]} />;
+          })}
+          <mesh geometry={GEO.flap} material={belt} position={[0, 0.12, 0.66]} castShadow />
+        </>
+      );
+    case "sagari":
+      return (
+        <>
+          {base}
+          {Array.from({ length: 9 }, (_, i) => {
+            const a = ((i - 4) / 9) * Math.PI * 0.9;
+            return <mesh key={i} geometry={GEO.sagari} material={belt} position={[Math.sin(a) * 0.72, -0.08, Math.cos(a) * 0.72]} />;
+          })}
+        </>
+      );
+    case "cape":
+      return (
+        <>
+          {base}
+          <mesh geometry={GEO.flap} material={belt} position={[0, 0.12, 0.66]} castShadow />
+          <mesh geometry={GEO.cape} material={belt} position={[0, 0.55, -0.7]} rotation-x={0.18} castShadow />
+          <mesh geometry={GEO.dot} material={GOLD} position={[-0.42, 1.0, -0.6]} />
+          <mesh geometry={GEO.dot} material={GOLD} position={[0.42, 1.0, -0.6]} />
+        </>
+      );
+    default: // classic and armbands (bands are drawn on the arms)
       return (
         <>
           {base}
@@ -297,6 +419,7 @@ export function SumoModel({
   const hairColor = HAIR_COLORS[appearance.hairColor]?.hex ?? HAIR_COLORS[0].hex;
   const face = FACES[appearance.face]?.id ?? "determined";
   const outfit = OUTFITS[appearance.outfit]?.id ?? "classic";
+  const armband = outfit === "armbands" ? <mesh geometry={GEO.armband} material={colorMaterial(color)} position-y={-0.32} rotation-x={Math.PI / 2} /> : null;
 
   return (
     <group ref={parts.root}>
@@ -312,9 +435,11 @@ export function SumoModel({
 
         <group ref={parts.armL} position={[-0.7, 0.62, 0.05]} rotation-z={0.7}>
           <mesh geometry={GEO.arm} material={SKIN} position-y={-0.22} castShadow />
+          {armband}
         </group>
         <group ref={parts.armR} position={[0.7, 0.62, 0.05]} rotation-z={-0.7}>
           <mesh geometry={GEO.arm} material={SKIN} position-y={-0.22} castShadow />
+          {armband}
         </group>
 
         <group ref={parts.head} position-y={1.12}>

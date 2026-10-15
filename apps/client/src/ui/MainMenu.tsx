@@ -32,11 +32,19 @@ export function MainMenu() {
           <img src={`${import.meta.env.BASE_URL}title.webp`} alt={GAME_TITLE} width={1200} height={621} />
         </h1>
         <div className="home__actions">
-          {balance !== undefined && (
-            <button className="btn home__coins" onClick={() => setWalletOpen(true)} aria-label={`Wallet: ${balance} Sumo Coins`}>
+          <button
+            className="btn home__coins"
+            onClick={() => setWalletOpen(true)}
+            aria-label={balance !== undefined ? `Wallet: ${balance} Sumo Coins` : "Wallet: coins coming soon"}
+          >
+            {balance !== undefined ? (
               <Coins amount={balance} />
-            </button>
-          )}
+            ) : (
+              <span className="coins">
+                <span className="coins__icon" aria-hidden="true" />—
+              </span>
+            )}
+          </button>
           <button className="icon-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
             <HangerIcon />
           </button>

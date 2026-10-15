@@ -1,4 +1,4 @@
-import { STARTER_ITEMS, allCosmeticItemIds, Currency, type ArenaInfo, type EconomyFlags } from "@mini-sumo/shared";
+import { STARTER_ITEMS, allCosmeticItemIds, cosmeticPrice, Currency, type ArenaInfo, type EconomyFlags } from "@mini-sumo/shared";
 import { computePrize } from "./prize.js";
 
 /**
@@ -140,22 +140,7 @@ export function listArenas(): ArenaInfo[] {
 
 export type { ArenaConfig };
 
-/** Cosmetic prices in Sumo Coins. Starter items are free and owned by everyone. */
-const ITEM_PRICES: Record<string, number> = {
-  "hair.spiky": 250,
-  "hair.bowl": 150,
-  "hair.mohawk": 400,
-  "hairColor.ginger": 150,
-  "hairColor.silver": 200,
-  "hairColor.blue": 300,
-  "face.cool": 400,
-  "face.sleepy": 100,
-  "face.fierce": 300,
-  "outfit.striped": 300,
-  "outfit.apron": 750,
-  "outfit.champion": 2000,
-};
-
+/** Cosmetic prices live in packages/shared (COSMETIC_PRICES); starter items are free. */
 export interface ItemConfig {
   id: string;
   category: ReturnType<typeof allCosmeticItemIds>[number]["category"];
@@ -174,7 +159,7 @@ export const CATALOG: readonly ItemConfig[] = allCosmeticItemIds().map((item) =>
     category: item.category,
     index: item.index,
     name: item.label,
-    price: starter ? 0 : (ITEM_PRICES[item.id] ?? 500),
+    price: cosmeticPrice(item.id),
     currency: Currency.Coins,
     starter,
     available: true,

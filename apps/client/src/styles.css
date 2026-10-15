@@ -1001,6 +1001,92 @@ body {
   color: rgba(43, 35, 64, 0.6);
 }
 
+/* Wardrobe tabs and items */
+.tabs {
+  display: flex;
+  gap: 6px;
+  flex: none;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.tab {
+  font: inherit;
+  font-weight: 800;
+  color: var(--ink);
+  background: #fbf6ee;
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 4px 16px;
+  min-height: 40px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab--on {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.tab:focus-visible,
+.item:focus-visible {
+  outline: 3px solid var(--coral);
+  outline-offset: 2px;
+}
+
+.items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  align-content: start;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
+  background: #eef0f6;
+  border: 2.5px dashed var(--ink);
+  border-radius: 14px;
+  padding: 8px 10px;
+  min-height: 64px;
+  cursor: pointer;
+}
+
+.item--owned {
+  background: #fbf6ee;
+  border-style: solid;
+}
+
+.item--on {
+  background: var(--sun);
+  border-style: solid;
+  box-shadow: 0 3px 0 var(--ink);
+}
+
+.item__swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+}
+
+.item__name {
+  font-weight: 800;
+  font-size: 0.92rem;
+  line-height: 1.1;
+}
+
+.item__price {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: rgba(43, 35, 64, 0.75);
+}
+
 .choice--locked {
   background: #eef0f6;
   border-style: dashed;

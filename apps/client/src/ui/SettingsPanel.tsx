@@ -3,7 +3,7 @@ import { NAME_MAX_LENGTH } from "@mini-sumo/shared";
 import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore, type JoystickMode, type TouchMode } from "../settings";
 import { useStore } from "../store";
-import { setAboutOpen, setSettingsOpen, setWardrobeOpen } from "../uiStore";
+import { setAboutOpen, setSettingsOpen } from "../uiStore";
 
 function Segmented<T extends string>({
   label,
@@ -94,15 +94,6 @@ export function SettingsPanel() {
               </button>
             </form>
             {inRoom && <p className="hint">You can change your name between bouts.</p>}
-            <button
-              className="btn"
-              onClick={() => {
-                setSettingsOpen(false);
-                setWardrobeOpen(true);
-              }}
-            >
-              Change avatar
-            </button>
             <button className="btn" disabled aria-describedby="google-soon">
               Save progress to Google account <span className="tag tag--soon" id="google-soon">Coming soon</span>
             </button>

@@ -57,8 +57,14 @@ try {
 
   // Wardrobe: give the host a custom look.
   await host.page.getByRole("button", { name: "Customise your wrestler" }).click();
-  for (const option of ["Mohawk", "Ginger", "Fierce", "Champion"]) {
-    await host.page.getByRole("button", { name: option, exact: true }).click();
+  for (const [tab, option] of [
+    ["Hair", "Mohawk"],
+    ["Colour", "Ginger"],
+    ["Face", "Fierce"],
+    ["Outfit", "Champion"],
+  ]) {
+    await host.page.getByRole("tab", { name: tab }).click();
+    await host.page.getByRole("button", { name: new RegExp(`^${option},`) }).click();
   }
   await sleep(1500);
   await shot(host.page, "wardrobe");

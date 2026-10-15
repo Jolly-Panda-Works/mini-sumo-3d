@@ -8,6 +8,7 @@ import {
   PLAYER_COLORS,
   Phase,
   cosmeticItemId,
+  cosmeticPrice,
   randomAppearance,
   restrictToOwned,
   type Appearance,
@@ -35,42 +36,52 @@ function PreviewSumo({ appearance, color }: { appearance: Appearance; color: str
   return <SumoModel parts={parts} color={color} appearance={appearance} showRing={false} />;
 }
 
-interface OptionGroupProps {
-  label: string;
-  category: CosmeticCategory;
-  options: readonly { label: string; hex?: string }[];
+type Tab = { category: CosmeticCategory; label: string; options: readonly { label: string; hex?: string }[] };
+
+const TABS: readonly Tab[] = [
+  { category: "hair", label: "Hair", options: HAIR_STYLES },
+  { category: "hairColor", label: "Colour", options: HAIR_COLORS },
+  { category: "face", label: "Face", options: FACES },
+  { category: "outfit", label: "Outfit", options: OUTFITS },
+];
+
+interface ItemGridProps {
+  tab: Tab;
   value: number;
+  worn: number;
   owned: ReadonlySet<string>;
-  prices: ReadonlyMap<string, number>;
-  onChange: (index: number) => void;
+  priceOf: (id: string) => number;
+  onPick: (index: number) => void;
 }
 
-function OptionGroup({ label, category, options, value, owned, prices, onChange }: OptionGroupProps) {
+/** One category's items: owned first (in catalog order), then the rest by price. */
+function ItemGrid({ tab, value, worn, owned, priceOf, onPick }: ItemGridProps) {
+  const items = tab.options
+    .map((option, index) => {
+      const id = cosmeticItemId(tab.category, index);
+      return { option, index, id, owned: owned.has(id), price: priceOf(id) };
+    })
+    .sort((a, b) => (a.owned === b.owned ? (a.owned ? a.index - b.index : a.price - b.price || a.index - b.index) : a.owned ? -1 : 1));
+
   return (
-    <fieldset className="wardrobe__group">
-      <legend className="field__label">{label}</legend>
-      <div className="choices">
-        {options.map((option, index) => {
-          const id = cosmeticItemId(category, index);
-          const isOwned = owned.has(id);
-          const price = prices.get(id);
-          return (
-            <button
-              key={option.label}
-              type="button"
-              className={`choice${index === value ? " choice--on" : ""}${isOwned ? "" : " choice--locked"}`}
-              aria-pressed={index === value}
-              aria-label={`${option.label}${isOwned ? "" : price !== undefined ? `, not owned, ${price} Sumo Coins` : ", not owned"}`}
-              onClick={() => onChange(index)}
-            >
-              {option.hex && <span className="choice__swatch" style={{ background: option.hex }} aria-hidden="true" />}
-              {option.label}
-              {!isOwned && (price !== undefined ? <Coins amount={price} /> : <span className="choice__lock">Locked</span>)}
-            </button>
-          );
-        })}
-      </div>
-    </fieldset>
+    <div className="items" role="tabpanel" aria-label={tab.label}>
+      {items.map(({ option, index, owned: isOwned, price }) => (
+        <button
+          key={option.label}
+          type="button"
+          className={`item${index === value ? " item--on" : ""}${isOwned ? " item--owned" : ""}`}
+          aria-pressed={index === value}
+          aria-label={`${option.label}, ${isOwned ? (index === worn ? "wearing" : "owned") : `${price} Sumo Coins`}`}
+          onClick={() => onPick(index)}
+        >
+          {option.hex && <span className="item__swatch" style={{ background: option.hex }} aria-hidden="true" />}
+          <span className="item__name">{option.label}</span>
+          <span className="item__price">
+            {isOwned ? (index === worn ? "Wearing" : price === 0 ? "Free" : "Owned") : <Coins amount={price} />}
+          </span>
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -83,7 +94,10 @@ export function Wardrobe() {
   const economy = useStore(economyStore);
   const game = useStore(gameStore);
   const owned = ownedItems();
-  const prices = new Map((economy.catalog?.items ?? []).filter((i) => !i.starter).map((i) => [i.id, i.price] as const));
+  // Prices from the server catalog when online, otherwise the shared price table.
+  const catalogPrices = new Map((economy.catalog?.items ?? []).map((i) => [i.id, i.price] as const));
+  const priceOf = (id: string) => catalogPrices.get(id) ?? cosmeticPrice(id);
+  const [tab, setTab] = useState<Tab>(TABS[0]!);
   const shopOpen = economy.status === "ready" && Boolean(economy.catalog?.flags.shop) && economy.profile !== null;
   const balance = economy.profile?.balances.coins ?? 0;
   // What the preview shows; may include items you don't own yet (try before you buy).
@@ -118,7 +132,9 @@ export function Wardrobe() {
   const missing = (Object.keys(draft) as CosmeticCategory[])
     .map((category) => cosmeticItemId(category, draft[category]))
     .find((id) => !owned.has(id));
-  const missingItem = missing ? economy.catalog?.items.find((i) => i.id === missing) : undefined;
+  const missingItem = missing
+    ? { id: missing, name: TABS.flatMap((t) => t.options.map((o, i) => [cosmeticItemId(t.category, i), o.label] as const)).find(([id]) => id === missing)?.[1] ?? missing, price: priceOf(missing) }
+    : undefined;
 
   const buy = async () => {
     if (!missingItem) return;
@@ -162,35 +178,38 @@ export function Wardrobe() {
           </div>
 
           <div className="wardrobe__options">
-            {(
-              [
-                ["Hair", "hair", HAIR_STYLES],
-                ["Hair colour", "hairColor", HAIR_COLORS],
-                ["Face", "face", FACES],
-                ["Outfit", "outfit", OUTFITS],
-              ] as const
-            ).map(([label, category, options]) => (
-              <OptionGroup
-                key={category}
-                label={label}
-                category={category}
-                options={options}
-                value={draft[category]}
-                owned={owned}
-                prices={prices}
-                onChange={(index) => update({ [category]: index } as Partial<Appearance>)}
-              />
-            ))}
+            <div className="tabs" role="tablist" aria-label="Categories">
+              {TABS.map((t) => (
+                <button
+                  key={t.category}
+                  type="button"
+                  role="tab"
+                  aria-selected={t.category === tab.category}
+                  className={`tab${t.category === tab.category ? " tab--on" : ""}`}
+                  onClick={() => setTab(t)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+            <ItemGrid
+              tab={tab}
+              value={draft[tab.category]}
+              worn={appearance[tab.category]}
+              owned={owned}
+              priceOf={priceOf}
+              onPick={(index) => update({ [tab.category]: index } as Partial<Appearance>)}
+            />
             <p className="hint">
-              Your belt keeps your player colour and number so everyone can tell you apart. Items with a price can be tried on
-              here and bought with Sumo Coins; looks never change how your wrestler plays.
+              Try anything on before you buy it. Bought items stay yours for good. Your belt keeps your player colour, and looks
+              never change how your wrestler plays.
             </p>
           </div>
         </div>
 
         {missing && (
           <div className="shop-bar" role="status">
-            {missingItem && shopOpen ? (
+            {shopOpen && missingItem ? (
               <>
                 <span>
                   Previewing <strong>{missingItem.name}</strong> for <Coins amount={missingItem.price} />

@@ -41,18 +41,54 @@ export function allCosmeticItemIds(): { id: string; category: CosmeticCategory; 
 }
 
 /**
- * Free items every player owns, also offline. Index 0 of each category is always free, so
- * the default look is always valid.
+ * Free items every player owns, also offline: the first option of each category, so the
+ * default look is always valid. Everything else is bought once and owned for good.
  */
-export const STARTER_ITEMS: readonly string[] = [
-  "hair.topknot",
-  "hair.bald",
-  "hairColor.black",
-  "hairColor.brown",
-  "face.determined",
-  "face.happy",
-  "outfit.classic",
-];
+export const STARTER_ITEMS: readonly string[] = ["hair.topknot", "hairColor.black", "face.determined", "outfit.classic"];
+
+/**
+ * Cosmetic prices in Sumo Coins. One table for the shop display and the server; the server
+ * only ever charges what this table says.
+ */
+export const COSMETIC_PRICES: Readonly<Record<string, number>> = Object.freeze({
+  "hair.bald": 100,
+  "hair.spiky": 250,
+  "hair.bowl": 150,
+  "hair.mohawk": 400,
+  "hair.ponytail": 200,
+  "hair.afro": 350,
+  "hair.buns": 300,
+  "hair.samurai": 600,
+  "hairColor.brown": 50,
+  "hairColor.ginger": 150,
+  "hairColor.silver": 200,
+  "hairColor.blue": 300,
+  "hairColor.pink": 250,
+  "hairColor.green": 250,
+  "hairColor.purple": 300,
+  "hairColor.gold": 800,
+  "hairColor.white": 400,
+  "face.happy": 50,
+  "face.cool": 400,
+  "face.sleepy": 100,
+  "face.fierce": 300,
+  "face.wink": 200,
+  "face.surprised": 150,
+  "face.grumpy": 150,
+  "face.sparkly": 500,
+  "outfit.striped": 300,
+  "outfit.apron": 750,
+  "outfit.champion": 2000,
+  "outfit.polka": 350,
+  "outfit.sagari": 600,
+  "outfit.cape": 1200,
+  "outfit.armbands": 450,
+});
+
+/** Price of an item (0 for starter items). */
+export function cosmeticPrice(itemId: string): number {
+  return STARTER_ITEMS.includes(itemId) ? 0 : (COSMETIC_PRICES[itemId] ?? 500);
+}
 
 /** Replaces any option the player doesn't own with the default (index 0). */
 export function restrictToOwned(appearance: Appearance, owned: ReadonlySet<string>): Appearance {

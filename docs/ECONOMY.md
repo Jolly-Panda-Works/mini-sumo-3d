@@ -114,7 +114,7 @@ Tables: `accounts`, `wallets`, `transactions`, `ownership`, `arena_entries`, `se
 
 ## Cosmetic shop
 
-The shop **is** the existing wardrobe. Each appearance option has a stable item id (`hair.mohawk`, `hairColor.blue`, …). Starter items (index 0 of each category plus a few more) are free and owned by everyone, also offline. Prices are in `ITEM_PRICES` (`config.ts`).
+The shop **is** the existing wardrobe, organised in tabs (hair, colour, face, outfit; 36 items). Each appearance option has a stable item id (`hair.mohawk`, `hairColor.blue`, …). The first option of each category is a free starter item owned by everyone, also offline; every other item has a price in `COSMETIC_PRICES` (`packages/shared/src/economy.ts`), the single table the server charges from. Bought items are owned for good and listed first in their tab.
 
 - Locked options show their price; picking one previews it on your wrestler (try before you buy).
 - *Buy* calls `POST /api/shop/purchase` with the item id and a UUID idempotency key. The server takes the price from its own catalog, debits and grants ownership in one transaction. Buying something you own never charges again.

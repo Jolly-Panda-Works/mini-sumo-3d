@@ -67,7 +67,7 @@ Party games are best when everyone understands them in five seconds. Mini Sumo h
 | | Step | What happens |
 | --- | --- | --- |
 | 1 | **Pick a name** | The first launch asks for your name and remembers it. Change it any time on the main menu. |
-| | **Dress up** | *Customise wrestler* (main menu or lobby): 5 hair styles, 5 hair colours, 5 faces and 4 outfits, with a live 3D preview. |
+| | **Dress up** | *Customise* (hanger button on the home screen or in the lobby): tabs for hair (9), hair colour (10), face (9) and outfit (8), with a live 3D preview. Every item has a price; bought items are yours for good and are listed first. |
 | 2 | **Get a room** | *Play now* joins an open public room or creates one; if no one joins within 30 seconds, the room fills up and starts by itself. *Create private room* gives you a code and an invite link for friends. |
 | 3 | **Start** | When at least two wrestlers are in, the host presses *Start match* (in a private room the host can also *Add bot*). A synced 3, 2, 1, GO! follows. |
 | 4 | **Push** | Run into opponents to shove them. Time your **dash** for a heavy hit, then recover before you slide out yourself. |

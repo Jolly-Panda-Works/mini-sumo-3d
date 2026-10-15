@@ -343,7 +343,8 @@ describe("cosmetic shop", () => {
     economy.purchase(a.accountId, "hair.mohawk", "buy-mohawk");
     expect(economy.saveAppearance(a.accountId, mohawk).hair).toBe(4);
     expect(economy.profile(a.accountId).appearance.hair).toBe(4);
-    expect(economy.saveAppearance(a.accountId, { hair: 1, hairColor: 1, face: 1, outfit: 0 })).toEqual({ hair: 1, hairColor: 1, face: 1, outfit: 0 });
+    expect(economy.saveAppearance(a.accountId, { hair: 0, hairColor: 0, face: 0, outfit: 0 })).toEqual({ hair: 0, hairColor: 0, face: 0, outfit: 0 });
+    expect(economy.saveAppearance(a.accountId, { hair: 1, hairColor: 1, face: 1, outfit: 0 })).toEqual({ hair: 0, hairColor: 0, face: 0, outfit: 0 });
   });
 });
 
@@ -354,6 +355,11 @@ describe("payments", () => {
       expect(result.ok).toBe(false);
     }
     expect(new PaymentService(FLAGS).available).toBe(false);
+  });
+
+  it("every non-starter item has a price and starter items are free", () => {
+    for (const item of CATALOG) expect(item.starter ? item.price === 0 : item.price > 0).toBe(true);
+    expect(CATALOG.length).toBeGreaterThanOrEqual(30);
   });
 
   it("the catalog only sells cosmetics for Sumo Coins", () => {

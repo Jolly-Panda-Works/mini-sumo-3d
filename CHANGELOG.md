@@ -8,6 +8,12 @@ Builds from `main` are released automatically as `MAJOR.MINOR.<build number>`; t
 
 ### Changed
 
+- Wardrobe: tabs per category (hair, colour, face, outfit) showing only that category; every item shows its price, owned items are listed first and stay owned. 36 items in total (new: ponytail, afro, twin buns, samurai band; pink, green, purple, gold, white; wink, surprised, grumpy, sparkly eyes; polka dots, sagari fringe, hero cape, armbands).
+- Only the first option of each category is a free starter item; prices live in one shared table (`COSMETIC_PRICES`).
+- Home shows the coin balance next to the customise and settings buttons; *Change avatar* removed from settings.
+
+### Changed
+
 - Home: the Training Arena is a card next to the other three; the title is centred; the home screen has its own backdrop (spotlights, stars, seigaiha waves) and the 3D arenas are only rendered inside rooms.
 
 ### Fixed
