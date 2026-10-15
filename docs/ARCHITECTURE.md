@@ -1,0 +1,85 @@
+# Mini Sumo architecture
+
+Technical notes for contributors. For playing and building, see the [README](../README.md).
+
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph Browser["Browser (static hosting)"]
+    UI["React UI<br/>menu · lobby · HUD · results"]
+    Scene["React Three Fiber scene<br/>arena · sumos · effects · camera"]
+    Input["InputController<br/>keyboard + touch"]
+    RM["RoomManager<br/>colyseus.js"]
+    Input -- "direction, dash" --> RM
+    RM -- "UI snapshot (store)" --> UI
+    RM -- "live state (read per frame)" --> Scene
+    RM -- "impact / dash / eliminated" --> Scene
+  end
+  subgraph Server["Node.js host"]
+    Room["MiniSumoRoom<br/>(Colyseus adapter)"]
+    Session["GameSession<br/>phases · host · players"]
+    Sim["Simulation systems<br/>Movement · Collision · Arena · Match"]
+    Room --> Session --> Sim
+  end
+  RM <-- "WebSocket: input messages ↑ / schema patches + events ↓" --> Room
+```
+
+```
+mini-sumo/
+├─ package.json              npm workspaces + root scripts
+├─ tsconfig.base.json
+├─ .env.example
+├─ packages/shared/src/      constants, message names, synced state types, math helpers
+├─ apps/server/
+│  ├─ src/index.ts           HTTP server + Colyseus + room registration
+│  ├─ src/rooms/MiniSumoRoom.ts   thin Colyseus adapter
+│  ├─ src/state/MiniSumoState.ts  @colyseus/schema state
+│  ├─ src/game/GameSession.ts     framework-free authoritative game (testable)
+│  ├─ src/simulation/        SimulationConfig, SimBody, Movement, Collision, Arena, Match systems
+│  ├─ src/validation/        InputValidator
+│  └─ test/                  vitest suites
+├─ apps/desktop/           Electron shell (main.cjs) + electron-builder config
+├─ apps/mobile/            Capacitor config + Android icon/splash sources
+├─ .github/workflows/build.yml   CI: test, web, desktop, Android, release
+└─ apps/client/
+   ├─ index.html, vite.config.ts
+   └─ src/
+      ├─ network/RoomManager.ts   connection, matchmaking, state → stores, events → effects/audio
+      ├─ input/InputController.ts keyboard + touch → normalized direction
+      ├─ game/                    GameCanvas, Arena, SumoModel, NetSumo, MenuSumos, Effects, CameraRig
+      ├─ ui/                      MainMenu, Lobby, HUD, Countdown, Results, SettingsPanel, TouchControls, Toasts
+      ├─ audio/AudioManager.ts    synthesized Web Audio effects
+      └─ styles.css
+```
+
+Design decisions:
+
+- **Simulation is framework-free.** `GameSession` and the systems operate on plain objects with an injected fixed-step clock. The Colyseus room only forwards messages, copies session data into the schema and broadcasts events. This is what makes the room logic unit-testable without a running server, and keeps a future engine or transport change cheap.
+- **Rendering is separate from simulation.** Server coordinates are `(x, y)` metres on the ring floor; the client maps them to three.js `(x, 0, y)`. The 3D models, falls and effects are cosmetic and never feed back into gameplay.
+- **React re-renders are rare.** The scene reads the live Colyseus state inside `useFrame`; React components only re-render from a low-frequency UI snapshot (phase, timer at 100 ms resolution, roster), compared by value before notifying.
+
+## Multiplayer architecture
+
+- **Authority:** the server owns membership, host, spawn positions, phases, timers, physics, dash cooldowns, eliminations, winners and rematches. Clients send only `input {x, y}` (direction), `dash`, `start`, `rematch` and `returnToLobby`. Positions, eliminations or winners sent by a client are not accepted by any handler.
+- **Identity:** every message is attributed via the Colyseus `client.sessionId`; no client-supplied ids are trusted. Host checks compare against the server's `hostId`.
+- **Tick:** fixed 30 Hz steps (`SimulationConfig.tickRate`) driven by `setSimulationInterval`, with an accumulator, a cap of 4 steps per update and a 250 ms clamp on real deltas after stalls. Patch rate is also ~30 Hz.
+- **Synced state:** per player `sessionId, name, colorIndex, x, y, vx, vy, angle, alive, connected, dashing, dashCooldownMs, placement, elimReason`; per room `phase, phaseRemainingMs, hostId, winnerId, isDraw, round, maxPlayers, isPrivate, aliveCount, standings`. Particles, camera and animation are client-only.
+- **Transient events** are Colyseus messages: `impact` (position + strength), `dash`, `eliminated`, `error`.
+- **Smoothing:** the client exponentially interpolates each sumo toward the latest server position. There is **no client-side prediction**; your own wrestler responds after one round trip.
+- **Validation:** inputs must be finite numbers; they are clamped to [-1, 1], normalised, and a deadzone is applied. Names are trimmed, stripped of control and bidi characters and limited to 16 characters. Each client has a token bucket (burst 30, 60 messages/s). Dash requests are checked for phase, alive state and cooldown.
+
+## Room lifecycle
+
+| Situation | Behaviour |
+| --- | --- |
+| Room created | `maxPlayers` clamped to 2–4. `private: true` calls `setPrivate(true)` so the room is hidden from quick match but joinable by id. |
+| Join while waiting/lobby | Accepted until the room is full. Colours fill the lowest free slot. First player is host. |
+| Join during countdown/match/results | Rejected with "A match is in progress…". The room is also `lock()`ed from countdown until it returns to the lobby. |
+| Leave in waiting/lobby | Player removed. Phase re-evaluated (`lobby` needs 2+). |
+| Leave during countdown | Player removed; countdown aborts to lobby/waiting if fewer than 2 remain. |
+| Leave or disconnect during a bout | Player is eliminated with reason `left`, kept for standings, removed when the room returns to the lobby. If one player remains, they win. |
+| Leave during results | Marked disconnected, removed on return to lobby or rematch. |
+| Host leaves | Host moves to the earliest-joined connected player. |
+| Everyone leaves | Colyseus auto-disposes the room. |
+| Reconnection | **Not supported.** Any disconnect is final; rejoin with the invite link while the room is in its lobby. |

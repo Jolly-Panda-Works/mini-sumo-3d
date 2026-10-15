@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Jolly-Panda-Works/mini-sumo-3d/security/advisories/new
+    about: Please report security problems privately.
+  - name: Game page
+    url: https://www.useffarahmand.com/en/projects/mini-sumo
+    about: About Mini Sumo on the creator's website.

@@ -11,3 +11,7 @@ apps/desktop/web/
 apps/desktop/release/
 apps/mobile/android/
 apps/mobile/ios/
+
+# Screenshot tooling
+server.log
+preview.log

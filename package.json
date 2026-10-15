@@ -38,5 +38,23 @@
   "devDependencies": {
     "concurrently": "^9.1.2",
     "typescript": "^5.8.3"
-  }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jolly-Panda-Works/mini-sumo-3d.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Jolly-Panda-Works/mini-sumo-3d/issues"
+  },
+  "keywords": [
+    "game",
+    "multiplayer",
+    "party-game",
+    "sumo",
+    "threejs",
+    "react-three-fiber",
+    "colyseus",
+    "typescript"
+  ]
 }

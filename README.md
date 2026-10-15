@@ -1,71 +1,151 @@
-# Mini Sumo
+<p align="center">
+  <img src="apps/client/public/logo.png" alt="Mini Sumo logo" width="200" />
+</p>
 
-**Created by [Usef Farahmand](https://www.useffarahmand.com)** · Game page: <https://www.useffarahmand.com/en/projects/mini-sumo>
+<h1 align="center">Mini Sumo</h1>
 
-A fast, cute, browser-based **3D** multiplayer party game. Two to four toy sumo wrestlers share a raised dohyo; push everyone else out of the ring and be the last one standing.
+<p align="center"><b>Push your friends out of the ring.</b> A cute 3D multiplayer party game for 2 to 4 players, right in the browser, on your desktop or on Android.</p>
 
-- **Client:** React 19 + React Three Fiber (three.js) + Vite, TypeScript
-- **Server:** Colyseus 0.16 (authoritative rooms, matchmaking, schema state sync) on Node.js, TypeScript
-- **Shared:** a small TypeScript package with constants, message names and state types
+<p align="center">Created by <a href="https://www.useffarahmand.com"><b>Usef Farahmand</b></a></p>
 
-No accounts, downloads or installs: open the page, create or join a room, play.
+<p align="center">
+  <a href="https://github.com/Jolly-Panda-Works/mini-sumo-3d/actions/workflows/build.yml"><img src="https://github.com/Jolly-Panda-Works/mini-sumo-3d/actions/workflows/build.yml/badge.svg" alt="Build" /></a>
+  <a href="https://github.com/Jolly-Panda-Works/mini-sumo-3d/releases/latest"><img src="https://img.shields.io/github/v/release/Jolly-Panda-Works/mini-sumo-3d?display_name=tag&color=FF5D73" alt="Latest release" /></a>
+  <a href="https://github.com/Jolly-Panda-Works/mini-sumo-3d/releases"><img src="https://img.shields.io/github/downloads/Jolly-Panda-Works/mini-sumo-3d/total?color=FF5D73" alt="Downloads" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
+  <img src="https://img.shields.io/badge/platform-Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android-lightgrey" alt="Platforms" />
+</p>
 
-> This project was originally specified for Phaser (2.5D). It is implemented with React Three Fiber in real 3D instead, as requested. Gameplay is still simulated on a flat 2D plane on the server; the client renders it in 3D.
+<p align="center">
+  <a href="https://github.com/Jolly-Panda-Works/mini-sumo-3d/releases/latest">Download</a> ·
+  <a href="https://www.useffarahmand.com/en/projects/mini-sumo">Game page</a> ·
+  <a href="https://github.com/Jolly-Panda-Works/mini-sumo-3d/issues/new?template=bug_report.yml">Report a bug</a> ·
+  <a href="https://github.com/Jolly-Panda-Works/mini-sumo-3d/issues/new?template=feature_request.yml">Request a feature</a>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/bout.png" alt="Three sumo wrestlers colliding in the ring" width="900" />
+</p>
+
+> **Server status:** the public game server is not online yet. Until it is, play on your own computer or network by running the server from source (see [Run from source](#run-from-source)).
 
 ---
+
+## Table of contents
+
+- [Why Mini Sumo?](#why-mini-sumo)
+- [How to play](#how-to-play)
+- [Screenshots](#screenshots)
+- [Download and install](#download-and-install)
+- [Run from source](#run-from-source)
+- [Build the apps yourself](#build-the-apps-yourself)
+- [Releases and versions](#releases-and-versions)
+- [Deployment](#deployment)
+- [Project structure](#project-structure)
+- [Technology](#technology)
+- [Limitations](#limitations)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing) · [Security](#security) · [Privacy](#privacy) · [License](#license)
+
+## Why Mini Sumo?
+
+Party games are best when everyone understands them in five seconds. Mini Sumo has one rule: **stay in the ring**. Round toy wrestlers bump, bounce and dash into each other on a little dohyo, and the last one standing wins. No accounts, no installs needed for the web version, and a match takes about a minute.
+
+- **Real 3D** with React Three Fiber: squash-and-stretch wrestlers, ring-out falls, dust and shockwaves.
+- **Fair multiplayer:** the Colyseus server decides every push, ring-out and winner. Clients only send input.
+- **Play anywhere:** browser, Windows, macOS, Linux and Android, with keyboard or touch controls.
+- **Invite with a link:** create a private room and share it, or jump into a public quick match.
+
+## How to play
+
+| | Step | What happens |
+| --- | --- | --- |
+| 1 | **Pick a name** | Type a name on the main menu. |
+| 2 | **Get a room** | *Play now* joins a public room. *Create private room* gives you a code and an invite link for friends. |
+| 3 | **Start** | When at least two wrestlers are in, the host presses *Start match*. A synced 3, 2, 1, GO! follows. |
+| 4 | **Push** | Run into opponents to shove them. Time your **dash** for a heavy hit, then recover before you slide out yourself. |
+| 5 | **Win** | The last wrestler in the ring wins. Then the host picks *Rematch* or *Back to lobby*. |
+
+| Action | Keyboard | Touch |
+| --- | --- | --- |
+| Move | WASD or arrow keys | Left joystick |
+| Dash (3 s cooldown) | Space | Dash button (fills as it recharges) |
+| Settings | Esc | Gear button |
+
+Settings never pause the shared match. *Settings → About* shows the version, the creator and links to the game page and source code.
+
+<details>
+<summary><b>Exact rules</b></summary>
+
+- 2–4 players per room; the host starts once at least 2 are present.
+- 3 s countdown (wrestlers are frozen), then a 90 s bout.
+- You're out when your centre passes **7.2 m** from the ring centre (ring radius 7 m + 0.2 m tolerance). The straw rope is drawn exactly at 7 m. Only gameplay coordinates count, never the 3D model.
+- Within a tick the server runs: movement → collisions → ring-outs → last-standing check → timer check. So a ring-out on the final tick is counted before the timer.
+- **Winner:** the last player in the ring.
+- **Everyone out in the same tick:** draw; they share first place.
+- **Time up with several players in the ring:** the one closest to the centre wins. If the two closest are within 5 cm of each other, it's a draw among all players that close.
+- **Standings:** winner (or tied players) first, then players still in the ring by distance to centre, then eliminated players by elimination time (later is better; same tick shares a place).
+- After results the host can start a **Rematch** or go **Back to lobby**. Otherwise the room returns to the lobby after 20 s.
+
+Tuning lives in `apps/server/src/simulation/SimulationConfig.ts` (acceleration 28 m/s², max speed 6.5 m/s, drag 4/s, dash 11.5 m/s for 180 ms, cooldown 3 s, dash mass ×2.5, restitution 0.35, push bonus 5).
+
+</details>
 
 ## Screenshots
 
-_Placeholders. No screenshots have been captured yet._
+| Main menu | Private room lobby |
+| --- | --- |
+| <img src="docs/screenshots/menu.png" alt="Main menu" width="440" /> | <img src="docs/screenshots/lobby.png" alt="Lobby with three players" width="440" /> |
+| **Countdown** | **Results** |
+| <img src="docs/screenshots/countdown.png" alt="Countdown" width="440" /> | <img src="docs/screenshots/results.png" alt="Results screen" width="440" /> |
 
-| Main menu | Lobby | Bout | Results |
-| --- | --- | --- | --- |
-| `docs/screenshots/menu.png` (todo) | `docs/screenshots/lobby.png` (todo) | `docs/screenshots/bout.png` (todo) | `docs/screenshots/results.png` (todo) |
+<p align="center"><img src="docs/screenshots/mobile.png" alt="Mini Sumo on a phone with touch controls" width="260" /><br /><i>Touch controls on a phone.</i></p>
 
----
+Screenshots come from a real three-player match played by the [Screenshots workflow](.github/workflows/screenshots.yml) (*Actions → Screenshots → Run workflow*), which commits fresh images to `docs/screenshots/`.
 
-## Features
+## Download and install
 
-Implemented:
+1. Open the [**latest release**](https://github.com/Jolly-Panda-Works/mini-sumo-3d/releases/latest).
+2. Download the file for your device:
 
-- Quick match (public matchmaking via `joinOrCreate`), private rooms (`create` + `setPrivate`), join by room code or invite link (`?room=<roomId>`)
-- Lobby with room code, copy/share invite link, roster with slot number + colour + host and "you" tags, host-only **Start match**
-- Server-side phase machine: `waiting → lobby → countdown → playing → roundOver → lobby | countdown`
-- Server-authoritative 3-2-1-GO countdown and 90 s bout timer
-- Momentum-based movement (acceleration, speed cap, exponential drag), circular collisions with impulses and a push bonus, dash with 180 ms duration and 3 s cooldown (dashers count as heavier)
-- Ring-out elimination from gameplay coordinates only, last-standing win, documented timeout tiebreaker and draws, final standings
-- Rematch (host) or return to lobby; automatic return to the lobby 20 s after results
-- Disconnect handling for every phase, host transfer, joins rejected during matches, empty rooms disposed by Colyseus
-- Input validation, name sanitisation and per-client rate limiting (token bucket)
-- 3D procedural low-poly art (no image assets in the 3D scene): sumo characters with squash-and-stretch, walk cycle, blinking, dash lean, ring-out fall and tumble, victory hop; dohyo with straw boundary, starting lines, corner tassel posts and cushions
-- Effects: pooled dust particles, impact shockwave rings, camera shake on strong hits
-- Game logo (transparent PNG/WebP) on the main menu, plus favicon, Apple touch icon and web app manifest icons in `apps/client/public/`
-- Synthesised Web Audio sound effects (no files), mute toggle, unlocked on first gesture
-- Keyboard (WASD/arrows, Space, Esc) and touch (virtual joystick + dash button with cooldown ring)
-- Responsive camera that always fits the ring in portrait and landscape; safe-area aware UI
-- 62 unit tests for movement, collision, arena, dash, match lifecycle, lobby/host/disconnect logic and validation
+| Platform | File |
+| --- | --- |
+| Windows | `MiniSumo-<version>-Windows-Setup.exe` (installer) or `…-Windows-Portable.exe` |
+| macOS | `MiniSumo-<version>-macOS-arm64.dmg` (Apple Silicon) or `…-macOS-x64.dmg` (Intel) |
+| Linux | `MiniSumo-<version>-Linux-x86_64.AppImage` or `…-Linux-amd64.deb` |
+| Android | `MiniSumo-<version>-Android.apk` |
+| Web | `MiniSumo-<version>-Web.zip` (static site for your own hosting) |
 
-Not implemented (see [Known limitations](#known-limitations)): reconnection, ready-check, spectators joining mid-match, client-side prediction, accounts.
+> **Warning on first launch?** The apps aren't code-signed yet. On Windows click **More info → Run anyway**; on macOS right-click the app and choose **Open**. Every release ships `SHA256SUMS.txt` so you can verify the download. Details: [CODE_SIGNING.md](CODE_SIGNING.md).
 
----
+## Run from source
 
-## Prerequisites
-
-- **Node.js 20.12 or newer** (22 LTS recommended; `.nvmrc` is included)
-- npm 10+
-
-## Installation
+Requirements: **Node.js 20.12+** (22 recommended) and npm 10+.
 
 ```bash
-git clone <your-repo-url> mini-sumo
-cd mini-sumo
+git clone https://github.com/Jolly-Panda-Works/mini-sumo-3d.git
+cd mini-sumo-3d
 npm install
-cp .env.example .env      # optional for local development
+npm run dev
 ```
 
-`package-lock.json` is not committed yet because the project was authored offline. Run `npm install` once and commit the generated lock file.
+- Game: <http://localhost:5173> (Vite also prints your LAN address, so phones on the same Wi-Fi can join)
+- Server: `ws://localhost:2567`, health check at <http://localhost:2567/health>
 
-## Environment configuration
+Open two tabs, create a private room in one and paste the invite link into the other.
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Shared package (watch), server and client together |
+| `npm test` | 62 server tests: movement, collisions, ring-outs, dash, match lifecycle, lobby and disconnects |
+| `npm run typecheck` | TypeScript checks for server and client |
+| `npm run build` | Production build of shared, server and web client |
+| `npm start` | Start the built server |
+| `npm run desktop` | Build the web client and launch the desktop app |
+
+### Configuration
+
+One `.env` at the repository root (copy `.env.example`) serves both apps. Only `VITE_*` variables reach the browser, and they are baked in at build time.
 
 One `.env` file at the repository root serves both apps. Only variables prefixed with `VITE_` are exposed to the browser, and they are baked in at build time, so never put secrets there.
 
@@ -80,143 +160,46 @@ One `.env` file at the repository root serves both apps. Only variables prefixed
 
 If `VITE_SERVER_URL` is empty, the client connects to `ws(s)://<page hostname>:<VITE_SERVER_PORT>`. That makes local and LAN development work with no configuration and never hard-codes `localhost`.
 
-## Development
+## Build the apps yourself
+
+**GitHub Actions (recommended).** Every push to `main` builds the web, desktop and Android versions and publishes them as a GitHub Release. See [Releases and versions](#releases-and-versions).
+
+**Locally:**
 
 ```bash
-npm run dev          # builds shared, then runs shared (watch), server and client together
+npm run build:desktop    # installer/app for your current OS in apps/desktop/release/
+npm run android:install && cd apps/mobile && npx cap add android && cd ../..   # once; needs Android SDK + JDK 21
+npm run build:android    # then: npm run android:open --prefix apps/mobile
 ```
 
-- Client: http://localhost:5173 (also on your LAN IP, printed by Vite)
-- Server: ws://localhost:2567, health check at http://localhost:2567/health
+`apps/desktop` (Electron) and `apps/mobile` (Capacitor) aren't npm workspaces, so a plain `npm install` never downloads Electron or the Android tooling.
 
-Individual processes: `npm run dev:server`, `npm run dev:client`, `npm run dev:shared` (run `npm run build:shared` once first).
+<details>
+<summary><b>CI settings (variables and secrets)</b></summary>
 
-Play locally by opening two or more browser tabs: create a private room in one, copy the invite link into the others.
+Configure under *Settings → Secrets and variables → Actions*:
 
-## Production build
-
-```bash
-npm run build        # shared → server (dist/) → client (apps/client/dist/)
-npm start            # node apps/server/dist/index.js
-npm run preview      # optional: serve the built client locally on :4173
-```
-
-## Tests and type checks
-
-```bash
-npm test             # vitest, server-side gameplay and room-logic tests
-npm run typecheck    # tsc for server and client
-```
-
----
-
-## Architecture
-
-```mermaid
-flowchart LR
-  subgraph Browser["Browser (static hosting)"]
-    UI["React UI<br/>menu · lobby · HUD · results"]
-    Scene["React Three Fiber scene<br/>arena · sumos · effects · camera"]
-    Input["InputController<br/>keyboard + touch"]
-    RM["RoomManager<br/>colyseus.js"]
-    Input -- "direction, dash" --> RM
-    RM -- "UI snapshot (store)" --> UI
-    RM -- "live state (read per frame)" --> Scene
-    RM -- "impact / dash / eliminated" --> Scene
-  end
-  subgraph Server["Node.js host"]
-    Room["MiniSumoRoom<br/>(Colyseus adapter)"]
-    Session["GameSession<br/>phases · host · players"]
-    Sim["Simulation systems<br/>Movement · Collision · Arena · Match"]
-    Room --> Session --> Sim
-  end
-  RM <-- "WebSocket: input messages ↑ / schema patches + events ↓" --> Room
-```
-
-```
-mini-sumo/
-├─ package.json              npm workspaces + root scripts
-├─ tsconfig.base.json
-├─ .env.example
-├─ packages/shared/src/      constants, message names, synced state types, math helpers
-├─ apps/server/
-│  ├─ src/index.ts           HTTP server + Colyseus + room registration
-│  ├─ src/rooms/MiniSumoRoom.ts   thin Colyseus adapter
-│  ├─ src/state/MiniSumoState.ts  @colyseus/schema state
-│  ├─ src/game/GameSession.ts     framework-free authoritative game (testable)
-│  ├─ src/simulation/        SimulationConfig, SimBody, Movement, Collision, Arena, Match systems
-│  ├─ src/validation/        InputValidator
-│  └─ test/                  vitest suites
-├─ apps/desktop/           Electron shell (main.cjs) + electron-builder config
-├─ apps/mobile/            Capacitor config + Android icon/splash sources
-├─ .github/workflows/build.yml   CI: test, web, desktop, Android, release
-└─ apps/client/
-   ├─ index.html, vite.config.ts
-   └─ src/
-      ├─ network/RoomManager.ts   connection, matchmaking, state → stores, events → effects/audio
-      ├─ input/InputController.ts keyboard + touch → normalized direction
-      ├─ game/                    GameCanvas, Arena, SumoModel, NetSumo, MenuSumos, Effects, CameraRig
-      ├─ ui/                      MainMenu, Lobby, HUD, Countdown, Results, SettingsPanel, TouchControls, Toasts
-      ├─ audio/AudioManager.ts    synthesized Web Audio effects
-      └─ styles.css
-```
-
-Design decisions:
-
-- **Simulation is framework-free.** `GameSession` and the systems operate on plain objects with an injected fixed-step clock. The Colyseus room only forwards messages, copies session data into the schema and broadcasts events. This is what makes the room logic unit-testable without a running server, and keeps a future engine or transport change cheap.
-- **Rendering is separate from simulation.** Server coordinates are `(x, y)` metres on the ring floor; the client maps them to three.js `(x, 0, y)`. The 3D models, falls and effects are cosmetic and never feed back into gameplay.
-- **React re-renders are rare.** The scene reads the live Colyseus state inside `useFrame`; React components only re-render from a low-frequency UI snapshot (phase, timer at 100 ms resolution, roster), compared by value before notifying.
-
-## Multiplayer architecture
-
-- **Authority:** the server owns membership, host, spawn positions, phases, timers, physics, dash cooldowns, eliminations, winners and rematches. Clients send only `input {x, y}` (direction), `dash`, `start`, `rematch` and `returnToLobby`. Positions, eliminations or winners sent by a client are not accepted by any handler.
-- **Identity:** every message is attributed via the Colyseus `client.sessionId`; no client-supplied ids are trusted. Host checks compare against the server's `hostId`.
-- **Tick:** fixed 30 Hz steps (`SimulationConfig.tickRate`) driven by `setSimulationInterval`, with an accumulator, a cap of 4 steps per update and a 250 ms clamp on real deltas after stalls. Patch rate is also ~30 Hz.
-- **Synced state:** per player `sessionId, name, colorIndex, x, y, vx, vy, angle, alive, connected, dashing, dashCooldownMs, placement, elimReason`; per room `phase, phaseRemainingMs, hostId, winnerId, isDraw, round, maxPlayers, isPrivate, aliveCount, standings`. Particles, camera and animation are client-only.
-- **Transient events** are Colyseus messages: `impact` (position + strength), `dash`, `eliminated`, `error`.
-- **Smoothing:** the client exponentially interpolates each sumo toward the latest server position. There is **no client-side prediction**; your own wrestler responds after one round trip.
-- **Validation:** inputs must be finite numbers; they are clamped to [-1, 1], normalised, and a deadzone is applied. Names are trimmed, stripped of control and bidi characters and limited to 16 characters. Each client has a token bucket (burst 30, 60 messages/s). Dash requests are checked for phase, alive state and cooldown.
-
-## Room lifecycle
-
-| Situation | Behaviour |
-| --- | --- |
-| Room created | `maxPlayers` clamped to 2–4. `private: true` calls `setPrivate(true)` so the room is hidden from quick match but joinable by id. |
-| Join while waiting/lobby | Accepted until the room is full. Colours fill the lowest free slot. First player is host. |
-| Join during countdown/match/results | Rejected with "A match is in progress…". The room is also `lock()`ed from countdown until it returns to the lobby. |
-| Leave in waiting/lobby | Player removed. Phase re-evaluated (`lobby` needs 2+). |
-| Leave during countdown | Player removed; countdown aborts to lobby/waiting if fewer than 2 remain. |
-| Leave or disconnect during a bout | Player is eliminated with reason `left`, kept for standings, removed when the room returns to the lobby. If one player remains, they win. |
-| Leave during results | Marked disconnected, removed on return to lobby or rematch. |
-| Host leaves | Host moves to the earliest-joined connected player. |
-| Everyone leaves | Colyseus auto-disposes the room. |
-| Reconnection | **Not supported.** Any disconnect is final; rejoin with the invite link while the room is in its lobby. |
-
-## Game rules
-
-- 2–4 players per room; the host starts once at least 2 are present.
-- 3 s countdown (wrestlers are frozen), then a 90 s bout.
-- You're out when your centre passes **7.2 m** from the ring centre (ring radius 7 m + 0.2 m tolerance). The straw rope is drawn exactly at 7 m. Only gameplay coordinates count, never the 3D model.
-- Within a tick the server runs: movement → collisions → ring-outs → last-standing check → timer check. So a ring-out on the final tick is counted before the timer.
-- **Winner:** the last player in the ring.
-- **Everyone out in the same tick:** draw; they share first place.
-- **Time up with several players in the ring:** the one closest to the centre wins. If the two closest are within 5 cm of each other, it's a draw among all players that close.
-- **Standings:** winner (or tied players) first, then players still in the ring by distance to centre, then eliminated players by elimination time (later is better; same tick shares a place).
-- After results the host can start a **Rematch** or go **Back to lobby**. Otherwise the room returns to the lobby after 20 s.
-
-Tuning lives in `apps/server/src/simulation/SimulationConfig.ts` (acceleration 28 m/s², max speed 6.5 m/s, drag 4/s, dash 11.5 m/s for 180 ms, cooldown 3 s, dash mass ×2.5, restitution 0.35, push bonus 5).
-
-## Controls
-
-| Action | Keyboard | Touch |
+| Name | Kind | Purpose |
 | --- | --- | --- |
-| Move | WASD or arrow keys | Left joystick |
-| Dash | Space | Dash button (fills as it recharges) |
-| Settings | Esc | Gear button |
+| `VITE_SERVER_URL` | variable | Public server, e.g. `wss://sumo-api.example.com`. Android requires `wss://`. Until it's set, releases carry a "server not live" warning. |
+| `VITE_PUBLIC_URL` | variable | Web address used in invite links from the apps. Defaults to `https://<owner>.github.io/<repo>/`. |
+| `DEPLOY_PAGES` | variable | `true` to publish the web build to GitHub Pages from `main` (also set *Settings → Pages → Source: GitHub Actions*). |
+| `ANDROID_KEYSTORE_BASE64` | secret | `base64 -w0 release.keystore`, for a signed APK/AAB |
+| `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | secrets | Keystore credentials |
 
-Settings never pause the shared match; while they are open your wrestler receives no input. Touch controls default to "Auto" (shown on touch devices) and can be forced on or off in settings.
+</details>
 
----
+## Releases and versions
+
+The release line lives in the root `package.json` `version` (currently `0.1.0`). The [Build workflow](.github/workflows/build.yml) decides the final version and injects the same string into the web client (*Settings → About*), the desktop apps, the Android `versionName` and the release name:
+
+| Trigger | Version | Published? |
+| --- | --- | --- |
+| Tag `vX.Y.Z` | `X.Y.Z` exactly | Yes, release `vX.Y.Z` |
+| Push to `main` | `MAJOR.MINOR.<build number>`, e.g. `0.1.42` | Yes, tag `v0.1.42` is created |
+| Pull requests and other branches | `MAJOR.MINOR.0-dev.<build number>` | No, artifacts only |
+
+Each release contains the Windows, macOS, Linux, Android and web files plus `SHA256SUMS.txt`. To start a new line (e.g. `0.2.x`), change the root `version` and push. Android's `versionCode` is the workflow run number, so it always increases.
 
 ## Deployment
 
@@ -260,46 +243,50 @@ VITE_SERVER_URL=wss://sumo-api.example.com npm run build
 
 `VITE_SERVER_URL` is read at build time; rebuild when it changes. Pages served over `https://` must use a `wss://` server URL.
 
-## CI builds: web, desktop and Android (GitHub Actions)
+A standalone copy of the server with a step-by-step Ubuntu guide (Node.js, PM2, nginx, certbot) is available as **mini-sumo-server**; the same steps work for `apps/server` in this repository.
 
-`.github/workflows/build.yml` runs on every push/PR to `main`, on tags `v*` and manually:
+## Project structure
 
-| Job | Runner | Output artifact |
-| --- | --- | --- |
-| Typecheck & test | ubuntu | (server tests, server build) |
-| Web | ubuntu | `mini-sumo-web` (static site, built for `/<repo>/`); optional GitHub Pages deploy |
-| Desktop | windows / macos / ubuntu | `.exe` installer + portable, `.dmg` (x64 + arm64), `.AppImage` + `.deb` |
-| Android | ubuntu (JDK 21) | `MiniSumo-android-debug.apk`, plus signed release `.apk`/`.aab` if a keystore is configured |
-| GitHub Release | ubuntu | on `v*` tags: everything above attached to a release |
-
-`apps/desktop` and `apps/mobile` are **not** npm workspaces: a plain `npm install` at the root never downloads Electron or Capacitor. They install on demand (`npm run desktop:install`, `npm run android:install`).
-
-Desktop is an **Electron** shell (`apps/desktop`) that serves the built client from `http://127.0.0.1:41730`. It is packaged by `apps/desktop/scripts/package.mjs`, which runs electron-builder from an isolated staging folder so the surrounding npm workspace is never bundled into the app. Set `repository` in `apps/desktop/package.json` to your GitHub repo (CI overrides it with `GITHUB_REPOSITORY`). Android is a **Capacitor** shell (`apps/mobile`); the native project is generated in CI (`cap add android`), so `apps/mobile/android/` is not committed. Icons and splash come from `apps/desktop/build/icon.png` and `apps/mobile/assets/`.
-
-**The apps are clients only.** The Colyseus server still has to run somewhere (see [Deployment](#deployment)). Configure the repository under *Settings → Secrets and variables → Actions*:
-
-| Name | Kind | Required | Purpose |
-| --- | --- | --- | --- |
-| `VITE_SERVER_URL` | variable | yes | Public server, e.g. `wss://sumo-api.example.com`. Android requires `wss://`. |
-| `VITE_PUBLIC_URL` | variable | no | Web address used in invite links from the apps. Defaults to `https://<owner>.github.io/<repo>/`. |
-| `DEPLOY_PAGES` | variable | no | `true` to publish the web build to GitHub Pages from `main` (also set *Settings → Pages → Source: GitHub Actions*). |
-| `ANDROID_KEYSTORE_BASE64` | secret | no | `base64 -w0 release.keystore` |
-| `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | secrets | no | Keystore credentials |
-
-Create a release: `git tag v1.0.0 && git push origin v1.0.0`. The tag sets the desktop version and Android `versionName`; the Android `versionCode` is the workflow run number.
-
-Notes:
-- Desktop builds are **unsigned**. Windows SmartScreen shows a warning ("More info → Run anyway"); on macOS right-click the app and choose *Open*, or run `xattr -dr com.apple.quarantine "/Applications/Mini Sumo.app"`.
-- The debug APK installs directly on a phone (allow "install unknown apps"). Use the signed AAB for Google Play.
-
-Local equivalents:
-
-```bash
-npm run desktop          # build web + launch Electron
-npm run build:desktop    # build web + package for the current OS (apps/desktop/release/)
-npm run android:install && cd apps/mobile && npx cap add android && cd ../..   # once; needs Android SDK + JDK 21
-npm run build:android    # build web + cap sync; then: npm run android:open --prefix apps/mobile
 ```
+mini-sumo-3d/
+├── apps/
+│   ├── client/          # React + React Three Fiber web client (Vite)
+│   ├── server/          # Colyseus room, game session, simulation, tests
+│   ├── desktop/         # Electron shell + packaging script (electron-builder)
+│   └── mobile/          # Capacitor config and Android icon/splash sources
+├── packages/shared/     # message names, constants, synced state types, credits
+├── tools/               # release notes and screenshot automation
+├── docs/                # architecture notes, screenshots, social preview, Persian guide
+├── .github/             # CI, release and screenshot workflows, issue & PR templates
+├── CHANGELOG.md · CODE_SIGNING.md · CONTRIBUTING.md · SECURITY.md · PRIVACY.md
+└── LICENSE
+```
+
+How the server, client and networking fit together, the synced state, the room lifecycle and the disconnect rules: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Technology
+
+| Area | Stack |
+| --- | --- |
+| Client | React 19, React Three Fiber 9, three.js, Vite 6, TypeScript |
+| Server | Colyseus 0.16, @colyseus/schema 3, Node.js 22, TypeScript |
+| Desktop | Electron 37, electron-builder 26 |
+| Android | Capacitor 7 |
+| Tests and CI | Vitest, GitHub Actions, Playwright (screenshots) |
+
+## Limitations
+
+- No reconnection: a dropped connection ends your participation in the room.
+- No client-side prediction; on high-latency links your own movement feels delayed.
+- Single server instance; no horizontal scaling configuration.
+- No ready-check, spectator joining, accounts, or persistent stats.
+- Room codes are the Colyseus room ids (about 9 case-sensitive characters). Privacy means "not listed"; anyone with the code can join. It is not an authorization mechanism.
+- No automated Colyseus integration tests (`@colyseus/testing`); room logic is tested through `GameSession`, which the room delegates to.
+- Name tags use a canvas texture; they redraw once the web font loads, and fall back to system rounded fonts offline.
+- Google Fonts is loaded from the network; the game works without it using fallback fonts.
+- Colyseus 0.16 is used deliberately (stable, well known APIs). Newer 0.17/0.18 releases rename the client SDK (`@colyseus/sdk`) and change server bootstrapping; upgrade following the official migration guides.
+- The public server isn't live yet; online play needs your own server for now.
+- Desktop and Android builds aren't code-signed ([CODE_SIGNING.md](CODE_SIGNING.md)).
 
 ## Troubleshooting
 
@@ -314,23 +301,22 @@ npm run build:android    # build web + cap sync; then: npm run android:open --pr
 - **`process.loadEnvFile is not a function`:** upgrade to Node.js 20.12+.
 - **Decorator or schema errors on the server:** `experimentalDecorators: true` and `useDefineForClassFields: false` must stay in `apps/server/tsconfig.json`.
 
-## Known limitations
+## Contributing
 
-- No reconnection: a dropped connection ends your participation in the room.
-- No client-side prediction; on high-latency links your own movement feels delayed.
-- Single server instance; no horizontal scaling configuration.
-- No ready-check, spectator joining, accounts, or persistent stats.
-- Room codes are the Colyseus room ids (about 9 case-sensitive characters). Privacy means "not listed"; anyone with the code can join. It is not an authorization mechanism.
-- No automated Colyseus integration tests (`@colyseus/testing`); room logic is tested through `GameSession`, which the room delegates to.
-- Name tags use a canvas texture; they redraw once the web font loads, and fall back to system rounded fonts offline.
-- Google Fonts is loaded from the network; the game works without it using fallback fonts.
-- Colyseus 0.16 is used deliberately (stable, well known APIs). Newer 0.17/0.18 releases rename the client SDK (`@colyseus/sdk`) and change server bootstrapping; upgrade following the official migration guides.
+Contributions are very welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) and follow the [Code of Conduct](CODE_OF_CONDUCT.md). A good first step: play a match and [open an issue](https://github.com/Jolly-Panda-Works/mini-sumo-3d/issues/new/choose).
 
-## Credits
+## Security
 
-Mini Sumo is designed and developed by **Usef Farahmand**.
+Found a vulnerability? Please don't open a public issue. See [SECURITY.md](SECURITY.md).
 
-- Website: <https://www.useffarahmand.com>
-- Game page: <https://www.useffarahmand.com/en/projects/mini-sumo>
+## Privacy
 
-The credit appears in the main menu, the settings "About" section, the desktop app metadata (About panel, installer, copyright) and the server's `/health` response.
+No accounts, analytics or ads. What little the game stores is described in [PRIVACY.md](PRIVACY.md).
+
+## License
+
+Released under the [MIT License](LICENSE) © 2026 [Usef Farahmand](https://github.com/Usef-Farahmand) · [useffarahmand.com](https://www.useffarahmand.com) · [Game page](https://www.useffarahmand.com/en/projects/mini-sumo)
+
+## Acknowledgments
+
+[React Three Fiber](https://r3f.docs.pmnd.rs/) · [three.js](https://threejs.org/) · [Colyseus](https://colyseus.io/) · [Vite](https://vite.dev/) · [Electron](https://www.electronjs.org/) · [electron-builder](https://www.electron.build/) · [Capacitor](https://capacitorjs.com/) · [Vitest](https://vitest.dev/) · [Playwright](https://playwright.dev/) · [Baloo 2](https://fonts.google.com/specimen/Baloo+2)

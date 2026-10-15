@@ -3,6 +3,7 @@ export const CREDITS = {
   author: "Usef Farahmand",
   website: "https://www.useffarahmand.com",
   projectUrl: "https://www.useffarahmand.com/en/projects/mini-sumo",
+  sourceUrl: "https://github.com/Jolly-Panda-Works/mini-sumo-3d",
 } as const;
 
 /** Colyseus room type name registered on the server. */

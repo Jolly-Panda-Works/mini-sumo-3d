@@ -1,0 +1,59 @@
+# Plays a real 3-player local match in headless Chromium and commits fresh README screenshots
+# to docs/screenshots/. Run it manually: Actions -> Screenshots -> Run workflow.
+name: Screenshots
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    env:
+      VITE_SERVER_URL: ws://localhost:2567
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: "**/package.json"
+      - name: Install dependencies
+        run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - name: Build
+        run: |
+          npm run build:shared
+          npm run build -w @mini-sumo/server
+          npm run build -w @mini-sumo/client
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Start server and client
+        run: |
+          (cd apps/server && HOST=127.0.0.1 nohup node dist/index.js > ../../server.log 2>&1 &)
+          (nohup npm run preview -w @mini-sumo/client -- --port 4173 --strictPort > preview.log 2>&1 &)
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:2567/health && curl -sf http://localhost:4173/ > /dev/null && break
+            sleep 1
+          done
+      - name: Capture screenshots
+        run: node tools/screenshots.mjs http://localhost:4173/ docs/screenshots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: |
+            docs/screenshots/*.png
+            server.log
+            preview.log
+      - name: Commit screenshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/screenshots/*.png
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "docs: update README screenshots [skip ci]"
+          git push

@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest an idea for gameplay, visuals, controls or tooling.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would you like?
+      description: Describe the idea and the situation where it helps.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Gameplay / rules
+        - Controls
+        - Visuals / audio
+        - Lobby / rooms
+        - Desktop / Android apps
+        - Server / hosting
+        - Docs / CI
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd like to help implement this

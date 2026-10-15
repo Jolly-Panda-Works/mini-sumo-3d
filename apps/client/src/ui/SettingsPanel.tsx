@@ -49,7 +49,8 @@ export function SettingsPanel() {
         <section className="about" aria-label="About Mini Sumo">
           <p className="field__label">About</p>
           <p className="about__text">
-            Mini Sumo is made by <strong>{CREDITS.author}</strong>.
+            Mini Sumo {import.meta.env.VITE_APP_VERSION ? `v${import.meta.env.VITE_APP_VERSION}` : ""} is made by{" "}
+            <strong>{CREDITS.author}</strong> and is open source under the MIT License.
           </p>
           <p className="about__links">
             <a href={CREDITS.projectUrl} target="_blank" rel="noopener noreferrer">
@@ -57,6 +58,9 @@ export function SettingsPanel() {
             </a>
             <a href={CREDITS.website} target="_blank" rel="noopener noreferrer">
               useffarahmand.com
+            </a>
+            <a href={CREDITS.sourceUrl} target="_blank" rel="noopener noreferrer">
+              Source code
             </a>
           </p>
         </section>

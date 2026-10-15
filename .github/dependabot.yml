@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directories: ["/", "/apps/desktop", "/apps/mobile"]
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+    ignore:
+      # Colyseus 0.x minor versions contain breaking changes; upgrade deliberately.
+      - dependency-name: "colyseus"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
+      - dependency-name: "@colyseus/*"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
+      - dependency-name: "colyseus.js"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly

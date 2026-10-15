@@ -1,6 +1,10 @@
 /// <reference types="node" />
+import { readFileSync } from "node:fs";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+
+// Version shown in Settings -> About. CI sets VITE_APP_VERSION; locally use the root package.json.
+process.env.VITE_APP_VERSION ||= JSON.parse(readFileSync(new URL("../../package.json", import.meta.url), "utf8")).version;
 
 export default defineConfig({
   // "/" for normal hosting, Electron and Capacitor; "/<repo>/" for GitHub Pages (set VITE_BASE in CI).

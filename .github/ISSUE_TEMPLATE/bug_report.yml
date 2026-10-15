@@ -1,0 +1,56 @@
+name: Bug report
+description: Something in the game or the builds doesn't work as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting! Please check existing issues first. Security problems go to SECURITY.md, not here.
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Web (desktop browser)
+        - Web (mobile browser)
+        - Windows app
+        - macOS app
+        - Linux app
+        - Android app
+        - Server / self-hosting
+        - Build / CI
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: From Settings → About in the game, or the release name.
+      placeholder: "0.1.12"
+  - type: input
+    id: environment
+    attributes:
+      label: Browser / OS / device
+      placeholder: "Chrome 141 on Windows 11, Pixel 7 with Android 16…"
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Create a private room
+        2. Join from a second tab
+        3. …
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Browser console errors, server logs, or a screenshot.
+      render: text
