@@ -1,7 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { CanvasTexture, Sprite } from "three";
-import { PLAYER_COLORS, Phase, lerpAngle } from "@mini-sumo/shared";
+import { PLAYER_COLORS, Phase, lerpAngle, type Appearance } from "@mini-sumo/shared";
 import { roomManager } from "../network/RoomManager";
 import { lastHitAt } from "./effectsBus";
 import { createNameTagTexture } from "./nameTag";
@@ -14,6 +14,10 @@ interface Props {
   name: string;
   colorIndex: number;
   isYou: boolean;
+  hair: number;
+  hairColor: number;
+  face: number;
+  outfit: number;
 }
 
 /** Converts gameplay facing (atan2(y, x)) to a three.js yaw for a model facing +Z. */
@@ -25,7 +29,8 @@ function yawFromAngle(angle: number): number {
  * Renders one player. Positions come only from the authoritative Colyseus state and are
  * smoothed for display; nothing here influences gameplay.
  */
-export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou }: Props) {
+export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair, hairColor, face, outfit }: Props) {
+  const appearance = useMemo<Appearance>(() => ({ hair, hairColor, face, outfit }), [hair, hairColor, face, outfit]);
   const color = PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]!.hex;
   const parts = useSumoParts();
   const tagRef = useRef<Sprite>(null);
@@ -152,7 +157,7 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou }: Pr
 
   return (
     <>
-      <SumoModel parts={parts} color={color} />
+      <SumoModel parts={parts} color={color} appearance={appearance} />
       <sprite ref={tagRef} scale={[2.3, 0.52, 1]} renderOrder={10} visible={false}>
         {texture && <spriteMaterial key={texture.uuid} map={texture} depthTest={false} transparent />}
       </sprite>

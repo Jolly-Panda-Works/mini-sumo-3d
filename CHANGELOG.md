@@ -11,6 +11,7 @@ Builds from `main` are released automatically as `MAJOR.MINOR.<build number>`; t
 - Bots: the host of a private room can add and remove computer-controlled wrestlers in the lobby.
 - Quick match: *Play now* waits up to 30 seconds for other players, then fills the room with bots (ordinary random names, same look as players) and starts automatically.
 - First-launch name prompt; the name is saved for next time.
+- Character customisation before a match: hair style and colour, face and outfit, with a live 3D preview. The look is saved, sent when joining and synced to everyone; the belt keeps the player colour. Bots get a random look.
 
 ## [0.1.0] - 2026-10-15
 

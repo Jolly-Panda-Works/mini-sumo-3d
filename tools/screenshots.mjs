@@ -54,6 +54,15 @@ try {
   await sleep(800);
   await shot(host.page, "menu");
 
+  // Wardrobe: give the host a custom look.
+  await host.page.getByRole("button", { name: "Customise wrestler" }).click();
+  for (const option of ["Mohawk", "Ginger", "Fierce", "Champion"]) {
+    await host.page.getByRole("button", { name: option, exact: true }).click();
+  }
+  await sleep(1500);
+  await shot(host.page, "wardrobe");
+  await host.page.getByRole("button", { name: "Done" }).click();
+
   await host.page.getByRole("button", { name: "Create private room" }).click();
   await host.page.waitForSelector(".room-code");
   const code = (await host.page.locator(".room-code").innerText()).trim();
@@ -65,6 +74,9 @@ try {
     await guest.page.goto(`${BASE}?room=${encodeURIComponent(code)}`);
     await guest.page.waitForSelector("canvas");
     await setName(guest.page, guest.name);
+    await guest.page.getByRole("button", { name: "Customise wrestler" }).click();
+    await guest.page.getByRole("button", { name: "Surprise me" }).click();
+    await guest.page.getByRole("button", { name: "Done" }).click();
     await guest.page.getByRole("button", { name: "Join room" }).click();
     await guest.page.waitForSelector(".roster");
   }

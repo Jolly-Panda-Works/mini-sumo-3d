@@ -5,12 +5,13 @@ import { inputController } from "./input/InputController";
 import { gameStore, sessionStore } from "./network/RoomManager";
 import { settingsStore, touchControlsEnabled } from "./settings";
 import { useStore } from "./store";
-import { setSettingsOpen, uiStore } from "./uiStore";
+import { setSettingsOpen, setWardrobeOpen, uiStore } from "./uiStore";
 import { Countdown } from "./ui/Countdown";
 import { HUD } from "./ui/HUD";
 import { Lobby } from "./ui/Lobby";
 import { MainMenu } from "./ui/MainMenu";
 import { NameGate } from "./ui/NameGate";
+import { Wardrobe } from "./ui/Wardrobe";
 import { Results } from "./ui/Results";
 import { SettingsPanel } from "./ui/SettingsPanel";
 import { Toasts } from "./ui/Toasts";
@@ -31,10 +32,17 @@ export function App() {
     return () => inputController.stop();
   }, [inRoom]);
 
+  // The wardrobe is a lobby-only screen: close it when a bout starts.
+  useEffect(() => {
+    if (inBout) setWardrobeOpen(false);
+  }, [inBout]);
+
   // Escape opens/closes the local settings overlay. It never pauses the shared match.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setSettingsOpen(!uiStore.get().settingsOpen);
+      if (e.key !== "Escape") return;
+      if (uiStore.get().wardrobeOpen) setWardrobeOpen(false);
+      else setSettingsOpen(!uiStore.get().settingsOpen);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -64,6 +72,7 @@ export function App() {
       <div className="ui">
         {screen}
         {inRoom && <Toasts />}
+        {ui.wardrobeOpen && (!inRoom || game.phase === Phase.Waiting || game.phase === Phase.Lobby) && <Wardrobe />}
         {ui.settingsOpen && <SettingsPanel />}
         {!inRoom && !settings.onboarded && <NameGate />}
       </div>

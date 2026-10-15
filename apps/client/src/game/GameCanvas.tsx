@@ -41,7 +41,19 @@ export function GameCanvas() {
       />
       <Arena />
       {inRoom
-        ? game.players.map((p) => <NetSumo key={p.id} id={p.id} name={p.name} colorIndex={p.colorIndex} isYou={p.isYou} />)
+        ? game.players.map((p) => (
+            <NetSumo
+              key={p.id}
+              id={p.id}
+              name={p.name}
+              colorIndex={p.colorIndex}
+              isYou={p.isYou}
+              hair={p.appearance.hair}
+              hairColor={p.appearance.hairColor}
+              face={p.appearance.face}
+              outfit={p.appearance.outfit}
+            />
+          ))
         : <MenuSumos />}
       <Effects />
       <CameraRig orbit={!inRoom} />

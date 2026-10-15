@@ -57,12 +57,14 @@ Party games are best when everyone understands them in five seconds. Mini Sumo h
 - **Invite with a link:** create a private room and share it, or jump into a public quick match.
 - **Never wait long:** *Play now* finds an open room or creates one. If nobody shows up within 30 seconds, computer-controlled wrestlers with ordinary names fill the ring and the bout starts.
 - **Practice with bots:** the host of a private room can add or remove bots in the lobby.
+- **Make it yours:** pick a hair style and colour, a face and an outfit before the bout. Your belt keeps your player colour and number, so everyone can still tell who is who.
 
 ## How to play
 
 | | Step | What happens |
 | --- | --- | --- |
 | 1 | **Pick a name** | The first launch asks for your name and remembers it. Change it any time on the main menu. |
+| | **Dress up** | *Customise wrestler* (main menu or lobby): 5 hair styles, 5 hair colours, 5 faces and 4 outfits, with a live 3D preview. |
 | 2 | **Get a room** | *Play now* joins an open public room or creates one; if no one joins within 30 seconds, the room fills up and starts by itself. *Create private room* gives you a code and an invite link for friends. |
 | 3 | **Start** | When at least two wrestlers are in, the host presses *Start match* (in a private room the host can also *Add bot*). A synced 3, 2, 1, GO! follows. |
 | 4 | **Push** | Run into opponents to shove them. Time your **dash** for a heavy hit, then recover before you slide out yourself. |
@@ -100,8 +102,8 @@ Tuning lives in `apps/server/src/simulation/SimulationConfig.ts` (acceleration 2
 | <img src="docs/screenshots/menu.png" alt="Main menu" width="440" /> | <img src="docs/screenshots/lobby.png" alt="Lobby with three players" width="440" /> |
 | **First launch** | **Countdown** |
 | <img src="docs/screenshots/welcome.png" alt="Name prompt on first launch" width="440" /> | <img src="docs/screenshots/countdown.png" alt="Countdown" width="440" /> |
-| **Results** | |
-| <img src="docs/screenshots/results.png" alt="Results screen" width="440" /> | |
+| **Customise your wrestler** | **Results** |
+| <img src="docs/screenshots/wardrobe.png" alt="Wardrobe with hair, face and outfit options" width="440" /> | <img src="docs/screenshots/results.png" alt="Results screen" width="440" /> |
 
 <p align="center"><img src="docs/screenshots/mobile.png" alt="Mini Sumo on a phone with touch controls" width="260" /><br /><i>Touch controls on a phone.</i></p>
 
@@ -141,7 +143,7 @@ Open two tabs, create a private room in one and paste the invite link into the o
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Shared package (watch), server and client together |
-| `npm test` | 78 server tests: movement, collisions, ring-outs, dash, bots, quick match, match lifecycle, lobby and disconnects |
+| `npm test` | 83 server tests: movement, collisions, ring-outs, dash, bots, quick match, match lifecycle, lobby and disconnects |
 | `npm run typecheck` | TypeScript checks for server and client |
 | `npm run build` | Production build of shared, server and web client |
 | `npm start` | Start the built server |

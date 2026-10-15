@@ -49,6 +49,9 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
     this.onMessage(ClientMessage.ReturnToLobby, (client) => {
       this.reply(client, this.session.requestReturnToLobby(client.sessionId));
     });
+    this.onMessage(ClientMessage.SetAppearance, (client, message: unknown) => {
+      this.reply(client, this.session.setAppearance(client.sessionId, message));
+    });
     this.onMessage(ClientMessage.AddBot, (client) => {
       this.reply(client, this.session.addBot(client.sessionId));
     });
@@ -67,7 +70,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
   }
 
   override onJoin(client: Client, options: JoinOptions = {}): void {
-    const result = this.session.addPlayer(client.sessionId, options.name);
+    const result = this.session.addPlayer(client.sessionId, options.name, options.appearance);
     if (!result.ok) throw new ServerError(4003, result.error);
     this.flushEvents();
     this.syncState();
@@ -171,6 +174,10 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
       ps.elimReason = p.elimReason;
       // Quick-match bots are indistinguishable from players on the wire.
       ps.isBot = p.isBot && !s.quickMatch;
+      ps.hair = p.appearance.hair;
+      ps.hairColor = p.appearance.hairColor;
+      ps.face = p.appearance.face;
+      ps.outfit = p.appearance.outfit;
     }
 
     this.updateLock();

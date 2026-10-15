@@ -1,9 +1,11 @@
 import { useFrame } from "@react-three/fiber";
-import { PLAYER_COLORS } from "@mini-sumo/shared";
+import { DEFAULT_APPEARANCE, PLAYER_COLORS, type Appearance } from "@mini-sumo/shared";
+import { settingsStore } from "../settings";
+import { useStore } from "../store";
 import { SumoModel, useSumoParts } from "./SumoModel";
 
 /** Decorative pair shown behind the main menu (purely cosmetic, not networked). */
-function StompingSumo({ x, colorIndex, phase }: { x: number; colorIndex: number; phase: number }) {
+function StompingSumo({ x, colorIndex, phase, appearance }: { x: number; colorIndex: number; phase: number; appearance: Appearance }) {
   const parts = useSumoParts();
   useFrame((frame) => {
     const t = frame.clock.elapsedTime + phase;
@@ -23,14 +25,18 @@ function StompingSumo({ x, colorIndex, phase }: { x: number; colorIndex: number;
     }
     if (parts.eyes.current) parts.eyes.current.scale.y = t % 3.1 < 0.12 ? 0.2 : 1;
   });
-  return <SumoModel parts={parts} color={PLAYER_COLORS[colorIndex]!.hex} />;
+  return <SumoModel parts={parts} color={PLAYER_COLORS[colorIndex]!.hex} appearance={appearance} />;
 }
 
+const RIVAL: Appearance = { hair: 2, hairColor: 1, face: 4, outfit: 1 };
+
+/** The left wrestler wears the player's own look, so the menu previews the customisation. */
 export function MenuSumos() {
+  const { appearance } = useStore(settingsStore);
   return (
     <>
-      <StompingSumo x={-1.8} colorIndex={0} phase={0} />
-      <StompingSumo x={1.8} colorIndex={1} phase={1.2} />
+      <StompingSumo x={-1.8} colorIndex={0} phase={0} appearance={appearance ?? DEFAULT_APPEARANCE} />
+      <StompingSumo x={1.8} colorIndex={1} phase={1.2} appearance={RIVAL} />
     </>
   );
 }

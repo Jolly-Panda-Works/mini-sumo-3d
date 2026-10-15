@@ -18,6 +18,10 @@ export interface SyncedPlayer {
   elimReason: string;
   /** True only in private rooms, where the host manages bots. Always false in quick match. */
   isBot: boolean;
+  hair: number;
+  hairColor: number;
+  face: number;
+  outfit: number;
 }
 
 /** Minimal read-only view of a Colyseus MapSchema. */

@@ -3,7 +3,7 @@ import { CREDITS, MAX_PLAYERS, MIN_PLAYERS, NAME_MAX_LENGTH } from "@mini-sumo/s
 import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
-import { setSettingsOpen } from "../uiStore";
+import { setSettingsOpen, setWardrobeOpen } from "../uiStore";
 
 const inviteCode = new URLSearchParams(window.location.search).get("room") ?? "";
 
@@ -53,6 +53,10 @@ export function MainMenu() {
             enterKeyHint="go"
           />
         </label>
+
+        <button className="btn" onClick={() => setWardrobeOpen(true)}>
+          Customise wrestler
+        </button>
 
         {!inviteCode && (
           <button className="btn btn--primary btn--big" disabled={busy} onClick={() => void roomManager.quickPlay(name)}>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { MIN_PLAYERS, Phase } from "@mini-sumo/shared";
 import { gameStore, roomManager, sessionStore } from "../network/RoomManager";
 import { useStore } from "../store";
-import { setSettingsOpen } from "../uiStore";
+import { setSettingsOpen, setWardrobeOpen } from "../uiStore";
 import { GearIcon } from "./MainMenu";
 import { PlayerBadge } from "./PlayerBadge";
 
@@ -96,6 +96,10 @@ export function Lobby() {
             ),
           )}
         </ul>
+
+        <button className="btn" onClick={() => setWardrobeOpen(true)}>
+          Customise wrestler
+        </button>
 
         {searching && (
           <div className="search" role="status" aria-live="polite">

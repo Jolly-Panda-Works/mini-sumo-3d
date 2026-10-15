@@ -9,6 +9,8 @@ export const ClientMessage = {
   AddBot: "addBot",
   /** Host of a private room: remove a computer-controlled wrestler ({ id }). */
   RemoveBot: "removeBot",
+  /** Change your own appearance (lobby only). Payload: Appearance. */
+  SetAppearance: "setAppearance",
 } as const;
 export type ClientMessage = (typeof ClientMessage)[keyof typeof ClientMessage];
 
@@ -58,6 +60,8 @@ export interface ErrorPayload {
 /** Options accepted by client.create / joinOrCreate / joinById. */
 export interface JoinOptions {
   name?: string;
+  /** Initial character look (see appearance.ts); validated by the server. */
+  appearance?: { hair: number; hairColor: number; face: number; outfit: number };
   private?: boolean;
   maxPlayers?: number;
 }

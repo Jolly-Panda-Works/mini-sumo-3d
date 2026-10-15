@@ -11,7 +11,9 @@ import {
   type JoinOptions,
   type RemoveBotPayload,
   type SyncedState,
+  type Appearance,
 } from "@mini-sumo/shared";
+import { settingsStore } from "../settings";
 import { audio } from "../audio/AudioManager";
 import { resolveServerUrl } from "../config";
 import { dustBus, impactBus, lastHitAt, shakeBus } from "../game/effectsBus";
@@ -31,6 +33,7 @@ export interface UIPlayer {
   dashCooldownMs: number;
   /** Only true in private rooms; quick-match bots look like everyone else. */
   isBot: boolean;
+  appearance: Appearance;
   isHost: boolean;
   isYou: boolean;
 }
@@ -126,12 +129,12 @@ class RoomManager {
   }
 
   quickPlay(name: string): Promise<boolean> {
-    const options: JoinOptions = { name, private: false, maxPlayers: 4 };
+    const options: JoinOptions = { name, private: false, maxPlayers: 4, appearance: settingsStore.get().appearance };
     return this.connect(() => this.client.joinOrCreate(ROOM_NAME, options));
   }
 
   createPrivate(name: string, maxPlayers: number): Promise<boolean> {
-    const options: JoinOptions = { name, private: true, maxPlayers };
+    const options: JoinOptions = { name, private: true, maxPlayers, appearance: settingsStore.get().appearance };
     return this.connect(() => this.client.create(ROOM_NAME, options));
   }
 
@@ -141,7 +144,7 @@ class RoomManager {
       sessionStore.update({ error: "Room codes are letters and numbers. Paste the code or open the invite link." });
       return Promise.resolve(false);
     }
-    const options: JoinOptions = { name };
+    const options: JoinOptions = { name, appearance: settingsStore.get().appearance };
     return this.connect(() => this.client.joinById(trimmed, options));
   }
 
@@ -176,6 +179,11 @@ class RoomManager {
 
   returnToLobby(): void {
     this._room?.send(ClientMessage.ReturnToLobby);
+  }
+
+  /** Sends the current look to the room (the server only accepts it in the lobby). */
+  setAppearance(appearance: Appearance): void {
+    this._room?.send(ClientMessage.SetAppearance, appearance);
   }
 
   addBot(): void {
@@ -218,6 +226,8 @@ class RoomManager {
 
   private attach(room: Room): void {
     this._room = room;
+    // Make sure the server has the latest look, even if it changed while joining.
+    room.send(ClientMessage.SetAppearance, settingsStore.get().appearance);
     this.snapshotKey = "";
     this.lastPatchAt = performance.now();
     this.lastCountdownSecond = -1;
@@ -328,6 +338,7 @@ class RoomManager {
         elimReason: p.elimReason,
         dashCooldownMs: p.dashCooldownMs,
         isBot: Boolean(p.isBot),
+        appearance: { hair: p.hair ?? 0, hairColor: p.hairColor ?? 0, face: p.face ?? 0, outfit: p.outfit ?? 0 },
         isHost: id === state.hostId,
         isYou: id === you,
       });

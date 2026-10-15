@@ -1,4 +1,13 @@
-import { MAX_PLAYERS, MIN_PLAYERS, PLAYER_COLORS, Phase, type EliminationReason } from "@mini-sumo/shared";
+import {
+  MAX_PLAYERS,
+  MIN_PLAYERS,
+  PLAYER_COLORS,
+  Phase,
+  randomAppearance,
+  sanitizeAppearance,
+  type Appearance,
+  type EliminationReason,
+} from "@mini-sumo/shared";
 import { applyArenaEliminations, ringPositions } from "../simulation/ArenaSystem.js";
 import { resolveCollisions } from "../simulation/CollisionSystem.js";
 import { canTransition, computeStandings, determineOutcome } from "../simulation/MatchSystem.js";
@@ -23,6 +32,8 @@ export interface SessionPlayer extends SimBody {
   isBot: boolean;
   /** Simulation time of the bot's next decision. */
   nextThinkAt: number;
+  /** Hair, face and outfit. The belt colour always comes from colorIndex. */
+  appearance: Appearance;
 }
 
 export interface SessionOptions {
@@ -140,12 +151,12 @@ export class GameSession {
 
   // ---------------------------------------------------------------- membership
 
-  addPlayer(id: string, rawName: unknown): ActionResult {
+  addPlayer(id: string, rawName: unknown, rawAppearance?: unknown): ActionResult {
     if (this.players.has(id)) return fail("Already in this room.");
     const check = this.canJoin();
     if (!check.ok) return check;
 
-    this.insertPlayer(id, (colorIndex) => sanitizeName(rawName, `Sumo ${colorIndex + 1}`), false);
+    this.insertPlayer(id, (colorIndex) => sanitizeName(rawName, `Sumo ${colorIndex + 1}`), false, sanitizeAppearance(rawAppearance));
     if (!this.hostId) this.hostId = id;
     this.afterRosterChange();
     return OK;
@@ -174,7 +185,17 @@ export class GameSession {
     return OK;
   }
 
-  private insertPlayer(id: string, name: (colorIndex: number) => string, isBot: boolean): SessionPlayer {
+  /** Players customise their look before a match: only in waiting/lobby. */
+  setAppearance(id: string, raw: unknown): ActionResult {
+    const player = this.players.get(id);
+    if (!player || !player.connected || player.isBot) return fail("Unknown player.");
+    if (!this.consumeToken(player)) return fail("Too many requests.");
+    if (this.phase !== Phase.Waiting && this.phase !== Phase.Lobby) return fail("You can change your look in the lobby.");
+    player.appearance = sanitizeAppearance(raw);
+    return OK;
+  }
+
+  private insertPlayer(id: string, name: (colorIndex: number) => string, isBot: boolean, appearance: Appearance): SessionPlayer {
     const used = new Set([...this.players.values()].map((p) => p.colorIndex));
     let colorIndex = 0;
     while (used.has(colorIndex) && colorIndex < PLAYER_COLORS.length - 1) colorIndex++;
@@ -191,6 +212,7 @@ export class GameSession {
       tokensUpdatedAt: this.time,
       isBot,
       nextThinkAt: 0,
+      appearance,
     };
     this.players.set(id, player);
     return player;
@@ -200,7 +222,7 @@ export class GameSession {
     let id = randomId(this.rng);
     while (this.players.has(id)) id = randomId(this.rng);
     const names = [...this.players.values()].map((p) => p.name);
-    return this.insertPlayer(id, () => pickBotName(names, this.rng), true);
+    return this.insertPlayer(id, () => pickBotName(names, this.rng), true, randomAppearance(this.rng));
   }
 
   private afterRosterChange(): void {

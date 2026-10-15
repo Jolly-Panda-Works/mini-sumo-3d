@@ -19,6 +19,11 @@ export class PlayerState extends Schema {
   @type("string") elimReason = "";
   /** Only true in private rooms (the host manages bots there). Never set in quick match. */
   @type("boolean") isBot = false;
+  /** Appearance indexes (see packages/shared appearance.ts). */
+  @type("uint8") hair = 0;
+  @type("uint8") hairColor = 0;
+  @type("uint8") face = 0;
+  @type("uint8") outfit = 0;
 }
 
 export class MiniSumoState extends Schema {

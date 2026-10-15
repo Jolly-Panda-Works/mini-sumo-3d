@@ -341,6 +341,93 @@ body {
   }
 }
 
+/* ---------- Wardrobe ---------- */
+
+.wardrobe {
+  width: min(780px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.wardrobe__body {
+  display: grid;
+  grid-template-columns: minmax(200px, 280px) 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.wardrobe__preview {
+  aspect-ratio: 3 / 4;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-control);
+  background: radial-gradient(circle at 50% 35%, #8fb6e0, var(--sky));
+  overflow: hidden;
+}
+
+.wardrobe__options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.wardrobe__group {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--ink);
+  background: #fbf6ee;
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 4px 12px;
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.choice--on {
+  background: var(--sun);
+  box-shadow: 0 3px 0 var(--ink);
+}
+
+.choice:focus-visible {
+  outline: 3px solid var(--coral);
+  outline-offset: 2px;
+}
+
+.choice__swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+}
+
+@media (max-width: 640px) {
+  .wardrobe__body {
+    grid-template-columns: 1fr;
+  }
+  .wardrobe__preview {
+    aspect-ratio: auto;
+    height: 220px;
+  }
+}
+
 /* ---------- First-run name prompt ---------- */
 
 .name-gate {

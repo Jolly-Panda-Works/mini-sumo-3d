@@ -64,7 +64,7 @@ Design decisions:
 - **Authority:** the server owns membership, host, spawn positions, phases, timers, physics, dash cooldowns, eliminations, winners and rematches. Clients send only `input {x, y}` (direction), `dash`, `start`, `rematch` and `returnToLobby`. Positions, eliminations or winners sent by a client are not accepted by any handler.
 - **Identity:** every message is attributed via the Colyseus `client.sessionId`; no client-supplied ids are trusted. Host checks compare against the server's `hostId`.
 - **Tick:** fixed 30 Hz steps (`SimulationConfig.tickRate`) driven by `setSimulationInterval`, with an accumulator, a cap of 4 steps per update and a 250 ms clamp on real deltas after stalls. Patch rate is also ~30 Hz.
-- **Synced state:** per player `sessionId, name, colorIndex, x, y, vx, vy, angle, alive, connected, dashing, dashCooldownMs, placement, elimReason`; per room `phase, phaseRemainingMs, hostId, winnerId, isDraw, round, maxPlayers, isPrivate, aliveCount, standings`. Particles, camera and animation are client-only.
+- **Synced state:** per player `sessionId, name, colorIndex, x, y, vx, vy, angle, alive, connected, dashing, dashCooldownMs, placement, elimReason, isBot, hair, hairColor, face, outfit`; per room `phase, phaseRemainingMs, hostId, winnerId, isDraw, round, maxPlayers, isPrivate, aliveCount, standings`. Particles, camera and animation are client-only.
 - **Transient events** are Colyseus messages: `impact` (position + strength), `dash`, `eliminated`, `error`.
 - **Smoothing:** the client exponentially interpolates each sumo toward the latest server position. There is **no client-side prediction**; your own wrestler responds after one round trip.
 - **Validation:** inputs must be finite numbers; they are clamped to [-1, 1], normalised, and a deadzone is applied. Names are trimmed, stripped of control and bidi characters and limited to 16 characters. Each client has a token bucket (burst 30, 60 messages/s). Dash requests are checked for phase, alive state and cooldown.
@@ -96,3 +96,7 @@ Bots live entirely on the server (`apps/server/src/game/BotBrain.ts`). Every 120
 - Random noise and the reaction delay keep it beatable.
 
 Quick-match bots get ordinary names (`botNames.ts`) and ids shaped like Colyseus session ids, and `isBot` is never sent for quick-match rooms, so they look like everyone else. In private rooms `isBot` is synced so the host can manage them.
+
+## Character customisation
+
+The look is four small indexes (`hair`, `hairColor`, `face`, `outfit`) defined in `packages/shared/src/appearance.ts`. The client saves them in settings, sends them in the join options and with `setAppearance` while in the lobby. The server validates every field with `sanitizeAppearance` (out-of-range values fall back to the default), only accepts changes in `waiting`/`lobby`, and syncs them per player. The belt colour is never customisable: it is the slot colour, which keeps players identifiable together with the P1–P4 number.
