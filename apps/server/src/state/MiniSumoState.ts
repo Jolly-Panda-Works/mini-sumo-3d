@@ -1,0 +1,36 @@
+import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
+
+/** Synchronized per-player data. Only what clients need for rendering and UI. */
+export class PlayerState extends Schema {
+  @type("string") sessionId = "";
+  @type("string") name = "";
+  @type("uint8") colorIndex = 0;
+  @type("float32") x = 0;
+  @type("float32") y = 0;
+  @type("float32") vx = 0;
+  @type("float32") vy = 0;
+  @type("float32") angle = 0;
+  @type("boolean") alive = true;
+  @type("boolean") connected = true;
+  @type("boolean") dashing = false;
+  /** Remaining dash cooldown, rounded up to 100 ms to limit patch traffic. */
+  @type("uint16") dashCooldownMs = 0;
+  @type("uint8") placement = 0;
+  @type("string") elimReason = "";
+}
+
+export class MiniSumoState extends Schema {
+  @type({ map: PlayerState }) players = new MapSchema<PlayerState>();
+  @type("string") phase = "waiting";
+  /** Server-authoritative time left in the current phase, rounded up to 100 ms. */
+  @type("uint32") phaseRemainingMs = 0;
+  @type("string") hostId = "";
+  @type("string") winnerId = "";
+  @type("boolean") isDraw = false;
+  @type("uint16") round = 0;
+  @type("uint8") maxPlayers = 4;
+  @type("boolean") isPrivate = false;
+  @type("uint8") aliveCount = 0;
+  /** Session ids ordered by final placement (filled when a round ends). */
+  @type(["string"]) standings = new ArraySchema<string>();
+}
