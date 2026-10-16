@@ -37,6 +37,7 @@ export interface LocalRoomOptions {
   arenaId?: string;
   /** Paid entry (local economy). Refunded if the bout never starts. */
   entry?: LocalEntry;
+  level?: number;
 }
 
 /**
@@ -91,7 +92,7 @@ export class LocalConnection implements GameConnection {
       itemY: 0,
       standings: [],
     };
-    this.session.addPlayer(this.sessionId, options.name, options.appearance);
+    this.session.addPlayer(this.sessionId, options.name, options.appearance, options.level);
     this.sync();
     this.lastTick = performance.now();
     this.timer = window.setInterval(() => this.tick(), TICK_MS);
@@ -303,6 +304,8 @@ export class LocalConnection implements GameConnection {
       ps.hairColor = p.appearance.hairColor;
       ps.face = p.appearance.face;
       ps.outfit = p.appearance.outfit;
+      ps.avatar = p.appearance.avatar;
+      ps.level = p.level;
     }
   }
 }

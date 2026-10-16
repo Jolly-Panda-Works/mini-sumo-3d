@@ -1,4 +1,4 @@
-import { FACES, HAIR_COLORS, HAIR_STYLES, OUTFITS, type Appearance } from "./appearance.js";
+import { AVATARS, FACES, HAIR_COLORS, HAIR_STYLES, OUTFITS, type Appearance } from "./appearance.js";
 
 /**
  * Client-facing economy contract. Authoritative prices, fees and rewards live on the server
@@ -21,6 +21,7 @@ const OPTIONS: Record<CosmeticCategory, readonly { label: string; id?: string }[
   hairColor: HAIR_COLORS,
   face: FACES,
   outfit: OUTFITS,
+  avatar: AVATARS,
 };
 
 const slug = (option: { label: string; id?: string }) => option.id ?? option.label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
@@ -57,6 +58,10 @@ export const STARTER_ITEMS: readonly string[] = [
   "outfit.classic",
   "outfit.striped",
   "outfit.polka",
+  "avatar.0",
+  "avatar.1",
+  "avatar.2",
+  "avatar.3",
 ];
 
 /**
@@ -112,15 +117,25 @@ export const COIN_PACKS: readonly CoinPack[] = [
   { id: "coins_70000", name: "Grand festival", coins: 70000, image: "coins/pack7.webp", tag: "Best value" },
 ];
 
+/** Avatars past the free four: 250, then 450, 700 and 1,000 coins for the rarer ones. */
+function avatarPrice(index: number): number {
+  if (index < 12) return 250;
+  if (index < 24) return 450;
+  if (index < 34) return 700;
+  return 1000;
+}
+
 /** Price of an item (0 for starter items). */
 export function cosmeticPrice(itemId: string): number {
-  return STARTER_ITEMS.includes(itemId) ? 0 : (COSMETIC_PRICES[itemId] ?? 500);
+  if (STARTER_ITEMS.includes(itemId)) return 0;
+  if (itemId.startsWith("avatar.")) return avatarPrice(Number(itemId.slice(7)));
+  return COSMETIC_PRICES[itemId] ?? 500;
 }
 
 /** Replaces any option the player doesn't own with the default (index 0). */
 export function restrictToOwned(appearance: Appearance, owned: ReadonlySet<string>): Appearance {
   const keep = (category: CosmeticCategory) => (owned.has(cosmeticItemId(category, appearance[category])) ? appearance[category] : 0);
-  return { hair: keep("hair"), hairColor: keep("hairColor"), face: keep("face"), outfit: keep("outfit") };
+  return { hair: keep("hair"), hairColor: keep("hairColor"), face: keep("face"), outfit: keep("outfit"), avatar: keep("avatar") };
 }
 
 // ---------------------------------------------------------------- API shapes

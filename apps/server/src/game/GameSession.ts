@@ -21,6 +21,14 @@ import { DEFAULT_CONFIG, type SimulationConfig } from "../simulation/SimulationC
 import { sanitizeName, validateMoveInput } from "../validation/InputValidator.js";
 import { decideBot, easedTuning, type BotTuning } from "./BotBrain.js";
 
+/** Bots go for a power-up flag only once it's their turn (players get the first chance). */
+export function botSeeksItem(cfg: SimulationConfig, level: BotLevel, sinceSpawnMs: number): boolean {
+  return sinceSpawnMs >= cfg.botItemDelayMs[level];
+}
+
+/** Levels shown for bots of each difficulty. */
+const BOT_LEVEL_RANGE: Record<BotLevel, [number, number]> = { easy: [1, 4], normal: [3, 8], hard: [7, 14] };
+
 /** The bot that gives up in a bots-only finish: slow, wobbly, never dashes, ignores the edge. */
 const WEAK_BOT: BotTuning = { thinkMinMs: 350, thinkMaxMs: 600, noise: 1.6, dashChance: 0, inputScale: 0.3, edgeStart: 0.97 };
 import { createRng, pickBotName, randomId } from "./botNames.js";
@@ -51,6 +59,8 @@ export interface SessionPlayer extends SimBody {
   /** Active power-up and when it ends. */
   powerUp: PowerUpKind | "";
   powerUpUntil: number;
+  /** Player level shown in the HUD (bots get one that fits their difficulty). */
+  level: number;
 }
 
 /** The power-up flag standing on the ring, if any. */
@@ -215,12 +225,13 @@ export class GameSession {
 
   // ---------------------------------------------------------------- membership
 
-  addPlayer(id: string, rawName: unknown, rawAppearance?: unknown): ActionResult {
+  addPlayer(id: string, rawName: unknown, rawAppearance?: unknown, rawLevel?: unknown): ActionResult {
     if (this.players.has(id)) return fail("Already in this room.");
     const check = this.canJoin();
     if (!check.ok) return check;
 
-    this.insertPlayer(id, (colorIndex) => sanitizeName(rawName, `Sumo ${colorIndex + 1}`), false, sanitizeAppearance(rawAppearance));
+    const player = this.insertPlayer(id, (colorIndex) => sanitizeName(rawName, `Sumo ${colorIndex + 1}`), false, sanitizeAppearance(rawAppearance));
+    player.level = typeof rawLevel === "number" && Number.isFinite(rawLevel) ? Math.max(1, Math.min(999, Math.floor(rawLevel))) : 1;
     if (!this.hostId) this.hostId = id;
     this.afterRosterChange();
     return OK;
@@ -284,6 +295,7 @@ export class GameSession {
       entrance: null,
       powerUp: "",
       powerUpUntil: 0,
+      level: 1,
     };
     this.players.set(id, player);
     return player;
@@ -293,7 +305,10 @@ export class GameSession {
     let id = randomId(this.rng);
     while (this.players.has(id)) id = randomId(this.rng);
     const names = [...this.players.values()].map((p) => p.name);
-    return this.insertPlayer(id, () => pickBotName(names, this.rng), true, randomAppearance(this.rng));
+    const bot = this.insertPlayer(id, () => pickBotName(names, this.rng), true, randomAppearance(this.rng));
+    const [low, high] = BOT_LEVEL_RANGE[this.botLevel];
+    bot.level = low + Math.floor(this.rng() * (high - low + 1));
+    return bot;
   }
 
   private afterRosterChange(): void {
@@ -816,7 +831,7 @@ export class GameSession {
       const decision = decideBot(bot, alive, this.cfg, this.rng, bot.id === this.weakBotId ? WEAK_BOT : tuning);
       // Go for the power-up flag once it's this bot level's turn (players get the first chance).
       const item = this.item;
-      if (item && bot.id !== this.weakBotId && this.time - item.spawnedAt >= this.cfg.botItemDelayMs[this.botLevel]) {
+      if (item && bot.id !== this.weakBotId && botSeeksItem(this.cfg, this.botLevel, this.time - item.spawnedAt)) {
         const dx = item.x - bot.x;
         const dy = item.y - bot.y;
         const len = Math.hypot(dx, dy);

@@ -3805,3 +3805,448 @@ dl.profile__stats {
   border-radius: 10px;
   background: rgba(20, 16, 34, 0.7);
 }
+
+/* ======================================================================
+   Second art pass: player frames, power-up frame, timer, coins, profile,
+   reward board, art buttons, avatars. Positions are measured from the art.
+   ====================================================================== */
+
+/* ---------- Player frames, top left (P1 red, P2 blue, P3 green, P4 yellow) ---------- */
+
+.hud__players {
+  display: none;
+}
+
+.frames {
+  position: absolute;
+  top: calc(8px + var(--safe-top, 0px));
+  left: calc(8px + var(--safe-left, 0px));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: min(40vw, 240px);
+  pointer-events: none;
+}
+
+.frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 700 / 171;
+  background: center / 100% 100% no-repeat;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35));
+}
+
+.frame__avatar {
+  position: absolute;
+  left: 6.9%;
+  top: 15.2%;
+  width: 17.2%;
+  height: 67.8%;
+  object-fit: cover;
+}
+
+.frame__name {
+  position: absolute;
+  left: 32.5%;
+  top: 17.5%;
+  width: 62%;
+  height: 31.6%;
+  display: flex;
+  align-items: center;
+  color: #fff4dc;
+  font-weight: 800;
+  font-size: clamp(0.62rem, 2.6vw, 0.9rem);
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.frame__level {
+  position: absolute;
+  left: 46.5%;
+  top: 55%;
+  width: 7%;
+  height: 27.5%;
+  display: flex;
+  align-items: center;
+  color: #ffd166;
+  font-weight: 900;
+  font-size: clamp(0.6rem, 2.4vw, 0.85rem);
+  line-height: 1;
+}
+
+.frame__powerup {
+  position: absolute;
+  right: 5%;
+  top: 48%;
+  height: 46%;
+  width: auto;
+}
+
+.frame--out {
+  filter: grayscale(0.85) brightness(0.8);
+}
+
+.frame__state {
+  position: absolute;
+  right: 6%;
+  top: 54%;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: #1a1236;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.frame--you .frame__name {
+  color: #ffe7a8;
+}
+
+/* ---------- Timer: the number inside the round frame ---------- */
+
+.hud__timer.timer-circle {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: auto;
+  aspect-ratio: 202 / 207;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--ui-timer-circle) center / contain no-repeat;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+}
+
+.timer-circle__text {
+  margin-top: -4%;
+  color: #3a1d05;
+  font-size: 1.05rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.timer-circle--low .timer-circle__text {
+  color: #c62828;
+}
+
+.timer-circle--low {
+  animation: timer-pulse 0.8s ease-in-out infinite;
+}
+
+/* ---------- Your power-up: emblem in the circle, name and time below ---------- */
+
+.pu-frame {
+  position: absolute;
+  right: calc(8px + var(--safe-right, 0px));
+  top: 30%;
+  width: 84px;
+  aspect-ratio: 174 / 436;
+  background: var(--ui-powerup-frame) center / 100% 100% no-repeat;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.4));
+  animation: powerup-in-right 0.35s cubic-bezier(0.34, 1.5, 0.64, 1);
+  pointer-events: none;
+}
+
+.pu-frame__emblem {
+  position: absolute;
+  left: 22%;
+  top: 7.5%;
+  width: 56%;
+  height: auto;
+}
+
+.pu-frame__name {
+  position: absolute;
+  left: 17.2%;
+  top: 40.4%;
+  width: 65.6%;
+  height: 7.5%;
+  display: grid;
+  place-items: center;
+  color: #fff4dc;
+  font-size: 0.5rem;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.pu-frame__time {
+  position: absolute;
+  left: 17.8%;
+  top: 55.3%;
+  width: 64.4%;
+  height: 37.4%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pu-frame__seconds {
+  color: #ffd166;
+  font-size: 1.6rem;
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.pu-frame__bar {
+  width: 80%;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pu) calc(var(--left) * 100%), rgba(255, 255, 255, 0.2) 0);
+}
+
+.pu-frame--ending {
+  animation: powerup-blink 0.25s steps(2) infinite;
+}
+
+/* ---------- Coin frame: always its own proportions (never stretched) ---------- */
+
+.coin-frame {
+  height: 46px;
+  width: auto;
+  aspect-ratio: 469 / 143;
+  padding: 0 7% 0 24%;
+  background: var(--ui-coin-frame) center / contain no-repeat;
+  font-size: 1.1rem;
+}
+
+.hub__coins.coin-frame {
+  padding: 0 7% 0 24%;
+}
+
+.coin-frame--static {
+  height: 46px;
+}
+
+/* ---------- Profile frame on the home screen ---------- */
+
+.profile-card {
+  position: relative;
+  height: 64px;
+  width: auto;
+  aspect-ratio: 516 / 192;
+  padding: 0;
+  border: 0;
+  background: var(--ui-profile-frame) center / contain no-repeat;
+  cursor: pointer;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.3));
+  justify-self: start;
+}
+
+.profile-card__avatar {
+  position: absolute;
+  left: 3.5%;
+  top: 10.4%;
+  width: 27.9%;
+  height: 76.6%;
+  object-fit: cover;
+}
+
+.profile-card__name {
+  position: absolute;
+  left: 38%;
+  top: 22.9%;
+  width: 52%;
+  height: 26.6%;
+  display: flex;
+  align-items: center;
+  color: #fff4dc;
+  font-weight: 800;
+  font-size: 0.85rem;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-card__level {
+  position: absolute;
+  left: 56%;
+  top: 55.2%;
+  height: 21.9%;
+  display: flex;
+  align-items: center;
+  color: #ffd166;
+  font-weight: 900;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.profile-card:active {
+  transform: translateY(2px);
+}
+
+.profile-card:focus-visible {
+  outline: 3px solid #ffe7a8;
+  outline-offset: 2px;
+}
+
+.hub__profile.profile-card {
+  min-height: 0;
+  padding: 0;
+}
+
+/* ---------- Reward and calculations on the shimenawa board ---------- */
+
+.dlg-results .economy-result.reward-board {
+  position: relative;
+  width: min(100%, 300px);
+  margin: 0 auto;
+  min-height: 220px;
+  padding: 19% 22% 16%;
+  background: var(--ui-reward-board) center / 100% 100% no-repeat;
+  color: #3a1d05;
+  font-size: 0.82rem;
+}
+
+.dlg-results .economy-result.reward-board .hint {
+  color: rgba(58, 29, 5, 0.7);
+}
+
+.dlg-results .reward-board .reward-panel {
+  aspect-ratio: auto;
+  background: none;
+  padding: 0 0 4px;
+  color: #8e1f1f;
+  text-shadow: none;
+}
+
+.dlg-results .reward-board .reward-panel__amount {
+  font-size: 1.45rem;
+}
+
+.dlg-results .reward-board .economy-result__balance {
+  border-top-color: rgba(58, 29, 5, 0.3);
+}
+
+/* ---------- Art buttons ---------- */
+
+.art-btn img {
+  display: block;
+}
+
+.dlg-results .row .art-btn {
+  flex: 1 1 0;
+  max-width: 50%;
+}
+
+.arena-tile__play {
+  flex: none;
+  min-height: 0;
+  width: 100%;
+  margin-top: auto;
+}
+
+.arena-tile__play[aria-disabled="true"] img {
+  filter: grayscale(0.8);
+  opacity: 0.7;
+}
+
+/* ---------- Shop button art with its caption ---------- */
+
+.hub__side-btn--shop .hub__shop-art {
+  width: 60px;
+  aspect-ratio: 360 / 336;
+}
+
+/* ---------- Avatars ---------- */
+
+.profile__avatar {
+  position: relative;
+  flex: none;
+  width: 72px;
+  height: 72px;
+}
+
+.profile__avatar img {
+  width: 100%;
+  height: 100%;
+  border: 3px solid #ffe7a8;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.profile__avatar .level-badge {
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+}
+
+.avatars__grid {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  gap: 6px;
+}
+
+.avatars__item {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 3px solid transparent;
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.avatars__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatars__item--on {
+  border-color: #ffd166;
+  box-shadow: 0 0 0 2px #1a1236;
+}
+
+.avatars__item--locked img {
+  filter: grayscale(0.55) brightness(0.75);
+}
+
+.avatars__price {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1px 0;
+  background: rgba(20, 16, 34, 0.8);
+  color: #ffe7a8;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.avatars__price .coins__img {
+  width: 0.9em;
+  height: 0.9em;
+}
+
+.dlg-avatar-buy {
+  width: min(320px, 100%);
+}
+
+.avatar-buy__img {
+  align-self: center;
+  width: 120px;
+  height: 120px;
+  border: 3px solid #ffe7a8;
+  border-radius: 14px;
+}

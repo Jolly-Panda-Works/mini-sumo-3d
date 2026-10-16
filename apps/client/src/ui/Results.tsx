@@ -51,7 +51,7 @@ export function Results() {
         </ol>
 
         {result && (result.kind !== "rewarded" || result.rewards > 0 || (result.xp ?? 0) > 0) && (
-          <div className="economy-result" role="status">
+          <div className="economy-result reward-board" role="status">
             {won > 0 && (
               <div className="reward-panel">
                 <span className="reward-panel__label">{result.prize > 0 ? "Prize" : "Reward"}</span>
@@ -114,8 +114,8 @@ export function Results() {
         {paid ? (
           <>
             <div className="row">
-              <button className="btn btn--grow" onClick={() => void roomManager.leave()}>
-                Home
+<button className="art-btn art-btn--home" onClick={() => void roomManager.leave()} aria-label="Home">
+                <img src={`${import.meta.env.BASE_URL}ui/btn-home.webp`} alt="" width={318} height={109} draggable={false} />
               </button>
               <button
                 className="art-btn art-btn--again"
@@ -125,7 +125,7 @@ export function Results() {
                 }}
                 aria-label={`Play again for ${arena?.entryFee ?? 0} Sumo Coins`}
               >
-                <img src={`${import.meta.env.BASE_URL}ui/play-again.webp`} alt="" width={638} height={186} draggable={false} />
+                <img src={`${import.meta.env.BASE_URL}ui/btn-play-again.webp`} alt="" width={288} height={102} draggable={false} />
                 <span className="art-btn__fee">
                   <Coins amount={arena?.entryFee ?? 0} />
                 </span>
@@ -135,12 +135,12 @@ export function Results() {
           </>
         ) : isHost ? (
           <div className="row">
-            <button className="art-btn art-btn--again" onClick={() => roomManager.rematch()} aria-label="Play again">
-              <img src={`${import.meta.env.BASE_URL}ui/play-again.webp`} alt="" width={638} height={186} draggable={false} />
+            <button className="art-btn art-btn--again" onClick={() => roomManager.rematch()} aria-label="Rematch">
+              <img src={`${import.meta.env.BASE_URL}ui/btn-rematch.webp`} alt="" width={289} height={102} draggable={false} />
             </button>
-            <button className="btn btn--grow" onClick={() => void roomManager.leave()}>
-              Home
-            </button>
+<button className="art-btn art-btn--home" onClick={() => void roomManager.leave()} aria-label="Home">
+                <img src={`${import.meta.env.BASE_URL}ui/btn-home.webp`} alt="" width={318} height={109} draggable={false} />
+              </button>
           </div>
         ) : (
           <p className="hint hint--center">Waiting for the host. Back to the lobby in {seconds}s.</p>

@@ -51,20 +51,26 @@ export const OUTFITS = [
   { id: "armbands", label: "Armbands" },
 ] as const;
 
+/** Profile pictures (public/avatars/<index>.webp). The first four are free. */
+export const AVATARS = Array.from({ length: 40 }, (_, i) => ({ id: String(i), label: `Avatar ${i + 1}` }));
+
 export interface Appearance {
   hair: number;
   hairColor: number;
   face: number;
   outfit: number;
+  /** Profile picture, shown in the profile, on the home screen and in matches. */
+  avatar: number;
 }
 
-export const DEFAULT_APPEARANCE: Readonly<Appearance> = Object.freeze({ hair: 0, hairColor: 0, face: 0, outfit: 0 });
+export const DEFAULT_APPEARANCE: Readonly<Appearance> = Object.freeze({ hair: 0, hairColor: 0, face: 0, outfit: 0, avatar: 0 });
 
 export const APPEARANCE_LIMITS: Readonly<Record<keyof Appearance, number>> = Object.freeze({
   hair: HAIR_STYLES.length,
   hairColor: HAIR_COLORS.length,
   face: FACES.length,
   outfit: OUTFITS.length,
+  avatar: AVATARS.length,
 });
 
 function pick(raw: unknown, limit: number, fallback: number): number {
@@ -79,6 +85,7 @@ export function sanitizeAppearance(raw: unknown): Appearance {
     hairColor: pick(r.hairColor, APPEARANCE_LIMITS.hairColor, DEFAULT_APPEARANCE.hairColor),
     face: pick(r.face, APPEARANCE_LIMITS.face, DEFAULT_APPEARANCE.face),
     outfit: pick(r.outfit, APPEARANCE_LIMITS.outfit, DEFAULT_APPEARANCE.outfit),
+    avatar: pick(r.avatar, APPEARANCE_LIMITS.avatar, DEFAULT_APPEARANCE.avatar),
   };
 }
 
@@ -90,5 +97,6 @@ export function randomAppearance(random: () => number = Math.random): Appearance
     hairColor: r(APPEARANCE_LIMITS.hairColor),
     face: r(APPEARANCE_LIMITS.face),
     outfit: r(APPEARANCE_LIMITS.outfit),
+    avatar: r(APPEARANCE_LIMITS.avatar),
   };
 }

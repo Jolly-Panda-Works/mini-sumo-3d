@@ -8,6 +8,7 @@ import { pushToast, setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen
 import { settingsStore } from "../settings";
 import { ArenaRow } from "./ArenaSelect";
 import { Icon } from "./Icon";
+import { avatarSrc } from "./Avatar";
 import { PHONE_QUERY, useMediaQuery } from "../useMediaQuery";
 
 /** Bout results already announced (so the toast shows once). */
@@ -56,16 +57,7 @@ export function MainMenu() {
       <main className="home">
         <header className="home__top">
           <div className="home__actions">
-            <button
-              className="btn home__profile"
-              onClick={() => setProfileOpen(true)}
-              aria-label={`Profile: ${settings.name}, level ${economy.profile?.level.level ?? 1}`}
-            >
-              <span className="home__profile-name">{settings.name}</span>
-              <span className="home__profile-level">
-                Level <span className="level-badge">{economy.profile?.level.level ?? 1}</span>
-              </span>
-            </button>
+            <ProfileCard className="home__profile-card" />
             <button className="tile-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
               <Icon name="customize" size={48} />
             </button>
@@ -92,14 +84,7 @@ export function MainMenu() {
       <h1 className="visually-hidden">{GAME_TITLE}</h1>
       {/* Top: profile on the left, coins on the right, settings under the coins */}
       <header className="hub__top">
-        <button
-          className="btn hub__profile"
-          onClick={() => setProfileOpen(true)}
-          aria-label={`Profile: ${settings.name}, level ${economy.profile?.level.level ?? 1}`}
-        >
-          <span className="level-badge">{economy.profile?.level.level ?? 1}</span>
-          <span className="hub__profile-name">{settings.name}</span>
-        </button>
+        <ProfileCard className="hub__profile" />
         <button className="coin-frame hub__coins" onClick={() => setShopOpen(true)} aria-label={`Coin shop. Balance: ${balance ?? 0} Sumo Coins`}>
           <span className="coin-frame__amount">{(balance ?? 0).toLocaleString("en-US")}</span>
           <Icon name="plus" size={26} className="coin-frame__plus" />
@@ -118,7 +103,8 @@ export function MainMenu() {
           <span>Customise</span>
         </button>
         <button className="hub__side-btn hub__side-btn--shop" onClick={() => setShopOpen(true)} aria-label="Shop">
-          <img className="hub__shop-art" src={`${import.meta.env.BASE_URL}ui/shop.webp`} alt="" width={294} height={266} />
+          <img className="hub__shop-art" src={`${import.meta.env.BASE_URL}ui/shop.webp`} alt="" width={360} height={335} />
+          <span>Shop</span>
         </button>
       </nav>
 
@@ -129,4 +115,18 @@ export function MainMenu() {
 
 export function GearIcon() {
   return <Icon name="settings" size={48} />;
+}
+
+/** The profile frame on the home screen: picture, name and level; opens the profile. */
+function ProfileCard({ className = "" }: { className?: string }) {
+  const settings = useStore(settingsStore);
+  const economy = useStore(economyStore);
+  const level = economy.profile?.level.level ?? 1;
+  return (
+    <button className={`profile-card ${className}`} onClick={() => setProfileOpen(true)} aria-label={`Profile: ${settings.name}, level ${level}`}>
+      <img className="profile-card__avatar" src={avatarSrc(settings.appearance.avatar)} alt="" width={160} height={160} />
+      <span className="profile-card__name">{settings.name}</span>
+      <span className="profile-card__level">{level}</span>
+    </button>
+  );
 }

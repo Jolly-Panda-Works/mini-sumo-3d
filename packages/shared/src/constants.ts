@@ -57,10 +57,10 @@ export const NAME_MAX_LENGTH = 16;
 
 /** Player slot colours. Slot numbers (P1..P4) are always shown next to the colour. */
 export const PLAYER_COLORS = [
-  { hex: "#FF5D73", label: "Coral" },
-  { hex: "#2EC4B6", label: "Teal" },
-  { hex: "#FFC23C", label: "Sun" },
-  { hex: "#8E6CEF", label: "Violet" },
+  { hex: "#E2443A", label: "Red" },
+  { hex: "#3D7FE0", label: "Blue" },
+  { hex: "#3FA34D", label: "Green" },
+  { hex: "#F2B21E", label: "Yellow" },
 ] as const;
 
 export const Phase = {

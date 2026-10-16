@@ -5,7 +5,7 @@ import { cfg, playingSession } from "./helpers.js";
 
 describe("appearance", () => {
   it("sanitizes valid, partial and malformed input", () => {
-    expect(sanitizeAppearance({ hair: 2, hairColor: 1, face: 3, outfit: 2 })).toEqual({ hair: 2, hairColor: 1, face: 3, outfit: 2 });
+    expect(sanitizeAppearance({ hair: 2, hairColor: 1, face: 3, outfit: 2 })).toEqual({ hair: 2, hairColor: 1, face: 3, outfit: 2, avatar: 0 });
     expect(sanitizeAppearance({ hair: 99, face: -1, outfit: 1.5, hairColor: "2" })).toEqual(DEFAULT_APPEARANCE);
     expect(sanitizeAppearance(null)).toEqual(DEFAULT_APPEARANCE);
     expect(sanitizeAppearance([1, 2])).toEqual(DEFAULT_APPEARANCE);
@@ -25,7 +25,7 @@ describe("appearance", () => {
     const s = new GameSession(cfg, 4);
     s.addPlayer("a", "A", { hair: 4, hairColor: 2, face: 1, outfit: 3 });
     s.addPlayer("b", "B", { hair: 1000 });
-    expect(s.players.get("a")!.appearance).toEqual({ hair: 4, hairColor: 2, face: 1, outfit: 3 });
+    expect(s.players.get("a")!.appearance).toEqual({ hair: 4, hairColor: 2, face: 1, outfit: 3, avatar: 0 });
     expect(s.players.get("b")!.appearance).toEqual(DEFAULT_APPEARANCE);
   });
 

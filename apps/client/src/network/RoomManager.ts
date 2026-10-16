@@ -21,6 +21,9 @@ import { LocalConnection, type LocalRoomOptions } from "./LocalConnection";
 import { detectNetworkMode, networkStore } from "./networkMode";
 import { accountToken, economyStore, ensureAccount, initLocalEconomy, loadEconomy, refreshProfile, setLastResult } from "./economyClient";
 import { localEconomy } from "./localEconomy";
+
+/** Your level, shown to everyone in the match. */
+const myLevel = () => economyStore.get().profile?.level.level ?? 1;
 import { botLevelForArena } from "@mini-sumo/shared";
 import { audio } from "../audio/AudioManager";
 import { resolveServerUrl } from "../config";
@@ -43,6 +46,7 @@ export interface UIPlayer {
   dashCooldownTotalMs: number;
   powerUp: string;
   powerUpMs: number;
+  level: number;
   /** Only true in private rooms; quick-match bots look like everyone else. */
   isBot: boolean;
   appearance: Appearance;
@@ -200,16 +204,16 @@ class RoomManager {
       void refreshProfile();
       return this.connect(
         () => Promise.reject(new Error("offline")),
-        { name, appearance, isPrivate: false, maxPlayers: 4, botLevel, arenaId, entry },
+        { name, appearance, isPrivate: false, maxPlayers: 4, botLevel, arenaId, entry, level: myLevel() },
       );
     }
-    const options: JoinOptions = { name, private: false, maxPlayers: 4, appearance, arenaId, botLevel: arenaId === "training" ? botLevel : undefined };
+    const options: JoinOptions = { name, private: false, maxPlayers: 4, appearance, arenaId, botLevel: arenaId === "training" ? botLevel : undefined, level: myLevel() };
     return this.connect(
       async () => {
         options.authToken = await this.authToken();
         return wrapColyseusRoom(await this.client.joinOrCreate(ROOM_NAME, options));
       },
-      arenaId === "training" ? { name, appearance, isPrivate: false, maxPlayers: 4, botLevel } : undefined,
+      arenaId === "training" ? { name, appearance, isPrivate: false, maxPlayers: 4, botLevel, level: myLevel() } : undefined,
     );
   }
 
@@ -233,7 +237,7 @@ class RoomManager {
         options.authToken = await this.authToken();
         return wrapColyseusRoom(await this.client.create(ROOM_NAME, options));
       },
-      { name, appearance, isPrivate: true, maxPlayers, botLevel },
+      { name, appearance, isPrivate: true, maxPlayers, botLevel, level: myLevel() },
     );
   }
 
@@ -486,7 +490,8 @@ class RoomManager {
         powerUp: p.powerUp ?? "",
         powerUpMs: p.powerUpMs ?? 0,
         isBot: Boolean(p.isBot),
-        appearance: { hair: p.hair ?? 0, hairColor: p.hairColor ?? 0, face: p.face ?? 0, outfit: p.outfit ?? 0 },
+        appearance: { hair: p.hair ?? 0, hairColor: p.hairColor ?? 0, face: p.face ?? 0, outfit: p.outfit ?? 0, avatar: p.avatar ?? 0 },
+        level: p.level ?? 1,
         isHost: id === state.hostId,
         isYou: id === you,
       });

@@ -6,6 +6,16 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Avatars: 40 profile pictures, chosen in the profile (four free, the rest 250–1,000 coins, bought once). Shown on the home profile frame and in matches; part of the synced appearance.
+- Match HUD: every wrestler in the top-left corner in their colour frame (P1 red, P2 blue, P3 green, P4 yellow) with picture, name and level; another player's power-up shows as its flag. Player colours are now red, blue, green and yellow to match.
+- Levels are shown in matches (online from the account, offline from the device; bots get one that fits their difficulty).
+
+### Changed
+
+- New art: power-up emblems and flags, the power-up frame (emblem, name, timer), the round match timer, the coin frame (never stretched), the home profile frame with picture, HOME / REMATCH / PLAY / PLAY AGAIN buttons, the shimenawa board for rewards and calculations, and the shop button.
+
 ### Changed
 
 - The "Last bout: …" notice on the home screen is gone (it pushed the layout around); after a bout a short notification shows the coins won or the result note, then disappears.

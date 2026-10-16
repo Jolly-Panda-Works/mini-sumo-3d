@@ -345,9 +345,9 @@ describe("cosmetic shop", () => {
     economy.purchase(a.accountId, "hair.mohawk", "buy-mohawk");
     expect(economy.saveAppearance(a.accountId, mohawk).hair).toBe(4);
     expect(economy.profile(a.accountId).appearance.hair).toBe(4);
-    expect(economy.saveAppearance(a.accountId, { hair: 0, hairColor: 0, face: 0, outfit: 0 })).toEqual({ hair: 0, hairColor: 0, face: 0, outfit: 0 });
-    expect(economy.saveAppearance(a.accountId, { hair: 1, hairColor: 1, face: 1, outfit: 1 })).toEqual({ hair: 1, hairColor: 1, face: 1, outfit: 1 });
-    expect(economy.saveAppearance(a.accountId, { hair: 2, hairColor: 3, face: 2, outfit: 2 })).toEqual({ hair: 0, hairColor: 0, face: 0, outfit: 0 });
+    expect(economy.saveAppearance(a.accountId, { hair: 0, hairColor: 0, face: 0, outfit: 0 })).toEqual({ hair: 0, hairColor: 0, face: 0, outfit: 0, avatar: 0 });
+    expect(economy.saveAppearance(a.accountId, { hair: 1, hairColor: 1, face: 1, outfit: 1 })).toEqual({ hair: 1, hairColor: 1, face: 1, outfit: 1, avatar: 0 });
+    expect(economy.saveAppearance(a.accountId, { hair: 2, hairColor: 3, face: 2, outfit: 2 })).toEqual({ hair: 0, hairColor: 0, face: 0, outfit: 0, avatar: 0 });
   });
 });
 

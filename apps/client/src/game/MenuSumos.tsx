@@ -28,7 +28,7 @@ function StompingSumo({ x, colorIndex, phase, appearance }: { x: number; colorIn
   return <SumoModel parts={parts} color={PLAYER_COLORS[colorIndex]!.hex} appearance={appearance} />;
 }
 
-const RIVAL: Appearance = { hair: 2, hairColor: 1, face: 4, outfit: 1 };
+const RIVAL: Appearance = { hair: 2, hairColor: 1, face: 4, outfit: 1, avatar: 0 };
 
 /** The left wrestler wears the player's own look, so the menu previews the customisation. */
 export function MenuSumos() {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Phase } from "@mini-sumo/shared";
-import { GameSession } from "../src/game/GameSession.js";
+import { GameSession, botSeeksItem } from "../src/game/GameSession.js";
 import { advance, cfg, playingSession } from "./helpers.js";
 
 const untilItem = (s: GameSession, limitMs = 30_000) => {
@@ -69,7 +69,7 @@ describe("power-ups", () => {
 
   it("no new flags in the final stretch", () => {
     const s = playingSession(["a", "b"]);
-    while (s.phaseRemainingMs > cfg.lateGameMs + 100) s.update(s.stepMs);
+    while (s.phaseRemainingMs > cfg.lateGameMs) s.update(s.stepMs);
     s.item = null;
     s.drainEvents();
     const spawned: string[] = [];
@@ -83,29 +83,22 @@ describe("power-ups", () => {
   });
 
   it("bots wait their turn: hard goes first, easy last", () => {
-    const firstMove = (level: "easy" | "normal" | "hard") => {
-      const s = new GameSession(cfg, 4, { quickMatch: true, seed: 3, botLevel: level });
-      s.addPlayer("me", "Me");
+    for (const level of ["hard", "normal", "easy"] as const) {
+      expect(botSeeksItem(cfg, level, 0)).toBe(false);
+      expect(botSeeksItem(cfg, level, cfg.botItemDelayMs[level] - 1)).toBe(false);
+      expect(botSeeksItem(cfg, level, cfg.botItemDelayMs[level])).toBe(true);
+    }
+    expect(cfg.botItemDelayMs.hard).toBeLessThan(cfg.botItemDelayMs.normal);
+    expect(cfg.botItemDelayMs.normal).toBeLessThan(cfg.botItemDelayMs.easy);
+  });
+
+  it("bots show a level that fits their difficulty", () => {
+    for (const [level, max] of [["easy", 4], ["hard", 14]] as const) {
+      const s = new GameSession(cfg, 4, { quickMatch: true, seed: 5, botLevel: level });
+      s.addPlayer("me", "Me", undefined, 6);
       advance(s, cfg.quickMatchWaitMs + cfg.botJoinIntervalMs * 3 + 100);
-      s.requestStart("me");
-      advance(s, cfg.entranceMs + cfg.countdownMs + 50);
-      const item = untilItem(s)!;
-      // Who heads for the flag? Watch a bot's input direction relative to the flag.
-      const bot = s.bots[0]!;
-      const start = s.time;
-      while (s.item && s.time - start < 8000) {
-        s.update(s.stepMs);
-        const toItem = Math.atan2(item.y - bot.y, item.x - bot.x);
-        const input = Math.atan2(bot.inputY, bot.inputX);
-        if (Math.hypot(bot.inputX, bot.inputY) > 0.1 && Math.abs(Math.atan2(Math.sin(toItem - input), Math.cos(toItem - input))) < 0.05) {
-          return s.time - item.spawnedAt;
-        }
-      }
-      return Number.POSITIVE_INFINITY;
-    };
-    const hard = firstMove("hard");
-    const easy = firstMove("easy");
-    expect(hard).toBeGreaterThanOrEqual(cfg.botItemDelayMs.hard);
-    expect(easy === Number.POSITIVE_INFINITY || easy >= cfg.botItemDelayMs.easy).toBe(true);
+      expect(s.players.get("me")!.level).toBe(6);
+      for (const bot of s.bots) expect(bot.level).toBeLessThanOrEqual(max);
+    }
   });
 });

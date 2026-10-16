@@ -123,7 +123,7 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
                 {status && !soon && <p className="arena-tile__status">{status}</p>}
                 {free && <BotLevelPicker />}
                 <button
-                  className="btn btn--primary arena-tile__btn"
+                  className="art-btn arena-tile__btn arena-tile__play"
                   disabled={busy}
                   aria-disabled={!available}
                   onClick={() => {
@@ -138,7 +138,7 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
                     free ? `Play ${arena.name} for free` : soon ? `${arena.name}: coming soon` : `Enter ${arena.name} for ${arena.entryFee} Sumo Coins`
                   }
                 >
-                  {free ? (busy ? "Finding a room…" : "Play") : soon ? "Coming soon" : "Enter"}
+                  <img src={`${import.meta.env.BASE_URL}ui/btn-play.webp`} alt="" width={291} height={99} draggable={false} />
                 </button>
               </div>
             </li>

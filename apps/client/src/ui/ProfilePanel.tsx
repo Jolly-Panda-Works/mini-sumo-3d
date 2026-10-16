@@ -5,6 +5,11 @@ import { settingsStore } from "../settings";
 import { useStore } from "../store";
 import { pushToast, setProfileOpen } from "../uiStore";
 import { Dialog } from "./Dialog";
+import { avatarSrc } from "./Avatar";
+import { AVATARS, cosmeticItemId, cosmeticPrice } from "@mini-sumo/shared";
+import { buyItem, ownedItems } from "../network/economyClient";
+import { Coins } from "./Coins";
+import { audio } from "../audio/AudioManager";
 import { playGamesStore, signInToPlayGames } from "../network/playGames";
 
 function EditName({ onClose }: { onClose: () => void }) {
@@ -64,8 +69,11 @@ export function ProfilePanel() {
     <>
       <Dialog title="Profile" onClose={() => setProfileOpen(false)} className="profile">
         <div className="profile__level">
-          <span className="level-badge level-badge--big" aria-label={`Level ${level.level}`}>
-            {level.level}
+          <span className="profile__avatar">
+            <img src={avatarSrc(settings.appearance.avatar)} alt="" width={160} height={160} />
+            <span className="level-badge" aria-label={`Level ${level.level}`}>
+              {level.level}
+            </span>
           </span>
           <div className="profile__xp">
             <div className="profile__name-row">
@@ -98,6 +106,8 @@ export function ProfilePanel() {
             </p>
           </div>
         </div>
+
+        <AvatarPicker />
 
         <dl className="profile__stats">
           {rows.map(([label, value]) => (
@@ -134,5 +144,96 @@ export function ProfilePanel() {
       </Dialog>
       {editing && <EditName onClose={() => setEditing(false)} />}
     </>
+  );
+}
+
+/** Profile pictures: four free, the rest bought once with Sumo Coins. */
+function AvatarPicker() {
+  const settings = useStore(settingsStore);
+  const economy = useStore(economyStore);
+  const owned = ownedItems();
+  const balance = economy.profile?.balances.coins ?? 0;
+  const [pending, setPending] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const current = settings.appearance.avatar;
+
+  const choose = (index: number) => {
+    if (owned.has(cosmeticItemId("avatar", index))) settingsStore.update({ appearance: { ...settings.appearance, avatar: index } });
+    else {
+      setError(null);
+      setPending(index);
+    }
+  };
+
+  const buy = async () => {
+    if (pending === null) return;
+    try {
+      await buyItem(cosmeticItemId("avatar", pending));
+      audio.sample("purchase");
+      settingsStore.update({ appearance: { ...settingsStore.get().appearance, avatar: pending } });
+      setPending(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "The purchase failed.");
+    }
+  };
+
+  const price = pending === null ? 0 : cosmeticPrice(cosmeticItemId("avatar", pending));
+  return (
+    <section className="avatars" aria-label="Profile picture">
+      <h3 className="settings__heading">Picture</h3>
+      <ul className="avatars__grid">
+        {AVATARS.map((avatar, i) => {
+          const isOwned = owned.has(cosmeticItemId("avatar", i));
+          return (
+            <li key={avatar.id}>
+              <button
+                className={`avatars__item${i === current ? " avatars__item--on" : ""}${isOwned ? "" : " avatars__item--locked"}`}
+                onClick={() => choose(i)}
+                aria-pressed={i === current}
+                aria-label={`${avatar.label}${isOwned ? "" : `, ${cosmeticPrice(cosmeticItemId("avatar", i))} Sumo Coins`}`}
+              >
+                <img src={avatarSrc(i)} alt="" width={160} height={160} loading="lazy" />
+                {!isOwned && (
+                  <span className="avatars__price">
+                    <Coins amount={cosmeticPrice(cosmeticItemId("avatar", i))} />
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      {pending !== null && (
+        <Dialog
+          title="New picture"
+          onClose={() => setPending(null)}
+          className="avatar-buy"
+          hideClose
+          footer={
+            <div className="row">
+              <button className="btn btn--grow" onClick={() => setPending(null)}>
+                Not now
+              </button>
+              <button
+                className="btn btn--primary btn--grow"
+                aria-disabled={balance < price}
+                data-sfx={balance < price ? undefined : "none"}
+                onClick={() => (balance < price ? setError("Not enough Sumo Coins.") : void buy())}
+              >
+                Buy · <Coins amount={price} />
+              </button>
+            </div>
+          }
+        >
+          <img className="avatar-buy__img" src={avatarSrc(pending)} alt="" width={160} height={160} />
+          <p className="hint hint--center">You have {balance.toLocaleString("en-US")} coins.</p>
+          {error && (
+            <p className="notice notice--error" role="alert">
+              {error}
+            </p>
+          )}
+        </Dialog>
+      )}
+    </section>
   );
 }

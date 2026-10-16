@@ -28,6 +28,8 @@ export class PlayerState extends Schema {
   @type("uint8") hairColor = 0;
   @type("uint8") face = 0;
   @type("uint8") outfit = 0;
+  @type("uint8") avatar = 0;
+  @type("uint16") level = 1;
 }
 
 export class MiniSumoState extends Schema {

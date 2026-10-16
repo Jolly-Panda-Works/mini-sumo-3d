@@ -146,7 +146,8 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
       }
     }
 
-    const result = this.session.addPlayer(client.sessionId, options.name, appearance);
+    const level = economy && accountId ? economy.profile(accountId).level.level : options.level;
+    const result = this.session.addPlayer(client.sessionId, options.name, appearance, level);
     if (!result.ok) {
       if (this.paid && economy && accountId) economy.refundReserved(this.roomId, accountId, "Couldn't join the room: entry refunded");
       throw new ServerError(4003, result.error);
@@ -347,6 +348,8 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
       ps.hairColor = p.appearance.hairColor;
       ps.face = p.appearance.face;
       ps.outfit = p.appearance.outfit;
+      ps.avatar = p.appearance.avatar;
+      ps.level = p.level;
     }
 
     this.updateLock();
