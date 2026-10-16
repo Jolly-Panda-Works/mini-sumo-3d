@@ -40,20 +40,21 @@ keytool -genkeypair -v -keystore mini-sumo-upload.keystore -alias minisumo -keya
 - `VITE_SERVER_URL` را **تعریف نکنید** تا بازی کاملاً آفلاین ساخته شود.
 - اگر Google Play پیام «target API level» داد، متغیر `ANDROID_TARGET_SDK` را بسازید (مثلاً `36`).
 
-## ۴. ساخت نسخه‌ی Release (تگ خودکار)
+## ۴. ساخت نسخه‌ی Release (کاملاً خودکار)
 
-تگ را خود GitHub می‌سازد و همیشه با `version` در `package.json` ریشه یکی است. دو راه دارید:
+**هر push به `main` که تغییری در بازی دارد، خودش یک Release می‌سازد.** نسخه از روی پیام commitها تعیین می‌شود:
 
-**راه ساده:** در GitHub به **Actions ← Build ← Run workflow** بروید، شاخه‌ی `main` را انتخاب کنید و در **bump** یکی را بزنید:
-- `patch`: مثلاً 1.0.1 به 1.0.2 (رفع باگ)
-- `minor`: مثلاً 1.0.2 به 1.1.0 (قابلیت جدید)
-- `major`: مثلاً 1.1.0 به 2.0.0
+| پیام commitها از آخرین Release | نسخه‌ی بعدی (مثلاً از 1.4.2) |
+|---|---|
+| `feat!:` یا `BREAKING CHANGE` | 2.0.0 |
+| حداقل یک `feat:` | 1.5.0 |
+| `fix:`، `perf:`، `refactor:` یا پیام بدون نوع | 1.4.3 |
+| فقط `docs:`، `chore:`، `ci:`، `test:`، `style:`، `build:` | بدون Release |
 
-GitHub نسخه را در `package.json` بالا می‌برد، commit می‌کند، تگ `v…` و Release را می‌سازد.
+GitHub نسخه را در `package.json` بالا می‌برد، تگ `vX.Y.Z` می‌زند و Release را با فایل‌های نهایی و لیست تغییرات («What's changed») منتشر می‌کند. بعد از هر Release یک `git pull` بزنید.
 
-**راه دستی:** `version` را در `package.json` ریشه عوض کنید، `npm install` بزنید (تا `package-lock.json` هم به‌روز شود) و push کنید.
-
-> بعد از اجرای راه ساده، قبل از کار بعدی `git pull` بزنید تا commit نسخه روی کامپیوترتان هم بیاید.
+- برای انتخاب دستی نسخه، `version` را در `package.json` بالاتر بگذارید و push کنید.
+- **Actions ← Build ← Run workflow** هم هست: `auto` (از روی commitها)، یا `patch` / `minor` / `major`.
 
 در **Releases** این فایل‌ها ساخته می‌شوند:
 - `MiniSumo-1.0.2-Android.aab`: برای آپلود در Google Play (روی گوشی نصب نمی‌شود)

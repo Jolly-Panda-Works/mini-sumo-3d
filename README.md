@@ -247,18 +247,21 @@ Configure under *Settings → Secrets and variables → Actions*:
 
 ## Releases and versions
 
-The root `package.json` `version` **is** the release version. GitHub tags and releases it automatically; you never create tags by hand. The same version goes into *Settings → About*, the desktop apps, the Android `versionName` and the release name.
+Releases are automatic: **every push to `main` that changes the game becomes a GitHub Release** with the final Windows, macOS, Linux, Android and web builds. The version comes from the commit messages since the last release ([Conventional Commits](https://www.conventionalcommits.org/)):
 
-| What you do | What GitHub does |
+| Commit messages since the last release | Next version (from 1.4.2) |
 | --- | --- |
-| Change `version` in `package.json` (e.g. `1.0.2`) and push to `main` | Builds `1.0.2`, creates tag `v1.0.2` and the GitHub Release |
-| *Actions → Build → Run workflow* with **bump** = `patch` / `minor` / `major` | Bumps `package.json` (and the lock file), commits it to `main`, then tags and releases the new version |
-| Push to `main` without changing the version | Builds and uploads artifacts (and GitHub Pages), no new release |
-| Open a pull request | Builds `X.Y.Z-dev.<run>` artifacts only |
+| a `feat!:` commit, or `BREAKING CHANGE` in a message body | 2.0.0 |
+| at least one `feat: …` | 1.5.0 |
+| `fix:`, `perf:`, `refactor:` or messages without a type | 1.4.3 |
+| only `docs:`, `chore:`, `ci:`, `test:`, `style:`, `build:` | no release (artifacts on the run only) |
 
-Each release contains the Windows, macOS, Linux, Android and web files plus `SHA256SUMS.txt`. Android's `versionCode` is `MAJOR×1,000,000 + MINOR×1,000 + PATCH` (e.g. `1.0.2` → `1000002`), so it always grows with the version as Google Play requires.
+GitHub then updates `package.json` (commit `chore(release): vX.Y.Z [skip ci]`), tags `vX.Y.Z` and publishes the Release with a *What's changed* list built from the same messages. The version also goes into *About*, the desktop apps and Android (`versionCode = MAJOR×1,000,000 + MINOR×1,000 + PATCH`).
 
-> If `main` is protected, allow GitHub Actions to push to it (or use the manual version change) so the bump commit can land.
+- To pick a version yourself, set a higher `version` in `package.json` and push.
+- *Actions → Build → Run workflow* releases on demand; `bump` = `auto` (from the commits), `patch`, `minor` or `major`.
+- After a release, `git pull` to get the version commit.
+- If `main` is protected, allow GitHub Actions to push to it.
 
 ## Deployment
 

@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Fully automatic releases: every push to `main` with game changes is released. The bump comes from the commit messages since the last release (`feat!`/`BREAKING CHANGE` → major, `feat` → minor, `fix`/`perf`/`refactor`/untyped → patch; only docs/chore/ci/test/style/build → no release). The Release body gets a *What's changed* list (`tools/changes.mjs`).
+
 ### Fixed
 
 - *Run workflow → bump* failed with "non-fast-forward" when `main` had moved on since the run started (for example a re-run of an older run, or a push in the meantime). The bump now starts from the newest `main` and retries the push on top of new commits.
