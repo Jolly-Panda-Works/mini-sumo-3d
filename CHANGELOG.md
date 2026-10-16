@@ -6,6 +6,12 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Studio card uses the Jolly Panda Studio logo with its name.
+- Loading screen: the tall illustration on portrait screens (the Android app), the square one on landscape screens.
+- The loading bar fills from 1 % to 100 % on screen like a progress bar (it no longer finishes hidden behind the studio card).
+
 ### Added
 
 - Jolly Panda studio card on every launch (fades in and out), then the new loading screen: illustrated background and a framed loading bar with a glowing fill and a running wrestler (24-frame sprite) at its edge, plus the *LOADING…* label and percentage.
