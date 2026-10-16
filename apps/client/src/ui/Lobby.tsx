@@ -5,6 +5,7 @@ import { gameStore, roomManager, sessionStore } from "../network/RoomManager";
 import { economyStore } from "../network/economyClient";
 import { Coins } from "./Coins";
 import { Icon } from "./Icon";
+import { Dialog } from "./Dialog";
 import { themeFor } from "../game/arenaThemes";
 import { useStore } from "../store";
 import { PlayerBadge } from "./PlayerBadge";
@@ -60,22 +61,21 @@ export function Lobby() {
   const slots = Array.from({ length: game.maxPlayers }, (_, i) => connected[i] ?? null);
 
   return (
-    <main className="lobby">
-      <section className="panel lobby__panel" aria-label="Room lobby">
-        <div className="lobby__head">
-          <div>
-            <p className="field__label">
-              {offline ? "Training" : game.isPrivate ? "Private room" : (arena?.name ?? "Training")}
-            </p>
-            {offline ? (
-              <p className="room-code room-code--offline">{themeFor(game.arenaId).title}</p>
-            ) : (
-              <p className="room-code" aria-label={`Room code ${session.roomId}`}>
-                {session.roomId}
-              </p>
-            )}
-          </div>
-        </div>
+    <Dialog
+      title={game.isPrivate ? "Private room" : (arena?.name ?? "Training Arena")}
+      onClose={() => void roomManager.leave()}
+      className="lobby"
+      overlayClassName="overlay--lobby"
+    >
+        <p className="lobby__sub">
+          {themeFor(game.arenaId).title}
+          {!offline && (
+            <span className="room-code" aria-label={`Room code ${session.roomId}`}>
+              {" "}
+              · {session.roomId}
+            </span>
+          )}
+        </p>
 
         {!offline && (
         <div className="row">
@@ -177,10 +177,7 @@ export function Lobby() {
           <p className="hint hint--center">Waiting for the host to start the match.</p>
         )}
 
-        <button className="btn btn--ghost" onClick={() => void roomManager.leave()}>
-          {paid ? "Leave and get a refund" : "Leave room"}
-        </button>
-      </section>
-    </main>
+        {paid && <p className="hint hint--center">Leave with × before the bout starts to get your entry back.</p>}
+    </Dialog>
   );
 }

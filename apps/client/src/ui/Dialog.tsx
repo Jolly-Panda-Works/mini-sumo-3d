@@ -18,6 +18,7 @@ export function Dialog({
   role = "dialog",
   bodyClassName = "",
   hideClose = false,
+  overlayClassName = "",
 }: {
   title: ReactNode;
   onClose: () => void;
@@ -28,6 +29,7 @@ export function Dialog({
   bodyClassName?: string;
   /** For dialogs whose own buttons close them (e.g. "Not now"). */
   hideClose?: boolean;
+  overlayClassName?: string;
 }) {
   const id = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -45,7 +47,7 @@ export function Dialog({
     .join(" ");
 
   return (
-    <div className="overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className={`overlay ${overlayClassName}`} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className={`dialog-wrap ${wrapClass}`}>
         <section className="dialog" role={role} aria-modal="true" aria-labelledby={id}>
           <img className="dialog__plaque" src={`${BASE}ui/header.webp`} alt="" draggable={false} />

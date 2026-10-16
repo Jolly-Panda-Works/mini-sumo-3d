@@ -8,6 +8,17 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Home hub (from the sketch): profile with name and level on the left, coins on the right with settings under them, the arena carousel in the middle (one card centred, a bit of the next and previous showing instead of arrows), and *Customise* and a new *Shop* button bottom left. The title logo is no longer on the home screen.
+- The waiting room uses the framed popup (× leaves the room), with the ring still visible above it.
+- Results: medals for places 1–3; *Back to lobby* is now *Home*.
+
+### Fixed
+
+- Popup content (e.g. the coin packs) reached under the ropes at the bottom of the frame.
+- Screenshots workflow: it waited for a 3D canvas on the home screen and used the removed *Play with friends* flow. It now waits for the loading screen and plays a shared Training room.
+
+### Changed
+
 - Fully automatic releases: every push to `main` with game changes is released. The bump comes from the commit messages since the last release (`feat!`/`BREAKING CHANGE` → major, `feat` → minor, `fix`/`perf`/`refactor`/untyped → patch; only docs/chore/ci/test/style/build → no release). The Release body gets a *What's changed* list (`tools/changes.mjs`).
 
 ### Fixed

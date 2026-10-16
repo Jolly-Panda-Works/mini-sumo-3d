@@ -33,13 +33,13 @@ export function Results() {
         <ol className="standings">
           {standings.map((p) => (
             <li key={p.id} className={`standings__row${p.isYou ? " standings__row--you" : ""}`}>
-              <span
-                className={`place${MEDALS[p.placement] ? ` place--${MEDALS[p.placement]}` : ""}`}
-                aria-label={`Place ${p.placement}`}
-              >
-                {p.placement}
-              </span>
-              {MEDALS[p.placement] && <Icon name={`medal-${MEDALS[p.placement]}` as IconName} size={30} className="standings__medal" />}
+              {MEDALS[p.placement] ? (
+                <Icon name={`medal-${MEDALS[p.placement]}` as IconName} size={40} className="standings__medal" label={`Place ${p.placement}`} />
+              ) : (
+                <span className="place" aria-label={`Place ${p.placement}`}>
+                  {p.placement}
+                </span>
+              )}
               <PlayerBadge colorIndex={p.colorIndex} />
               <span className="standings__name">{p.isYou ? `${p.name} (you)` : p.name}</span>
               <span className="standings__note">
@@ -125,8 +125,8 @@ export function Results() {
             <button className="btn btn--primary btn--grow" onClick={() => roomManager.rematch()}>
               Rematch
             </button>
-            <button className="btn btn--grow" onClick={() => roomManager.returnToLobby()}>
-              Back to lobby
+            <button className="btn btn--grow" onClick={() => void roomManager.leave()}>
+              Home
             </button>
           </div>
         ) : (
