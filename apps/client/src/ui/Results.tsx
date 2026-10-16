@@ -6,9 +6,7 @@ import { Coins } from "./Coins";
 import { settingsStore } from "../settings";
 import { PlayerBadge } from "./PlayerBadge";
 
-function ordinal(n: number): string {
-  return ["", "1st", "2nd", "3rd", "4th"][n] ?? `${n}th`;
-}
+const MEDALS: Record<number, string> = { 1: "gold", 2: "silver", 3: "bronze" };
 
 export function Results() {
   const game = useStore(gameStore);
@@ -41,7 +39,12 @@ export function Results() {
         <ol className="standings">
           {standings.map((p) => (
             <li key={p.id} className={`standings__row${p.isYou ? " standings__row--you" : ""}`}>
-              <span className="standings__place">{ordinal(p.placement)}</span>
+              <span
+                className={`place${MEDALS[p.placement] ? ` place--${MEDALS[p.placement]}` : ""}`}
+                aria-label={`Place ${p.placement}`}
+              >
+                {p.placement}
+              </span>
               <PlayerBadge colorIndex={p.colorIndex} />
               <span className="standings__name">{p.isYou ? `${p.name} (you)` : p.name}</span>
               <span className="standings__note">

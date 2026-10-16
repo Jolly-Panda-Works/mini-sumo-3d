@@ -23,6 +23,7 @@ import { Results } from "./ui/Results";
 import { SettingsPanel } from "./ui/SettingsPanel";
 import { Toasts } from "./ui/Toasts";
 import { TouchControls } from "./ui/TouchControls";
+import { OutActions } from "./ui/OutActions";
 
 export function App() {
   const session = useStore(sessionStore);
@@ -32,6 +33,7 @@ export function App() {
   const inRoom = session.status === "connected" && session.roomId !== "";
   const touch = touchControlsEnabled(settings.touchControls);
   const inBout = game.phase === Phase.Countdown || game.phase === Phase.Playing;
+  const youOut = game.phase === Phase.Playing && game.players.some((p) => p.isYou && !p.alive);
 
   useEffect(() => {
     if (!inRoom) return;
@@ -82,7 +84,7 @@ export function App() {
         <HUD touch={touch} />
         <Countdown />
         {game.phase === Phase.RoundOver && <Results />}
-        {touch && inBout && <TouchControls />}
+        {inBout && youOut ? <OutActions /> : touch && inBout && <TouchControls />}
       </>
     );
   }

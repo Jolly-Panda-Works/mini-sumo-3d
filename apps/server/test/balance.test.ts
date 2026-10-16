@@ -75,7 +75,9 @@ describe("late-game dash recharge", () => {
   it("does not change bots' dash cooldown", () => {
     const s = new GameSession(cfg, 4, { quickMatch: true, seed: 2, botLevel: "hard" });
     s.addPlayer("me", "Me");
-    advance(s, cfg.quickMatchWaitMs + cfg.countdownMs + 200);
+    advance(s, cfg.quickMatchWaitMs + 100);
+    s.requestStart("me");
+    advance(s, cfg.countdownMs + 200);
     while (s.phase === Phase.Playing && s.phaseRemainingMs > 3000) s.update(s.stepMs);
     for (const bot of s.bots) expect(bot.dashCooldownTotal).toBe(cfg.dashCooldownMs);
   });

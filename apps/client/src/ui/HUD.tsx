@@ -52,7 +52,7 @@ export function HUD({ touch }: { touch: boolean }) {
 
       {you && !you.alive && playing && <p className="hud__spectate">You're out. Watching the rest of the bout.</p>}
 
-      {!touch && (
+      {!touch && you?.alive !== false && (
         <div className="hud__bottom">
           <div className={`dash-meter${dashReady ? " dash-meter--ready" : ""}`} aria-label={dashReady ? "Dash ready" : "Dash recharging"}>
             <span className="dash-meter__fill" style={{ transform: `scaleX(${dashProgress})` }} />

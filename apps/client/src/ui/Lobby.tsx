@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MIN_PLAYERS, Phase } from "@mini-sumo/shared";
 import { networkStore } from "../network/networkMode";
 import { gameStore, roomManager, sessionStore } from "../network/RoomManager";
@@ -6,7 +6,7 @@ import { economyStore } from "../network/economyClient";
 import { Coins } from "./Coins";
 import { themeFor } from "../game/arenaThemes";
 import { useStore } from "../store";
-import { setSettingsOpen, setWardrobeOpen } from "../uiStore";
+import { setSettingsOpen } from "../uiStore";
 import { GearIcon } from "./MainMenu";
 import { PlayerBadge } from "./PlayerBadge";
 
@@ -25,6 +25,18 @@ export function Lobby() {
   const canStart = isHost && game.phase === Phase.Lobby && connected.length >= MIN_PLAYERS;
   const full = connected.length >= game.maxPlayers;
   const searching = !game.isPrivate && game.searchRemainingMs > 0;
+  // Online paid arenas start on their own; everything else is started by the host.
+  const autoStart = paid && !offline;
+  // The button unlocks one second after the wait is over (and the bots have arrived).
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    if (searching || !canStart) {
+      setArmed(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setArmed(true), 1000);
+    return () => window.clearTimeout(timer);
+  }, [searching, canStart]);
   const searchSeconds = Math.ceil(game.searchRemainingMs / 1000);
   const link = roomManager.inviteLink();
 
@@ -117,11 +129,7 @@ export function Lobby() {
           )}
         </ul>
 
-        <button className="btn" onClick={() => setWardrobeOpen(true)}>
-          Customise wrestler
-        </button>
-
-        {paid && arena && (
+        {autoStart && arena && (
           <div className="search" role="status" aria-live="polite">
             <span className="search__spinner" aria-hidden="true" />
             <div>
@@ -137,26 +145,21 @@ export function Lobby() {
           </div>
         )}
 
-        {searching && !paid && (
-          <div className="search" role="status" aria-live="polite">
-            <span className="search__spinner" aria-hidden="true" />
-            <div>
-              <p className="search__title">Looking for wrestlers… {searchSeconds}s</p>
-              <p className="hint">The bout starts automatically.</p>
-            </div>
-          </div>
-        )}
-
         {isHost && game.isPrivate && (
           <button className="btn" disabled={full} onClick={() => roomManager.addBot()}>
             {full ? "Room is full" : "Add bot"}
           </button>
         )}
 
-        {paid ? null : isHost ? (
+        {autoStart ? null : isHost ? (
           <>
-            <button className="btn btn--primary btn--big" disabled={!canStart} onClick={() => roomManager.startMatch()}>
-              Start match
+            <button
+              className="btn btn--primary btn--big lobby__start"
+              disabled={!canStart || !armed}
+              onClick={() => roomManager.startMatch()}
+              aria-live="polite"
+            >
+              {searching ? `Start match in ${searchSeconds}…` : "Start match"}
             </button>
             {!canStart && !searching && (
               <p className="hint">

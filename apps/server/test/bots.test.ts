@@ -110,7 +110,7 @@ describe("private room bots", () => {
 });
 
 describe("quick match", () => {
-  it("a lone player gets bots and an automatic start after the wait", () => {
+  it("a lone player gets bots after the wait, then starts the match", () => {
     const s = quick();
     s.addPlayer("me", "Usef");
     expect(s.searchRemainingMs).toBe(cfg.quickMatchWaitMs);
@@ -118,6 +118,8 @@ describe("quick match", () => {
     expect(s.phase).toBe(Phase.Waiting);
     expect(s.searchRemainingMs).toBeGreaterThan(0);
     advance(s, 600);
+    expect(s.phase).toBe(Phase.Lobby);
+    expect(s.requestStart("me").ok).toBe(true);
     expect(s.phase).toBe(Phase.Countdown);
     expect(s.connectedPlayers).toHaveLength(4);
     expect(s.bots).toHaveLength(3);
@@ -155,7 +157,9 @@ describe("quick match", () => {
   it("rematch keeps the bots, returning to the lobby removes them and searches again", () => {
     const s = quick({ matchDurationMs: 2000 });
     s.addPlayer("me", "Me");
-    advance(s, cfg.quickMatchWaitMs + cfg.countdownMs + 3000);
+    advance(s, cfg.quickMatchWaitMs + 100);
+    s.requestStart("me");
+    advance(s, cfg.countdownMs + 3000);
     expect(s.phase).toBe(Phase.RoundOver);
     expect(s.requestRematch("me").ok).toBe(true);
     expect(s.bots).toHaveLength(3);
@@ -170,7 +174,9 @@ describe("quick match", () => {
   it("bots play by the same rules: inputs stay normalized and positions finite", () => {
     const s = quick();
     s.addPlayer("me", "Me");
-    advance(s, cfg.quickMatchWaitMs + cfg.countdownMs + 100);
+    advance(s, cfg.quickMatchWaitMs + 100);
+    s.requestStart("me");
+    advance(s, cfg.countdownMs + 100);
     for (let i = 0; i < 300; i++) {
       s.update(s.stepMs);
       for (const p of s.players.values()) {

@@ -85,7 +85,7 @@ const fail = (error: string): ActionResult => ({ ok: false, error });
  * - The host role moves to the earliest-joined connected human.
  *
  * Bots: the host of a private room can add/remove bots in the lobby. In quick match rooms
- * bots fill the room after the wait time. Bots look like normal players and use the same
+ * bots fill the room after the wait time and the host starts the match. Bots look like normal players and use the same
  * input and physics; in quick match they are removed again when the room returns to the lobby.
  */
 export class GameSession {
@@ -591,13 +591,12 @@ export class GameSession {
     }
   }
 
-  /** Nobody joined in time: fill the room with bots and start. */
+  /** Nobody joined in time: fill the room with bots. The host then starts the match. */
   private tickSearch(): void {
     if (this.searchStartedAt < 0 || this.time - this.searchStartedAt < this.cfg.quickMatchWaitMs) return;
     this.searchStartedAt = -1;
     while (this.connectedPlayers.length < this.maxPlayers) this.createBot();
     this.refreshLobbyPhase();
-    this.startCountdown();
   }
 
   /**

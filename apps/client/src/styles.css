@@ -2386,3 +2386,65 @@ body {
     padding: 8px;
   }
 }
+
+/* ---------- Pushed out: return home ---------- */
+
+.out-actions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(24px + var(--safe-bottom));
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.out-actions .btn {
+  pointer-events: auto;
+  min-width: 220px;
+}
+
+/* ---------- Results: placements with medals ---------- */
+
+.place {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  border: 2.5px solid var(--ink);
+  background: #fbf6ee;
+  font-weight: 800;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.place--gold {
+  background: radial-gradient(circle at 35% 30%, #fff3b0, #f5c518 55%, #c9930a);
+  box-shadow: 0 3px 0 #8a6400;
+}
+
+.place--silver {
+  background: radial-gradient(circle at 35% 30%, #ffffff, #c9ced8 55%, #8e95a3);
+  box-shadow: 0 3px 0 #5c6270;
+}
+
+.place--bronze {
+  background: radial-gradient(circle at 35% 30%, #ffd8b0, #d08a4f 55%, #9a5a2a);
+  box-shadow: 0 3px 0 #6b3c18;
+}
+
+/* ---------- Home: buttons on top, then the title, then the arenas ---------- */
+
+.home__top {
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.home__actions {
+  position: static;
+  align-self: flex-end;
+}

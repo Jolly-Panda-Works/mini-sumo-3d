@@ -6,6 +6,13 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- When you're pushed out, a *Return home* button replaces the joystick and dash button.
+- Home: the buttons sit on top, the title below them, then the arenas.
+- Waiting lobby: no customise button or timer text; the Start button shows *Start match in N…*, unlocks one second after the wait and the host starts the bout (quick-match rooms no longer start by themselves once bots fill in).
+- Results: placements are numbers 1–4, with gold, silver and bronze medals for the top three.
+
 ### Added
 
 - On-device economy: 200 starting coins, wallet and history, wardrobe purchases, paid arenas against bots with prizes and refunds, training rewards, XP and levels (Pro at level 5, Champion at level 10). Only buying coins stays *Coming soon*.
