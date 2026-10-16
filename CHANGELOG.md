@@ -6,6 +6,12 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- CI builds Android and the web only: Releases contain the Android APK and AAB; the web build goes to GitHub Pages for testing. Desktop (Windows, macOS, Linux) builds were removed.
+- Your active power-up shows on the right edge of the screen, clear of the other HUD elements; other players' power-ups appear as a kanji badge next to their name.
+- The customise and shop buttons on the home hub are square.
+
 ### Added
 
 - Power-ups: a nobori flag pops up on the ring every 8–12 s (out of a puff of smoke). Grab it for 12 s of Iron Body (鉄), Thunder Dash (雷), Wind Feet (風) or Giant (巨); the flag then rides on your back, flickers in its last 2 s and vanishes in smoke. HUD badge with a countdown ring; sounds when your power-up starts and ends. Bots go for flags only after the player had a chance (hard 1.5 s, normal 3 s, easy 4.5 s). No new flags in the final 30 s.

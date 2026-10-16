@@ -38,6 +38,16 @@ export function HUD({ touch }: { touch: boolean }) {
           <li key={p.id} className={`chip${p.alive ? "" : " chip--out"}${p.isYou ? " chip--you" : ""}`}>
             <PlayerBadge colorIndex={p.colorIndex} dim={!p.alive} />
             <span className="chip__name">{p.isYou ? "You" : p.name}</span>
+            {p.alive && isPowerUpKind(p.powerUp) && (
+              <span
+                className="chip__powerup"
+                style={{ ["--pu" as string]: POWER_UPS[p.powerUp].color }}
+                title={POWER_UPS[p.powerUp].name}
+                aria-label={`Power-up: ${POWER_UPS[p.powerUp].name}`}
+              >
+                {POWER_UPS[p.powerUp].kanji}
+              </span>
+            )}
             {!p.alive && <span className="chip__state">{p.elimReason === "left" ? "Left" : "Out"}</span>}
           </li>
         ))}

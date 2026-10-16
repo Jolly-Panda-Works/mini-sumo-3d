@@ -13,7 +13,7 @@
   <a href="https://github.com/Jolly-Panda-Works/mini-sumo-3d/releases/latest"><img src="https://img.shields.io/github/v/release/Jolly-Panda-Works/mini-sumo-3d?display_name=tag&color=FF5D73" alt="Latest release" /></a>
   <a href="https://github.com/Jolly-Panda-Works/mini-sumo-3d/releases"><img src="https://img.shields.io/github/downloads/Jolly-Panda-Works/mini-sumo-3d/total?color=FF5D73" alt="Downloads" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
-  <img src="https://img.shields.io/badge/platform-Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android-lightgrey" alt="Platforms" />
+  <img src="https://img.shields.io/badge/platform-Android%20%7C%20Web-lightgrey" alt="Platforms" />
 </p>
 
 <p align="center">
@@ -55,7 +55,7 @@ Party games are best when everyone understands them in five seconds. Mini Sumo h
 
 - **Real 3D** with React Three Fiber: squash-and-stretch wrestlers, ring-out falls, dust and shockwaves.
 - **Fair multiplayer:** the Colyseus server decides every push, ring-out and winner. Clients only send input.
-- **Play anywhere:** browser, Windows, macOS, Linux and Android, with keyboard or touch controls.
+- **Play on Android** (and in the browser for testing), with touch or keyboard controls.
 - **Invite with a link:** create a private room and share it, or jump into a public quick match.
 - **Never wait long:** *Play now* finds an open room or creates one. If nobody shows up within 30 seconds, computer-controlled wrestlers with ordinary names fill the ring and the bout starts.
 - **Practice with bots:** three difficulty levels (Easy, Normal, Hard) on the Training card or in *Settings → Gameplay*; the host of a private room can add or remove bots in the lobby.
@@ -160,18 +160,10 @@ Offline, *Play now* searches for a few seconds and fills the ring with bots; *Cr
 
 ## Download and install
 
-1. Open the [**latest release**](https://github.com/Jolly-Panda-Works/mini-sumo-3d/releases/latest).
-2. Download the file for your device:
+- **Android:** open the [**latest release**](https://github.com/Jolly-Panda-Works/mini-sumo-3d/releases/latest) and install `MiniSumo-<version>-Android.apk` (signed; the `.aab` is for Google Play). Every release ships `SHA256SUMS.txt` to verify the download.
+- **Web (for testing):** play the latest build on [GitHub Pages](https://jolly-panda-works.github.io/mini-sumo-3d/).
 
-| Platform | File |
-| --- | --- |
-| Windows | `MiniSumo-<version>-Windows-Setup.exe` (installer) or `…-Windows-Portable.exe` |
-| macOS | `MiniSumo-<version>-macOS-arm64.dmg` (Apple Silicon) or `…-macOS-x64.dmg` (Intel) |
-| Linux | `MiniSumo-<version>-Linux-x86_64.AppImage` or `…-Linux-amd64.deb` |
-| Android | `MiniSumo-<version>-Android.apk` (signed; `.aab` is for Google Play only) |
-| Web | `MiniSumo-<version>-Web.zip` (static site for your own hosting) |
-
-> **Warning on first launch?** The apps aren't code-signed yet. On Windows click **More info → Run anyway**; on macOS right-click the app and choose **Open**. Every release ships `SHA256SUMS.txt` so you can verify the download. Details: [CODE_SIGNING.md](CODE_SIGNING.md).
+The desktop app (`apps/desktop`, Electron) is still in the repository but is no longer built by CI.
 
 ## Run from source
 
@@ -248,7 +240,7 @@ Configure under *Settings → Secrets and variables → Actions*:
 
 ## Releases and versions
 
-Releases are automatic: **every push to `main` that changes the game becomes a GitHub Release** with the final Windows, macOS, Linux, Android and web builds. The version comes from the commit messages since the last release ([Conventional Commits](https://www.conventionalcommits.org/)):
+Releases are automatic: **every push to `main` that changes the game becomes a GitHub Release** with the final Android builds (signed APK and the Play Store AAB). The web build is published to GitHub Pages for testing (set the `DEPLOY_PAGES` variable to `true`); desktop builds are no longer made. The version comes from the commit messages since the last release ([Conventional Commits](https://www.conventionalcommits.org/)):
 
 | Commit messages since the last release | Next version (from 1.4.2) |
 | --- | --- |

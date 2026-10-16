@@ -17,16 +17,10 @@ ${serverNote}
 
 ### Downloads
 
-| Platform | File |
+| | File |
 | --- | --- |
-| Windows (installer) | \`${f("Windows-Setup.exe")}\` |
-| Windows (portable, no install) | \`${f("Windows-Portable.exe")}\` |
-| macOS Apple Silicon | \`${f("macOS-arm64.dmg")}\` |
-| macOS Intel | \`${f("macOS-x64.dmg")}\` |
-| Linux | \`${f("Linux-x86_64.AppImage")}\` or \`${f("Linux-amd64.deb")}\` |
 | Android (install on a phone) | \`${f("Android.apk")}\` (signed; if missing, use \`${f("Android-debug.apk")}\`) |
 | Android (Google Play upload) | \`${f("Android.aab")}\` |
-| Web (static site) | \`${f("Web.zip")}\` |
 
-Verify a download with \`SHA256SUMS.txt\`. The apps are not code-signed yet, see [CODE_SIGNING.md](https://github.com/${repo}/blob/main/CODE_SIGNING.md) for the Windows SmartScreen and macOS Gatekeeper steps.
+Play the web version for testing on [GitHub Pages](https://${repo.split("/")[0].toLowerCase()}.github.io/${repo.split("/")[1]}/). Verify a download with \`SHA256SUMS.txt\`.
 `);

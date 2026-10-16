@@ -1,5 +1,5 @@
-# Builds Mini Sumo for web, desktop (Windows/macOS/Linux) and Android, and publishes a
-# GitHub Release.
+# Builds Mini Sumo for Android (released) and the web (published to GitHub Pages for
+# testing), and publishes a GitHub Release with the Android files.
 #
 # Versions (automatic): every push to main that changes the game is released.
 #   The commits since the last release decide the bump (Conventional Commits):
@@ -204,61 +204,6 @@ jobs:
       - id: deploy
         uses: actions/deploy-pages@v4
 
-  # ------------------------------------------------------------------ desktop
-  desktop:
-    name: Desktop (${{ matrix.name }})
-    needs: [version, test]
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: Windows
-            os: windows-latest
-            target: --win
-          - name: macOS
-            os: macos-latest
-            target: --mac
-          - name: Linux
-            os: ubuntu-latest
-            target: --linux
-    runs-on: ${{ matrix.os }}
-    env:
-      VITE_APP_VERSION: ${{ needs.version.outputs.version }}
-      VITE_BASE: /
-      # Unsigned builds: don't look for signing certificates.
-      CSC_IDENTITY_AUTO_DISCOVERY: "false"
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: ${{ needs.version.outputs.sha }}
-      - uses: actions/setup-node@v5
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: "**/package.json"
-      - name: Install dependencies
-        run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
-      - name: Install desktop dependencies
-        run: npm install --prefix apps/desktop
-      - name: Set app version
-        run: npm pkg set version="$VITE_APP_VERSION" --prefix apps/desktop
-      - run: npm run build:web
-      - name: Package
-        working-directory: apps/desktop
-        run: npm run prepare:web && node scripts/package.mjs ${{ matrix.target }}
-      - uses: actions/upload-artifact@v4
-        with:
-          name: mini-sumo-desktop-${{ matrix.name }}
-          path: |
-            apps/desktop/release/*.exe
-            apps/desktop/release/*.dmg
-            apps/desktop/release/*.AppImage
-            apps/desktop/release/*.deb
-          if-no-files-found: error
-
   # ------------------------------------------------------------------ android
   android:
     name: Android
@@ -372,7 +317,7 @@ jobs:
   # ------------------------------------------------------------------ release
   release:
     name: GitHub Release
-    needs: [version, web, desktop, android]
+    needs: [version, web, android]
     if: needs.version.outputs.release == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -392,8 +337,7 @@ jobs:
       - name: Collect files and checksums
         run: |
           mkdir -p release
-          (cd artifacts/mini-sumo-web && zip -qr "../../release/MiniSumo-$VERSION-Web.zip" .)
-          cp artifacts/mini-sumo-desktop-*/* release/
+          # Releases ship the Android app only; the web build is for testing on GitHub Pages.
           cp artifacts/mini-sumo-android/* release/
           (cd release && sha256sum * > SHA256SUMS.txt)
           ls -la release
