@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- *Run workflow → bump* failed with "non-fast-forward" when `main` had moved on since the run started (for example a re-run of an older run, or a push in the meantime). The bump now starts from the newest `main` and retries the push on top of new commits.
+
 ### Changed
 
 - Studio card uses the Jolly Panda Studio logo with its name.

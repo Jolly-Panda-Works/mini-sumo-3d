@@ -76,6 +76,9 @@ jobs:
 
           if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" && "$BUMP" != "none" ]]; then
             if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then echo "::error::Run the bump from the main branch."; exit 1; fi
+            # Bump on top of the newest main (a re-run or a later push may have moved it).
+            git fetch --quiet origin main
+            git checkout --quiet -B main origin/main
             CURRENT=$(node -p "require('./package.json').version")
             if newer "$CURRENT" "$LATEST"; then
               echo "::notice::package.json ($CURRENT) is behind the latest release v$LATEST; bumping from $LATEST."
@@ -86,7 +89,12 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git commit -am "chore(release): v$NEW [skip ci]"
-            git push origin HEAD:main
+            # If someone pushed in the meantime, replay the bump on top and try again.
+            for attempt in 1 2 3; do
+              if git push origin HEAD:main; then break; fi
+              if [[ $attempt == 3 ]]; then echo "::error::Couldn't push the version bump to main."; exit 1; fi
+              git pull --rebase --quiet origin main
+            done
             SHA=$(git rev-parse HEAD)
           fi
 
