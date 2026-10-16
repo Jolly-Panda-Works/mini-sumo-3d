@@ -41,26 +41,35 @@ export function allCosmeticItemIds(): { id: string; category: CosmeticCategory; 
 }
 
 /**
- * Free items every player owns, also offline: the first option of each category, so the
+ * Free items every player owns: three per category, including the first option so the
  * default look is always valid. Everything else is bought once and owned for good.
  */
-export const STARTER_ITEMS: readonly string[] = ["hair.topknot", "hairColor.black", "face.determined", "outfit.classic"];
+export const STARTER_ITEMS: readonly string[] = [
+  "hair.topknot",
+  "hair.bald",
+  "hair.ponytail",
+  "hairColor.black",
+  "hairColor.brown",
+  "hairColor.ginger",
+  "face.determined",
+  "face.happy",
+  "face.wink",
+  "outfit.classic",
+  "outfit.striped",
+  "outfit.polka",
+];
 
 /**
  * Cosmetic prices in Sumo Coins. One table for the shop display and the server; the server
  * only ever charges what this table says.
  */
 export const COSMETIC_PRICES: Readonly<Record<string, number>> = Object.freeze({
-  "hair.bald": 100,
   "hair.spiky": 250,
   "hair.bowl": 150,
   "hair.mohawk": 400,
-  "hair.ponytail": 200,
   "hair.afro": 350,
   "hair.buns": 300,
   "hair.samurai": 600,
-  "hairColor.brown": 50,
-  "hairColor.ginger": 150,
   "hairColor.silver": 200,
   "hairColor.blue": 300,
   "hairColor.pink": 250,
@@ -68,22 +77,39 @@ export const COSMETIC_PRICES: Readonly<Record<string, number>> = Object.freeze({
   "hairColor.purple": 300,
   "hairColor.gold": 800,
   "hairColor.white": 400,
-  "face.happy": 50,
   "face.cool": 400,
   "face.sleepy": 100,
   "face.fierce": 300,
-  "face.wink": 200,
   "face.surprised": 150,
   "face.grumpy": 150,
   "face.sparkly": 500,
-  "outfit.striped": 300,
   "outfit.apron": 750,
   "outfit.champion": 2000,
-  "outfit.polka": 350,
   "outfit.sagari": 600,
   "outfit.cape": 1200,
   "outfit.armbands": 450,
 });
+
+/**
+ * Sumo Coin packs for the coin shop. Purchases aren't available yet; the ids are the future
+ * product ids for a store integration.
+ */
+export interface CoinPack {
+  id: string;
+  name: string;
+  coins: number;
+  image: string;
+  tag?: "Popular" | "Best value";
+}
+
+export const COIN_PACKS: readonly CoinPack[] = [
+  { id: "coins_500", name: "Handful of coins", coins: 500, image: "coins/pack1.webp" },
+  { id: "coins_1200", name: "Coin stack", coins: 1200, image: "coins/pack2.webp" },
+  { id: "coins_2600", name: "Coin pouch", coins: 2600, image: "coins/pack3.webp", tag: "Popular" },
+  { id: "coins_5500", name: "Wooden chest", coins: 5500, image: "coins/pack4.webp" },
+  { id: "coins_12000", name: "Golden chest", coins: 12000, image: "coins/pack5.webp" },
+  { id: "coins_30000", name: "Treasure hoard", coins: 30000, image: "coins/pack6.webp", tag: "Best value" },
+];
 
 /** Price of an item (0 for starter items). */
 export function cosmeticPrice(itemId: string): number {

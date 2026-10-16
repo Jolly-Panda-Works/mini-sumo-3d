@@ -82,7 +82,7 @@ Party games are best when everyone understands them in five seconds. Mini Sumo h
 
 On phones and tablets the touch controls appear automatically during a bout (*Settings → Touch controls* can force them on or off). Steering and dashing work at the same time with two thumbs, and supported Android devices vibrate on dashes and hits (*Settings → Vibration*).
 
-*Settings* has your name and avatar, music and sound-effect volumes, controls, *About*, and *Save progress to Google account* (coming soon). The game plays original synthesised music: a calm pentatonic theme on menus and a faster taiko-driven one during bouts. The Android app always runs in landscape.
+*Settings* has your name, music and sound-effect volumes, controls, *About*, and *Save progress to Google account* (coming soon). The game plays original synthesised music: a calm pentatonic theme on menus and a faster taiko-driven one during bouts. The Android app always runs in landscape.
 
 Settings never pause the shared match. *Settings → About* shows the version, the creator and links to the game page and source code.
 
@@ -223,6 +223,8 @@ npm run build:desktop    # installer/app for your current OS in apps/desktop/rel
 npm run android:install && cd apps/mobile && npx cap add android && cd ../..   # once; needs Android SDK + JDK 21
 npm run build:android    # then: npm run android:open --prefix apps/mobile
 ```
+
+**Google Play release:** step-by-step guide (Persian) in [docs/ANDROID-RELEASE.fa.md](docs/ANDROID-RELEASE.fa.md); the store icon and feature graphic are in `docs/store/`. The Android application id is `com.jollypanda.mini_sumo`.
 
 `apps/desktop` (Electron) and `apps/mobile` (Capacitor) aren't npm workspaces, so a plain `npm install` never downloads Electron or the Android tooling.
 

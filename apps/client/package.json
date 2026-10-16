@@ -15,6 +15,7 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@fontsource/baloo-2": "^5.1.0",
     "@mini-sumo/shared": "*",
     "@react-three/fiber": "^9.1.2",
     "colyseus.js": "^0.16.0",

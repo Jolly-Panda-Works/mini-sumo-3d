@@ -2,6 +2,10 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { audio } from "./audio/AudioManager";
+// The game font is bundled with the app (no font requests to other sites).
+import "@fontsource/baloo-2/500.css";
+import "@fontsource/baloo-2/700.css";
+import "@fontsource/baloo-2/800.css";
 import "./styles.css";
 import { bootTrack, preloadImage, startBoot } from "./boot";
 import { roomManager } from "./network/RoomManager";

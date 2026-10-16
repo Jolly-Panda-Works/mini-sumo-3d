@@ -4,7 +4,7 @@ import { economyStore } from "../network/economyClient";
 import { networkStore } from "../network/networkMode";
 import { sessionStore } from "../network/RoomManager";
 import { useStore } from "../store";
-import { setFriendsOpen, setSettingsOpen, setWalletOpen, setWardrobeOpen } from "../uiStore";
+import { setFriendsOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
 import { ArenaRow } from "./ArenaSelect";
 import { Coins } from "./Coins";
 
@@ -32,18 +32,11 @@ export function MainMenu() {
           <img src={`${import.meta.env.BASE_URL}title.webp`} alt={GAME_TITLE} width={1200} height={621} />
         </h1>
         <div className="home__actions">
-          <button
-            className="btn home__coins"
-            onClick={() => setWalletOpen(true)}
-            aria-label={balance !== undefined ? `Wallet: ${balance} Sumo Coins` : "Wallet: coins coming soon"}
-          >
-            {balance !== undefined ? (
-              <Coins amount={balance} />
-            ) : (
-              <span className="coins">
-                <span className="coins__icon" aria-hidden="true" />—
-              </span>
-            )}
+          <button className="btn home__coins" onClick={() => setShopOpen(true)} aria-label={`Coin shop. Balance: ${balance ?? 0} Sumo Coins`}>
+            <Coins amount={balance ?? 0} />
+            <span className="home__coins-plus" aria-hidden="true">
+              +
+            </span>
           </button>
           <button className="icon-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
             <HangerIcon />

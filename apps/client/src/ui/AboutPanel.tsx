@@ -13,20 +13,14 @@ export function AboutPanel() {
         </h2>
         {version && <p className="hint">Version {version}</p>}
         <p>
-          A game by <strong>{CREDITS.author}</strong>. Open source under the MIT License.
+          A game by <strong>{CREDITS.author}</strong>
         </p>
-        <p className="hint">Music and sound effects are synthesised by the game. Sumo Coins are virtual and have no money value.</p>
         <p className="about__links">
-          <a href={CREDITS.projectUrl} target="_blank" rel="noopener noreferrer">
-            Game page
-          </a>
           <a href={CREDITS.website} target="_blank" rel="noopener noreferrer">
-            useffarahmand.com
-          </a>
-          <a href={CREDITS.sourceUrl} target="_blank" rel="noopener noreferrer">
-            Source code
+            www.useffarahmand.com
           </a>
         </p>
+        <p className="hint">© 2026 {CREDITS.author} · MIT License</p>
         <button className="btn btn--primary" onClick={() => setAboutOpen(false)}>
           Close
         </button>

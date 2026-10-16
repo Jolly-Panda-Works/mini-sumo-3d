@@ -6,7 +6,7 @@ import { inputController } from "./input/InputController";
 import { gameStore, sessionStore } from "./network/RoomManager";
 import { settingsStore, touchControlsEnabled } from "./settings";
 import { useStore } from "./store";
-import { setAboutOpen, setFriendsOpen, setSettingsOpen, setWalletOpen, setWardrobeOpen, uiStore } from "./uiStore";
+import { setAboutOpen, setFriendsOpen, setSettingsOpen, setShopOpen, setWalletOpen, setWardrobeOpen, uiStore } from "./uiStore";
 import { Countdown } from "./ui/Countdown";
 import { HUD } from "./ui/HUD";
 import { Lobby } from "./ui/Lobby";
@@ -15,6 +15,7 @@ import { NameGate } from "./ui/NameGate";
 import { Wardrobe } from "./ui/Wardrobe";
 import { AboutPanel } from "./ui/AboutPanel";
 import { FriendsPanel } from "./ui/FriendsPanel";
+import { CoinShop } from "./ui/CoinShop";
 import { music } from "./audio/Music";
 import { Wallet } from "./ui/Wallet";
 import { Results } from "./ui/Results";
@@ -52,6 +53,8 @@ export function App() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || !settingsStore.get().onboarded) return;
       if (uiStore.get().wardrobeOpen) setWardrobeOpen(false);
+      else if (uiStore.get().walletOpen) setWalletOpen(false);
+      else if (uiStore.get().shopOpen) setShopOpen(false);
       else if (uiStore.get().aboutOpen) setAboutOpen(false);
       else if (uiStore.get().friendsOpen) setFriendsOpen(false);
       else if (uiStore.get().walletOpen) setWalletOpen(false);
@@ -91,6 +94,7 @@ export function App() {
         {inRoom && <Toasts />}
         {ui.wardrobeOpen && !needsName && (!inRoom || game.phase === Phase.Waiting || game.phase === Phase.Lobby) && <Wardrobe />}
         {ui.friendsOpen && !inRoom && !needsName && <FriendsPanel />}
+        {ui.shopOpen && !needsName && <CoinShop />}
         {ui.walletOpen && !needsName && <Wallet />}
         {ui.settingsOpen && !needsName && <SettingsPanel />}
         {ui.aboutOpen && <AboutPanel />}

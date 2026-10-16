@@ -225,6 +225,13 @@ jobs:
           # Always landscape (either way round).
           node scripts/landscape.mjs
 
+      - name: Target SDK (optional, repository variable ANDROID_TARGET_SDK)
+        if: vars.ANDROID_TARGET_SDK != ''
+        working-directory: apps/mobile/android
+        run: |
+          sed -i -E "s/(compileSdkVersion|targetSdkVersion) = [0-9]+/\1 = ${{ vars.ANDROID_TARGET_SDK }}/" variables.gradle
+          grep -E "SdkVersion" variables.gradle
+
       - name: Set version
         working-directory: apps/mobile/android
         run: |

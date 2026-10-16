@@ -114,7 +114,7 @@ Tables: `accounts`, `wallets`, `transactions`, `ownership`, `arena_entries`, `se
 
 ## Cosmetic shop
 
-The shop **is** the existing wardrobe, organised in tabs (hair, colour, face, outfit; 36 items). Each appearance option has a stable item id (`hair.mohawk`, `hairColor.blue`, …). The first option of each category is a free starter item owned by everyone, also offline; every other item has a price in `COSMETIC_PRICES` (`packages/shared/src/economy.ts`), the single table the server charges from. Bought items are owned for good and listed first in their tab.
+The shop **is** the existing wardrobe, organised in tabs (hair, colour, face, outfit; 36 items). Each appearance option has a stable item id (`hair.mohawk`, `hairColor.blue`, …). Three items per category are free starter items owned by everyone, also offline; every other item has a price in `COSMETIC_PRICES` (`packages/shared/src/economy.ts`), the single table the server charges from. Bought items are owned for good and listed first in their tab.
 
 - Locked options show their price; picking one previews it on your wrestler (try before you buy).
 - *Buy* calls `POST /api/shop/purchase` with the item id and a UUID idempotency key. The server takes the price from its own catalog, debits and grants ownership in one transaction. Buying something you own never charges again.
@@ -123,6 +123,10 @@ The shop **is** the existing wardrobe, organised in tabs (hair, colour, face, ou
 - Offline, you can wear starter items and items cached from your last online profile (display only).
 
 Not supported yet (no renderer for them): emotes, victory effects. Add them to the catalog once the game can show them.
+
+## Coin shop
+
+The coin shop (coin button on the home screen) lists six Sumo Coin packs (`COIN_PACKS` in `packages/shared/src/economy.ts`: 500 to 30,000 coins). Buying is **not available**: every pack shows *Coming soon* and no real-money price is displayed. On Android, real purchases will have to go through Google Play Billing.
 
 ## Feature flags (server-enforced)
 

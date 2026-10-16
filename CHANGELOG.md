@@ -8,6 +8,19 @@ Builds from `main` are released automatically as `MAJOR.MINOR.<build number>`; t
 
 ### Added
 
+- Coin shop with six Sumo Coin packs (all *Coming soon*), opened from the coin button on the home screen.
+- Android release guide (`docs/ANDROID-RELEASE.fa.md`), Play Store icon and feature graphic (`docs/store/`), optional `ANDROID_TARGET_SDK` CI variable.
+
+### Changed
+
+- Three free items per wardrobe category; every other item shows its price and *Buy · Coming soon* until the shop opens.
+- Android application id is `com.jollypanda.mini_sumo`.
+- About shows only the creator and www.useffarahmand.com.
+- The Baloo 2 font is bundled (`@fontsource/baloo-2`): no requests to Google Fonts, works fully offline.
+- The home screen always shows the coin balance.
+
+### Added
+
 - Bot difficulty: Easy, Normal and Hard (Training card and *Settings → Gameplay*); fixed per room, training matchmaking filtered by level.
 - Comeback balance in the last 30 seconds of a bout: players' dash recharges faster (down to 55 % of the cooldown) and bots ease off. The HUD shows a "Final stretch" badge and the dash meter follows the shorter cooldown.
 

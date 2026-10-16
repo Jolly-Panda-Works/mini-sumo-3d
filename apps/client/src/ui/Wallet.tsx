@@ -38,7 +38,7 @@ export function Wallet() {
         </h2>
         {!profile ? (
           <p className="notice notice--offline">
-            <strong>Coming soon.</strong> Sumo Coins, rewards and your history arrive with online play.
+            <strong>Coming soon.</strong> Your coin history will appear here.
           </p>
         ) : (
           <>

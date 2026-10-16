@@ -209,20 +209,21 @@ export function Wardrobe() {
 
         {missing && (
           <div className="shop-bar" role="status">
-            {shopOpen && missingItem ? (
+            {missingItem && (
               <>
                 <span>
-                  Previewing <strong>{missingItem.name}</strong> for <Coins amount={missingItem.price} />
-                  {balance < missingItem.price && <span className="hint"> (you have {balance})</span>}
+                  Previewing <strong>{missingItem.name}</strong> · <Coins amount={missingItem.price} />
                 </span>
-                <button className="btn btn--primary" disabled={buying || balance < missingItem.price} onClick={() => void buy()}>
-                  {buying ? "Buying…" : "Buy"}
-                </button>
+                {shopOpen ? (
+                  <button className="btn btn--primary" disabled={buying || balance < missingItem.price} onClick={() => void buy()}>
+                    {buying ? "Buying…" : "Buy"}
+                  </button>
+                ) : (
+                  <button className="btn" disabled aria-label={`Buy ${missingItem.name}: coming soon`}>
+                    Buy · Coming soon
+                  </button>
+                )}
               </>
-            ) : (
-              <span>
-                Previewing a shop item. <span className="tag tag--soon">Shop coming soon</span>
-              </span>
             )}
           </div>
         )}
