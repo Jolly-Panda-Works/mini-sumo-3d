@@ -1,4 +1,4 @@
-import { LATE_GAME_MS, MATCH_DURATION_MS, Phase } from "@mini-sumo/shared";
+import { LATE_GAME_MS, MATCH_DURATION_MS, POWER_UPS, POWER_UP_MS, Phase, isPowerUpKind, type PowerUpKind } from "@mini-sumo/shared";
 import { gameStore, sessionStore } from "../network/RoomManager";
 import { useStore } from "../store";
 import { setSettingsOpen } from "../uiStore";
@@ -46,6 +46,7 @@ export function HUD({ touch }: { touch: boolean }) {
       {session.unstable && <p className="hud__warning">Connection unstable. Waiting for the server…</p>}
 
       {finalStretch && you?.alive && <p className="hud__boost">Final stretch: your dash recharges faster!</p>}
+      {you?.alive && isPowerUpKind(you.powerUp) && <PowerUpBadge kind={you.powerUp} ms={you.powerUpMs} />}
       {finalStretch && you?.alive && <FinalVignette remainingMs={game.remainingMs} />}
 
       {you && !you.alive && playing && <p className="hud__spectate">You're out. Watching the rest of the bout.</p>}
@@ -81,5 +82,22 @@ function FinalVignette({ remainingMs }: { remainingMs: number }) {
         ["--vignette-speed" as string]: `${1.6 - 0.9 * late}s`,
       }}
     />
+  );
+}
+
+/** Your active power-up: its kanji, name and a ring that runs down. */
+function PowerUpBadge({ kind, ms }: { kind: PowerUpKind; ms: number }) {
+  const info = POWER_UPS[kind];
+  const left = Math.max(0, Math.min(1, ms / POWER_UP_MS));
+  return (
+    <div className={`powerup${ms < 2000 ? " powerup--ending" : ""}`} role="status" style={{ ["--pu" as string]: info.color, ["--left" as string]: String(left) }}>
+      <span className="powerup__kanji" aria-hidden="true">
+        {info.kanji}
+      </span>
+      <span className="powerup__text">
+        <strong>{info.name}</strong>
+        <span>{Math.ceil(ms / 1000)}s</span>
+      </span>
+    </div>
   );
 }

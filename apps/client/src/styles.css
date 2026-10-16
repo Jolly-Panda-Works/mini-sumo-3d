@@ -3455,3 +3455,62 @@ dl.profile__stats {
   height: 40px;
   margin: 0;
 }
+
+/* ---------- Power-up badge (HUD) ---------- */
+
+.powerup {
+  position: absolute;
+  left: 50%;
+  top: calc(64px + var(--safe-top, 0px));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 14px 4px 4px;
+  border-radius: 999px;
+  background: rgba(20, 16, 34, 0.75);
+  border: 2.5px solid var(--pu);
+  color: #fff4dc;
+  animation: powerup-in 0.35s cubic-bezier(0.34, 1.5, 0.64, 1);
+}
+
+.powerup__kanji {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fff;
+  background: conic-gradient(var(--pu) calc(var(--left) * 360deg), rgba(255, 255, 255, 0.15) 0);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
+}
+
+.powerup__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+  font-size: 0.85rem;
+}
+
+.powerup__text strong {
+  font-size: 0.95rem;
+}
+
+.powerup--ending {
+  animation: powerup-blink 0.25s steps(2) infinite;
+}
+
+@keyframes powerup-in {
+  from {
+    transform: translateX(-50%) scale(0.6);
+    opacity: 0;
+  }
+}
+
+@keyframes powerup-blink {
+  50% {
+    opacity: 0.45;
+  }
+}

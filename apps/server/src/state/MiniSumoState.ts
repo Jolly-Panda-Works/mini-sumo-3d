@@ -16,6 +16,9 @@ export class PlayerState extends Schema {
   /** Remaining dash cooldown, rounded up to 100 ms to limit patch traffic. */
   @type("uint16") dashCooldownMs = 0;
   @type("uint16") dashCooldownTotalMs = 3000;
+  /** Active power-up ("" none) and its remaining time. */
+  @type("string") powerUp = "";
+  @type("uint16") powerUpMs = 0;
   @type("uint8") placement = 0;
   @type("string") elimReason = "";
   /** Only true in private rooms (the host manages bots there). Never set in quick match. */
@@ -45,6 +48,10 @@ export class MiniSumoState extends Schema {
   @type("string") arenaId = "training";
   /** Bot difficulty ("easy" | "normal" | "hard"; empty in paid arenas). */
   @type("string") botLevel = "normal";
+  /** Power-up flag on the ring ("" when none). */
+  @type("string") itemKind = "";
+  @type("float32") itemX = 0;
+  @type("float32") itemY = 0;
   /** Session ids ordered by final placement (filled when a round ends). */
   @type(["string"]) standings = new ArraySchema<string>();
 }

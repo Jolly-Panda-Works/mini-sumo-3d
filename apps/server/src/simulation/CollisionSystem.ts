@@ -12,7 +12,7 @@ export interface ImpactEvent {
 }
 
 function massOf(body: SimBody, timeMs: number, cfg: SimulationConfig): number {
-  return isDashing(body, timeMs) ? cfg.dashMass : cfg.baseMass;
+  return (isDashing(body, timeMs) ? cfg.dashMass : cfg.baseMass) * (body.massScale ?? 1);
 }
 
 /**
@@ -24,8 +24,6 @@ function massOf(body: SimBody, timeMs: number, cfg: SimulationConfig): number {
  */
 export function resolveCollisions(bodies: readonly SimBody[], cfg: SimulationConfig, timeMs: number): ImpactEvent[] {
   const events: ImpactEvent[] = [];
-  const minDist = cfg.playerRadius * 2;
-  const minDistSq = minDist * minDist;
   const count = bodies.length;
 
   for (let iter = 0; iter < cfg.collisionIterations; iter++) {
@@ -37,6 +35,8 @@ export function resolveCollisions(bodies: readonly SimBody[], cfg: SimulationCon
         const b = bodies[j]!;
         if (!b.alive) continue;
 
+        const minDist = cfg.playerRadius * ((a.radiusScale ?? 1) + (b.radiusScale ?? 1));
+        const minDistSq = minDist * minDist;
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         const distSq = dx * dx + dy * dy;

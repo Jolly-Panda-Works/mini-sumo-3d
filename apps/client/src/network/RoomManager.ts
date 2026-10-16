@@ -41,6 +41,8 @@ export interface UIPlayer {
   elimReason: string;
   dashCooldownMs: number;
   dashCooldownTotalMs: number;
+  powerUp: string;
+  powerUpMs: number;
   /** Only true in private rooms; quick-match bots look like everyone else. */
   isBot: boolean;
   appearance: Appearance;
@@ -63,6 +65,8 @@ export interface GameSnapshot {
   searchRemainingMs: number;
   arenaId: string;
   botLevel: string;
+  /** Power-up flag on the ring. */
+  item: { kind: string; x: number; y: number } | null;
   players: UIPlayer[];
   standings: string[];
 }
@@ -89,6 +93,7 @@ const EMPTY_GAME: GameSnapshot = {
   searchRemainingMs: 0,
   arenaId: "training",
   botLevel: "",
+  item: null,
   players: [],
   standings: [],
 };
@@ -398,8 +403,7 @@ class RoomManager {
       }
       // You: the knocked-out sting and the crowd groaning. Others: the usual drop sound,
       // and the crowd cheers if you pushed them.
-      if (isYou) audio.sample("knocked-out");
-      else audio.eliminated();
+      audio.eliminated();
       if (isYou && msg.reason === "ringOut") audio.crowdAww();
       else if (msg.by && msg.by === this.sessionId) audio.crowdCheer();
       if (isYou) vibrate(120);
@@ -479,6 +483,8 @@ class RoomManager {
         elimReason: p.elimReason,
         dashCooldownMs: p.dashCooldownMs,
         dashCooldownTotalMs: p.dashCooldownTotalMs || 3000,
+        powerUp: p.powerUp ?? "",
+        powerUpMs: p.powerUpMs ?? 0,
         isBot: Boolean(p.isBot),
         appearance: { hair: p.hair ?? 0, hairColor: p.hairColor ?? 0, face: p.face ?? 0, outfit: p.outfit ?? 0 },
         isHost: id === state.hostId,
@@ -500,6 +506,7 @@ class RoomManager {
       searchRemainingMs: state.searchRemainingMs ?? 0,
       arenaId: state.arenaId ?? "training",
       botLevel: state.botLevel ?? "",
+      item: state.itemKind ? { kind: state.itemKind, x: state.itemX ?? 0, y: state.itemY ?? 0 } : null,
       players,
       standings: Array.from(state.standings ?? []),
     };
@@ -510,6 +517,10 @@ class RoomManager {
     const previous = gameStore.get();
     gameStore.set(next);
     this.playPhaseCues(previous, next);
+    const before = previous.players.find((p) => p.isYou)?.powerUp ?? "";
+    const after = next.players.find((p) => p.isYou)?.powerUp ?? "";
+    if (after && after !== before) audio.sample("powerup-on");
+    else if (before && !after) audio.sample("powerup-off");
   }
 
   private playPhaseCues(prev: GameSnapshot, next: GameSnapshot): void {

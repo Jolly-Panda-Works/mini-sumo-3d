@@ -304,6 +304,9 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
     const s = this.session;
     const state = this.state;
     state.phase = s.phase;
+    state.itemKind = s.item?.kind ?? "";
+    state.itemX = s.item?.x ?? 0;
+    state.itemY = s.item?.y ?? 0;
     state.phaseRemainingMs = roundUp100(s.phaseRemainingMs);
     state.hostId = s.hostId;
     state.winnerId = s.winnerId;
@@ -334,6 +337,8 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
       ps.dashing = isDashing(p, s.time);
       ps.dashCooldownMs = Math.min(65_000, roundUp100(Math.max(0, p.dashReadyAt - s.time)));
       ps.dashCooldownTotalMs = Math.min(65_000, p.dashCooldownTotal);
+      ps.powerUp = p.powerUp;
+      ps.powerUpMs = p.powerUp ? Math.min(65_000, roundUp100(Math.max(0, p.powerUpUntil - s.time))) : 0;
       ps.placement = p.placement;
       ps.elimReason = p.elimReason;
       // Quick-match bots are indistinguishable from players on the wire.

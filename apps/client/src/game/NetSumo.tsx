@@ -6,6 +6,7 @@ import { roomManager } from "../network/RoomManager";
 import { dustBus, lastHitAt } from "./effectsBus";
 import { createNameTagTexture } from "./nameTag";
 import { SumoModel, useSumoParts } from "./SumoModel";
+import { BackBanner } from "./PowerUpFlags";
 
 const OUTER_FLOOR_Y = -1.4;
 
@@ -63,6 +64,8 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
     wasAlive: true,
     /** When this wrestler first appeared (for the pop-in). */
     bornAt: -1,
+    /** Display size (grows with the Giant power-up). */
+    size: 1,
   });
 
   useFrame((frame, delta) => {
@@ -117,7 +120,9 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
       root.rotation.set(lean, s.yaw, 0);
       const pop = Math.min(1, (t - s.bornAt) / 0.45);
       const c1 = 1.70158;
-      root.scale.setScalar(pop < 1 ? Math.max(0.01, 1 + (c1 + 1) * (pop - 1) ** 3 + c1 * (pop - 1) ** 2) : 1);
+      const giant = (p as { powerUp?: string }).powerUp === "giant" ? 1.4 : 1;
+      s.size += (giant - s.size) * (1 - Math.exp(-6 * dt));
+      root.scale.setScalar((pop < 1 ? Math.max(0.01, 1 + (c1 + 1) * (pop - 1) ** 3 + c1 * (pop - 1) ** 2) : 1) * s.size);
 
       const bob = Math.sin(t * 3 + seed * 6) * 0.02;
       const stretch = p.dashing ? 0.12 : 0;
@@ -159,7 +164,7 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
 
     const tag = tagRef.current;
     if (tag) {
-      tag.position.set(s.x, s.y + (p.alive ? 2.55 : 1.4), s.z);
+      tag.position.set(s.x, s.y + (p.alive ? 2.55 * s.size : 1.4), s.z);
       tag.visible = p.connected && texture !== null;
     }
     s.wasAlive = p.alive;
@@ -168,6 +173,7 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
   return (
     <>
       <SumoModel parts={parts} color={color} appearance={appearance} />
+      <BackBanner id={id} root={parts.root} />
       <sprite ref={tagRef} scale={[2.3, 0.52, 1]} renderOrder={10} visible={false}>
         {texture && <spriteMaterial key={texture.uuid} map={texture} depthTest={false} transparent />}
       </sprite>

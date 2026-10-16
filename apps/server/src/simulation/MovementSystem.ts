@@ -40,11 +40,12 @@ export function stepMovement(body: SimBody, dt: number, cfg: SimulationConfig, t
   }
 
   const speedBefore = Math.hypot(body.vx, body.vy);
-  let vx = body.vx + ix * cfg.acceleration * dt;
-  let vy = body.vy + iy * cfg.acceleration * dt;
+  const speedScale = body.speedScale ?? 1;
+  let vx = body.vx + ix * cfg.acceleration * speedScale * dt;
+  let vy = body.vy + iy * cfg.acceleration * speedScale * dt;
 
   // Input may steer but never push speed beyond max(maxSpeed, current speed).
-  const cap = Math.max(speedBefore, cfg.maxSpeed);
+  const cap = Math.max(speedBefore, cfg.maxSpeed * speedScale);
   const speedAfter = Math.hypot(vx, vy);
   if (speedAfter > cap) {
     const s = cap / speedAfter;

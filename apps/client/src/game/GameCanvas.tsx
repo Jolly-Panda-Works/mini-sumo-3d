@@ -6,6 +6,7 @@ import { CameraRig } from "./CameraRig";
 import { Effects } from "./Effects";
 import { MenuSumos } from "./MenuSumos";
 import { NetSumo } from "./NetSumo";
+import { ItemFlag } from "./PowerUpFlags";
 import { themeFor } from "./arenaThemes";
 import { uiStore } from "../uiStore";
 
@@ -59,6 +60,7 @@ export function GameCanvas() {
             />
           ))
         : <MenuSumos />}
+      <ItemFlag />
       <Effects />
       <CameraRig orbit={!inRoom} />
     </Canvas>

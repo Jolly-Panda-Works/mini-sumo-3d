@@ -52,8 +52,6 @@ export function App() {
   const finalStretch = inRoom && game.phase === Phase.Playing && game.remainingMs > 0 && game.remainingMs <= LATE_GAME_MS;
   useEffect(() => {
     music.setTempo(finalStretch ? 1.1 : 1);
-    // The final stretch begins: a "buff" sting while you're still in the ring.
-    if (finalStretch && game.players.some((p) => p.isYou && p.alive)) audio.sample("final-stretch");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finalStretch]);
 

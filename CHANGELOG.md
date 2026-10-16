@@ -6,6 +6,18 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Power-ups: a nobori flag pops up on the ring every 8–12 s (out of a puff of smoke). Grab it for 12 s of Iron Body (鉄), Thunder Dash (雷), Wind Feet (風) or Giant (巨); the flag then rides on your back, flickers in its last 2 s and vanishes in smoke. HUD badge with a countdown ring; sounds when your power-up starts and ends. Bots go for flags only after the player had a chance (hard 1.5 s, normal 3 s, easy 4.5 s). No new flags in the final 30 s.
+
+### Changed
+
+- The *buff* and *debuff* sounds now belong to power-ups (`sfx/powerup-on.mp3`, `sfx/powerup-off.mp3`); the final stretch and being pushed out no longer use them.
+
+### Changed
+
+- The home hub with the arena carousel is for phones (up to 760 px wide). Wider screens (web, desktop, tablets) keep the buttons row, the title and all arenas in a row, with arrows only when some are off screen.
+
 ### Changed
 
 - Home hub (from the sketch): profile with name and level on the left, coins on the right with settings under them, the arena carousel in the middle (one card centred, a bit of the next and previous showing instead of arrows), and *Customise* and a new *Shop* button bottom left. The title logo is no longer on the home screen.

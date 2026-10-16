@@ -13,8 +13,8 @@ export const SAMPLES = {
   "menu-close": 0.55,
   purchase: 0.8,
   "level-up": 0.9,
-  "knocked-out": 0.7,
-  "final-stretch": 0.8,
+  "powerup-on": 0.85,
+  "powerup-off": 0.75,
 } as const;
 export type SampleName = keyof typeof SAMPLES;
 

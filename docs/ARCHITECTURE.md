@@ -125,3 +125,14 @@ The look is four small indexes (`hair`, `hairColor`, `face`, `outfit`) defined i
 ## Economy
 
 See [ECONOMY.md](ECONOMY.md). In short: `apps/server/src/economy/` (config, `Economy` service on `node:sqlite`, prize formula, disabled payments, events), `apps/server/src/http/api.ts` (JSON API on the game port), and hooks in `MiniSumoRoom` (`onAuth` resolves the guest token; paid joins reserve the entry; `playing` locks entries; `roundOver` settles and records rewards; cancel/dispose refund). `GameSession` gained a `paidArena` mode (humans only, automatic start, cancel when alone, single round). The client side is `apps/client/src/network/economyClient.ts` plus the arena, wallet, wardrobe-shop and results UI.
+
+
+## Power-ups
+
+Handled in `GameSession` (authoritative, so the same online and offline):
+
+- A flag (`session.item`) appears `powerUpFirstMs` (8 s) after the start, then every 8–12 s, at a random spot within 60 % of the ring radius and away from the wrestlers. It disappears after 8 s if nobody takes it, and no new flags appear in the final stretch.
+- Touching it (`playerRadius × size + 0.55`) gives that power-up for `powerUpDurationMs` (12 s); a new one replaces the old. Pushed-out players lose theirs.
+- Effects are applied through body modifiers (`massScale`, `radiusScale`, `speedScale` on `SimBody`) used by the movement and collision systems, plus a shorter dash cooldown for Thunder.
+- Bots steer for the flag only after `botItemDelayMs[level]`, so players get the first chance.
+- Synced as `powerUp` / `powerUpMs` per player and `itemKind` / `itemX` / `itemY` on the room. The client draws the flag on the ring and a banner on the wrestler's back (`PowerUpFlags.tsx`) and plays the power-up sounds for your own pickups.

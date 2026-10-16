@@ -86,6 +86,9 @@ export class LocalConnection implements GameConnection {
       searchRemainingMs: 0,
       arenaId: this.arenaId,
       botLevel: sanitizeBotLevel(options.botLevel),
+      itemKind: "",
+      itemX: 0,
+      itemY: 0,
       standings: [],
     };
     this.session.addPlayer(this.sessionId, options.name, options.appearance);
@@ -260,6 +263,9 @@ export class LocalConnection implements GameConnection {
     const s = this.session;
     const state = this.state;
     state.phase = s.phase;
+    state.itemKind = s.item?.kind ?? "";
+    state.itemX = s.item?.x ?? 0;
+    state.itemY = s.item?.y ?? 0;
     state.phaseRemainingMs = roundUp100(s.phaseRemainingMs);
     state.hostId = s.hostId;
     state.winnerId = s.winnerId;
@@ -288,6 +294,8 @@ export class LocalConnection implements GameConnection {
       ps.dashing = isDashing(p, s.time);
       ps.dashCooldownMs = roundUp100(Math.max(0, p.dashReadyAt - s.time));
       ps.dashCooldownTotalMs = p.dashCooldownTotal;
+      ps.powerUp = p.powerUp;
+      ps.powerUpMs = p.powerUp ? roundUp100(Math.max(0, p.powerUpUntil - s.time)) : 0;
       ps.placement = p.placement;
       ps.elimReason = p.elimReason;
       ps.isBot = p.isBot && this.isPrivate;

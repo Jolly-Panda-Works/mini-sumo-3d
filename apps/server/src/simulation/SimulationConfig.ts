@@ -7,6 +7,7 @@ import {
   PLAYER_RADIUS,
   QUICK_MATCH_WAIT_MS,
   LATE_GAME_MS,
+  POWER_UP_MS,
 } from "@mini-sumo/shared";
 
 /**
@@ -81,6 +82,26 @@ export interface SimulationConfig {
   /** How much bots ease off at the very end (0 = not at all, 1 = fully). */
   lateBotEase: number;
 
+  /** Power-ups */
+  powerUpsEnabled: boolean;
+  /** First flag this long after the bout starts, then every min..max ms. */
+  powerUpFirstMs: number;
+  powerUpEveryMinMs: number;
+  powerUpEveryMaxMs: number;
+  /** A flag nobody grabs disappears after this long. */
+  powerUpItemLifeMs: number;
+  powerUpDurationMs: number;
+  /** Flags appear within this fraction of the ring radius. */
+  powerUpSpawnRadiusFactor: number;
+  powerUpPickupRange: number;
+  /** Bots go for a flag only after this delay (players get the first chance). */
+  botItemDelayMs: { easy: number; normal: number; hard: number };
+  ironMassScale: number;
+  giantScale: number;
+  giantMassScale: number;
+  windSpeedScale: number;
+  thunderDashCooldownMs: number;
+
   /** Sustained messages per second per client (input + dash). */
   inputRateLimitPerSec: number;
   /** Token-bucket burst size. */
@@ -132,6 +153,21 @@ export const DEFAULT_CONFIG: Readonly<SimulationConfig> = Object.freeze({
   lateGameMs: LATE_GAME_MS,
   lateDashCooldownFactor: 0.55,
   lateBotEase: 1,
+
+  powerUpsEnabled: true,
+  powerUpFirstMs: 8_000,
+  powerUpEveryMinMs: 8_000,
+  powerUpEveryMaxMs: 12_000,
+  powerUpItemLifeMs: 8_000,
+  powerUpDurationMs: POWER_UP_MS,
+  powerUpSpawnRadiusFactor: 0.6,
+  powerUpPickupRange: 0.55,
+  botItemDelayMs: { hard: 1_500, normal: 3_000, easy: 4_500 },
+  ironMassScale: 2,
+  giantScale: 1.4,
+  giantMassScale: 1.7,
+  windSpeedScale: 1.4,
+  thunderDashCooldownMs: 800,
 
   inputRateLimitPerSec: 60,
   inputBurst: 30,

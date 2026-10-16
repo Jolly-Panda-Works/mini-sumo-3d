@@ -5,7 +5,9 @@ import {
   Phase,
   randomAppearance,
   sanitizeBotLevel,
+  POWER_UP_KINDS,
   type BotLevel,
+  type PowerUpKind,
   sanitizeAppearance,
   type Appearance,
   type EliminationReason,
@@ -46,6 +48,18 @@ export interface SessionPlayer extends SimBody {
   lastTouchAt: number;
   /** Countdown entrance: from the ring side to the start mark. */
   entrance: { fromX: number; fromY: number; toX: number; toY: number; angle: number } | null;
+  /** Active power-up and when it ends. */
+  powerUp: PowerUpKind | "";
+  powerUpUntil: number;
+}
+
+/** The power-up flag standing on the ring, if any. */
+export interface PowerUpItem {
+  kind: PowerUpKind;
+  x: number;
+  y: number;
+  spawnedAt: number;
+  expiresAt: number;
 }
 
 export interface SessionOptions {
@@ -71,6 +85,8 @@ export type SessionEvent =
   | { type: "impact"; a: string; b: string; x: number; y: number; strength: number }
   | { type: "eliminated"; id: string; name: string; reason: EliminationReason; by: string | null }
   | { type: "dash"; id: string }
+  | { type: "item"; kind: PowerUpKind; x: number; y: number; state: "spawned" | "expired" | "taken"; by?: string }
+  | { type: "powerUp"; id: string; kind: PowerUpKind; active: boolean }
   | { type: "roundOver"; winnerId: string | null; draw: boolean; durationMs: number }
   /** Paid arena: nobody else joined in time; the room should refund and close. */
   | { type: "cancelled" }
@@ -123,6 +139,9 @@ export class GameSession {
   /** Simulation time when the quick-match wait started, -1 when not searching. */
   private searchStartedAt = -1;
   private nextBotAt = 0;
+  /** Power-up flag on the ring and when the next one appears. */
+  item: PowerUpItem | null = null;
+  private nextItemAt = Number.POSITIVE_INFINITY;
   private countdownStartedAt = 0;
   private readonly rng: () => number;
   private accumulator = 0;
@@ -263,6 +282,8 @@ export class GameSession {
       lastTouchBy: "",
       lastTouchAt: -1e9,
       entrance: null,
+      powerUp: "",
+      powerUpUntil: 0,
     };
     this.players.set(id, player);
     return player;
@@ -327,7 +348,7 @@ export class GameSession {
     if (!this.consumeToken(player)) return fail("Too many requests.");
     if (this.phase !== Phase.Playing) return fail("Dash is only available during a bout.");
     if (!player.alive) return fail("You are out of this round.");
-    const cooldown = this.humanDashCooldownMs();
+    const cooldown = player.powerUp === "thunder" ? Math.min(this.cfg.thunderDashCooldownMs, this.humanDashCooldownMs()) : this.humanDashCooldownMs();
     if (!tryDash(player, this.time, this.cfg, cooldown)) return fail("Dash is cooling down.");
     player.dashCooldownTotal = cooldown;
     this.events.push({ type: "dash", id });
@@ -413,6 +434,7 @@ export class GameSession {
    */
   private simulate(dt: number): void {
     const bodies = this.alivePlayers.sort((a, b) => a.joinOrder - b.joinOrder);
+    this.tickPowerUps(bodies);
     this.driveBots(bodies);
     for (const body of bodies) stepMovement(body, dt, this.cfg, this.time);
 
@@ -421,6 +443,7 @@ export class GameSession {
     }
 
     this.recordContacts(bodies);
+    this.collectItem(bodies);
     for (const id of applyArenaEliminations(bodies, this.cfg, this.time)) {
       const player = this.players.get(id)!;
       player.elimReason = "ringOut";
@@ -443,6 +466,7 @@ export class GameSession {
 
   private eliminate(player: SessionPlayer, reason: EliminationReason): void {
     if (!player.alive) return;
+    this.clearPowerUp(player, true);
     player.alive = false;
     player.eliminatedAt = this.time;
     player.vx = 0;
@@ -455,11 +479,11 @@ export class GameSession {
 
   /** Remembers who touched whom, so a ring-out can be credited to the pusher. */
   private recordContacts(bodies: readonly SessionPlayer[]): void {
-    const reach = (this.cfg.playerRadius * 2 + 0.08) ** 2;
     for (let i = 0; i < bodies.length; i++) {
       for (let j = i + 1; j < bodies.length; j++) {
         const a = bodies[i]!;
         const b = bodies[j]!;
+        const reach = (this.cfg.playerRadius * ((a.radiusScale ?? 1) + (b.radiusScale ?? 1)) + 0.08) ** 2;
         if ((a.x - b.x) ** 2 + (a.y - b.y) ** 2 > reach) continue;
         a.lastTouchBy = b.id;
         a.lastTouchAt = this.time;
@@ -517,6 +541,9 @@ export class GameSession {
 
   private beginPlaying(): void {
     if (!this.transition(Phase.Playing)) return;
+    this.item = null;
+    this.nextItemAt = this.cfg.powerUpsEnabled ? this.time + this.cfg.powerUpFirstMs : Number.POSITIVE_INFINITY;
+    for (const p of this.players.values()) this.clearPowerUp(p, false);
     for (const p of this.connectedPlayers) {
       if (p.entrance) {
         p.x = p.entrance.toX;
@@ -532,6 +559,9 @@ export class GameSession {
   /** Finalizes the round. Guarded by the state machine, so it runs exactly once per round. */
   private endRound(): boolean {
     if (!this.transition(Phase.RoundOver)) return false;
+    this.item = null;
+    this.nextItemAt = Number.POSITIVE_INFINITY;
+    for (const p of this.players.values()) this.clearPowerUp(p, false);
 
     const outcome = determineOutcome(this.alivePlayers, this.cfg);
     this.winnerId = outcome.winnerId ?? "";
@@ -691,6 +721,80 @@ export class GameSession {
     return Math.round(this.cfg.dashCooldownMs * factor);
   }
 
+  // ---------------------------------------------------------------- power-ups
+
+  /** Spawns and expires flags, ends finished power-ups and applies the active effects. */
+  private tickPowerUps(alive: readonly SessionPlayer[]): void {
+    const cfg = this.cfg;
+    if (this.item && this.time >= this.item.expiresAt) {
+      const { kind, x, y } = this.item;
+      this.item = null;
+      this.events.push({ type: "item", kind, x, y, state: "expired" });
+      this.scheduleNextItem();
+    }
+    const remaining = this.phaseEndsAt - this.time;
+    if (!this.item && this.time >= this.nextItemAt) {
+      // No new flags in the final stretch.
+      if (remaining > cfg.lateGameMs) this.spawnItem(alive);
+      else this.nextItemAt = Number.POSITIVE_INFINITY;
+    }
+    for (const p of this.players.values()) {
+      if (p.powerUp && this.time >= p.powerUpUntil) this.clearPowerUp(p, true);
+      p.massScale = p.powerUp === "iron" ? cfg.ironMassScale : p.powerUp === "giant" ? cfg.giantMassScale : 1;
+      p.radiusScale = p.powerUp === "giant" ? cfg.giantScale : 1;
+      p.speedScale = p.powerUp === "wind" ? cfg.windSpeedScale : 1;
+    }
+  }
+
+  private scheduleNextItem(): void {
+    const { powerUpEveryMinMs: min, powerUpEveryMaxMs: max } = this.cfg;
+    this.nextItemAt = this.time + min + this.rng() * (max - min);
+  }
+
+  /** A random flag at a random spot inside the ring, away from the wrestlers. */
+  private spawnItem(alive: readonly SessionPlayer[]): void {
+    const cfg = this.cfg;
+    const kind = POWER_UP_KINDS[Math.floor(this.rng() * POWER_UP_KINDS.length)]!;
+    let x = 0;
+    let y = 0;
+    for (let attempt = 0; attempt < 12; attempt++) {
+      const r = cfg.arenaRadius * cfg.powerUpSpawnRadiusFactor * Math.sqrt(this.rng());
+      const a = this.rng() * Math.PI * 2;
+      x = Math.cos(a) * r;
+      y = Math.sin(a) * r;
+      if (alive.every((p) => Math.hypot(p.x - x, p.y - y) > cfg.playerRadius * 3)) break;
+    }
+    this.item = { kind, x, y, spawnedAt: this.time, expiresAt: this.time + cfg.powerUpItemLifeMs };
+    this.events.push({ type: "item", kind, x, y, state: "spawned" });
+  }
+
+  /** Whoever reaches the flag first takes it (ties: lowest join order). */
+  private collectItem(alive: readonly SessionPlayer[]): void {
+    const item = this.item;
+    if (!item) return;
+    for (const p of alive) {
+      const reach = this.cfg.playerRadius * (p.radiusScale ?? 1) + this.cfg.powerUpPickupRange;
+      if (Math.hypot(p.x - item.x, p.y - item.y) > reach) continue;
+      this.item = null;
+      this.events.push({ type: "item", kind: item.kind, x: item.x, y: item.y, state: "taken", by: p.id });
+      if (p.powerUp) this.clearPowerUp(p, true);
+      p.powerUp = item.kind;
+      p.powerUpUntil = this.time + this.cfg.powerUpDurationMs;
+      this.events.push({ type: "powerUp", id: p.id, kind: item.kind, active: true });
+      this.scheduleNextItem();
+      return;
+    }
+  }
+
+  private clearPowerUp(p: SessionPlayer, announce: boolean): void {
+    if (p.powerUp && announce) this.events.push({ type: "powerUp", id: p.id, kind: p.powerUp, active: false });
+    p.powerUp = "";
+    p.powerUpUntil = 0;
+    p.massScale = 1;
+    p.radiusScale = 1;
+    p.speedScale = 1;
+  }
+
   /**
    * When only two bots are left (every human is out), one of them gives up so the bout ends
    * quickly instead of running down the clock. The one further from the centre is picked.
@@ -710,10 +814,23 @@ export class GameSession {
     for (const bot of alive) {
       if (!bot.isBot || this.time < bot.nextThinkAt) continue;
       const decision = decideBot(bot, alive, this.cfg, this.rng, bot.id === this.weakBotId ? WEAK_BOT : tuning);
+      // Go for the power-up flag once it's this bot level's turn (players get the first chance).
+      const item = this.item;
+      if (item && bot.id !== this.weakBotId && this.time - item.spawnedAt >= this.cfg.botItemDelayMs[this.botLevel]) {
+        const dx = item.x - bot.x;
+        const dy = item.y - bot.y;
+        const len = Math.hypot(dx, dy);
+        if (len > 1e-3) {
+          decision.x = (dx / len) * tuning.inputScale;
+          decision.y = (dy / len) * tuning.inputScale;
+          decision.dash = false;
+        }
+      }
       bot.inputX = decision.x;
       bot.inputY = decision.y;
-      if (decision.dash && tryDash(bot, this.time, this.cfg)) {
-        bot.dashCooldownTotal = this.cfg.dashCooldownMs;
+      const botCooldown = bot.powerUp === "thunder" ? this.cfg.thunderDashCooldownMs : this.cfg.dashCooldownMs;
+      if (decision.dash && tryDash(bot, this.time, this.cfg, botCooldown)) {
+        bot.dashCooldownTotal = botCooldown;
         this.events.push({ type: "dash", id: bot.id });
       }
       bot.nextThinkAt = this.time + tuning.thinkMinMs + this.rng() * (tuning.thinkMaxMs - tuning.thinkMinMs);

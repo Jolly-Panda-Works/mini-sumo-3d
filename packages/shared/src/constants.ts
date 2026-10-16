@@ -29,6 +29,24 @@ export function sanitizeBotLevel(raw: unknown): BotLevel {
   return BOT_LEVELS.includes(raw as BotLevel) ? (raw as BotLevel) : "normal";
 }
 
+/**
+ * Power-ups: a flag appears on the ring every few seconds; whoever grabs it gets the power
+ * for POWER_UP_MS. The kanji is drawn on the flag (and on the banner behind the wrestler).
+ */
+export const POWER_UPS = {
+  iron: { kanji: "鉄", name: "Iron Body", description: "Twice as heavy: hard to push, pushes harder.", color: "#7E8AA6" },
+  thunder: { kanji: "雷", name: "Thunder Dash", description: "Dash recharges in under a second.", color: "#F2B21E" },
+  wind: { kanji: "風", name: "Wind Feet", description: "Much faster on your feet.", color: "#3FB58E" },
+  giant: { kanji: "巨", name: "Giant", description: "Grow big and heavy.", color: "#E2443A" },
+} as const;
+export type PowerUpKind = keyof typeof POWER_UPS;
+export const POWER_UP_KINDS = Object.keys(POWER_UPS) as PowerUpKind[];
+export const POWER_UP_MS = 12_000;
+
+export function isPowerUpKind(value: unknown): value is PowerUpKind {
+  return typeof value === "string" && value in POWER_UPS;
+}
+
 /** In the last part of a bout, players' dash recharges faster and bots ease off. */
 export const LATE_GAME_MS = 30_000;
 

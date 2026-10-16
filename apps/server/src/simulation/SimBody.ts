@@ -17,6 +17,10 @@ export interface SimBody {
   dashReadyAt: number;
   /** Simulation time (ms) of elimination, -1 while alive. */
   eliminatedAt: number;
+  /** Power-up modifiers (1 = normal). */
+  massScale?: number;
+  radiusScale?: number;
+  speedScale?: number;
 }
 
 export function createBody(id: string, x = 0, y = 0, angle = 0): SimBody {
