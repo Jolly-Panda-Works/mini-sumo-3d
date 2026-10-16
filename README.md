@@ -82,7 +82,7 @@ Party games are best when everyone understands them in five seconds. Mini Sumo h
 
 On phones and tablets the touch controls appear automatically during a bout (*Settings → Touch controls* can force them on or off). Steering and dashing work at the same time with two thumbs, and supported Android devices vibrate on dashes and hits (*Settings → Vibration*).
 
-*Settings* has your name, music and sound-effect volumes, controls, *About*, and *Save progress to Google account* (coming soon). The game plays original synthesised music: a calm pentatonic theme on menus and a faster taiko-driven one during bouts. The Android app always runs in landscape.
+*Settings* has your name, music and sound-effect volumes, controls, *About*, and *Save progress to Google account* (coming soon). Music: a Japanese bamboo-flute loop on the home screen, lobby and results, and a taiko percussion loop during bouts, crossfaded smoothly when you switch; it pauses while the app is in the background. The Android app always runs in landscape.
 
 Settings never pause the shared match. *Settings → About* shows the version, the creator and links to the game page and source code.
 
@@ -372,5 +372,8 @@ No accounts, analytics or ads. What little the game stores is described in [PRIV
 Released under the [MIT License](LICENSE) © 2026 [Usef Farahmand](https://github.com/Usef-Farahmand) · [useffarahmand.com](https://www.useffarahmand.com) · [Game page](https://www.useffarahmand.com/en/projects/mini-sumo)
 
 ## Acknowledgments
+
+Music: “Japanese Bamboo Bansuri” by Solbox and “Taiko Percussion Loop (Preparation for Action)” by Sonican, from [Pixabay](https://pixabay.com/) under the Pixabay Content License.
+
 
 [React Three Fiber](https://r3f.docs.pmnd.rs/) · [three.js](https://threejs.org/) · [Colyseus](https://colyseus.io/) · [Vite](https://vite.dev/) · [Electron](https://www.electronjs.org/) · [electron-builder](https://www.electron.build/) · [Capacitor](https://capacitorjs.com/) · [Vitest](https://vitest.dev/) · [Playwright](https://playwright.dev/) · [Baloo 2](https://fonts.google.com/specimen/Baloo+2)

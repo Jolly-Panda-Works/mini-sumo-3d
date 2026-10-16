@@ -15,6 +15,12 @@ class AudioManager {
 
   constructor() {
     settingsStore.subscribe(() => this.applyVolumes());
+    // Silence everything while the app is in the background (e.g. Android home screen).
+    document.addEventListener("visibilitychange", () => {
+      if (!this.ctx) return;
+      if (document.hidden) void this.ctx.suspend().catch(() => undefined);
+      else void this.ctx.resume().catch(() => undefined);
+    });
   }
 
   get context(): AudioContext | null {

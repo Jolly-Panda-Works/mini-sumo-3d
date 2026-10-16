@@ -21,6 +21,7 @@ export function AboutPanel() {
           </a>
         </p>
         <p className="hint">© 2026 {CREDITS.author} · MIT License</p>
+        <p className="hint">Music: “Japanese Bamboo Bansuri” by Solbox and “Taiko Percussion Loop” by Sonican (Pixabay).</p>
         <button className="btn btn--primary" onClick={() => setAboutOpen(false)}>
           Close
         </button>

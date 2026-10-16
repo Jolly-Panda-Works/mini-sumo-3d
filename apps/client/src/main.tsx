@@ -9,6 +9,7 @@ import "@fontsource/baloo-2/800.css";
 import "./styles.css";
 import { bootTrack, preloadImage, startBoot } from "./boot";
 import { roomManager } from "./network/RoomManager";
+import { music } from "./audio/Music";
 
 // Loading screen: artwork, fonts, the server check and the first 3D frame.
 const base = import.meta.env.BASE_URL;
@@ -16,6 +17,7 @@ const images = ["title.webp", "logo.webp", ...["training", "rookie", "pro", "cha
 images.forEach((file) => bootTrack(`img:${file}`, 1, preloadImage(`${base}${file}`)));
 bootTrack("fonts", 1, document.fonts?.ready ?? Promise.resolve());
 bootTrack("network", 2, roomManager.ready);
+bootTrack("music", 2, music.preload("menu"));
 startBoot();
 
 // Browsers only allow audio after a user gesture.

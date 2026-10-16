@@ -6,6 +6,10 @@ Builds from `main` are released automatically as `MAJOR.MINOR.<build number>`; t
 
 ## [Unreleased]
 
+### Changed
+
+- Music now uses two loops (`apps/client/public/music/`): a bamboo-flute track for home, lobby and results, and a taiko track for bouts, with a 1.6–1.8 s crossfade between them. Music and effects pause while the app is in the background. The procedural music was removed.
+
 ### Added
 
 - Coin shop with six Sumo Coin packs (all *Coming soon*), opened from the coin button on the home screen.
