@@ -290,22 +290,7 @@ export const localEconomy = {
       state.xp += xp;
       base.xp = xp;
     }
-    if (counts && entry.fee === 0 && entry.arenaId === "training") {
-      const day = today();
-      const earnedToday = state.rewardDay === day ? state.rewardDayTotal : 0;
-      const bonus = state.bonusDay !== day ? REWARDS.firstMatchOfDay : 0;
-      const amount = Math.min(REWARDS.participation + (result.won ? REWARDS.win : 0) + bonus, Math.max(0, REWARDS.dailyCap - earnedToday));
-      if (amount > 0) {
-        record(amount, bonus > 0 ? "daily_bonus" : "match_reward", bonus > 0 ? "Bout reward + first bout of the day" : result.won ? "Training win" : "Training bout", {
-          matchId: result.matchId,
-        });
-        state.coinsEarned += amount;
-        state.rewardDay = day;
-        state.rewardDayTotal = earnedToday + amount;
-        if (bonus > 0) state.bonusDay = day;
-        base.rewards = amount;
-      }
-    }
+    // Training is practice: XP only, no coin rewards.
     save();
     base.balance = state.coins;
     base.level = levelFromXp(state.xp).level;

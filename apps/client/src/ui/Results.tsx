@@ -56,7 +56,7 @@ export function Results() {
           ))}
         </ol>
 
-        {result && (result.kind !== "rewarded" || result.rewards > 0) && (
+        {result && (result.kind !== "rewarded" || result.rewards > 0 || (result.xp ?? 0) > 0) && (
           <div className="economy-result" role="status">
             {paid && (
               <p>

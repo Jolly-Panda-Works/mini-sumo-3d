@@ -41,10 +41,9 @@ All values are in `apps/server/src/economy/config.ts` (`ECONOMY`).
 | Source | Amount | Conditions |
 | --- | ---: | --- |
 | Welcome gift | 200 | Once per player: enough for a first Rookie bout. |
-| Training bout | +5 | Training Arena only. The round lasted ≥ 20 s and you didn't leave it. |
-| Training win | +15 | As above, and you won. |
-| First bout of the day | +50 | First rewarded training bout per UTC day. |
-| Daily cap | 300 | Free rewards (the three above) per account per UTC day. |
+| Training bout | 0 | Free practice: no coins, but XP and stats (the round lasted ≥ 20 s and you didn't leave it). |
+| Daily coins | +100 | Once per day from the coin shop. |
+| Level up | 50 + 25 × level | For every level reached. |
 | Paid arena win | prize | See below. |
 
 Anti-farming: rewards are recorded once per player per match (`match_results` primary key), short rounds and leavers get nothing, the daily cap bounds bot farming, and private rooms give no rewards (two friends could otherwise farm each other).
@@ -55,7 +54,7 @@ Defined once in `ARENA_CONFIG` (`config.ts`) and served to clients by `GET /api/
 
 | Arena | Entry | Players | Unlock | Max prize (4 players) |
 | --- | ---: | :---: | --- | ---: |
-| Training | free | 2–4 | – | rewards only |
+| Training | free | 2–4 | – | no coins (XP only) |
 | Rookie | 50 | 2–4 | level 1 | 180 |
 | Pro | 500 | 2–4 | level 5 | 1,800 |
 | Champion | 2,000 | 2–4 | level 10 | 7,200 |

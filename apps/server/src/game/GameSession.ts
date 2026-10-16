@@ -17,7 +17,10 @@ import { stepMovement, tryDash } from "../simulation/MovementSystem.js";
 import { createBody, type SimBody } from "../simulation/SimBody.js";
 import { DEFAULT_CONFIG, type SimulationConfig } from "../simulation/SimulationConfig.js";
 import { sanitizeName, validateMoveInput } from "../validation/InputValidator.js";
-import { decideBot, easedTuning } from "./BotBrain.js";
+import { decideBot, easedTuning, type BotTuning } from "./BotBrain.js";
+
+/** The bot that gives up in a bots-only finish: slow, wobbly, never dashes, ignores the edge. */
+const WEAK_BOT: BotTuning = { thinkMinMs: 350, thinkMaxMs: 600, noise: 1.6, dashChance: 0, inputScale: 0.3, edgeStart: 0.97 };
 import { createRng, pickBotName, randomId } from "./botNames.js";
 
 export interface SessionPlayer extends SimBody {
@@ -688,11 +691,25 @@ export class GameSession {
     return Math.round(this.cfg.dashCooldownMs * factor);
   }
 
+  /**
+   * When only two bots are left (every human is out), one of them gives up so the bout ends
+   * quickly instead of running down the clock. The one further from the centre is picked.
+   */
+  private weakBotId = "";
+
   private driveBots(alive: readonly SessionPlayer[]): void {
     const tuning = easedTuning(this.botLevel, this.lateness * this.cfg.lateBotEase);
+    if (alive.length === 2 && alive.every((p) => p.isBot)) {
+      if (!alive.some((p) => p.id === this.weakBotId)) {
+        const [a, b] = alive as [SessionPlayer, SessionPlayer];
+        this.weakBotId = Math.hypot(a.x, a.y) >= Math.hypot(b.x, b.y) ? a.id : b.id;
+      }
+    } else {
+      this.weakBotId = "";
+    }
     for (const bot of alive) {
       if (!bot.isBot || this.time < bot.nextThinkAt) continue;
-      const decision = decideBot(bot, alive, this.cfg, this.rng, tuning);
+      const decision = decideBot(bot, alive, this.cfg, this.rng, bot.id === this.weakBotId ? WEAK_BOT : tuning);
       bot.inputX = decision.x;
       bot.inputY = decision.y;
       if (decision.dash && tryDash(bot, this.time, this.cfg)) {

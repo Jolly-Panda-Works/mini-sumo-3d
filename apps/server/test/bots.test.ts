@@ -193,3 +193,25 @@ describe("quick match", () => {
     }
   });
 });
+
+describe("bots-only finish", () => {
+  it("one of the last two bots gives up, so the bout ends well before the clock", () => {
+    for (const seed of [1, 2, 3, 4, 5]) {
+      const s = new GameSession(cfg, 4, { quickMatch: true, seed, botLevel: "hard" });
+      s.addPlayer("me", "Me");
+      advance(s, cfg.quickMatchWaitMs + cfg.botJoinIntervalMs * 3 + 100);
+      s.requestStart("me");
+      advance(s, cfg.entranceMs + cfg.countdownMs + 50);
+      expect(s.phase).toBe(Phase.Playing);
+      s.removePlayer("me"); // the human is out
+      const bots = s.bots;
+      // Leave two bots in the ring.
+      const third = bots[2]!;
+      third.x = cfg.arenaRadius + 2;
+      const start = s.time;
+      while (s.phase === Phase.Playing && s.time - start < cfg.matchDurationMs) s.update(s.stepMs);
+      expect(s.phase).toBe(Phase.RoundOver);
+      expect(s.time - start).toBeLessThan(cfg.matchDurationMs * 0.75);
+    }
+  });
+});

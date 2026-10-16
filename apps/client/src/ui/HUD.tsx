@@ -28,9 +28,6 @@ export function HUD({ touch }: { touch: boolean }) {
         <div className={`hud__timer${lowTime ? " hud__timer--low" : ""}`} role="timer" aria-label="Time left">
           {formatTime(game.phase === Phase.Countdown ? MATCH_DURATION_MS : game.remainingMs)}
         </div>
-        <div className="hud__alive">
-          {game.aliveCount} in the ring
-        </div>
         <button className="icon-btn hud__gear" onClick={() => setSettingsOpen(true)} aria-label="Settings">
           <GearIcon />
         </button>
@@ -49,7 +46,7 @@ export function HUD({ touch }: { touch: boolean }) {
       {session.unstable && <p className="hud__warning">Connection unstable. Waiting for the server…</p>}
 
       {finalStretch && you?.alive && <p className="hud__boost">Final stretch: your dash recharges faster!</p>}
-      {finalStretch && <FinalVignette remainingMs={game.remainingMs} />}
+      {finalStretch && you?.alive && <FinalVignette remainingMs={game.remainingMs} />}
 
       {you && !you.alive && playing && <p className="hud__spectate">You're out. Watching the rest of the bout.</p>}
 

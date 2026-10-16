@@ -10,7 +10,6 @@ export function BotLevelPicker({ label = "Bots" }: { label?: string }) {
   const { botLevel } = useStore(settingsStore);
   return (
     <div className="level-picker" role="radiogroup" aria-label={`${label} difficulty`}>
-      <span className="level-picker__label">{label}</span>
       {BOT_LEVELS.map((level) => (
         <button
           key={level}
@@ -20,7 +19,7 @@ export function BotLevelPicker({ label = "Bots" }: { label?: string }) {
           className={`level-picker__opt${botLevel === level ? " level-picker__opt--on" : ""}`}
           onClick={() => settingsStore.update({ botLevel: level })}
         >
-          <Icon name={level} size={18} />
+          <Icon name={level} size={16} />
           {LABELS[level]}
         </button>
       ))}

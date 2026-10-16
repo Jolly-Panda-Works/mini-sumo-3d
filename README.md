@@ -136,7 +136,7 @@ The home screen has its own night-stage backdrop with the title in the middle an
 
 - New players get 200 coins (enough for a first Rookie bout) and level up with XP from every bout; Pro unlocks at level 5, Champion at level 10. The *Profile* panel shows level, XP, stats and unlocks.
 - Right now the economy runs on the device against bots; only buying coins is coming soon.
-- Training pays +5 per finished bout, +15 for a win and +50 for the first bout of the day, up to 300 per day.
+- Training is free practice: no coins, but every finished bout earns XP.
 - Prize = pool − 10 % economy fee (integer, `floor`). Draws and bouts that never start are refunded; leaving during a bout is a loss.
 - The **wardrobe is the shop**: priced options can be tried on and bought with coins. Looks never affect gameplay.
 - Everything (balances, prices, entries, prizes, ownership) is decided by the server and recorded in an append-only ledger with idempotency keys. *Settings* never stores coins.

@@ -4,7 +4,7 @@ import { economyStore } from "../network/economyClient";
 import { networkStore } from "../network/networkMode";
 import { sessionStore } from "../network/RoomManager";
 import { useStore } from "../store";
-import { pushToast, setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
+import { setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
 import { settingsStore } from "../settings";
 import { ArenaRow } from "./ArenaSelect";
 import { Coins } from "./Coins";
@@ -19,7 +19,6 @@ export function MainMenu() {
   const settings = useStore(settingsStore);
   const { mode } = useStore(networkStore);
   const online = mode === "online";
-  const busy = session.status === "connecting";
   const balance = economy.profile?.balances.coins;
   const last = economy.lastResult;
 
@@ -31,21 +30,16 @@ export function MainMenu() {
   return (
     <main className="home">
       <header className="home__top">
-        <h1 className="home__title">
-          <img src={`${import.meta.env.BASE_URL}title.webp`} alt={GAME_TITLE} width={1200} height={621} />
-        </h1>
         <div className="home__actions">
           <button
             className="btn home__profile"
             onClick={() => setProfileOpen(true)}
             aria-label={`Profile: ${settings.name}, level ${economy.profile?.level.level ?? 1}`}
           >
-            <span className="level-badge">{economy.profile?.level.level ?? 1}</span>
             <span className="home__profile-name">{settings.name}</span>
-          </button>
-          <button className="btn home__coins" onClick={() => setShopOpen(true)} aria-label={`Coin shop. Balance: ${balance ?? 0} Sumo Coins`}>
-            <Coins amount={balance ?? 0} />
-            <Icon name="plus" size={22} className="home__coins-plus" />
+            <span className="home__profile-level">
+              Level <span className="level-badge">{economy.profile?.level.level ?? 1}</span>
+            </span>
           </button>
           <button className="icon-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
             <Icon name="customize" size={30} />
@@ -53,7 +47,14 @@ export function MainMenu() {
           <button className="icon-btn" onClick={() => setSettingsOpen(true)} aria-label="Settings">
             <GearIcon />
           </button>
+          <button className="btn home__coins" onClick={() => setShopOpen(true)} aria-label={`Coin shop. Balance: ${balance ?? 0} Sumo Coins`}>
+            <Coins amount={balance ?? 0} />
+            <Icon name="plus" size={22} className="home__coins-plus" />
+          </button>
         </div>
+        <h1 className="home__title">
+          <img src={`${import.meta.env.BASE_URL}title.webp`} alt={GAME_TITLE} width={1200} height={621} />
+        </h1>
       </header>
 
       {last && (last.kind !== "rewarded" || last.rewards > 0) && (
@@ -73,18 +74,6 @@ export function MainMenu() {
       )}
 
       <ArenaRow />
-
-      <div className="home__bottom">
-        <button
-          className="btn btn--big"
-          disabled={busy}
-          aria-disabled={!online}
-          onClick={() => (online ? setFriendsOpen(true) : pushToast("Playing with friends is coming soon", "info"))}
-        >
-          Play with friends
-          {!online && <span className="tag tag--soon">Coming soon</span>}
-        </button>
-      </div>
 
       {session.error && (
         <p className="notice notice--error home__note" role="alert">

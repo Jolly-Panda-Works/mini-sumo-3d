@@ -2824,3 +2824,62 @@ dl.profile__stats {
   cursor: not-allowed;
   box-shadow: 0 2px 0 var(--ink);
 }
+
+/* ---------- Home: profile box fills the row; customise, settings and coins on the right ---------- */
+
+.home__actions {
+  width: 100%;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.home__profile {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 14px;
+}
+
+.home__profile-name {
+  display: block !important;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home__profile-level {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: rgba(43, 35, 64, 0.7);
+}
+
+.home__title {
+  margin-top: 4px;
+}
+
+/* ---------- Bot difficulty: one line on the card ---------- */
+
+.level-picker {
+  flex-wrap: nowrap;
+  gap: 3px;
+}
+
+.level-picker__opt {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: center;
+  gap: 2px;
+  padding: 1px 4px;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}

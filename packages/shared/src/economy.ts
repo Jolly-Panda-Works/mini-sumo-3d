@@ -313,7 +313,7 @@ export function arenaInfo(arena: ArenaDef): ArenaInfo {
     maxPrize: full.prize,
     payoutRule:
       arena.entryFee === 0
-        ? `Free. +${REWARDS.participation} coins per finished bout, +${REWARDS.win} for a win (up to ${REWARDS.dailyCap} a day).`
+        ? "Free practice. No coins, but every finished bout earns XP."
         : `The winner takes the pool minus a ${arena.economyFeePercent}% fee. Draws and bouts that never start are refunded.`,
     drawPolicy: "refund",
     bots: arena.bots,

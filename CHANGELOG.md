@@ -6,6 +6,14 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Home: one row of buttons on top (profile box with name and level filling the width, then customise, settings and coins on the right), the title below it. *Play with friends* removed.
+- Bot difficulty fits on one line on the Training card.
+- HUD: the "N in the ring" counter next to the timer is gone; the final-stretch glow only shows while you're still in the ring.
+- Training pays no coins (it still gives XP and counts for stats), on the device and on the server.
+- Bots-only finish: when every human is out and two bots are left, one of them gives up so the bout ends quickly.
+
 ### Fixed
 
 - Version bump started from `package.json` even when older releases (from the previous run-number scheme, e.g. `v1.0.37`) were higher, so a patch bump produced `v1.0.1`. Bumps now start from the highest `vX.Y.Z` tag, and a push whose `package.json` version is below the latest release fails with a clear message instead of releasing.
