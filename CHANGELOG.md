@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- The "Last bout: …" notice on the home screen is gone (it pushed the layout around); after a bout a short notification shows the coins won or the result note, then disappears.
+
 ### Added
 
 - Power-up art: the round emblems on the flags in the ring and on wrestlers' backs; the banner art in the HUD (your power-up on the right, others' next to their names).

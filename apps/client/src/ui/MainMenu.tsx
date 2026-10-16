@@ -4,12 +4,14 @@ import { economyStore } from "../network/economyClient";
 import { networkStore } from "../network/networkMode";
 import { sessionStore } from "../network/RoomManager";
 import { useStore } from "../store";
-import { setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
+import { pushToast, setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
 import { settingsStore } from "../settings";
 import { ArenaRow } from "./ArenaSelect";
-import { Coins } from "./Coins";
 import { Icon } from "./Icon";
 import { PHONE_QUERY, useMediaQuery } from "../useMediaQuery";
+
+/** Bout results already announced (so the toast shows once). */
+const toastedResults = new WeakSet<object>();
 
 const inviteCode = new URLSearchParams(window.location.search).get("room") ?? "";
 
@@ -24,31 +26,20 @@ export function MainMenu() {
   const last = economy.lastResult;
   const phone = useMediaQuery(PHONE_QUERY);
 
+  // After a bout: one short notification on the way home, then it's gone.
+  useEffect(() => {
+    if (!last || toastedResults.has(last)) return;
+    toastedResults.add(last);
+    const won = last.prize + last.rewards + (last.levelReward ?? 0);
+    if (won > 0) pushToast(`+${won.toLocaleString("en-US")} Sumo Coins`, "info", 3000);
+    else if (last.note) pushToast(last.note, "info", 3000);
+  }, [last]);
+
   // Invite links open the friends panel once we know the server is there.
   useEffect(() => {
     if (inviteCode && online) setFriendsOpen(true);
   }, [online]);
 
-  const notes = (
-    <>
-      {last && (last.kind !== "rewarded" || last.rewards > 0) && (
-        <p className="notice notice--result home__note" role="status">
-          {last.kind === "settled" && last.prize > 0 ? (
-            <>
-              Last bout: you won <Coins amount={last.prize} />!
-            </>
-          ) : last.kind === "rewarded" ? (
-            <>
-              Last bout: <Coins amount={last.rewards} signed /> reward.
-            </>
-          ) : (
-            <>Last bout: {last.note}</>
-          )}
-        </p>
-      )}
-
-    </>
-  );
   const error = (
     <>
       {session.error && (
@@ -90,7 +81,6 @@ export function MainMenu() {
             <img src={`${import.meta.env.BASE_URL}title.webp`} alt={GAME_TITLE} width={1200} height={621} />
           </h1>
         </header>
-        {notes}
         <ArenaRow variant="row" />
         {error}
       </main>
@@ -119,7 +109,6 @@ export function MainMenu() {
         </button>
       </header>
 
-      {notes}
       <ArenaRow variant="carousel" />
 
       {/* Bottom left: customise and shop */}

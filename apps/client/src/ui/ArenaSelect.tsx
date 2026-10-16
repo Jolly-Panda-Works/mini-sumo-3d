@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ArenaInfo } from "@mini-sumo/shared";
 import { arenaImage, themeFor } from "../game/arenaThemes";
 import { economyStore } from "../network/economyClient";
@@ -8,6 +8,7 @@ import { useStore } from "../store";
 import { Coins } from "./Coins";
 import { BotLevelPicker } from "./BotLevelPicker";
 import { Dialog } from "./Dialog";
+import { Icon } from "./Icon";
 import { pushToast } from "../uiStore";
 
 /**
@@ -41,7 +42,7 @@ const PREVIEW: ArenaInfo[] = [
 ];
 
 /** Paid arenas side by side: art, mood, entry fee, prize and an Enter button. */
-export function ArenaRow() {
+export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) {
   const economy = useStore(economyStore);
   const session = useStore(sessionStore);
   const settings = useStore(settingsStore);
@@ -51,6 +52,23 @@ export function ArenaRow() {
   const balance = economy.profile?.balances.coins ?? 0;
   const playerLevel = economy.profile?.level.level ?? 1;
   const arenas = (live ? economy.catalog?.arenas : null)?.filter((a) => a.enabled) ?? PREVIEW;
+  // Wide screens: arrows only when some arenas are off screen.
+  const [overflows, setOverflows] = useState(false);
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row || variant !== "row") return;
+    const check = () => setOverflows(row.scrollWidth > row.clientWidth + 4);
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(row);
+    return () => observer.disconnect();
+  }, [arenas.length, variant]);
+  const scrollRow = (dir: number) => {
+    const row = rowRef.current;
+    if (!row) return;
+    const card = row.querySelector("li");
+    row.scrollBy({ left: dir * ((card?.clientWidth ?? 240) + 16), behavior: "smooth" });
+  };
   const busy = session.status === "connecting";
 
   const enter = async (arena: ArenaInfo) => {
@@ -61,6 +79,11 @@ export function ArenaRow() {
   return (
     <>
       <div className="arena-row-wrap">
+      {variant === "row" && overflows && (
+        <button className="arena-row__arrow arena-row__arrow--left" onClick={() => scrollRow(-1)} aria-label="Previous arenas">
+          <Icon name="arrow-left" size={34} />
+        </button>
+      )}
 
       <ul className="arena-row" aria-label="Arenas" ref={rowRef}>
         {arenas.map((arena) => {
@@ -122,6 +145,11 @@ export function ArenaRow() {
           );
         })}
       </ul>
+      {variant === "row" && overflows && (
+        <button className="arena-row__arrow arena-row__arrow--right" onClick={() => scrollRow(1)} aria-label="More arenas">
+          <Icon name="arrow-right" size={34} />
+        </button>
+      )}
 
       </div>
 
