@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   FACES,
@@ -9,13 +9,13 @@ import {
   Phase,
   cosmeticItemId,
   cosmeticPrice,
-  randomAppearance,
   restrictToOwned,
   type Appearance,
   type CosmeticCategory,
 } from "@mini-sumo/shared";
 import { buyItem, economyStore, ownedItems, saveAppearanceRemote } from "../network/economyClient";
 import { Coins } from "./Coins";
+import { Dialog } from "./Dialog";
 import { SumoModel, useSumoParts } from "../game/SumoModel";
 import { gameStore, roomManager } from "../network/RoomManager";
 import { settingsStore } from "../settings";
@@ -85,163 +85,194 @@ function ItemGrid({ tab, value, worn, owned, priceOf, onPick }: ItemGridProps) {
   );
 }
 
+/** Try-on popup for an item you don't own yet: preview, name, price, Buy / Not now. */
+function ItemPopup({
+  item,
+  look,
+  color,
+  balance,
+  canBuy,
+  onBuy,
+  onClose,
+}: {
+  item: { id: string; name: string; price: number; category: CosmeticCategory; index: number };
+  look: Appearance;
+  color: string;
+  balance: number;
+  canBuy: boolean;
+  onBuy: () => Promise<void>;
+  onClose: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const affordable = balance >= item.price;
+  const tryOn = { ...look, [item.category]: item.index } as Appearance;
+
+  const buy = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await onBuy();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "The purchase failed. Try again.");
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Dialog
+      title={item.name}
+      onClose={onClose}
+      className="item-popup"
+      footer={
+        <div className="row">
+          <button className="btn btn--grow" onClick={onClose}>
+            Not now
+          </button>
+          <button className="btn btn--primary btn--grow" disabled={!canBuy || !affordable || busy} onClick={() => void buy()}>
+            {!canBuy ? "Coming soon" : busy ? "Buying…" : (
+              <>
+                Buy · <Coins amount={item.price} />
+              </>
+            )}
+          </button>
+        </div>
+      }
+    >
+      <div className="item-popup__preview" aria-hidden="true">
+        <Canvas shadows dpr={[1, 2]} camera={{ fov: 32, position: [0, 1.25, 4.6] }}>
+          <hemisphereLight args={["#F4F7FF", "#7B6A5A", 1.2]} />
+          <directionalLight position={[2.5, 4, 3]} intensity={1.6} castShadow />
+          <group position-y={-0.85}>
+            <PreviewSumo appearance={tryOn} color={color} />
+            <mesh rotation-x={-Math.PI / 2} receiveShadow>
+              <circleGeometry args={[1.4, 40]} />
+              <meshStandardMaterial color="#EFD6A8" roughness={1} />
+            </mesh>
+          </group>
+        </Canvas>
+      </div>
+      <p className="item-popup__price">
+        <Coins amount={item.price} />
+        <span className="hint">
+          {" "}
+          · you have {balance}
+          {!affordable && " (not enough coins)"}
+        </span>
+      </p>
+      {error && (
+        <p className="notice notice--error" role="alert">
+          {error}
+        </p>
+      )}
+    </Dialog>
+  );
+}
+
 /**
- * Customise hair, face and outfit before a match. Changes are saved locally and, in a
- * room lobby, sent to the server right away so everyone sees them.
+ * Customise hair, face and outfit. The preview and the category tabs stay in place; only the
+ * item grid scrolls. Owned items are worn at once; other items open a try-on popup.
  */
 export function Wardrobe() {
   const { appearance } = useStore(settingsStore);
   const economy = useStore(economyStore);
   const game = useStore(gameStore);
   const owned = ownedItems();
-  // Prices from the server catalog when online, otherwise the shared price table.
   const catalogPrices = new Map((economy.catalog?.items ?? []).map((i) => [i.id, i.price] as const));
   const priceOf = (id: string) => catalogPrices.get(id) ?? cosmeticPrice(id);
   const [tab, setTab] = useState<Tab>(TABS[0]!);
+  const [pending, setPending] = useState<{ category: CosmeticCategory; index: number } | null>(null);
   const shopOpen = economy.status === "ready" && Boolean(economy.catalog?.flags.shop) && economy.profile !== null;
   const balance = economy.profile?.balances.coins ?? 0;
-  // What the preview shows; may include items you don't own yet (try before you buy).
-  const [draft, setDraft] = useState<Appearance>(appearance);
-  const [buying, setBuying] = useState(false);
-  const [buyError, setBuyError] = useState<string | null>(null);
-  const doneRef = useRef<HTMLButtonElement>(null);
   const you = game.players.find((p) => p.isYou);
   const color = PLAYER_COLORS[(you?.colorIndex ?? 0) % PLAYER_COLORS.length]!.hex;
   const inLobby = Boolean(you) && (game.phase === Phase.Waiting || game.phase === Phase.Lobby);
 
-  useEffect(() => {
-    doneRef.current?.focus();
-  }, []);
-
   /** Saves the owned part of a look (locally, to the room and to the account). */
-  const commit = (look: Appearance) => {
+  const wear = (look: Appearance) => {
     const wearable = restrictToOwned(look, ownedItems());
     settingsStore.update({ appearance: wearable });
     if (inLobby) roomManager.setAppearance(wearable);
     void saveAppearanceRemote();
   };
 
-  const update = (patch: Partial<Appearance>) => {
-    const next = { ...draft, ...patch };
-    setDraft(next);
-    setBuyError(null);
-    commit(next);
+  const pick = (category: CosmeticCategory, index: number) => {
+    if (owned.has(cosmeticItemId(category, index))) wear({ ...appearance, [category]: index } as Appearance);
+    else setPending({ category, index });
   };
 
-  // First unowned item in the preview: offered for purchase.
-  const missing = (Object.keys(draft) as CosmeticCategory[])
-    .map((category) => cosmeticItemId(category, draft[category]))
-    .find((id) => !owned.has(id));
-  const missingItem = missing
-    ? { id: missing, name: TABS.flatMap((t) => t.options.map((o, i) => [cosmeticItemId(t.category, i), o.label] as const)).find(([id]) => id === missing)?.[1] ?? missing, price: priceOf(missing) }
-    : undefined;
-
-  const buy = async () => {
-    if (!missingItem) return;
-    setBuying(true);
-    setBuyError(null);
-    try {
-      await buyItem(missingItem.id);
-      commit(draft);
-    } catch (error) {
-      setBuyError(error instanceof Error ? error.message : "The purchase failed. Try again.");
-    } finally {
-      setBuying(false);
-    }
-  };
-
-  const close = () => {
-    commit(draft);
-    setWardrobeOpen(false);
-  };
+  const pendingItem = pending
+    ? {
+        ...pending,
+        id: cosmeticItemId(pending.category, pending.index),
+        name: TABS.find((t) => t.category === pending.category)!.options[pending.index]!.label,
+        price: priceOf(cosmeticItemId(pending.category, pending.index)),
+      }
+    : null;
 
   return (
-    <div className="overlay" onClick={(e) => e.target === e.currentTarget && close()}>
-      <section className="panel wardrobe" role="dialog" aria-modal="true" aria-labelledby="wardrobe-title">
-        <h2 id="wardrobe-title" className="settings__title">
-          Your wrestler
-        </h2>
-
-        <div className="wardrobe__body">
-          <div className="wardrobe__preview" aria-hidden="true">
-            <Canvas shadows dpr={[1, 2]} camera={{ fov: 32, position: [0, 1.25, 4.6] }}>
-              <hemisphereLight args={["#F4F7FF", "#7B6A5A", 1.2]} />
-              <directionalLight position={[2.5, 4, 3]} intensity={1.6} castShadow />
-              <group position-y={-0.85}>
-                <PreviewSumo appearance={draft} color={color} />
-                <mesh rotation-x={-Math.PI / 2} receiveShadow>
-                  <circleGeometry args={[1.4, 40]} />
-                  <meshStandardMaterial color="#EFD6A8" roughness={1} />
-                </mesh>
-              </group>
-            </Canvas>
-          </div>
-
-          <div className="wardrobe__options">
-            <div className="tabs" role="tablist" aria-label="Categories">
-              {TABS.map((t) => (
-                <button
-                  key={t.category}
-                  type="button"
-                  role="tab"
-                  aria-selected={t.category === tab.category}
-                  className={`tab${t.category === tab.category ? " tab--on" : ""}`}
-                  onClick={() => setTab(t)}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-            <ItemGrid
-              tab={tab}
-              value={draft[tab.category]}
-              worn={appearance[tab.category]}
-              owned={owned}
-              priceOf={priceOf}
-              onPick={(index) => update({ [tab.category]: index } as Partial<Appearance>)}
-            />
-            <p className="hint">
-              Try anything on before you buy it. Bought items stay yours for good. Your belt keeps your player colour, and looks
-              never change how your wrestler plays.
-            </p>
-          </div>
+    <>
+      <Dialog title="Your wrestler" onClose={() => setWardrobeOpen(false)} className="wardrobe" bodyClassName="wardrobe__body">
+        <div className="wardrobe__preview" aria-hidden="true">
+          <Canvas shadows dpr={[1, 2]} camera={{ fov: 32, position: [0, 1.25, 4.6] }}>
+            <hemisphereLight args={["#F4F7FF", "#7B6A5A", 1.2]} />
+            <directionalLight position={[2.5, 4, 3]} intensity={1.6} castShadow />
+            <group position-y={-0.85}>
+              <PreviewSumo appearance={appearance} color={color} />
+              <mesh rotation-x={-Math.PI / 2} receiveShadow>
+                <circleGeometry args={[1.4, 40]} />
+                <meshStandardMaterial color="#EFD6A8" roughness={1} />
+              </mesh>
+            </group>
+          </Canvas>
+          <span className="wardrobe__balance">
+            <Coins amount={balance} />
+          </span>
         </div>
 
-        {missing && (
-          <div className="shop-bar" role="status">
-            {missingItem && (
-              <>
-                <span>
-                  Previewing <strong>{missingItem.name}</strong> · <Coins amount={missingItem.price} />
-                </span>
-                {shopOpen ? (
-                  <button className="btn btn--primary" disabled={buying || balance < missingItem.price} onClick={() => void buy()}>
-                    {buying ? "Buying…" : "Buy"}
-                  </button>
-                ) : (
-                  <button className="btn" disabled aria-label={`Buy ${missingItem.name}: coming soon`}>
-                    Buy · Coming soon
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-        )}
-        {buyError && (
-          <p className="notice notice--error" role="alert">
-            {buyError}
-          </p>
-        )}
-
-        <div className="row">
-          <button type="button" className="btn btn--grow" onClick={() => update(restrictToOwned(randomAppearance(), owned))}>
-            Surprise me
-          </button>
-          <button ref={doneRef} type="button" className="btn btn--primary btn--grow" onClick={close}>
-            Done
-          </button>
+        <div className="tabs" role="tablist" aria-label="Categories">
+          {TABS.map((t) => (
+            <button
+              key={t.category}
+              type="button"
+              role="tab"
+              aria-selected={t.category === tab.category}
+              className={`tab${t.category === tab.category ? " tab--on" : ""}`}
+              onClick={() => setTab(t)}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
-      </section>
-    </div>
+
+        <div className="wardrobe__items">
+          <ItemGrid
+            tab={tab}
+            value={appearance[tab.category]}
+            worn={appearance[tab.category]}
+            owned={owned}
+            priceOf={priceOf}
+            onPick={(index) => pick(tab.category, index)}
+          />
+          <p className="hint">Bought items are yours for good. Looks never change how your wrestler plays.</p>
+        </div>
+      </Dialog>
+
+      {pendingItem && (
+        <ItemPopup
+          item={pendingItem}
+          look={appearance}
+          color={color}
+          balance={balance}
+          canBuy={shopOpen}
+          onClose={() => setPending(null)}
+          onBuy={async () => {
+            await buyItem(pendingItem.id);
+            wear({ ...settingsStore.get().appearance, [pendingItem.category]: pendingItem.index } as Appearance);
+            setPending(null);
+          }}
+        />
+      )}
+    </>
   );
 }

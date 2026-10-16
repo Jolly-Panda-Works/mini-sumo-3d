@@ -13,6 +13,7 @@ export interface UIState {
   walletOpen: boolean;
   friendsOpen: boolean;
   shopOpen: boolean;
+  profileOpen: boolean;
   /** Arena previewed in the 3D background of the home screen. */
   homeArena: string;
   toasts: Toast[];
@@ -25,6 +26,7 @@ export const uiStore = createStore<UIState>({
   walletOpen: false,
   friendsOpen: false,
   shopOpen: false,
+  profileOpen: false,
   homeArena: "training",
   toasts: [],
 });
@@ -42,6 +44,10 @@ export function pushToast(text: string, tone: Toast["tone"] = "info", durationMs
 
 export function setAboutOpen(open: boolean): void {
   uiStore.update({ aboutOpen: open });
+}
+
+export function setProfileOpen(open: boolean): void {
+  uiStore.update({ profileOpen: open });
 }
 
 export function setShopOpen(open: boolean): void {

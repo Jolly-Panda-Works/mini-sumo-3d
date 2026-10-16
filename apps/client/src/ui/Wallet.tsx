@@ -4,6 +4,7 @@ import { economyStore, loadLedger, refreshProfile } from "../network/economyClie
 import { useStore } from "../store";
 import { setWalletOpen } from "../uiStore";
 import { Coins } from "./Coins";
+import { Dialog } from "./Dialog";
 
 const LABELS: Record<LedgerCategory, string> = {
   welcome: "Welcome gift",
@@ -31,14 +32,10 @@ export function Wallet() {
   const spent = coinEntries.filter((e) => e.amount < 0).reduce((s, e) => s - e.amount, 0);
 
   return (
-    <div className="overlay" onClick={(e) => e.target === e.currentTarget && setWalletOpen(false)}>
-      <section className="panel wallet" role="dialog" aria-modal="true" aria-labelledby="wallet-title">
-        <h2 id="wallet-title" className="settings__title">
-          Wallet
-        </h2>
+    <Dialog title="Coin history" onClose={() => setWalletOpen(false)} className="wallet">
         {!profile ? (
           <p className="notice notice--offline">
-            <strong>Coming soon.</strong> Your coin history will appear here.
+            Your coin history will appear here.
           </p>
         ) : (
           <>
@@ -90,10 +87,6 @@ export function Wallet() {
             )}
           </>
         )}
-        <button className="btn btn--primary" onClick={() => setWalletOpen(false)}>
-          Done
-        </button>
-      </section>
-    </div>
+    </Dialog>
   );
 }

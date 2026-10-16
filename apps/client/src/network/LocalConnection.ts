@@ -8,6 +8,7 @@ import {
 } from "@mini-sumo/shared";
 import { GameSession, createConfig, isDashing, type ActionResult } from "@mini-sumo/sim";
 import type { GameConnection } from "./connection";
+import { localEconomy, type LocalEntry } from "./localEconomy";
 
 /** Offline quick match: a short, natural-feeling "search" before bots fill the room. */
 const OFFLINE_SEARCH_MS = 4000;
@@ -32,6 +33,10 @@ export interface LocalRoomOptions {
   isPrivate: boolean;
   maxPlayers: number;
   botLevel: string;
+  /** Arena of this local room (training, rookie, pro, champion; private rooms have none). */
+  arenaId?: string;
+  /** Paid entry (local economy). Refunded if the bout never starts. */
+  entry?: LocalEntry;
 }
 
 /**
@@ -49,10 +54,18 @@ export class LocalConnection implements GameConnection {
   private timer = 0;
   private lastTick = 0;
   private stateListeners = new Set<() => void>();
+  private leaveListeners = new Set<(code: number) => void>();
+  private readonly arenaId: string;
+  private readonly entry: LocalEntry | null;
+  private lastPhase: string = "waiting";
+  private closed = false;
   private messageListeners = new Map<string, Set<(message: any) => void>>();
 
   constructor(options: LocalRoomOptions) {
     this.isPrivate = options.isPrivate;
+    this.arenaId = options.isPrivate ? "private" : (options.arenaId ?? "training");
+    // Every local arena bout (free or paid) goes through the local economy, except private rooms.
+    this.entry = options.entry ?? (options.isPrivate ? null : { id: randomCode(), arenaId: this.arenaId, fee: 0, status: "paid" });
     this.session = new GameSession(createConfig({ quickMatchWaitMs: OFFLINE_SEARCH_MS }), options.maxPlayers, {
       quickMatch: !options.isPrivate,
       botLevel: sanitizeBotLevel(options.botLevel),
@@ -69,7 +82,7 @@ export class LocalConnection implements GameConnection {
       isPrivate: options.isPrivate,
       aliveCount: 0,
       searchRemainingMs: 0,
-      arenaId: options.isPrivate ? "private" : "training",
+      arenaId: this.arenaId,
       botLevel: sanitizeBotLevel(options.botLevel),
       standings: [],
     };
@@ -134,19 +147,39 @@ export class LocalConnection implements GameConnection {
     // Local rooms don't have transport errors.
   }
 
-  onLeave(): void {
-    // Local rooms only end when the player leaves.
+  onLeave(callback: (code: number) => void): void {
+    this.leaveListeners.add(callback);
   }
 
   removeAllListeners(): void {
     this.stateListeners.clear();
     this.messageListeners.clear();
+    this.leaveListeners.clear();
   }
 
   async leave(): Promise<number> {
-    window.clearInterval(this.timer);
+    this.stop();
     this.removeAllListeners();
     return 1000;
+  }
+
+  private stop(): void {
+    if (this.closed) return;
+    this.closed = true;
+    window.clearInterval(this.timer);
+    // Leaving before the bout started gives the entry fee back.
+    if (this.entry) localEconomy.refundIfNotStarted(this.entry);
+  }
+
+  /** Paid local bouts are single rounds: after the results the room closes (back home). */
+  private close(): void {
+    this.stop();
+    this.leaveListeners.forEach((listener) => listener(4000));
+    this.removeAllListeners();
+  }
+
+  private get paid(): boolean {
+    return (this.entry?.fee ?? 0) > 0;
   }
 
   // ------------------------------------------------------------------ internals
@@ -176,12 +209,41 @@ export class LocalConnection implements GameConnection {
         case "dash":
           this.emit(ServerMessage.Dash, { sessionId: event.id });
           break;
+        case "phase":
+          if (event.to === "playing" && this.entry) localEconomy.lock(this.entry);
+          break;
+        case "roundOver":
+          this.settle(event.winnerId, event.draw, event.durationMs);
+          break;
         default:
           break;
       }
     }
     this.sync();
     this.stateListeners.forEach((listener) => listener());
+    const phase = this.session.phase;
+    if (this.paid && this.lastPhase === "roundOver" && phase !== "roundOver") {
+      this.lastPhase = phase;
+      this.close();
+      return;
+    }
+    this.lastPhase = phase;
+  }
+
+  /** Prize or rewards plus XP for the bout that just ended (once per round). */
+  private settle(winnerId: string | null, draw: boolean, durationMs: number): void {
+    if (!this.entry) return;
+    const result = localEconomy.finish(this.entry, {
+      matchId: `${this.roomId}:${this.session.round}`,
+      won: winnerId === this.sessionId,
+      draw,
+      completed: true,
+      durationMs,
+      players: this.session.players.size,
+    });
+    this.emit(ServerMessage.Economy, result);
+    // Training rematches: each round is a fresh (free) entry.
+    if (!this.paid) this.entry.status = "paid";
   }
 
   private emit(type: string, message: unknown): void {

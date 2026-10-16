@@ -4,7 +4,8 @@ import { economyStore } from "../network/economyClient";
 import { networkStore } from "../network/networkMode";
 import { sessionStore } from "../network/RoomManager";
 import { useStore } from "../store";
-import { setFriendsOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
+import { setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
+import { settingsStore } from "../settings";
 import { ArenaRow } from "./ArenaSelect";
 import { Coins } from "./Coins";
 
@@ -14,6 +15,7 @@ const inviteCode = new URLSearchParams(window.location.search).get("room") ?? ""
 export function MainMenu() {
   const session = useStore(sessionStore);
   const economy = useStore(economyStore);
+  const settings = useStore(settingsStore);
   const { mode } = useStore(networkStore);
   const online = mode === "online";
   const busy = session.status === "connecting";
@@ -32,6 +34,14 @@ export function MainMenu() {
           <img src={`${import.meta.env.BASE_URL}title.webp`} alt={GAME_TITLE} width={1200} height={621} />
         </h1>
         <div className="home__actions">
+          <button
+            className="btn home__profile"
+            onClick={() => setProfileOpen(true)}
+            aria-label={`Profile: ${settings.name}, level ${economy.profile?.level.level ?? 1}`}
+          >
+            <span className="level-badge">{economy.profile?.level.level ?? 1}</span>
+            <span className="home__profile-name">{settings.name}</span>
+          </button>
           <button className="btn home__coins" onClick={() => setShopOpen(true)} aria-label={`Coin shop. Balance: ${balance ?? 0} Sumo Coins`}>
             <Coins amount={balance ?? 0} />
             <span className="home__coins-plus" aria-hidden="true">

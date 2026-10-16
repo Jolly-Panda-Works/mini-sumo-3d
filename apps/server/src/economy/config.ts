@@ -1,5 +1,17 @@
-import { STARTER_ITEMS, allCosmeticItemIds, cosmeticPrice, Currency, type ArenaInfo, type EconomyFlags } from "@mini-sumo/shared";
-import { computePrize } from "./prize.js";
+import {
+  ARENA_DEFS,
+  REWARDS,
+  STARTER_ITEMS,
+  STARTING_COINS,
+  allCosmeticItemIds,
+  arenaDef,
+  arenaInfo,
+  cosmeticPrice,
+  Currency,
+  type ArenaDef,
+  type ArenaInfo,
+  type EconomyFlags,
+} from "@mini-sumo/shared";
 
 /**
  * Authoritative economy configuration. Every price, fee and reward lives here; the client
@@ -28,117 +40,30 @@ export function loadFlags(): EconomyFlags {
 
 export const ECONOMY = {
   /** Coins granted once when a guest account is created. */
-  welcomeCoins: 500,
-
-  rewards: {
-    /** Free rewards are only given in the training arena (paid arenas pay prizes instead). */
-    participation: 5,
-    win: 15,
-    /** Extra once per UTC day for the first completed rewarded match. */
-    firstMatchOfDay: 50,
-    /** Cap on free rewards (participation + win + daily bonus) per account per UTC day. */
-    dailyCap: 300,
-    /** A round must last this long to count, and the player must not have left it. */
-    minMatchDurationMs: 20_000,
-  },
-
+  welcomeCoins: STARTING_COINS,
+  rewards: REWARDS,
   /** Paid arenas: start this long after a second player joins (or at once when full). */
   paidStartDelayMs: 12_000,
   /** Paid arenas: cancel and refund when no opponent arrives in time. */
   paidCancelAfterMs: 60_000,
 } as const;
 
-interface ArenaConfig {
-  id: string;
-  name: string;
-  description: string;
-  entryFee: number;
-  minPlayers: number;
-  maxPlayers: number;
-  economyFeePercent: number;
-  /** Bots only in free arenas: paid prizes must come from human entries. */
-  bots: boolean;
-  requires: { matches: number; wins: number };
-  enabled: boolean;
-}
-
-const ARENA_CONFIG: readonly ArenaConfig[] = [
-  {
-    id: "training",
-    name: "Training Arena",
-    description: "Free practice. Earn a few coins per bout; bots fill in if nobody joins.",
-    entryFee: 0,
-    minPlayers: 2,
-    maxPlayers: 4,
-    economyFeePercent: 0,
-    bots: true,
-    requires: { matches: 0, wins: 0 },
-    enabled: true,
-  },
-  {
-    id: "rookie",
-    name: "Rookie Arena",
-    description: "Low-stakes bouts against other players.",
-    entryFee: 100,
-    minPlayers: 2,
-    maxPlayers: 4,
-    economyFeePercent: 10,
-    bots: false,
-    requires: { matches: 0, wins: 0 },
-    enabled: true,
-  },
-  {
-    id: "pro",
-    name: "Pro Arena",
-    description: "For wrestlers with a few bouts behind them.",
-    entryFee: 500,
-    minPlayers: 2,
-    maxPlayers: 4,
-    economyFeePercent: 10,
-    bots: false,
-    requires: { matches: 10, wins: 0 },
-    enabled: true,
-  },
-  {
-    id: "champion",
-    name: "Champion Arena",
-    description: "High-stakes bouts for proven winners.",
-    entryFee: 2000,
-    minPlayers: 2,
-    maxPlayers: 4,
-    economyFeePercent: 10,
-    bots: false,
-    requires: { matches: 20, wins: 10 },
-    enabled: true,
-  },
-];
+/**
+ * Arenas come from packages/shared (ARENA_DEFS), the same table the offline economy uses.
+ * Online, paid arenas are humans only: a prize must come from other players' entries.
+ */
+export type ArenaConfig = ArenaDef;
 
 /** Private rooms: free, no rewards (friends could otherwise farm coins together). */
 export const PRIVATE_ARENA_ID = "private";
 
 export function getArena(id: unknown): ArenaConfig | null {
-  return ARENA_CONFIG.find((a) => a.id === id) ?? null;
-}
-
-export function arenaInfo(arena: ArenaConfig): ArenaInfo {
-  const full = computePrize(arena.entryFee, arena.maxPlayers, arena.economyFeePercent);
-  return {
-    ...arena,
-    currency: Currency.Coins,
-    maxPrize: full.prize,
-    payoutRule:
-      arena.entryFee === 0
-        ? `Free. +${ECONOMY.rewards.participation} coins per finished bout, +${ECONOMY.rewards.win} for a win (daily cap ${ECONOMY.rewards.dailyCap}).`
-        : `Winner takes the pool minus a ${arena.economyFeePercent}% economy fee. Draws and cancelled matches are refunded.`,
-    drawPolicy: "refund",
-  };
+  return arenaDef(id);
 }
 
 export function listArenas(): ArenaInfo[] {
-  return ARENA_CONFIG.map(arenaInfo);
+  return ARENA_DEFS.map((arena) => ({ ...arenaInfo(arena), bots: arena.entryFee === 0 }));
 }
-
-export type { ArenaConfig };
 
 /** Cosmetic prices live in packages/shared (COSMETIC_PRICES); starter items are free. */
 export interface ItemConfig {

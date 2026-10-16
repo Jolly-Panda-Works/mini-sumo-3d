@@ -82,7 +82,7 @@ Party games are best when everyone understands them in five seconds. Mini Sumo h
 
 On phones and tablets the touch controls appear automatically during a bout (*Settings → Touch controls* can force them on or off). Steering and dashing work at the same time with two thumbs, and supported Android devices vibrate on dashes and hits (*Settings → Vibration*).
 
-*Settings* has your name, music and sound-effect volumes, controls, *About*, and *Save progress to Google account* (coming soon). Music: a Japanese bamboo-flute loop on the home screen, lobby and results, and a taiko percussion loop during bouts, crossfaded smoothly when you switch; it pauses while the app is in the background. The Android app always runs in portrait.
+*Settings* has music and sound-effect volumes, controls and *About* (with the version); during a match it also has *Leave match*. Your name, level and stats live in *Profile*. Music: a Japanese bamboo-flute loop on the home screen, lobby and results, and a taiko percussion loop during bouts, crossfaded smoothly when you switch; it pauses while the app is in the background. The Android app always runs in portrait.
 
 Settings never pause the shared match. *Settings → About* shows the version, the creator and links to the game page and source code.
 
@@ -131,10 +131,12 @@ The home screen has its own night-stage backdrop with the title in the middle an
 | --- | ---: | ---: | --- |
 | Training | free | small free rewards | players, bots fill in |
 | Rookie | 100 coins | up to 360 | players only |
-| Pro | 500 coins | up to 1,800 | players only, unlocks after 10 bouts |
-| Champion | 2,000 coins | up to 7,200 | players only, unlocks after 20 bouts and 10 wins |
+| Pro | 500 coins | up to 1,800 | unlocks at level 5 |
+| Champion | 2,000 coins | up to 7,200 | unlocks at level 10 |
 
-- New players get 500 coins. Training pays +5 per finished bout, +15 for a win and +50 for the first bout of the day, up to 300 per day.
+- New players get 200 coins (enough for a first Rookie bout) and level up with XP from every bout; Pro unlocks at level 5, Champion at level 10. The *Profile* panel shows level, XP, stats and unlocks.
+- Right now the economy runs on the device against bots; only buying coins is coming soon.
+- Training pays +5 per finished bout, +15 for a win and +50 for the first bout of the day, up to 300 per day.
 - Prize = pool − 10 % economy fee (integer, `floor`). Draws and bouts that never start are refunded; leaving during a bout is a loss.
 - The **wardrobe is the shop**: priced options can be tried on and bought with coins. Looks never affect gameplay.
 - Everything (balances, prices, entries, prizes, ownership) is decided by the server and recorded in an append-only ledger with idempotency keys. *Settings* never stores coins.

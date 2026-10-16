@@ -2060,3 +2060,329 @@ body {
     transition: none;
   }
 }
+
+/* ---------- Dialogs: sticky title and close button, scrolling body ---------- */
+
+.panel.dialog {
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  max-height: calc(100dvh - 24px);
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog__head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 12px 10px 18px;
+  border-bottom: 2.5px dashed var(--ink-soft);
+  background: var(--paper);
+}
+
+.dialog__title {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.15;
+  min-width: 0;
+}
+
+.dialog__close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 3px 0 var(--ink);
+  cursor: pointer;
+}
+
+.dialog__close:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--ink);
+}
+
+.dialog__close:focus-visible {
+  outline: 3px solid var(--coral);
+  outline-offset: 2px;
+}
+
+.dialog__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dialog__foot {
+  flex: none;
+  padding: 10px 18px 14px;
+  border-top: 2.5px dashed var(--ink-soft);
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn--danger {
+  background: #ffe1e5;
+  border-color: #b8344a;
+  color: #8e1f33;
+  box-shadow: 0 4px 0 #8e1f33;
+}
+
+.settings__about {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings__version {
+  font-weight: 800;
+  color: rgba(43, 35, 64, 0.65);
+  font-variant-numeric: tabular-nums;
+}
+
+.coin-shop__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.about-panel .dialog__body {
+  align-items: center;
+  text-align: center;
+}
+
+.about-panel__name {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+/* ---------- Wardrobe: preview and tabs fixed, items scroll ---------- */
+
+.panel.dialog.wardrobe {
+  width: min(900px, 100%);
+  height: calc(100dvh - 16px);
+  max-height: none;
+}
+
+.dialog__body.wardrobe__body {
+  overflow: hidden;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(150px, 32vh) auto minmax(0, 1fr);
+  grid-template-areas: "preview" "tabs" "items";
+  padding-bottom: 12px;
+}
+
+.wardrobe__body .wardrobe__preview {
+  grid-area: preview;
+  position: relative;
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+.wardrobe__body .tabs {
+  grid-area: tabs;
+}
+
+.wardrobe__items {
+  grid-area: items;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 2px 2px 4px;
+}
+
+.wardrobe__balance {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--paper);
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+@media (orientation: landscape) and (min-width: 700px) {
+  .dialog__body.wardrobe__body {
+    grid-template-columns: minmax(220px, 38%) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "preview tabs" "preview items";
+  }
+}
+
+.panel.dialog.item-popup {
+  width: min(420px, 100%);
+}
+
+.item-popup__preview {
+  height: min(38vh, 300px);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-control);
+  background: radial-gradient(circle at 50% 35%, #8fb6e0, var(--sky));
+  overflow: hidden;
+}
+
+.item-popup__price {
+  margin: 0;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+/* ---------- Profile and levels ---------- */
+
+.panel.dialog.profile {
+  width: min(560px, 100%);
+}
+
+.level-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--coral);
+  color: var(--paper);
+  border: 2.5px solid var(--ink);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.level-badge--big {
+  min-width: 64px;
+  height: 64px;
+  font-size: 1.8rem;
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+.profile__level {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.profile__xp {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile__name {
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.xp-bar {
+  position: relative;
+  height: 16px;
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  background: #fbf6ee;
+  overflow: hidden;
+}
+
+.xp-bar__fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background: linear-gradient(90deg, #3fa34d, #8fd17a);
+}
+
+.profile__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+}
+
+.profile__stats p {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  font-weight: 800;
+}
+
+.unlocks {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.unlocks__row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border: 2px dashed var(--ink-soft);
+  border-radius: 12px;
+  font-weight: 700;
+  color: rgba(43, 35, 64, 0.7);
+}
+
+.unlocks__row--open {
+  border-style: solid;
+  border-color: #3fa34d;
+  color: var(--ink);
+}
+
+.home__profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 4px 12px 4px 6px;
+  max-width: 200px;
+}
+
+.home__profile-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.economy-result__levelup {
+  justify-content: center !important;
+  background: var(--sun);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+
+@media (max-width: 420px) {
+  .home__profile-name {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .overlay {
+    padding: 8px;
+  }
+}

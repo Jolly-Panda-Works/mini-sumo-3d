@@ -10,7 +10,11 @@ import {
 import { resolveServerUrl } from "../config";
 import { settingsStore } from "../settings";
 import { createStore } from "../store";
-import { httpUrlFor } from "./networkMode";
+import { httpUrlFor, networkStore } from "./networkMode";
+import { localEconomy } from "./localEconomy";
+
+/** True when the economy runs on this device (no online server). */
+const isLocal = () => networkStore.get().mode !== "online";
 
 /**
  * Client side of the economy. The server is the only authority for balances, prices and
@@ -139,6 +143,12 @@ function applyProfile(profile: ProfileResponse): void {
 }
 
 /** Loads catalog and profile (online mode). Recreates the guest account if the server lost it. */
+/** Offline: the on-device economy (same rules as the server). */
+export function initLocalEconomy(): void {
+  economyStore.update({ catalog: localEconomy.catalog(), status: "ready", error: null });
+  applyProfile(localEconomy.profile());
+}
+
 export async function loadEconomy(): Promise<void> {
   economyStore.update({ status: "loading", error: null });
   try {
@@ -164,6 +174,10 @@ export async function loadEconomy(): Promise<void> {
 }
 
 export async function refreshProfile(): Promise<void> {
+  if (isLocal()) {
+    applyProfile(localEconomy.profile());
+    return;
+  }
   if (economyStore.get().status === "offline") return;
   try {
     applyProfile(await request<ProfileResponse>("/profile"));
@@ -173,6 +187,10 @@ export async function refreshProfile(): Promise<void> {
 }
 
 export async function loadLedger(): Promise<void> {
+  if (isLocal()) {
+    economyStore.update({ ledger: localEconomy.ledger() });
+    return;
+  }
   try {
     const { entries } = await request<LedgerResponse>("/ledger?limit=100");
     economyStore.update({ ledger: entries });
@@ -188,6 +206,15 @@ const pendingPurchases = new Map<string, Promise<void>>();
  * of the same click, so a double tap or a network retry never charges twice.
  */
 export function buyItem(itemId: string): Promise<void> {
+  if (isLocal()) {
+    try {
+      localEconomy.purchase(itemId);
+      applyProfile(localEconomy.profile());
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
   const pending = pendingPurchases.get(itemId);
   if (pending) return pending;
   const idempotencyKey = crypto.randomUUID();
@@ -202,6 +229,7 @@ export function buyItem(itemId: string): Promise<void> {
 }
 
 export async function saveAppearanceRemote(): Promise<void> {
+  if (isLocal()) return;
   if (economyStore.get().status !== "ready") return;
   try {
     await request("/profile/appearance", { method: "PUT", body: JSON.stringify(settingsStore.get().appearance) });

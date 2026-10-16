@@ -251,7 +251,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
     const participants = [...this.session.players.values()]
       .filter((p) => !p.isBot && this.accounts.has(p.id))
       .map((p) => ({ accountId: this.accounts.get(p.id)!, won: p.id === winnerId, completed: p.connected && p.elimReason !== "left" }));
-    const rewards = economy.recordMatch({ matchId, durationMs, rewarded: !this.paid, participants });
+    const rewards = economy.recordMatch({ matchId, durationMs, rewarded: !this.paid, participants, arenaId: this.arenaId });
 
     for (const client of this.clients) {
       const accountId = this.accounts.get(client.sessionId);

@@ -263,7 +263,8 @@ describe("free rewards", () => {
     expect(first.get(b.accountId)).toBe(r.participation + r.firstMatchOfDay);
     const repeat = economy.recordMatch({ matchId: "m1", durationMs: 30_000, rewarded: true, participants: participants([a.accountId], a.accountId) });
     expect(repeat.size).toBe(0);
-    expect(economy.profile(a.accountId).stats).toEqual({ matches: 1, wins: 1 });
+    expect(economy.profile(a.accountId).stats).toMatchObject({ matches: 1, wins: 1 });
+    expect(economy.profile(a.accountId).level.xp).toBe(50);
     const second = economy.recordMatch({ matchId: "m2", durationMs: 30_000, rewarded: true, participants: participants([a.accountId]) });
     expect(second.get(a.accountId)).toBe(r.participation);
   });
@@ -369,5 +370,20 @@ describe("payments", () => {
   it("the catalog only sells cosmetics for Sumo Coins", () => {
     expect(CATALOG.every((i) => i.currency === Currency.Coins)).toBe(true);
     expect(ROOKIE.entryFee).toBeGreaterThan(0);
+  });
+});
+
+describe("levels", () => {
+  it("bouts give XP, levels unlock arenas", () => {
+    const { economy } = setup();
+    const a = player(economy, 5000);
+    expect(economy.profile(a.accountId).level.level).toBe(1);
+    expect(economy.canEnter(a.accountId, "pro").ok).toBe(false);
+    for (let i = 0; i < 40; i++) {
+      economy.recordMatch({ matchId: `x${i}`, durationMs: 30_000, rewarded: false, arenaId: "rookie", participants: [{ accountId: a.accountId, won: true, completed: true }] });
+    }
+    const profile = economy.profile(a.accountId);
+    expect(profile.level.level).toBeGreaterThanOrEqual(5);
+    expect(economy.canEnter(a.accountId, "pro").ok).toBe(true);
   });
 });

@@ -4,6 +4,7 @@ import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
 import { setFriendsOpen } from "../uiStore";
+import { Dialog } from "./Dialog";
 
 const inviteCode = new URLSearchParams(window.location.search).get("room") ?? "";
 
@@ -25,11 +26,7 @@ export function FriendsPanel() {
   };
 
   return (
-    <div className="overlay" onClick={(e) => e.target === e.currentTarget && setFriendsOpen(false)}>
-      <section className="panel friends" role="dialog" aria-modal="true" aria-labelledby="friends-title">
-        <h2 id="friends-title" className="settings__title">
-          Play with friends
-        </h2>
+    <Dialog title="Play with friends" onClose={() => setFriendsOpen(false)} className="friends">
         {inviteCode && (
           <p className="notice notice--invite">
             You were invited to room <strong>{inviteCode}</strong>.
@@ -73,10 +70,6 @@ export function FriendsPanel() {
             {session.error}
           </p>
         )}
-        <button className="btn btn--ghost" onClick={() => setFriendsOpen(false)}>
-          Close
-        </button>
-      </section>
-    </div>
+    </Dialog>
   );
 }

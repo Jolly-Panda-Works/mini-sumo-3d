@@ -149,7 +149,8 @@ export interface ArenaInfo {
   payoutRule: string;
   drawPolicy: DrawPolicy;
   bots: boolean;
-  requires: { matches: number; wins: number };
+  /** Player level needed to enter. */
+  requires: { level: number };
   enabled: boolean;
 }
 
@@ -175,7 +176,9 @@ export interface ProfileResponse {
   balances: Record<Currency, number>;
   owned: string[];
   appearance: Appearance;
-  stats: { matches: number; wins: number };
+  stats: { matches: number; wins: number; coinsEarned: number };
+  /** Progression: level from total XP. */
+  level: LevelInfo;
   /** Free rewards already earned today (UTC) and the daily cap. */
   daily: { earned: number; cap: number; firstMatchBonusAvailable: boolean };
 }
@@ -215,4 +218,137 @@ export interface EconomyResultMessage {
   rewards: number;
   balance: number | null;
   note: string;
+  /** XP gained in this bout and the level afterwards (when known). */
+  xp?: number;
+  level?: number;
+  levelUp?: boolean;
+}
+
+// ---------------------------------------------------------------- rules shared by the
+// local (offline) economy and the server. Balancing values live here, in one place.
+
+/** Coins a new player starts with: enough for a first Rookie bout. */
+export const STARTING_COINS = 200;
+
+export const REWARDS = {
+  /** Training Arena only (paid arenas pay prizes instead). */
+  participation: 5,
+  win: 15,
+  /** Extra for the first rewarded bout of each day. */
+  firstMatchOfDay: 50,
+  /** Free coins (the three above) per day. */
+  dailyCap: 300,
+  /** A bout must last this long to count, and the player must finish it. */
+  minMatchDurationMs: 20_000,
+} as const;
+
+export interface ArenaDef {
+  id: string;
+  name: string;
+  description: string;
+  entryFee: number;
+  minPlayers: number;
+  maxPlayers: number;
+  economyFeePercent: number;
+  /** Bots may fill the ring. */
+  bots: boolean;
+  requiredLevel: number;
+  enabled: boolean;
+}
+
+export const ARENA_DEFS: readonly ArenaDef[] = [
+  { id: "training", name: "Training Arena", description: "Free practice bouts.", entryFee: 0, minPlayers: 2, maxPlayers: 4, economyFeePercent: 0, bots: true, requiredLevel: 1, enabled: true },
+  { id: "rookie", name: "Rookie Arena", description: "Low-stakes bouts.", entryFee: 100, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 1, enabled: true },
+  { id: "pro", name: "Pro Arena", description: "Tougher wrestlers, bigger pool.", entryFee: 500, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 5, enabled: true },
+  { id: "champion", name: "Champion Arena", description: "High stakes for proven winners.", entryFee: 2000, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 10, enabled: true },
+];
+
+export function arenaDef(id: unknown): ArenaDef | null {
+  return ARENA_DEFS.find((a) => a.id === id) ?? null;
+}
+
+/**
+ * Prize for a paid bout, in integer coins:
+ *   pool = entryFee * players, prize = floor(pool * (100 - fee%) / 100), sink = pool - prize.
+ * prize + sink === pool, so rounding never creates coins.
+ */
+export function computePrize(entryFee: number, players: number, feePercent: number): { pool: number; prize: number; sink: number } {
+  if (!Number.isInteger(entryFee) || entryFee < 0 || !Number.isInteger(players) || players < 0) {
+    throw new Error("invalid prize input");
+  }
+  const fee = Math.min(100, Math.max(0, Math.floor(feePercent)));
+  const pool = entryFee * players;
+  const prize = Math.floor((pool * (100 - fee)) / 100);
+  return { pool, prize, sink: pool - prize };
+}
+
+export function arenaInfo(arena: ArenaDef): ArenaInfo {
+  const full = computePrize(arena.entryFee, arena.maxPlayers, arena.economyFeePercent);
+  return {
+    id: arena.id,
+    name: arena.name,
+    description: arena.description,
+    entryFee: arena.entryFee,
+    currency: Currency.Coins,
+    minPlayers: arena.minPlayers,
+    maxPlayers: arena.maxPlayers,
+    economyFeePercent: arena.economyFeePercent,
+    maxPrize: full.prize,
+    payoutRule:
+      arena.entryFee === 0
+        ? `Free. +${REWARDS.participation} coins per finished bout, +${REWARDS.win} for a win (up to ${REWARDS.dailyCap} a day).`
+        : `The winner takes the pool minus a ${arena.economyFeePercent}% fee. Draws and bouts that never start are refunded.`,
+    drawPolicy: "refund",
+    bots: arena.bots,
+    requires: { level: arena.requiredLevel },
+    enabled: arena.enabled,
+  };
+}
+
+export function arenaInfos(): ArenaInfo[] {
+  return ARENA_DEFS.map(arenaInfo);
+}
+
+/**
+ * Bot difficulty for arenas where the player doesn't pick it: random, weighted by tier.
+ * (Training uses the player's own choice.)
+ */
+export function botLevelForArena(arenaId: string, random: () => number = Math.random): "easy" | "normal" | "hard" {
+  const r = random();
+  if (arenaId === "rookie") return r < 0.5 ? "easy" : "normal";
+  if (arenaId === "pro") return r < 0.6 ? "normal" : "hard";
+  if (arenaId === "champion") return r < 0.3 ? "normal" : "hard";
+  return "normal";
+}
+
+// ---------------------------------------------------------------- levels
+
+export interface LevelInfo {
+  level: number;
+  /** Total XP. */
+  xp: number;
+  /** XP at the start of this level and needed for the next one. */
+  levelStartXp: number;
+  nextLevelXp: number;
+}
+
+/** Total XP needed to reach a level: 50 * (level - 1) * level  (L2 = 100, L5 = 1000, L10 = 4500). */
+export function xpForLevel(level: number): number {
+  const l = Math.max(1, Math.floor(level));
+  return 50 * (l - 1) * l;
+}
+
+export function levelFromXp(xp: number): LevelInfo {
+  const total = Math.max(0, Math.floor(xp));
+  let level = 1;
+  while (xpForLevel(level + 1) <= total && level < 999) level++;
+  return { level, xp: total, levelStartXp: xpForLevel(level), nextLevelXp: xpForLevel(level + 1) };
+}
+
+const XP_ARENA_MULTIPLIER: Record<string, number> = { training: 1, rookie: 1.5, pro: 2, champion: 3 };
+
+/** XP for a finished bout: 20 for taking part, +30 for a win, scaled by arena tier. */
+export function xpForMatch(arenaId: string, won: boolean, completed: boolean): number {
+  if (!completed) return 0;
+  return Math.round((20 + (won ? 30 : 0)) * (XP_ARENA_MULTIPLIER[arenaId] ?? 1));
 }

@@ -1,5 +1,7 @@
 # Mini Sumo economy
 
+> **Current release: on-device economy.** While online play is not available, the same rules run locally (`apps/client/src/network/localEconomy.ts`, stored on the device): wallet, ledger, wardrobe purchases, arena entries against bots, prizes, training rewards, XP and levels. Only buying coins (the coin shop) is *Coming soon*. The server described below takes over as the authority when online play launches.
+
 A server-authoritative virtual-currency economy: earn **Sumo Coins** by playing, pay an entry fee to compete in an arena, the server pays the winner, and coins buy cosmetics in the existing wardrobe.
 
 **This is not real-money wagering.** Coins can't be bought with money, sent to other players, traded or cashed out. Entry fees and prizes are virtual. There are no real-money purchases in this version.
@@ -38,7 +40,7 @@ All values are in `apps/server/src/economy/config.ts` (`ECONOMY`).
 
 | Source | Amount | Conditions |
 | --- | ---: | --- |
-| Welcome gift | 500 | Once per guest account. |
+| Welcome gift | 200 | Once per player: enough for a first Rookie bout. |
 | Training bout | +5 | Training Arena only. The round lasted ≥ 20 s and you didn't leave it. |
 | Training win | +15 | As above, and you won. |
 | First bout of the day | +50 | First rewarded training bout per UTC day. |
@@ -51,12 +53,16 @@ Anti-farming: rewards are recorded once per player per match (`match_results` pr
 
 Defined once in `ARENA_CONFIG` (`config.ts`) and served to clients by `GET /api/catalog`.
 
-| Arena | Entry | Players | Bots | Unlock | Max prize (4 players) |
-| --- | ---: | :---: | :---: | --- | ---: |
-| Training | free | 2–4 | yes | – | rewards only |
-| Rookie | 100 | 2–4 | no | – | 360 |
-| Pro | 500 | 2–4 | no | 10 bouts | 1,800 |
-| Champion | 2,000 | 2–4 | no | 20 bouts, 10 wins | 7,200 |
+| Arena | Entry | Players | Unlock | Max prize (4 players) |
+| --- | ---: | :---: | --- | ---: |
+| Training | free | 2–4 | – | rewards only |
+| Rookie | 100 | 2–4 | level 1 | 360 |
+| Pro | 500 | 2–4 | level 5 | 1,800 |
+| Champion | 2,000 | 2–4 | level 10 | 7,200 |
+
+**Levels:** every finished bout (at least 20 s, not left early) gives XP: 20, +30 for a win, ×1 / ×1.5 / ×2 / ×3 for Training / Rookie / Pro / Champion. Total XP for a level is `50 × (level − 1) × level` (level 2 = 100, level 5 = 1,000, level 10 = 4,500). Arenas, rewards, prizes and levels are defined once in `packages/shared/src/economy.ts` and used by both the local economy and the server.
+
+**Bots:** on the device, every arena is played against bots. Training uses the difficulty picked on its card; Rookie, Pro and Champion pick one at random for their tier (Rookie easy or normal, Pro mostly normal, Champion mostly hard). Online, paid arenas are humans only.
 
 The Training Arena is always free and open, so a player with zero coins can always keep playing and earning.
 

@@ -6,7 +6,7 @@ import { inputController } from "./input/InputController";
 import { gameStore, sessionStore } from "./network/RoomManager";
 import { settingsStore, touchControlsEnabled } from "./settings";
 import { useStore } from "./store";
-import { setAboutOpen, setFriendsOpen, setSettingsOpen, setShopOpen, setWalletOpen, setWardrobeOpen, uiStore } from "./uiStore";
+import { setAboutOpen, setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWalletOpen, setWardrobeOpen, uiStore } from "./uiStore";
 import { Countdown } from "./ui/Countdown";
 import { HUD } from "./ui/HUD";
 import { Lobby } from "./ui/Lobby";
@@ -16,6 +16,7 @@ import { Wardrobe } from "./ui/Wardrobe";
 import { AboutPanel } from "./ui/AboutPanel";
 import { FriendsPanel } from "./ui/FriendsPanel";
 import { CoinShop } from "./ui/CoinShop";
+import { ProfilePanel } from "./ui/ProfilePanel";
 import { music } from "./audio/Music";
 import { Wallet } from "./ui/Wallet";
 import { Results } from "./ui/Results";
@@ -54,6 +55,7 @@ export function App() {
       if (e.key !== "Escape" || !settingsStore.get().onboarded) return;
       if (uiStore.get().wardrobeOpen) setWardrobeOpen(false);
       else if (uiStore.get().walletOpen) setWalletOpen(false);
+      else if (uiStore.get().profileOpen) setProfileOpen(false);
       else if (uiStore.get().shopOpen) setShopOpen(false);
       else if (uiStore.get().aboutOpen) setAboutOpen(false);
       else if (uiStore.get().friendsOpen) setFriendsOpen(false);
@@ -94,6 +96,7 @@ export function App() {
         {inRoom && <Toasts />}
         {ui.wardrobeOpen && !needsName && (!inRoom || game.phase === Phase.Waiting || game.phase === Phase.Lobby) && <Wardrobe />}
         {ui.friendsOpen && !inRoom && !needsName && <FriendsPanel />}
+        {ui.profileOpen && !needsName && <ProfilePanel />}
         {ui.shopOpen && !needsName && <CoinShop />}
         {ui.walletOpen && !needsName && <Wallet />}
         {ui.settingsOpen && !needsName && <SettingsPanel />}

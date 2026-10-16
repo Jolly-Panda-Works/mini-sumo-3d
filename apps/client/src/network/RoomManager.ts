@@ -18,7 +18,9 @@ import { settingsStore } from "../settings";
 import { wrapColyseusRoom, type GameConnection } from "./connection";
 import { LocalConnection, type LocalRoomOptions } from "./LocalConnection";
 import { detectNetworkMode, networkStore } from "./networkMode";
-import { accountToken, economyStore, ensureAccount, loadEconomy, refreshProfile, setLastResult } from "./economyClient";
+import { accountToken, economyStore, ensureAccount, initLocalEconomy, loadEconomy, refreshProfile, setLastResult } from "./economyClient";
+import { localEconomy } from "./localEconomy";
+import { botLevelForArena } from "@mini-sumo/shared";
 import { audio } from "../audio/AudioManager";
 import { resolveServerUrl } from "../config";
 import { dustBus, impactBus, lastHitAt, shakeBus } from "../game/effectsBus";
@@ -135,6 +137,7 @@ class RoomManager {
       networkStore.set({ mode });
       if (mode === "offline") console.info("[mini-sumo] No server: rooms run on this device.");
       else void loadEconomy();
+      if (mode === "offline") initLocalEconomy();
     });
   }
 
@@ -177,11 +180,23 @@ class RoomManager {
   async enterArena(arenaId: string, name: string): Promise<boolean> {
     const appearance = settingsStore.get().appearance;
     await this.modeReady;
-    if (arenaId !== "training" && this.offline) {
-      sessionStore.update({ error: "This arena is coming soon. Try Training meanwhile." });
-      return false;
+    // Training uses the player's difficulty; other arenas pick one at random for their tier.
+    const botLevel = arenaId === "training" ? settingsStore.get().botLevel : botLevelForArena(arenaId);
+    if (this.offline) {
+      if (sessionStore.get().status === "connecting") return false;
+      let entry;
+      try {
+        entry = localEconomy.payEntry(arenaId);
+      } catch (error) {
+        sessionStore.update({ error: error instanceof Error ? error.message : "You can't enter this arena yet." });
+        return false;
+      }
+      void refreshProfile();
+      return this.connect(
+        () => Promise.reject(new Error("offline")),
+        { name, appearance, isPrivate: false, maxPlayers: 4, botLevel, arenaId, entry },
+      );
     }
-    const botLevel = settingsStore.get().botLevel;
     const options: JoinOptions = { name, private: false, maxPlayers: 4, appearance, arenaId, botLevel: arenaId === "training" ? botLevel : undefined };
     return this.connect(
       async () => {

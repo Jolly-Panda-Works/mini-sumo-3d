@@ -6,6 +6,26 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- On-device economy: 200 starting coins, wallet and history, wardrobe purchases, paid arenas against bots with prizes and refunds, training rewards, XP and levels (Pro at level 5, Champion at level 10). Only buying coins stays *Coming soon*.
+- Profile panel: name, level and XP bar, stats, arena unlocks, coin history.
+- End-of-bout rewards on the results screen: prize, rewards, XP and level-ups.
+- Wardrobe try-on popup for items you don't own: preview on your wrestler, name, price, Buy / Not now.
+
+### Changed
+
+- All popups use one dialog: sticky title and a close (×) button in the top-right corner; content scrolls underneath.
+- Settings: Audio and Controls only, About with the version; in a match, Audio, Controls and *Leave match*. Profile and Gameplay sections removed (bot difficulty is picked on the Training card; other arenas choose it at random for their tier).
+- Wardrobe fills the screen; the preview and category tabs stay fixed and only the items scroll. *Surprise me* removed.
+- Results: no extra *Leave room* button; paid bouts offer *Home* and *Play again*.
+- Coin shop: *History* removed (it lives in Profile).
+- Arenas, rewards, prize formula and levels moved to `packages/shared` (one rulebook for the device and the server); the server tracks XP and unlocks arenas by level.
+
+### Fixed
+
+- Wardrobe: after tapping an item you didn't own, the purchase bar blocked buying other items.
+
 ### Changed
 
 - Releases are tagged automatically from the root `package.json` version: pushing a new version to `main` creates tag `vX.Y.Z` and the Release; *Run workflow* with **bump** (patch/minor/major) bumps, commits, tags and releases in one go. Pushes without a version change build artifacts only. Android `versionCode` is derived from the version.

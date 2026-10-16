@@ -12,6 +12,8 @@ import {
   type LedgerCategory,
   type LedgerEntry,
   type ProfileResponse,
+  levelFromXp,
+  xpForMatch,
 } from "@mini-sumo/shared";
 import { ECONOMY, getArena, getItem } from "./config.js";
 import { consoleEventSink, type EconomyEventSink } from "./events.js";
@@ -116,6 +118,7 @@ CREATE TABLE IF NOT EXISTS match_results (
 
 interface AccountRow {
   id: string;
+  xp: number;
   appearance: string;
   matches: number;
   wins: number;
@@ -188,6 +191,9 @@ export class Economy {
     this.db = new DatabaseSync(path);
     if (path !== ":memory:") this.db.exec("PRAGMA journal_mode = WAL;");
     this.db.exec(SCHEMA);
+    // Migration: XP for levels (added after the first schema).
+    const columns = rows<{ name: string }>(this.db.prepare("PRAGMA table_info(accounts)").all());
+    if (!columns.some((c) => c.name === "xp")) this.db.exec("ALTER TABLE accounts ADD COLUMN xp INTEGER NOT NULL DEFAULT 0");
   }
 
   close(): void {
@@ -335,9 +341,22 @@ export class Economy {
       balances: { coins: this.balance(accountId, Currency.Coins), gems: this.balance(accountId, Currency.Gems) },
       owned: [...this.owned(accountId)],
       appearance: this.appearanceOf(accountId),
-      stats: { matches: account.matches, wins: account.wins },
+      stats: { matches: account.matches, wins: account.wins, coinsEarned: this.coinsEarned(accountId) },
+      level: levelFromXp(account.xp),
       daily: { earned, cap: ECONOMY.rewards.dailyCap, firstMatchBonusAvailable: account.bonus_day !== today },
     };
+  }
+
+  /** Coins won or earned through play (prizes, rewards, daily bonuses). */
+  private coinsEarned(accountId: string): number {
+    const found = row<{ total: number | null }>(
+      this.db
+        .prepare(
+          "SELECT SUM(amount) AS total FROM transactions WHERE account_id = ? AND amount > 0 AND category IN ('arena_prize', 'match_reward', 'daily_bonus')",
+        )
+        .get(accountId),
+    );
+    return found?.total ?? 0;
   }
 
   ledger(accountId: string, limit = 50): LedgerEntry[] {
@@ -438,14 +457,8 @@ export class Economy {
     const arena = getArena(arenaId);
     if (!arena || !arena.enabled) return { ok: false, error: new EconomyError("unknown_arena", "That arena is not available.") };
     const account = this.account(accountId);
-    if (account.matches < arena.requires.matches || account.wins < arena.requires.wins) {
-      return {
-        ok: false,
-        error: new EconomyError(
-          "arena_locked",
-          `${arena.name} unlocks after ${arena.requires.matches} bouts and ${arena.requires.wins} wins.`,
-        ),
-      };
+    if (levelFromXp(account.xp).level < arena.requiredLevel) {
+      return { ok: false, error: new EconomyError("arena_locked", `${arena.name} unlocks at level ${arena.requiredLevel}.`) };
     }
     if (arena.entryFee > 0 && this.balance(accountId) < arena.entryFee) {
       return { ok: false, error: new EconomyError("insufficient_funds", `You need ${arena.entryFee} Sumo Coins to enter ${arena.name}.`) };
@@ -643,7 +656,13 @@ export class Economy {
    * Free rewards only when `rewarded` (training arena), the round lasted long enough and the
    * player finished it; capped per UTC day. Returns coins granted per account.
    */
-  recordMatch(input: { matchId: string; durationMs: number; rewarded: boolean; participants: readonly MatchParticipant[] }): Map<string, number> {
+  recordMatch(input: {
+    matchId: string;
+    durationMs: number;
+    rewarded: boolean;
+    participants: readonly MatchParticipant[];
+    arenaId?: string;
+  }): Map<string, number> {
     const granted = new Map<string, number>();
     if (!this.flags.economy) return granted;
     const today = utcDay(this.now());
@@ -659,7 +678,10 @@ export class Economy {
 
         const counts = p.completed && input.durationMs >= r.minMatchDurationMs;
         if (counts) {
-          this.db.prepare("UPDATE accounts SET matches = matches + 1, wins = wins + ? WHERE id = ?").run(p.won ? 1 : 0, p.accountId);
+          const xp = xpForMatch(input.arenaId ?? "training", p.won, true);
+          this.db
+            .prepare("UPDATE accounts SET matches = matches + 1, wins = wins + ?, xp = xp + ? WHERE id = ?")
+            .run(p.won ? 1 : 0, xp, p.accountId);
         }
         if (!input.rewarded || !counts) continue;
 

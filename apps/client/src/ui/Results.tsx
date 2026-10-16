@@ -3,6 +3,7 @@ import { gameStore, roomManager } from "../network/RoomManager";
 import { useStore } from "../store";
 import { economyStore } from "../network/economyClient";
 import { Coins } from "./Coins";
+import { settingsStore } from "../settings";
 import { PlayerBadge } from "./PlayerBadge";
 
 function ordinal(n: number): string {
@@ -76,6 +77,13 @@ export function Results() {
                 <Coins amount={result.rewards} signed />
               </p>
             )}
+            {result.xp !== undefined && result.xp > 0 && (
+              <p>
+                <span>XP</span>
+                <strong>+{result.xp}</strong>
+              </p>
+            )}
+            {result.levelUp && <p className="economy-result__levelup">Level up! You're now level {result.level}.</p>}
             {result.note && <p className="hint">{result.note}</p>}
             {result.balance !== null && (
               <p className="economy-result__balance">
@@ -87,17 +95,23 @@ export function Results() {
         )}
 
         {paid ? (
-          <div className="row">
-            <button
-              className="btn btn--primary btn--grow"
-              onClick={() => {
-                void roomManager.leave();
-              }}
-            >
-              Play again
-            </button>
-            <p className="hint">Each paid bout needs a new entry. Back to the arenas in {seconds}s.</p>
-          </div>
+          <>
+            <div className="row">
+              <button className="btn btn--grow" onClick={() => void roomManager.leave()}>
+                Home
+              </button>
+              <button
+                className="btn btn--primary btn--grow"
+                onClick={() => {
+                  const arenaId = game.arenaId;
+                  void roomManager.leave().then(() => roomManager.enterArena(arenaId, settingsStore.get().name));
+                }}
+              >
+                Play again · <Coins amount={arena?.entryFee ?? 0} />
+              </button>
+            </div>
+            <p className="hint hint--center">Back home in {seconds}s.</p>
+          </>
         ) : isHost ? (
           <div className="row">
             <button className="btn btn--primary btn--grow" onClick={() => roomManager.rematch()}>
@@ -110,9 +124,6 @@ export function Results() {
         ) : (
           <p className="hint hint--center">Waiting for the host. Back to the lobby in {seconds}s.</p>
         )}
-        <button className="btn btn--ghost" onClick={() => void roomManager.leave()}>
-          Leave room
-        </button>
       </section>
     </div>
   );
