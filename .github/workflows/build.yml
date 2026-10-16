@@ -1,10 +1,14 @@
 # Builds Mini Sumo for web, desktop (Windows/macOS/Linux) and Android, and publishes a
 # GitHub Release.
 #
-# Versions (root package.json "version" is the release line, e.g. 0.1.0):
-#   tag vX.Y.Z      -> X.Y.Z, released
-#   push to main    -> MAJOR.MINOR.<run number>, released (tag v<version> is created)
-#   PRs / branches  -> MAJOR.MINOR.0-dev.<run number>, artifacts only
+# Versions: the root package.json "version" IS the release version, and GitHub tags it.
+#   push to main, version not released yet -> builds X.Y.Z, creates tag vX.Y.Z + Release
+#   push to main, tag vX.Y.Z already exists -> builds artifacts only (bump the version to release)
+#   Actions -> Build -> Run workflow, bump = patch/minor/major
+#                                           -> bumps package.json, commits it, tags and releases
+#   tag vX.Y.Z pushed by hand               -> releases X.Y.Z
+#   pull requests                           -> X.Y.Z-dev.<run>, artifacts only
+# Android versionCode = MAJOR*1000000 + MINOR*1000 + PATCH (always grows with the version).
 #
 # Repository settings (Settings -> Secrets and variables -> Actions):
 #   Variables
@@ -25,6 +29,12 @@ on:
       - "docs/screenshots/**"
   pull_request:
   workflow_dispatch:
+    inputs:
+      bump:
+        description: "Bump the version in package.json before building and releasing"
+        type: choice
+        options: [none, patch, minor, major]
+        default: none
 
 permissions:
   contents: read
@@ -43,31 +53,65 @@ jobs:
   version:
     name: Version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       version: ${{ steps.v.outputs.version }}
       release: ${{ steps.v.outputs.release }}
+      code: ${{ steps.v.outputs.code }}
+      sha: ${{ steps.v.outputs.sha }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - id: v
+        env:
+          BUMP: ${{ inputs.bump || 'none' }}
         run: |
-          BASE=$(node -p "require('./package.json').version.split('.').slice(0, 2).join('.')")
+          SHA="$GITHUB_SHA"
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" && "$BUMP" != "none" ]]; then
+            if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then echo "::error::Run the bump from the main branch."; exit 1; fi
+            npm version "$BUMP" --no-git-tag-version --no-workspaces-update > /dev/null
+            NEW=$(node -p "require('./package.json').version")
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -am "chore(release): v$NEW [skip ci]"
+            git push origin HEAD:main
+            SHA=$(git rev-parse HEAD)
+          fi
+
+          PKG=$(node -p "require('./package.json').version")
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             VERSION="${GITHUB_REF_NAME#v}"; RELEASE=true
-          elif [[ "$GITHUB_EVENT_NAME" == "push" && "$GITHUB_REF" == "refs/heads/main" ]]; then
-            VERSION="$BASE.$GITHUB_RUN_NUMBER"; RELEASE=true
+            [[ "$VERSION" != "$PKG" ]] && echo "::warning::Tag $GITHUB_REF_NAME differs from package.json version $PKG."
+          elif [[ "$GITHUB_REF" == "refs/heads/main" && "$GITHUB_EVENT_NAME" != "pull_request" ]]; then
+            VERSION="$PKG"
+            if git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" > /dev/null; then
+              RELEASE=false
+              echo "::notice::v$VERSION is already released. Bump the version in package.json (or run Build with bump) to publish a new release."
+            else
+              RELEASE=true
+            fi
           else
-            VERSION="$BASE.0-dev.$GITHUB_RUN_NUMBER"; RELEASE=false
+            VERSION="$PKG-dev.$GITHUB_RUN_NUMBER"; RELEASE=false
           fi
+
+          CODE=$(node -e "const [a,b,c]='$VERSION'.split('-')[0].split('.').map(Number); console.log(a*1000000+b*1000+c)")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "release=$RELEASE" >> "$GITHUB_OUTPUT"
-          echo "### Version $VERSION (release: $RELEASE)" >> "$GITHUB_STEP_SUMMARY"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "### Version $VERSION (release: $RELEASE, Android versionCode $CODE)" >> "$GITHUB_STEP_SUMMARY"
 
   # ------------------------------------------------------------------ checks
   test:
     name: Typecheck & test
+    needs: version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.version.outputs.sha }}
       - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -91,6 +135,8 @@ jobs:
       VITE_BASE: /${{ github.event.repository.name }}/
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.version.outputs.sha }}
       - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -156,6 +202,8 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.version.outputs.sha }}
       - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -193,6 +241,8 @@ jobs:
       HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.version.outputs.sha }}
       - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -235,7 +285,7 @@ jobs:
       - name: Set version
         working-directory: apps/mobile/android
         run: |
-          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" app/build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode ${{ needs.version.outputs.code }}/" app/build.gradle
           sed -i "s/versionName \"[^\"]*\"/versionName \"$VERSION\"/" app/build.gradle
           grep -E "versionCode|versionName" app/build.gradle
 
@@ -299,6 +349,8 @@ jobs:
       VERSION: ${{ needs.version.outputs.version }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.version.outputs.sha }}
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
@@ -319,7 +371,7 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.VERSION }}
-          target_commitish: ${{ github.sha }}
+          target_commitish: ${{ needs.version.outputs.sha }}
           name: Mini Sumo v${{ env.VERSION }}
           body_path: release-notes.md
           generate_release_notes: true

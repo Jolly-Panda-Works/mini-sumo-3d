@@ -2,9 +2,13 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow [Semantic Versioning](https://semver.org/).
 
-Builds from `main` are released automatically as `MAJOR.MINOR.<build number>`; tagged releases (`vX.Y.Z`) use the tag exactly.
+Releases use the root `package.json` version and are tagged `vX.Y.Z` automatically.
 
 ## [Unreleased]
+
+### Changed
+
+- Releases are tagged automatically from the root `package.json` version: pushing a new version to `main` creates tag `vX.Y.Z` and the Release; *Run workflow* with **bump** (patch/minor/major) bumps, commits, tags and releases in one go. Pushes without a version change build artifacts only. Android `versionCode` is derived from the version.
 
 ### Changed
 

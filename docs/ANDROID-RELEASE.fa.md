@@ -40,19 +40,27 @@ keytool -genkeypair -v -keystore mini-sumo-upload.keystore -alias minisumo -keya
 - `VITE_SERVER_URL` را **تعریف نکنید** تا بازی کاملاً آفلاین ساخته شود.
 - اگر Google Play پیام «target API level» داد، متغیر `ANDROID_TARGET_SDK` را بسازید (مثلاً `36`).
 
-## ۴. ساخت نسخه‌ی Release
+## ۴. ساخت نسخه‌ی Release (تگ خودکار)
 
-۱. در `package.json` ریشه، `version` را مثلاً `1.0.0` کنید و push کنید.
-۲. تگ بزنید:
-   ```cmd
-   git tag v1.0.0
-   git push origin v1.0.0
-   ```
-۳. در تب **Actions** صبر کنید تا Build سبز شود. در **Releases** این فایل‌ها ساخته می‌شوند:
-   - `MiniSumo-1.0.0-Android.aab`: برای آپلود در Google Play (روی گوشی نصب نمی‌شود)
-   - `MiniSumo-1.0.0-Android.apk`: نسخه‌ی امضاشده برای نصب مستقیم و تست
-   - `MiniSumo-1.0.0-Android-debug.apk`: نسخه‌ی دیباگ، فقط برای عیب‌یابی
-۴. `versionCode` خودکار شماره‌ی اجرای workflow است و همیشه بزرگ‌تر می‌شود (Google Play همین را می‌خواهد).
+تگ را خود GitHub می‌سازد و همیشه با `version` در `package.json` ریشه یکی است. دو راه دارید:
+
+**راه ساده:** در GitHub به **Actions ← Build ← Run workflow** بروید، شاخه‌ی `main` را انتخاب کنید و در **bump** یکی را بزنید:
+- `patch`: مثلاً 1.0.1 به 1.0.2 (رفع باگ)
+- `minor`: مثلاً 1.0.2 به 1.1.0 (قابلیت جدید)
+- `major`: مثلاً 1.1.0 به 2.0.0
+
+GitHub نسخه را در `package.json` بالا می‌برد، commit می‌کند، تگ `v…` و Release را می‌سازد.
+
+**راه دستی:** `version` را در `package.json` ریشه عوض کنید، `npm install` بزنید (تا `package-lock.json` هم به‌روز شود) و push کنید.
+
+> بعد از اجرای راه ساده، قبل از کار بعدی `git pull` بزنید تا commit نسخه روی کامپیوترتان هم بیاید.
+
+در **Releases** این فایل‌ها ساخته می‌شوند:
+- `MiniSumo-1.0.2-Android.aab`: برای آپلود در Google Play (روی گوشی نصب نمی‌شود)
+- `MiniSumo-1.0.2-Android.apk`: نسخه‌ی امضاشده برای نصب مستقیم و تست
+- `MiniSumo-1.0.2-Android-debug.apk`: نسخه‌ی دیباگ، فقط برای عیب‌یابی
+
+`versionCode` اندروید از روی نسخه حساب می‌شود (مثلاً 1.0.2 می‌شود 1000002)، پس با هر نسخه‌ی جدید بزرگ‌تر می‌شود.
 
 ## ۵. تست روی گوشی
 
@@ -91,8 +99,7 @@ keytool -genkeypair -v -keystore mini-sumo-upload.keystore -alias minisumo -keya
 
 ## ۱۰. به‌روزرسانی‌های بعدی
 
-۱. version را بالا ببرید (مثلاً `1.0.1`).
-۲. تگ `v1.0.1` بزنید.
-۳. فایل `.aab` جدید را در Play Console آپلود کنید.
+۱. **Actions ← Build ← Run workflow** با bump مناسب.
+۲. فایل `.aab` جدید را از Release در Play Console آپلود کنید.
 
 > **پرداخت در آینده:** خرید بسته‌های سکه در اندروید باید با **Google Play Billing** انجام شود. وقتی خواستید این بخش را فعال کنید، بگویید تا یکپارچه‌سازی را اضافه کنم.

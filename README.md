@@ -245,15 +245,18 @@ Configure under *Settings → Secrets and variables → Actions*:
 
 ## Releases and versions
 
-The release line lives in the root `package.json` `version` (currently `0.1.0`). The [Build workflow](.github/workflows/build.yml) decides the final version and injects the same string into the web client (*Settings → About*), the desktop apps, the Android `versionName` and the release name:
+The root `package.json` `version` **is** the release version. GitHub tags and releases it automatically; you never create tags by hand. The same version goes into *Settings → About*, the desktop apps, the Android `versionName` and the release name.
 
-| Trigger | Version | Published? |
-| --- | --- | --- |
-| Tag `vX.Y.Z` | `X.Y.Z` exactly | Yes, release `vX.Y.Z` |
-| Push to `main` | `MAJOR.MINOR.<build number>`, e.g. `0.1.42` | Yes, tag `v0.1.42` is created |
-| Pull requests and other branches | `MAJOR.MINOR.0-dev.<build number>` | No, artifacts only |
+| What you do | What GitHub does |
+| --- | --- |
+| Change `version` in `package.json` (e.g. `1.0.2`) and push to `main` | Builds `1.0.2`, creates tag `v1.0.2` and the GitHub Release |
+| *Actions → Build → Run workflow* with **bump** = `patch` / `minor` / `major` | Bumps `package.json` (and the lock file), commits it to `main`, then tags and releases the new version |
+| Push to `main` without changing the version | Builds and uploads artifacts (and GitHub Pages), no new release |
+| Open a pull request | Builds `X.Y.Z-dev.<run>` artifacts only |
 
-Each release contains the Windows, macOS, Linux, Android and web files plus `SHA256SUMS.txt`. To start a new line (e.g. `0.2.x`), change the root `version` and push. Android's `versionCode` is the workflow run number, so it always increases.
+Each release contains the Windows, macOS, Linux, Android and web files plus `SHA256SUMS.txt`. Android's `versionCode` is `MAJOR×1,000,000 + MINOR×1,000 + PATCH` (e.g. `1.0.2` → `1000002`), so it always grows with the version as Google Play requires.
+
+> If `main` is protected, allow GitHub Actions to push to it (or use the manual version change) so the bump commit can land.
 
 ## Deployment
 
