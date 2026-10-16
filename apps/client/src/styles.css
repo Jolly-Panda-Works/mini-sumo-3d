@@ -1948,6 +1948,32 @@ body {
 
 /* ---------- Responsive ---------- */
 
+/* Portrait phones (the Android app is portrait-only). */
+@media (orientation: portrait) {
+  .home__top {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .home__actions {
+    position: static;
+    align-self: flex-end;
+  }
+  .home__title img {
+    height: auto;
+    width: min(86vw, 420px);
+  }
+  .arena-tile {
+    flex-basis: min(64vw, 280px);
+  }
+  .home__bottom {
+    width: 100%;
+  }
+  .home__bottom .btn {
+    flex: 1;
+  }
+}
+
 @media (max-height: 420px) {
   .home__title img {
     height: 64px;

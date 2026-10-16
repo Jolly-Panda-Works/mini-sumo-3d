@@ -6,6 +6,10 @@ Builds from `main` are released automatically as `MAJOR.MINOR.<build number>`; t
 
 ## [Unreleased]
 
+### Changed
+
+- The Android app is portrait-only (`apps/mobile/scripts/orientation.mjs`, replaces `landscape.mjs`); web manifest orientation is portrait. The home screen stacks the buttons above the title on portrait screens and arena cards are sized for one-thumb swiping.
+
 ### Fixed
 
 - Signed Android release: CI could ship Gradle's *unsigned* release APK under the "signed" name, which phones reject ("package appears to be invalid"). Release builds are now signed by Gradle's injected signing config, verified with `apksigner`/`jarsigner`, and the keystore secrets are checked first. Files: `…-Android.apk` (signed), `…-Android.aab` (Play), `…-Android-debug.apk`.

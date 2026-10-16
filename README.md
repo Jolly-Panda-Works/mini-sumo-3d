@@ -82,7 +82,7 @@ Party games are best when everyone understands them in five seconds. Mini Sumo h
 
 On phones and tablets the touch controls appear automatically during a bout (*Settings → Touch controls* can force them on or off). Steering and dashing work at the same time with two thumbs, and supported Android devices vibrate on dashes and hits (*Settings → Vibration*).
 
-*Settings* has your name, music and sound-effect volumes, controls, *About*, and *Save progress to Google account* (coming soon). Music: a Japanese bamboo-flute loop on the home screen, lobby and results, and a taiko percussion loop during bouts, crossfaded smoothly when you switch; it pauses while the app is in the background. The Android app always runs in landscape.
+*Settings* has your name, music and sound-effect volumes, controls, *About*, and *Save progress to Google account* (coming soon). Music: a Japanese bamboo-flute loop on the home screen, lobby and results, and a taiko percussion loop during bouts, crossfaded smoothly when you switch; it pauses while the app is in the background. The Android app always runs in portrait.
 
 Settings never pause the shared match. *Settings → About* shows the version, the creator and links to the game page and source code.
 

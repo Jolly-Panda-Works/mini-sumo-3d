@@ -11,9 +11,9 @@
   "scripts": {
     "android:add": "cap add android",
     "android:assets": "capacitor-assets generate --android --iconBackgroundColor \"#2F5C8A\" --splashBackgroundColor \"#2F5C8A\"",
-    "android:sync": "cap sync android && npm run android:landscape",
+    "android:sync": "cap sync android && npm run android:orientation",
     "android:open": "cap open android",
-    "android:landscape": "node scripts/landscape.mjs"
+    "android:orientation": "node scripts/orientation.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.0",

@@ -56,7 +56,7 @@ keytool -genkeypair -v -keystore mini-sumo-upload.keystore -alias minisumo -keya
 
 ## ۵. تست روی گوشی
 
-فایل `…-Android.apk` را روی گوشی نصب کنید (اگر قبلاً نسخه‌ی دیباگ یا نسخه‌ای با کلید دیگر نصب بوده، اول آن را حذف کنید) و این‌ها را چک کنید: باز شدن، صفحه‌ی loading، حالت افقی، Training، wardrobe، صدا و لرزش.
+فایل `…-Android.apk` را روی گوشی نصب کنید (اگر قبلاً نسخه‌ی دیباگ یا نسخه‌ای با کلید دیگر نصب بوده، اول آن را حذف کنید) و این‌ها را چک کنید: باز شدن، صفحه‌ی loading، حالت عمودی، Training، wardrobe، صدا و لرزش.
 
 ## ۶. Google Play Console
 
@@ -72,7 +72,7 @@ keytool -genkeypair -v -keystore mini-sumo-upload.keystore -alias minisumo -keya
 |---|---|
 | آیکن ۵۱۲×۵۱۲ | `docs/store/icon-512.png` |
 | Feature graphic ۱۰۲۴×۵۰۰ | `docs/store/feature-graphic.png` |
-| اسکرین‌شات‌ها (۲ تا ۸ عدد) | از گوشی، در حالت افقی |
+| اسکرین‌شات‌ها (۲ تا ۸ عدد) | از گوشی، در حالت عمودی |
 | توضیح کوتاه (حداکثر ۸۰ کاراکتر) | مثلاً: Push your friends out of the ring! A cute 3D sumo party game. |
 | دسته‌بندی | Games → Casual (یا Sports) |
 
