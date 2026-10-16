@@ -8,6 +8,12 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Added
 
+- Sound effects from files (`apps/client/public/sfx/`): button click, "not available" for buttons that can't be used yet (they now explain why when tapped), dialog open/close, purchase, level up, knocked out, and a sting when the final stretch begins.
+- Level-up popup after a bout: the old level floats up and fades, the new one rises into its place with the level-up sound, then the coin reward appears.
+- Coins for every level reached: 50 + 25 × level (level 2 = 100, level 5 = 175, level 10 = 300), on the device and on the server (`levelUpReward`, ledger category `level_up`). The results screen lists the reward.
+
+### Added
+
 - Game icons (medals, settings, customise, coin, plus, music, sound, difficulty, bot, close, Google Play, arrows) and new coin-pack art.
 - Walk-in before every bout: wrestlers wait at the ring side in the lobby, bots join one by one (with a pop and a puff of dust), then everyone walks to the start marks, the 3-2-1 runs and the referee's whistle starts the bout.
 - Ring-outs are credited to the last wrestler in contact: the crowd cheers when you push someone out and groans when you're pushed out. Profile counts *Wrestlers pushed out*.

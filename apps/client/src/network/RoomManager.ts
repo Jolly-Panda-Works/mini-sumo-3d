@@ -26,7 +26,7 @@ import { audio } from "../audio/AudioManager";
 import { resolveServerUrl } from "../config";
 import { dustBus, impactBus, lastHitAt, shakeBus } from "../game/effectsBus";
 import { createStore } from "../store";
-import { pushToast } from "../uiStore";
+import { showLevelUp, pushToast } from "../uiStore";
 import { vibrate } from "../haptics";
 
 export type ConnectionStatus = "idle" | "connecting" | "connected";
@@ -396,8 +396,10 @@ class RoomManager {
         dustBus.emit({ x: player.x, y: player.y, count: 16, speed: 2.4 });
         shakeBus.emit(0.7);
       }
-      audio.eliminated();
-      // The crowd: groans when you go out, cheers when you push someone out.
+      // You: the knocked-out sting and the crowd groaning. Others: the usual drop sound,
+      // and the crowd cheers if you pushed them.
+      if (isYou) audio.sample("knocked-out");
+      else audio.eliminated();
       if (isYou && msg.reason === "ringOut") audio.crowdAww();
       else if (msg.by && msg.by === this.sessionId) audio.crowdCheer();
       if (isYou) vibrate(120);
@@ -406,6 +408,11 @@ class RoomManager {
     room.onMessage(ServerMessage.Economy, (msg: EconomyResultMessage) => {
       setLastResult(msg);
       if (msg.kind === "cancelled") pushToast(msg.note, "info", 4000);
+      if (msg.levelUp && msg.level && msg.previousLevel) {
+        const levelUp = { from: msg.previousLevel, to: msg.level, coins: msg.levelReward ?? 0 };
+        // Let the results land first.
+        window.setTimeout(() => showLevelUp(levelUp), 1200);
+      }
       void refreshProfile();
     });
 

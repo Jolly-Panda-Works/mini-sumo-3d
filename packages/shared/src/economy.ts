@@ -201,6 +201,7 @@ export type LedgerCategory =
   | "daily_bonus"
   | "cosmetic_purchase"
   | "daily_gift"
+  | "level_up"
   | "adjustment";
 
 export interface LedgerEntry {
@@ -232,6 +233,9 @@ export interface EconomyResultMessage {
   xp?: number;
   level?: number;
   levelUp?: boolean;
+  /** Level before this bout and the coins granted for levelling up. */
+  previousLevel?: number;
+  levelReward?: number;
 }
 
 // ---------------------------------------------------------------- rules shared by the
@@ -356,6 +360,18 @@ export function levelFromXp(xp: number): LevelInfo {
   let level = 1;
   while (xpForLevel(level + 1) <= total && level < 999) level++;
   return { level, xp: total, levelStartXp: xpForLevel(level), nextLevelXp: xpForLevel(level + 1) };
+}
+
+/** Coins for reaching a level: 50 + 25 per level (level 2 = 100, level 5 = 175, level 10 = 300). */
+export function levelUpReward(level: number): number {
+  return level <= 1 ? 0 : 50 + 25 * Math.floor(level);
+}
+
+/** Total level-up coins for going from one level to another (several at once add up). */
+export function levelUpCoins(fromLevel: number, toLevel: number): number {
+  let total = 0;
+  for (let l = Math.floor(fromLevel) + 1; l <= Math.floor(toLevel); l++) total += levelUpReward(l);
+  return total;
 }
 
 const XP_ARENA_MULTIPLIER: Record<string, number> = { training: 1, rookie: 1.5, pro: 2, champion: 3 };

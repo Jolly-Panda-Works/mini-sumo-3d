@@ -5,7 +5,22 @@ import { settingsStore } from "../settings";
  * Graph: sources -> sfx bus / music bus -> master -> speakers.
  * The context is created on the first user gesture to respect autoplay rules.
  */
+/** Sound files in public/sfx (short MP3s), with a level per file so they sit together. */
+export const SAMPLES = {
+  click: 0.55,
+  reject: 0.7,
+  "menu-open": 0.75,
+  "menu-close": 0.55,
+  purchase: 0.8,
+  "level-up": 0.9,
+  "knocked-out": 0.7,
+  "final-stretch": 0.8,
+} as const;
+export type SampleName = keyof typeof SAMPLES;
+
 class AudioManager {
+  private sampleFiles = new Map<SampleName, Promise<ArrayBuffer | null>>();
+  private sampleBuffers = new Map<SampleName, Promise<AudioBuffer | null>>();
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private sfxBus: GainNode | null = null;
@@ -69,6 +84,57 @@ class AudioManager {
     } catch {
       this.ctx = null;
     }
+  }
+
+  /** Downloads every sound file (small; works before audio is unlocked). */
+  preloadSamples(): Promise<unknown> {
+    return Promise.all((Object.keys(SAMPLES) as SampleName[]).map((name) => this.sampleFile(name)));
+  }
+
+  private sampleFile(name: SampleName): Promise<ArrayBuffer | null> {
+    let pending = this.sampleFiles.get(name);
+    if (!pending) {
+      pending = fetch(`${import.meta.env.BASE_URL}sfx/${name}.mp3`)
+        .then((r) => (r.ok ? r.arrayBuffer() : null))
+        .catch(() => null);
+      this.sampleFiles.set(name, pending);
+    }
+    return pending;
+  }
+
+  /** Plays a sound file (decoded once, then reused). */
+  sample(name: SampleName): void {
+    const ctx = this.ready;
+    if (!ctx || !this.sfxBus) return;
+    let decoded = this.sampleBuffers.get(name);
+    if (!decoded) {
+      decoded = this.sampleFile(name).then(async (data) => {
+        if (!data) return null;
+        try {
+          return await ctx.decodeAudioData(data.slice(0));
+        } catch {
+          return null;
+        }
+      });
+      this.sampleBuffers.set(name, decoded);
+    }
+    void decoded.then((buffer) => {
+      if (!buffer || !this.sfxBus || ctx.state !== "running") return;
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      const gain = ctx.createGain();
+      gain.gain.value = SAMPLES[name];
+      src.connect(gain).connect(this.sfxBus);
+      src.start();
+    });
+  }
+
+  click(): void {
+    this.sample("click");
+  }
+
+  reject(): void {
+    this.sample("reject");
   }
 
   private applyVolumes(): void {
@@ -266,9 +332,7 @@ class AudioManager {
     this.tone(330, 0.35, "triangle", 0.16, undefined, 0.18);
   }
 
-  click(): void {
-    this.tone(880, 0.05, "sine", 0.08);
-  }
+
 }
 
 export const audio = new AudioManager();

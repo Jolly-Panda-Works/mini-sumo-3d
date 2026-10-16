@@ -4,6 +4,7 @@ import { economyStore, refreshProfile } from "../network/economyClient";
 import { localEconomy } from "../network/localEconomy";
 import { networkStore } from "../network/networkMode";
 import { pushToast } from "../uiStore";
+import { audio } from "../audio/AudioManager";
 import { useStore } from "../store";
 import { setShopOpen } from "../uiStore";
 import { Coins } from "./Coins";
@@ -22,6 +23,7 @@ export function CoinShop() {
     const amount = localEconomy.claimDailyGift();
     setGiftReady(false);
     if (amount > 0) {
+      audio.sample("purchase");
       void refreshProfile();
       pushToast(`+${amount} Sumo Coins`, "info");
     }
@@ -45,7 +47,7 @@ export function CoinShop() {
           <p className="pack__coins">
             <Coins amount={DAILY_GIFT_COINS} />
           </p>
-          <button className="btn btn--primary pack__btn" disabled={!giftReady} onClick={claim}>
+          <button className="btn btn--primary pack__btn" disabled={!giftReady} onClick={claim} data-sfx="none">
             {!local ? "Coming soon" : giftReady ? "Claim" : "Come back tomorrow"}
           </button>
         </li>
@@ -57,7 +59,12 @@ export function CoinShop() {
             <p className="pack__coins">
               <Coins amount={pack.coins} />
             </p>
-            <button className="btn pack__btn" disabled aria-label={`${pack.name}, ${pack.coins} Sumo Coins: coming soon`}>
+            <button
+              className="btn pack__btn"
+              aria-disabled="true"
+              aria-label={`${pack.name}, ${pack.coins} Sumo Coins: coming soon`}
+              onClick={() => pushToast("Buying coins is coming soon", "info")}
+            >
               Coming soon
             </button>
           </li>

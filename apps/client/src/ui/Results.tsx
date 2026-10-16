@@ -88,6 +88,12 @@ export function Results() {
                 <strong>+{result.xp}</strong>
               </p>
             )}
+            {result.levelReward !== undefined && result.levelReward > 0 && (
+              <p>
+                <span>Level-up reward</span>
+                <Coins amount={result.levelReward} signed />
+              </p>
+            )}
             {result.levelUp && (
               <p className="economy-result__levelup">
                 <Icon name="arrow-up" size={22} /> Level up! You're now level {result.level}.

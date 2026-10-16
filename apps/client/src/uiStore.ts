@@ -14,6 +14,8 @@ export interface UIState {
   friendsOpen: boolean;
   shopOpen: boolean;
   profileOpen: boolean;
+  /** Level-up celebration after a bout. */
+  levelUp: { from: number; to: number; coins: number } | null;
   /** Arena previewed in the 3D background of the home screen. */
   homeArena: string;
   toasts: Toast[];
@@ -27,6 +29,7 @@ export const uiStore = createStore<UIState>({
   friendsOpen: false,
   shopOpen: false,
   profileOpen: false,
+  levelUp: null,
   homeArena: "training",
   toasts: [],
 });
@@ -44,6 +47,10 @@ export function pushToast(text: string, tone: Toast["tone"] = "info", durationMs
 
 export function setAboutOpen(open: boolean): void {
   uiStore.update({ aboutOpen: open });
+}
+
+export function showLevelUp(levelUp: { from: number; to: number; coins: number } | null): void {
+  uiStore.update({ levelUp });
 }
 
 export function setProfileOpen(open: boolean): void {

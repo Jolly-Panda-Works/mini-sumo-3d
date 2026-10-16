@@ -16,6 +16,8 @@ import {
 import { buyItem, economyStore, ownedItems, saveAppearanceRemote } from "../network/economyClient";
 import { Coins } from "./Coins";
 import { Dialog } from "./Dialog";
+import { audio } from "../audio/AudioManager";
+import { pushToast } from "../uiStore";
 import { SumoModel, useSumoParts } from "../game/SumoModel";
 import { gameStore, roomManager } from "../network/RoomManager";
 import { settingsStore } from "../settings";
@@ -130,7 +132,13 @@ function ItemPopup({
           <button className="btn btn--grow" onClick={onClose}>
             Not now
           </button>
-          <button className="btn btn--primary btn--grow" disabled={!canBuy || !affordable || busy} onClick={() => void buy()}>
+          <button
+            className="btn btn--primary btn--grow"
+            disabled={!canBuy || busy}
+            aria-disabled={!affordable}
+            data-sfx={affordable ? "none" : undefined}
+            onClick={() => (affordable ? void buy() : pushToast("Not enough Sumo Coins", "info"))}
+          >
             {!canBuy ? "Coming soon" : busy ? "Buying…" : (
               <>
                 Buy · <Coins amount={item.price} />
@@ -269,6 +277,7 @@ export function Wardrobe() {
           onClose={() => setPending(null)}
           onBuy={async () => {
             await buyItem(pendingItem.id);
+            audio.sample("purchase");
             wear({ ...settingsStore.get().appearance, [pendingItem.category]: pendingItem.index } as Appearance);
             setPending(null);
           }}

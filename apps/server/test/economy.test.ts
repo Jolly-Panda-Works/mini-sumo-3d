@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Currency } from "@mini-sumo/shared";
+import { Currency, levelUpCoins } from "@mini-sumo/shared";
 import { CATALOG, ECONOMY, getArena } from "../src/economy/config.js";
 import { Economy, EconomyError } from "../src/economy/Economy.js";
 import { silentEventSink } from "../src/economy/events.js";
@@ -385,6 +385,9 @@ describe("levels", () => {
     }
     const profile = economy.profile(a.accountId);
     expect(profile.level.level).toBeGreaterThanOrEqual(5);
+    // Every level reached paid its reward, once.
+    const levelUps = economy.ledger(a.accountId, 200).filter((e) => e.category === "level_up");
+    expect(levelUps.reduce((sum, e) => sum + e.amount, 0)).toBe(levelUpCoins(1, profile.level.level));
     expect(economy.canEnter(a.accountId, "pro").ok).toBe(true);
   });
 });

@@ -16,6 +16,8 @@ import { Wardrobe } from "./ui/Wardrobe";
 import { AboutPanel } from "./ui/AboutPanel";
 import { FriendsPanel } from "./ui/FriendsPanel";
 import { CoinShop } from "./ui/CoinShop";
+import { LevelUpPopup } from "./ui/LevelUpPopup";
+import { audio } from "./audio/AudioManager";
 import { ProfilePanel } from "./ui/ProfilePanel";
 import { music } from "./audio/Music";
 import { Wallet } from "./ui/Wallet";
@@ -50,7 +52,24 @@ export function App() {
   const finalStretch = inRoom && game.phase === Phase.Playing && game.remainingMs > 0 && game.remainingMs <= LATE_GAME_MS;
   useEffect(() => {
     music.setTempo(finalStretch ? 1.1 : 1);
+    // The final stretch begins: a "buff" sting while you're still in the ring.
+    if (finalStretch && game.players.some((p) => p.isYou && p.alive)) audio.sample("final-stretch");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finalStretch]);
+
+  // Button sounds: a click for every button, a "no" for buttons that can't be used yet
+  // (aria-disabled, which also explain why). Buttons with their own sound opt out with
+  // data-sfx="none".
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const button = (e.target as HTMLElement | null)?.closest?.("button");
+      if (!button || button.disabled || button.dataset.sfx === "none") return;
+      if (button.getAttribute("aria-disabled") === "true") audio.reject();
+      else audio.click();
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, []);
 
   // The wardrobe is a lobby-only screen: close it when a bout starts.
   useEffect(() => {
@@ -114,6 +133,7 @@ export function App() {
         {ui.walletOpen && !needsName && <Wallet />}
         {ui.settingsOpen && !needsName && !inLobby && <SettingsPanel />}
         {ui.aboutOpen && <AboutPanel />}
+        {ui.levelUp && <LevelUpPopup />}
       </div>
     </div>
   );

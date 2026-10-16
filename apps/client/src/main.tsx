@@ -18,6 +18,7 @@ images.forEach((file) => bootTrack(`img:${file}`, 1, preloadImage(`${base}${file
 bootTrack("fonts", 1, document.fonts?.ready ?? Promise.resolve());
 bootTrack("network", 2, roomManager.ready);
 bootTrack("music", 2, music.preload("menu"));
+bootTrack("sfx", 1, audio.preloadSamples());
 startBoot();
 
 // Browsers only allow audio after a user gesture.

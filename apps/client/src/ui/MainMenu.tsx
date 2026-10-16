@@ -4,7 +4,7 @@ import { economyStore } from "../network/economyClient";
 import { networkStore } from "../network/networkMode";
 import { sessionStore } from "../network/RoomManager";
 import { useStore } from "../store";
-import { setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
+import { pushToast, setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
 import { settingsStore } from "../settings";
 import { ArenaRow } from "./ArenaSelect";
 import { Coins } from "./Coins";
@@ -75,7 +75,12 @@ export function MainMenu() {
       <ArenaRow />
 
       <div className="home__bottom">
-        <button className="btn btn--big" disabled={!online || busy} onClick={() => setFriendsOpen(true)}>
+        <button
+          className="btn btn--big"
+          disabled={busy}
+          aria-disabled={!online}
+          onClick={() => (online ? setFriendsOpen(true) : pushToast("Playing with friends is coming soon", "info"))}
+        >
           Play with friends
           {!online && <span className="tag tag--soon">Coming soon</span>}
         </button>

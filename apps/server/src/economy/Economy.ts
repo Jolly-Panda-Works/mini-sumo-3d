@@ -13,6 +13,7 @@ import {
   type LedgerEntry,
   type ProfileResponse,
   levelFromXp,
+  levelUpCoins,
   xpForMatch,
 } from "@mini-sumo/shared";
 import { ECONOMY, getArena, getItem } from "./config.js";
@@ -352,7 +353,7 @@ export class Economy {
     const found = row<{ total: number | null }>(
       this.db
         .prepare(
-          "SELECT SUM(amount) AS total FROM transactions WHERE account_id = ? AND amount > 0 AND category IN ('arena_prize', 'match_reward', 'daily_bonus')",
+          "SELECT SUM(amount) AS total FROM transactions WHERE account_id = ? AND amount > 0 AND category IN ('arena_prize', 'match_reward', 'daily_bonus', 'level_up')",
         )
         .get(accountId),
     );
@@ -679,9 +680,23 @@ export class Economy {
         const counts = p.completed && input.durationMs >= r.minMatchDurationMs;
         if (counts) {
           const xp = xpForMatch(input.arenaId ?? "training", p.won, true);
+          const before = levelFromXp(account.xp).level;
+          const after = levelFromXp(account.xp + xp).level;
           this.db
             .prepare("UPDATE accounts SET matches = matches + 1, wins = wins + ?, xp = xp + ? WHERE id = ?")
             .run(p.won ? 1 : 0, xp, p.accountId);
+          const levelCoins = levelUpCoins(before, after);
+          if (levelCoins > 0) {
+            this.apply({
+              accountId: p.accountId,
+              currency: Currency.Coins,
+              amount: levelCoins,
+              category: "level_up",
+              reason: `Reached level ${after}`,
+              key: `levelup:${input.matchId}:${p.accountId}`,
+              matchId: input.matchId,
+            });
+          }
         }
         if (!input.rewarded || !counts) continue;
 

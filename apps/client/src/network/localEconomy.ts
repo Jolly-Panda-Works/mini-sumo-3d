@@ -10,6 +10,7 @@ import {
   computePrize,
   cosmeticPrice,
   levelFromXp,
+  levelUpCoins,
   xpForMatch,
   type CatalogResponse,
   type EconomyResultMessage,
@@ -309,6 +310,18 @@ export const localEconomy = {
     base.balance = state.coins;
     base.level = levelFromXp(state.xp).level;
     base.levelUp = base.level > levelBefore;
+    base.previousLevel = levelBefore;
+    if (base.levelUp) {
+      // Coins for every level reached.
+      const coins = levelUpCoins(levelBefore, base.level);
+      if (coins > 0) {
+        record(coins, "level_up", `Reached level ${base.level}`, { matchId: result.matchId });
+        state.coinsEarned += coins;
+        base.levelReward = coins;
+        save();
+        base.balance = state.coins;
+      }
+    }
     return base;
   },
 

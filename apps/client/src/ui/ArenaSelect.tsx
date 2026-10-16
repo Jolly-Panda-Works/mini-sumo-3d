@@ -8,6 +8,7 @@ import { useStore } from "../store";
 import { Coins } from "./Coins";
 import { BotLevelPicker } from "./BotLevelPicker";
 import { Dialog } from "./Dialog";
+import { pushToast } from "../uiStore";
 import { Icon } from "./Icon";
 
 /**
@@ -109,8 +110,16 @@ export function ArenaRow() {
                 {free && <BotLevelPicker />}
                 <button
                   className="btn btn--primary arena-tile__btn"
-                  disabled={!available || busy}
-                  onClick={() => (free ? void roomManager.quickPlay(settings.name) : setConfirm(arena))}
+                  disabled={busy}
+                  aria-disabled={!available}
+                  onClick={() => {
+                    if (!available) {
+                      pushToast(status || "Not available yet", "info");
+                      return;
+                    }
+                    if (free) void roomManager.quickPlay(settings.name);
+                    else setConfirm(arena);
+                  }}
                   aria-label={
                     free ? `Play ${arena.name} for free` : soon ? `${arena.name}: coming soon` : `Enter ${arena.name} for ${arena.entryFee} Sumo Coins`
                   }

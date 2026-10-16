@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { Icon } from "./Icon";
+import { audio } from "../audio/AudioManager";
 
 /**
  * Shared popup: a sticky header with the title and a close (×) button in the top-right
@@ -30,6 +31,8 @@ export function Dialog({
 
   useEffect(() => {
     closeRef.current?.focus({ preventScroll: true });
+    audio.sample("menu-open");
+    return () => audio.sample("menu-close");
   }, []);
 
   return (
@@ -40,7 +43,7 @@ export function Dialog({
             {title}
           </h2>
           {!hideClose && (
-            <button ref={closeRef} type="button" className="dialog__close" onClick={onClose} aria-label="Close">
+            <button ref={closeRef} type="button" className="dialog__close" onClick={onClose} aria-label="Close" data-sfx="none">
               <Icon name="close" size={26} />
             </button>
           )}

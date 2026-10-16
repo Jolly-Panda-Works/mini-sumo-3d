@@ -3,7 +3,7 @@ import { NAME_MAX_LENGTH } from "@mini-sumo/shared";
 import { economyStore } from "../network/economyClient";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
-import { setProfileOpen } from "../uiStore";
+import { pushToast, setProfileOpen } from "../uiStore";
 import { Dialog } from "./Dialog";
 import { Icon } from "./Icon";
 
@@ -106,7 +106,11 @@ export function ProfilePanel() {
           ))}
         </dl>
 
-        <button className="btn profile__google" disabled>
+        <button
+          className="btn profile__google"
+          aria-disabled="true"
+          onClick={() => pushToast("Google Play saving is coming soon", "info")}
+        >
           <Icon name="gplay-login" size={28} />
           Save progress with Google Play <span className="tag tag--soon">Coming soon</span>
         </button>
