@@ -263,7 +263,6 @@ export function Wardrobe() {
             priceOf={priceOf}
             onPick={(index) => pick(tab.category, index)}
           />
-          <p className="hint">Bought items are yours for good. Looks never change how your wrestler plays.</p>
         </div>
       </Dialog>
 

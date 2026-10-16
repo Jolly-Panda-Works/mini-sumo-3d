@@ -72,7 +72,6 @@ export function CoinShop() {
           </li>
         ))}
       </ul>
-      <p className="hint">Sumo Coins are used for arena entries and wardrobe items. They can't be cashed out.</p>
     </Dialog>
   );
 }

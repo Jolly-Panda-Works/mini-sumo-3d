@@ -4,6 +4,8 @@
  * It disappears when everything is ready (or after a safety timeout).
  */
 const START = 30;
+/** The studio card plays for 2.4 s from launch; the loading screen shows at least briefly after it. */
+const MIN_VISIBLE_MS = 3000;
 const SAFETY_TIMEOUT_MS = 15_000;
 
 const tasks = new Map<string, { weight: number; done: boolean }>();
@@ -25,12 +27,14 @@ function render(): void {
   if (shown > goal) shown = goal;
   const value = Math.round(shown);
   const fill = root.querySelector<HTMLElement>(".boot__fill");
+  const runner = root.querySelector<HTMLElement>(".boot__runner");
   const pct = root.querySelector<HTMLElement>(".boot__pct");
-  if (fill) fill.style.width = `${value}%`;
+  if (fill) fill.style.clipPath = `inset(0 ${100 - value}% 0 0)`;
+  if (runner) runner.style.left = `${value}%`;
   if (pct) pct.textContent = `${value}%`;
   root.setAttribute("aria-valuenow", String(value));
 
-  if (value >= 100 && !finished) {
+  if (value >= 100 && !finished && performance.now() >= MIN_VISIBLE_MS) {
     finished = true;
     window.setTimeout(() => {
       root.classList.add("boot--done");

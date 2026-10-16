@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ArenaInfo } from "@mini-sumo/shared";
 import { arenaImage, themeFor } from "../game/arenaThemes";
 import { economyStore } from "../network/economyClient";
@@ -58,6 +58,17 @@ export function ArenaRow() {
   const balance = economy.profile?.balances.coins ?? 0;
   const playerLevel = economy.profile?.level.level ?? 1;
   const arenas = (live ? economy.catalog?.arenas : null)?.filter((a) => a.enabled) ?? PREVIEW;
+  // Arrows only when some arenas are off screen.
+  const [overflows, setOverflows] = useState(false);
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+    const check = () => setOverflows(row.scrollWidth > row.clientWidth + 4);
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(row);
+    return () => observer.disconnect();
+  }, [arenas.length]);
   const busy = session.status === "connecting";
 
   const enter = async (arena: ArenaInfo) => {
@@ -68,9 +79,11 @@ export function ArenaRow() {
   return (
     <>
       <div className="arena-row-wrap">
-      <button className="arena-row__arrow arena-row__arrow--left" onClick={() => scrollRow(-1)} aria-label="Previous arenas">
-        <Icon name="arrow-left" size={34} />
-      </button>
+      {overflows && (
+        <button className="arena-row__arrow arena-row__arrow--left" onClick={() => scrollRow(-1)} aria-label="Previous arenas">
+          <Icon name="arrow-left" size={34} />
+        </button>
+      )}
       <ul className="arena-row" aria-label="Arenas" ref={rowRef}>
         {arenas.map((arena) => {
           const theme = themeFor(arena.id);
@@ -131,9 +144,11 @@ export function ArenaRow() {
           );
         })}
       </ul>
-      <button className="arena-row__arrow arena-row__arrow--right" onClick={() => scrollRow(1)} aria-label="More arenas">
-        <Icon name="arrow-right" size={34} />
-      </button>
+      {overflows && (
+        <button className="arena-row__arrow arena-row__arrow--right" onClick={() => scrollRow(1)} aria-label="More arenas">
+          <Icon name="arrow-right" size={34} />
+        </button>
+      )}
       </div>
 
       {confirm && (
