@@ -3,8 +3,7 @@ import { POWER_UPS, isPowerUpKind } from "@mini-sumo/shared";
 
 /**
  * Nobori banner art for a power-up (vertical shop flag, as in the reference): a pastel field
- * with a dotted pattern, a rope border and the power-up's kanji, drawn on a canvas once and
- * cached.
+ * with a dotted pattern and the power-up's round emblem, drawn on a canvas once and cached.
  */
 const cache = new Map<string, CanvasTexture>();
 
@@ -27,6 +26,9 @@ export function bannerTexture(kind: string): CanvasTexture | null {
   canvas.width = W;
   canvas.height = H;
   const g = canvas.getContext("2d")!;
+  const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
+  texture.anisotropy = 4;
 
   // Field
   g.fillStyle = shade(color, 0.62);
@@ -40,31 +42,27 @@ export function bannerTexture(kind: string): CanvasTexture | null {
   g.fillRect(0, H - 22, W, 22);
   g.fillStyle = shade(color, -0.25);
   g.fillRect(W - 14, 34, 6, H - 56);
-  // Kanji
+  // The round power-up emblem (public/powerups/<kind>-coin.webp), drawn when loaded.
+  const emblem = new Image();
+  const drawEmblem = () => {
+    const size = W * 0.86;
+    const ratio = emblem.naturalHeight / Math.max(1, emblem.naturalWidth);
+    g.drawImage(emblem, (W - size) / 2 - 4, H * 0.44 - (size * ratio) / 2, size, size * ratio);
+    texture.needsUpdate = true;
+  };
+  emblem.onload = drawEmblem;
+  emblem.src = `${import.meta.env.BASE_URL}powerups/${kind}-coin.webp`;
+  // Until it loads (or if it can't), the kanji.
   g.fillStyle = shade(color, -0.55);
   g.textAlign = "center";
   g.textBaseline = "middle";
   g.font = `900 112px ${KANJI_FONT}`;
-  g.fillText(kanji, W / 2 - 4, H * 0.42);
-  // A small seal circle under it
-  g.beginPath();
-  g.arc(W / 2 - 4, H * 0.74, 30, 0, Math.PI * 2);
-  g.fillStyle = "#ffffff";
-  g.fill();
-  g.lineWidth = 5;
-  g.strokeStyle = color;
-  g.stroke();
-  g.fillStyle = color;
-  g.font = `900 34px ${KANJI_FONT}`;
-  g.fillText(kanji, W / 2 - 4, H * 0.74 + 1);
+  g.fillText(kanji, W / 2 - 4, H * 0.44);
   // Outline
   g.lineWidth = 6;
   g.strokeStyle = shade(color, -0.6);
   g.strokeRect(3, 3, W - 6, H - 6);
 
-  const texture = new CanvasTexture(canvas);
-  texture.colorSpace = SRGBColorSpace;
-  texture.anisotropy = 4;
   cache.set(kind, texture);
   return texture;
 }

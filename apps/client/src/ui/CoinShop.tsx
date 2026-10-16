@@ -36,8 +36,9 @@ export function CoinShop() {
       className="coin-shop"
     >
       <p className="coin-shop__balance">
-        <span className="field__label">Your coins</span>
-        <Coins amount={balance} />
+        <span className="coin-frame coin-frame--static" aria-label={`Your coins: ${balance}`}>
+          <span className="coin-frame__amount">{balance.toLocaleString("en-US")}</span>
+        </span>
       </p>
       <ul className="packs">
         <li className="pack pack--daily">

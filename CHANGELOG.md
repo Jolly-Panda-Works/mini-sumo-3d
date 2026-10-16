@@ -6,6 +6,15 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Power-up art: the round emblems on the flags in the ring and on wrestlers' backs; the banner art in the HUD (your power-up on the right, others' next to their names).
+- Art frames: the coin balance in the medal frame (home and shop), the match timer in the clock frame, the shop button art on the home hub, and the *Play again* button art on the results screen.
+
+### Fixed
+
+- Results: the reward amounts were unreadable (light text on a light panel). The prize or reward now shows in the red trophy panel, and the details are in light text on the board.
+
 ### Changed
 
 - CI builds Android and the web only: Releases contain the Android APK and AAB; the web build goes to GitHub Pages for testing. Desktop (Windows, macOS, Linux) builds were removed.

@@ -25,8 +25,8 @@ export function HUD({ touch }: { touch: boolean }) {
   return (
     <div className="hud">
       <div className="hud__top">
-        <div className={`hud__timer${lowTime ? " hud__timer--low" : ""}`} role="timer" aria-label="Time left">
-          {formatTime(game.phase === Phase.Countdown ? MATCH_DURATION_MS : game.remainingMs)}
+        <div className={`hud__timer timer-frame${lowTime ? " hud__timer--low" : ""}`} role="timer" aria-label="Time left">
+          <span className="timer-frame__text">{formatTime(game.phase === Phase.Countdown ? MATCH_DURATION_MS : game.remainingMs)}</span>
         </div>
         <button className="tile-btn hud__gear" onClick={() => setSettingsOpen(true)} aria-label="Settings">
           <GearIcon />
@@ -39,14 +39,14 @@ export function HUD({ touch }: { touch: boolean }) {
             <PlayerBadge colorIndex={p.colorIndex} dim={!p.alive} />
             <span className="chip__name">{p.isYou ? "You" : p.name}</span>
             {p.alive && isPowerUpKind(p.powerUp) && (
-              <span
+              <img
                 className="chip__powerup"
-                style={{ ["--pu" as string]: POWER_UPS[p.powerUp].color }}
+                src={`${import.meta.env.BASE_URL}powerups/${p.powerUp}-flag.webp`}
+                alt={`Power-up: ${POWER_UPS[p.powerUp].name}`}
                 title={POWER_UPS[p.powerUp].name}
-                aria-label={`Power-up: ${POWER_UPS[p.powerUp].name}`}
-              >
-                {POWER_UPS[p.powerUp].kanji}
-              </span>
+                width={120}
+                height={262}
+              />
             )}
             {!p.alive && <span className="chip__state">{p.elimReason === "left" ? "Left" : "Out"}</span>}
           </li>
@@ -101,9 +101,8 @@ function PowerUpBadge({ kind, ms }: { kind: PowerUpKind; ms: number }) {
   const left = Math.max(0, Math.min(1, ms / POWER_UP_MS));
   return (
     <div className={`powerup${ms < 2000 ? " powerup--ending" : ""}`} role="status" style={{ ["--pu" as string]: info.color, ["--left" as string]: String(left) }}>
-      <span className="powerup__kanji" aria-hidden="true">
-        {info.kanji}
-      </span>
+      <img className="powerup__flag" src={`${import.meta.env.BASE_URL}powerups/${kind}-flag.webp`} alt="" width={120} height={262} />
+      <span className="powerup__ring" aria-hidden="true" />
       <span className="powerup__text">
         <strong>{info.name}</strong>
         <span>{Math.ceil(ms / 1000)}s</span>

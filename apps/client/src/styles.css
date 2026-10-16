@@ -3573,3 +3573,235 @@ dl.profile__stats {
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
 }
+
+/* ======================================================================
+   Art frames: coin balance, timer, reward panel, Play again, shop
+   (public/ui/*.webp; text sits in each frame's panel, measured from the art)
+   ====================================================================== */
+
+.coin-frame {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 54px;
+  aspect-ratio: 409 / 170;
+  padding: 0 4% 0 37%;
+  border: 0;
+  background: var(--ui-coin-frame) center / 100% 100% no-repeat;
+  color: #fff4dc;
+  font: inherit;
+  font-weight: 800;
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.3));
+}
+
+.coin-frame--static {
+  cursor: default;
+  height: 50px;
+}
+
+.coin-frame__amount {
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.coin-frame__plus {
+  position: absolute;
+  right: -6px;
+  top: -6px;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+}
+
+.coin-frame:active {
+  transform: translateY(2px);
+}
+
+.coin-frame:focus-visible {
+  outline: 3px solid #ffe7a8;
+  outline-offset: 2px;
+}
+
+.hub__coins.coin-frame {
+  min-height: 0;
+  padding: 0 4% 0 37%;
+}
+
+.coin-shop__balance {
+  justify-content: center;
+}
+
+/* Timer in the clock frame */
+.hud__timer.timer-frame {
+  display: flex;
+  align-items: center;
+  height: 58px;
+  aspect-ratio: 421 / 174;
+  padding: 0 5% 0 36%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--ui-timer-frame) center / 100% 100% no-repeat;
+  color: #fff4dc;
+  font-size: 1.6rem;
+  line-height: 1;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.3));
+}
+
+.timer-frame__text {
+  flex: 1;
+  text-align: center;
+}
+
+.hud__timer--low.timer-frame {
+  background: var(--ui-timer-frame) center / 100% 100% no-repeat;
+  color: #ff8f8f;
+  animation: timer-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes timer-pulse {
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+/* Results: readable details on the dark board, the reward in the red panel */
+.dlg-results .economy-result {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: #f4ede2;
+}
+
+.dlg-results .economy-result .hint {
+  color: rgba(244, 237, 226, 0.7);
+}
+
+.dlg-results .economy-result__balance {
+  border-top-color: rgba(255, 231, 168, 0.3);
+}
+
+.reward-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  aspect-ratio: 659 / 197;
+  padding: 7% 8% 3%;
+  background: var(--ui-reward-panel) center / 100% 100% no-repeat;
+  color: #ffe7a8;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.55);
+}
+
+.reward-panel__label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.reward-panel__amount {
+  font-size: 1.7rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* Art buttons */
+.art-btn {
+  position: relative;
+  flex: 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+}
+
+.art-btn img {
+  width: 100%;
+  height: auto;
+}
+
+.art-btn:active {
+  transform: translateY(2px);
+}
+
+.art-btn:focus-visible {
+  outline: 3px solid #ffe7a8;
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+.art-btn__fee {
+  position: absolute;
+  right: 6%;
+  bottom: -8px;
+  line-height: 1;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #1a1236;
+  color: #ffe7a8;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.dlg-results .row {
+  align-items: center;
+}
+
+/* Shop art button on the hub */
+.hub__side-btn--shop .hub__shop-art {
+  width: 64px;
+  height: auto;
+  aspect-ratio: 294 / 266;
+  object-fit: contain;
+}
+
+/* Power-up banners in the HUD */
+.chip__powerup {
+  width: auto;
+  height: 26px;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  object-fit: contain;
+}
+
+.powerup {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  gap: 2px;
+}
+
+.powerup__flag {
+  height: 92px;
+  width: auto;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.4));
+}
+
+.powerup__ring {
+  display: block;
+  width: 56px;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pu) calc(var(--left) * 100%), rgba(255, 255, 255, 0.25) 0);
+  box-shadow: 0 0 0 2px rgba(20, 16, 34, 0.7);
+}
+
+.powerup__text {
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(20, 16, 34, 0.7);
+}

@@ -22,6 +22,7 @@ export function Results() {
   const standings = game.standings.map((id) => byId.get(id)).filter((p): p is NonNullable<typeof p> => Boolean(p));
   const seconds = Math.ceil(game.remainingMs / 1000);
 
+  const won = result ? result.prize + result.rewards + (result.levelReward ?? 0) : 0;
   let headline = "It's a draw!";
   if (winner) headline = winner.isYou ? "You win!" : `${winner.name} wins!`;
 
@@ -51,13 +52,21 @@ export function Results() {
 
         {result && (result.kind !== "rewarded" || result.rewards > 0 || (result.xp ?? 0) > 0) && (
           <div className="economy-result" role="status">
+            {won > 0 && (
+              <div className="reward-panel">
+                <span className="reward-panel__label">{result.prize > 0 ? "Prize" : "Reward"}</span>
+                <span className="reward-panel__amount">
+                  <Coins amount={won} signed />
+                </span>
+              </div>
+            )}
             {paid && (
               <p>
                 <span>Entry fee</span>
                 <Coins amount={-result.entryFee} signed />
               </p>
             )}
-            {result.prize > 0 && (
+            {result.prize > 0 && (result.rewards > 0 || (result.levelReward ?? 0) > 0) && (
               <p>
                 <span>Prize</span>
                 <Coins amount={result.prize} signed />
@@ -109,21 +118,25 @@ export function Results() {
                 Home
               </button>
               <button
-                className="btn btn--primary btn--grow"
+                className="art-btn art-btn--again"
                 onClick={() => {
                   const arenaId = game.arenaId;
                   void roomManager.leave().then(() => roomManager.enterArena(arenaId, settingsStore.get().name));
                 }}
+                aria-label={`Play again for ${arena?.entryFee ?? 0} Sumo Coins`}
               >
-                Play again · <Coins amount={arena?.entryFee ?? 0} />
+                <img src={`${import.meta.env.BASE_URL}ui/play-again.webp`} alt="" width={638} height={186} draggable={false} />
+                <span className="art-btn__fee">
+                  <Coins amount={arena?.entryFee ?? 0} />
+                </span>
               </button>
             </div>
             <p className="hint hint--center">Back home in {seconds}s.</p>
           </>
         ) : isHost ? (
           <div className="row">
-            <button className="btn btn--primary btn--grow" onClick={() => roomManager.rematch()}>
-              Rematch
+            <button className="art-btn art-btn--again" onClick={() => roomManager.rematch()} aria-label="Play again">
+              <img src={`${import.meta.env.BASE_URL}ui/play-again.webp`} alt="" width={638} height={186} draggable={false} />
             </button>
             <button className="btn btn--grow" onClick={() => void roomManager.leave()}>
               Home
