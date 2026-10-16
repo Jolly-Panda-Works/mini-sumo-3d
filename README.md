@@ -165,7 +165,7 @@ Offline, *Play now* searches for a few seconds and fills the ring with bots; *Cr
 | Windows | `MiniSumo-<version>-Windows-Setup.exe` (installer) or `…-Windows-Portable.exe` |
 | macOS | `MiniSumo-<version>-macOS-arm64.dmg` (Apple Silicon) or `…-macOS-x64.dmg` (Intel) |
 | Linux | `MiniSumo-<version>-Linux-x86_64.AppImage` or `…-Linux-amd64.deb` |
-| Android | `MiniSumo-<version>-Android.apk` |
+| Android | `MiniSumo-<version>-Android.apk` (signed; `.aab` is for Google Play only) |
 | Web | `MiniSumo-<version>-Web.zip` (static site for your own hosting) |
 
 > **Warning on first launch?** The apps aren't code-signed yet. On Windows click **More info → Run anyway**; on macOS right-click the app and choose **Open**. Every release ships `SHA256SUMS.txt` so you can verify the download. Details: [CODE_SIGNING.md](CODE_SIGNING.md).

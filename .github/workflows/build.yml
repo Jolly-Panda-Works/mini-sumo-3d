@@ -243,33 +243,43 @@ jobs:
         working-directory: apps/mobile/android
         run: ./gradlew assembleDebug --no-daemon
 
+      # Signed with Gradle's injected signing config (the same mechanism Android Studio uses),
+      # so the outputs are app-release.apk / app-release.aab, signed. Unsigned files are never shipped.
       - name: Build signed release APK and AAB
         if: env.HAS_KEYSTORE == 'true'
-        working-directory: apps/mobile
+        working-directory: apps/mobile/android
         env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/release.keystore"
-          for TYPE in APK AAB; do
-            npx cap build android \
-              --keystorepath "$RUNNER_TEMP/release.keystore" \
-              --keystorepass "$KEYSTORE_PASSWORD" \
-              --keystorealias "$KEY_ALIAS" \
-              --keystorealiaspass "$KEY_PASSWORD" \
-              --androidreleasetype "$TYPE"
-          done
+          printf '%s' "$KEYSTORE_BASE64" | tr -d '\r\n ' | base64 --decode > "$RUNNER_TEMP/release.keystore"
+          keytool -list -keystore "$RUNNER_TEMP/release.keystore" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" > /dev/null \
+            || { echo "::error::The keystore, its password or the key alias in the repository secrets is wrong."; exit 1; }
+          ./gradlew assembleRelease bundleRelease --no-daemon \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/release.keystore" \
+            -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
+
+      - name: Verify signatures
+        if: env.HAS_KEYSTORE == 'true'
+        run: |
+          OUTPUTS=apps/mobile/android/app/build/outputs
+          APKSIGNER="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -n 1)apksigner"
+          "$APKSIGNER" verify --verbose --print-certs "$OUTPUTS/apk/release/app-release.apk"
+          jarsigner -verify "$OUTPUTS/bundle/release/app-release.aab" | tail -n 1
 
       - name: Collect outputs
         run: |
           mkdir -p out
           OUTPUTS=apps/mobile/android/app/build/outputs
-          cp "$OUTPUTS/apk/debug/app-debug.apk" "out/MiniSumo-$VERSION-Android.apk"
-          SIGNED_APK=$(find "$OUTPUTS" -path '*release*' -name '*.apk' | head -n 1)
-          SIGNED_AAB=$(find "$OUTPUTS" -path '*release*' -name '*.aab' | head -n 1)
-          [ -n "$SIGNED_APK" ] && cp "$SIGNED_APK" "out/MiniSumo-$VERSION-Android-signed.apk"
-          [ -n "$SIGNED_AAB" ] && cp "$SIGNED_AAB" "out/MiniSumo-$VERSION-Android-signed.aab"
+          cp "$OUTPUTS/apk/debug/app-debug.apk" "out/MiniSumo-$VERSION-Android-debug.apk"
+          if [ "$HAS_KEYSTORE" = "true" ]; then
+            cp "$OUTPUTS/apk/release/app-release.apk" "out/MiniSumo-$VERSION-Android.apk"
+            cp "$OUTPUTS/bundle/release/app-release.aab" "out/MiniSumo-$VERSION-Android.aab"
+          fi
           ls -la out
       - uses: actions/upload-artifact@v4
         with:

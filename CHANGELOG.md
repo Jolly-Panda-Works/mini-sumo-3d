@@ -6,6 +6,10 @@ Builds from `main` are released automatically as `MAJOR.MINOR.<build number>`; t
 
 ## [Unreleased]
 
+### Fixed
+
+- Signed Android release: CI could ship Gradle's *unsigned* release APK under the "signed" name, which phones reject ("package appears to be invalid"). Release builds are now signed by Gradle's injected signing config, verified with `apksigner`/`jarsigner`, and the keystore secrets are checked first. Files: `…-Android.apk` (signed), `…-Android.aab` (Play), `…-Android-debug.apk`.
+
 ### Changed
 
 - Music now uses two loops (`apps/client/public/music/`): a bamboo-flute track for home, lobby and results, and a taiko track for bouts, with a 1.6–1.8 s crossfade between them. Music and effects pause while the app is in the background. The procedural music was removed.

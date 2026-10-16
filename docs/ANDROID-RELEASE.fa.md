@@ -49,13 +49,14 @@ keytool -genkeypair -v -keystore mini-sumo-upload.keystore -alias minisumo -keya
    git push origin v1.0.0
    ```
 ۳. در تب **Actions** صبر کنید تا Build سبز شود. در **Releases** این فایل‌ها ساخته می‌شوند:
-   - `MiniSumo-1.0.0-Android-signed.aab`: برای Google Play
-   - `MiniSumo-1.0.0-Android-signed.apk`: برای نصب مستقیم و تست
+   - `MiniSumo-1.0.0-Android.aab`: برای آپلود در Google Play (روی گوشی نصب نمی‌شود)
+   - `MiniSumo-1.0.0-Android.apk`: نسخه‌ی امضاشده برای نصب مستقیم و تست
+   - `MiniSumo-1.0.0-Android-debug.apk`: نسخه‌ی دیباگ، فقط برای عیب‌یابی
 ۴. `versionCode` خودکار شماره‌ی اجرای workflow است و همیشه بزرگ‌تر می‌شود (Google Play همین را می‌خواهد).
 
 ## ۵. تست روی گوشی
 
-APK امضاشده را روی گوشی نصب کنید و این‌ها را چک کنید: باز شدن، صفحه‌ی loading، حالت افقی، Training، wardrobe، صدا و لرزش.
+فایل `…-Android.apk` را روی گوشی نصب کنید (اگر قبلاً نسخه‌ی دیباگ یا نسخه‌ای با کلید دیگر نصب بوده، اول آن را حذف کنید) و این‌ها را چک کنید: باز شدن، صفحه‌ی loading، حالت افقی، Training، wardrobe، صدا و لرزش.
 
 ## ۶. Google Play Console
 
