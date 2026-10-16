@@ -8,6 +8,7 @@ import { setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWardro
 import { settingsStore } from "../settings";
 import { ArenaRow } from "./ArenaSelect";
 import { Coins } from "./Coins";
+import { Icon } from "./Icon";
 
 const inviteCode = new URLSearchParams(window.location.search).get("room") ?? "";
 
@@ -44,12 +45,10 @@ export function MainMenu() {
           </button>
           <button className="btn home__coins" onClick={() => setShopOpen(true)} aria-label={`Coin shop. Balance: ${balance ?? 0} Sumo Coins`}>
             <Coins amount={balance ?? 0} />
-            <span className="home__coins-plus" aria-hidden="true">
-              +
-            </span>
+            <Icon name="plus" size={22} className="home__coins-plus" />
           </button>
           <button className="icon-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
-            <HangerIcon />
+            <Icon name="customize" size={30} />
           </button>
           <button className="icon-btn" onClick={() => setSettingsOpen(true)} aria-label="Settings">
             <GearIcon />
@@ -92,28 +91,5 @@ export function MainMenu() {
 }
 
 export function GearIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.3 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1L11 21h4l.3-2.9a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"
-        transform="translate(-1 0)"
-      />
-    </svg>
-  );
-}
-
-function HangerIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M10 6.5a2 2 0 1 1 3 1.7c-.6.4-1 .9-1 1.6V11l8.5 5.2c.9.6.5 1.8-.6 1.8H4.1c-1.1 0-1.5-1.2-.6-1.8L12 11"
-      />
-    </svg>
-  );
+  return <Icon name="settings" size={30} />;
 }

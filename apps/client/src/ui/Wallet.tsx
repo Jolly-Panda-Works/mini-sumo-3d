@@ -13,6 +13,7 @@ const LABELS: Record<LedgerCategory, string> = {
   arena_prize: "Arena prize",
   match_reward: "Bout reward",
   daily_bonus: "Daily bonus",
+  daily_gift: "Daily coins",
   cosmetic_purchase: "Shop",
   adjustment: "Adjustment",
 };

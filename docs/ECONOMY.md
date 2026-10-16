@@ -56,9 +56,11 @@ Defined once in `ARENA_CONFIG` (`config.ts`) and served to clients by `GET /api/
 | Arena | Entry | Players | Unlock | Max prize (4 players) |
 | --- | ---: | :---: | --- | ---: |
 | Training | free | 2–4 | – | rewards only |
-| Rookie | 100 | 2–4 | level 1 | 360 |
+| Rookie | 50 | 2–4 | level 1 | 180 |
 | Pro | 500 | 2–4 | level 5 | 1,800 |
 | Champion | 2,000 | 2–4 | level 10 | 7,200 |
+
+**Daily coins:** the coin shop gives 100 free coins once a day.
 
 **Levels:** every finished bout (at least 20 s, not left early) gives XP: 20, +30 for a win, ×1 / ×1.5 / ×2 / ×3 for Training / Rookie / Pro / Champion. Total XP for a level is `50 × (level − 1) × level` (level 2 = 100, level 5 = 1,000, level 10 = 4,500). Arenas, rewards, prizes and levels are defined once in `packages/shared/src/economy.ts` and used by both the local economy and the server.
 

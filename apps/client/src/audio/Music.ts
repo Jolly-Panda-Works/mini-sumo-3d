@@ -37,6 +37,16 @@ class Music {
     return this.fetchFile(TRACKS[mode].file);
   }
 
+  private rate = 1;
+
+  /** Playback speed of the current track (the final stretch plays a little faster). */
+  setTempo(rate: number): void {
+    if (rate === this.rate) return;
+    this.rate = rate;
+    const ctx = audio.context;
+    if (ctx && this.current) this.current.source.playbackRate.linearRampToValueAtTime(rate, ctx.currentTime + 1.2);
+  }
+
   setMode(mode: MusicMode): void {
     if (mode === this.mode) return;
     this.mode = mode;
@@ -101,6 +111,7 @@ class Music {
     const source = ctx.createBufferSource();
     source.buffer = buffer;
     source.loop = true;
+    source.playbackRate.value = this.rate;
     const gain = ctx.createGain();
     const t = ctx.currentTime;
     gain.gain.setValueAtTime(0, t);

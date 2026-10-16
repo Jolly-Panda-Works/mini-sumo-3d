@@ -53,7 +53,7 @@ describe("match state machine", () => {
     s.addPlayer("a", "A");
     s.addPlayer("b", "B");
     s.requestStart("a");
-    advance(s, cfg.countdownMs - 100);
+    advance(s, (cfg.entranceMs + cfg.countdownMs) - 100);
     expect(s.phase).toBe(Phase.Countdown);
     advance(s, 200);
     expect(s.phase).toBe(Phase.Playing);
@@ -66,6 +66,7 @@ describe("match state machine", () => {
     s.addPlayer("b", "B");
     s.requestStart("a");
     const a = s.players.get("a")!;
+    advance(s, cfg.entranceMs + 100); // walked in from the ring side
     const x = a.x;
     s.handleInput("a", { x: 1, y: 0 });
     advance(s, 1000);
@@ -186,5 +187,47 @@ describe("match state machine", () => {
       { id: "e2", placement: 2 },
       { id: "e3", placement: 4 },
     ]);
+  });
+});
+
+describe("entrance and ring-out credit", () => {
+  it("walks everyone from the ring side to the start marks before the 3-2-1", () => {
+    const s = new GameSession(cfg, 4);
+    s.addPlayer("a", "A");
+    s.addPlayer("b", "B");
+    const a = s.players.get("a")!;
+    const lobbyDist = Math.hypot(a.x, a.y);
+    expect(lobbyDist).toBeCloseTo(cfg.arenaRadius * cfg.lobbyRadiusFactor, 3);
+    s.requestStart("a");
+    advance(s, cfg.entranceMs / 2);
+    const mid = Math.hypot(a.x, a.y);
+    expect(mid).toBeLessThan(lobbyDist);
+    expect(mid).toBeGreaterThan(cfg.arenaRadius * cfg.spawnRadiusFactor);
+    advance(s, cfg.entranceMs / 2 + 100);
+    expect(Math.hypot(a.x, a.y)).toBeCloseTo(cfg.arenaRadius * cfg.spawnRadiusFactor, 3);
+    expect(s.phase).toBe(Phase.Countdown);
+    expect(s.phaseRemainingMs).toBeLessThanOrEqual(cfg.countdownMs);
+  });
+
+  it("credits a ring-out to the last wrestler in contact", () => {
+    const s = playingSession(["a", "b", "c"]);
+    const a = s.players.get("a")!;
+    const b = s.players.get("b")!;
+    const c = s.players.get("c")!;
+    c.x = -5;
+    c.y = 0;
+    a.x = 5.4;
+    a.y = 0;
+    b.x = 6.6;
+    b.y = 0;
+    s.handleInput("a", { x: 1, y: 0 });
+    s.handleDash("a");
+    let credit: string | null | undefined;
+    for (let i = 0; i < 90 && b.alive; i++) {
+      s.update(s.stepMs);
+      for (const e of s.drainEvents()) if (e.type === "eliminated" && e.id === "b") credit = e.by;
+    }
+    expect(b.alive).toBe(false);
+    expect(credit).toBe("a");
   });
 });

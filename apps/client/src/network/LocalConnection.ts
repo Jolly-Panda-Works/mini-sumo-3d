@@ -58,6 +58,8 @@ export class LocalConnection implements GameConnection {
   private readonly arenaId: string;
   private readonly entry: LocalEntry | null;
   private lastPhase: string = "waiting";
+  /** Opponents you pushed out this round. */
+  private ringOuts = 0;
   private closed = false;
   private messageListeners = new Map<string, Set<(message: any) => void>>();
 
@@ -204,13 +206,15 @@ export class LocalConnection implements GameConnection {
           });
           break;
         case "eliminated":
-          this.emit(ServerMessage.Eliminated, { sessionId: event.id, name: event.name, reason: event.reason });
+          if (event.by === this.sessionId) this.ringOuts++;
+          this.emit(ServerMessage.Eliminated, { sessionId: event.id, name: event.name, reason: event.reason, by: event.by });
           break;
         case "dash":
           this.emit(ServerMessage.Dash, { sessionId: event.id });
           break;
         case "phase":
           if (event.to === "playing" && this.entry) localEconomy.lock(this.entry);
+          if (event.to === "countdown") this.ringOuts = 0;
           break;
         case "roundOver":
           this.settle(event.winnerId, event.draw, event.durationMs);
@@ -240,6 +244,7 @@ export class LocalConnection implements GameConnection {
       completed: true,
       durationMs,
       players: this.session.players.size,
+      ringOuts: this.ringOuts,
     });
     this.emit(ServerMessage.Economy, result);
     // Training rematches: each round is a fresh (free) entry.

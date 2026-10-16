@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Phase } from "@mini-sumo/shared";
+import { COUNTDOWN_MS, Phase } from "@mini-sumo/shared";
 import { gameStore } from "../network/RoomManager";
 import { useStore } from "../store";
 
-/** Big 3, 2, 1, GO driven by the server's remaining countdown time. */
+/** Walk-in, then a big 3, 2, 1 and GO (with the referee's whistle), driven by the server's clock. */
 export function Countdown() {
   const game = useStore(gameStore);
   const [showGo, setShowGo] = useState(false);
@@ -21,6 +21,8 @@ export function Countdown() {
   }, [game.phase]);
 
   if (game.phase === Phase.Countdown) {
+    // First the wrestlers walk in from the ring side; the numbers come after.
+    if (game.remainingMs > COUNTDOWN_MS) return null;
     const n = Math.max(1, Math.ceil(game.remainingMs / 1000));
     return (
       <div className="countdown" aria-live="assertive">

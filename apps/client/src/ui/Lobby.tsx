@@ -4,10 +4,9 @@ import { networkStore } from "../network/networkMode";
 import { gameStore, roomManager, sessionStore } from "../network/RoomManager";
 import { economyStore } from "../network/economyClient";
 import { Coins } from "./Coins";
+import { Icon } from "./Icon";
 import { themeFor } from "../game/arenaThemes";
 import { useStore } from "../store";
-import { setSettingsOpen } from "../uiStore";
-import { GearIcon } from "./MainMenu";
 import { PlayerBadge } from "./PlayerBadge";
 
 export function Lobby() {
@@ -76,9 +75,6 @@ export function Lobby() {
               </p>
             )}
           </div>
-          <button className="icon-btn" onClick={() => setSettingsOpen(true)} aria-label="Settings">
-            <GearIcon />
-          </button>
         </div>
 
         {!offline && (
@@ -114,7 +110,11 @@ export function Lobby() {
                 <span className="roster__name">{p.name}</span>
                 {p.isYou && <span className="tag">You</span>}
                 {p.isHost && <span className="tag tag--host">Host</span>}
-                {p.isBot && <span className="tag tag--bot">Bot</span>}
+                {p.isBot && (
+                  <span className="tag tag--bot">
+                    <Icon name="bot" size={16} /> Bot
+                  </span>
+                )}
                 {p.isBot && isHost && (
                   <button className="roster__remove" onClick={() => roomManager.removeBot(p.id)} aria-label={`Remove bot ${p.name}`}>
                     Remove
@@ -147,6 +147,7 @@ export function Lobby() {
 
         {isHost && game.isPrivate && (
           <button className="btn" disabled={full} onClick={() => roomManager.addBot()}>
+            {!full && <Icon name="bot" size={22} />}
             {full ? "Room is full" : "Add bot"}
           </button>
         )}

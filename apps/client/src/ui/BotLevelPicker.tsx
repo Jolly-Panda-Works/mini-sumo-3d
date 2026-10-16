@@ -1,6 +1,7 @@
 import { BOT_LEVELS, type BotLevel } from "@mini-sumo/shared";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
+import { Icon } from "./Icon";
 
 const LABELS: Record<BotLevel, string> = { easy: "Easy", normal: "Normal", hard: "Hard" };
 
@@ -19,6 +20,7 @@ export function BotLevelPicker({ label = "Bots" }: { label?: string }) {
           className={`level-picker__opt${botLevel === level ? " level-picker__opt--on" : ""}`}
           onClick={() => settingsStore.update({ botLevel: level })}
         >
+          <Icon name={level} size={18} />
           {LABELS[level]}
         </button>
       ))}

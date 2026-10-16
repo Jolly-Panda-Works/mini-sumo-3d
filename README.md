@@ -130,7 +130,7 @@ The home screen has its own night-stage backdrop with the title in the middle an
 | Arena | Entry | Winner gets (4 players) | Opponents |
 | --- | ---: | ---: | --- |
 | Training | free | small free rewards | players, bots fill in |
-| Rookie | 100 coins | up to 360 | players only |
+| Rookie | 50 coins | up to 180 | players only |
 | Pro | 500 coins | up to 1,800 | unlocks at level 5 |
 | Champion | 2,000 coins | up to 7,200 | unlocks at level 10 |
 

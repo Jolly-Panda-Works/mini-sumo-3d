@@ -8,6 +8,7 @@ import { computePrize } from "../src/economy/prize.js";
 
 const FLAGS = { economy: true, shop: true, premiumCurrency: false, realMoneyPurchases: false };
 const ROOKIE = getArena("rookie")!;
+const F = ROOKIE.entryFee;
 
 function setup(flags = FLAGS) {
   let clock = new Date("2026-10-15T10:00:00Z");
@@ -122,19 +123,19 @@ describe("arena entry", () => {
     const { economy } = setup();
     const a = player(economy, 300);
     economy.reserveEntry(a.accountId, "rookie", "room1");
-    expect(economy.balance(a.accountId)).toBe(200);
+    expect(economy.balance(a.accountId)).toBe(300 - F);
     expectCode(() => economy.reserveEntry(a.accountId, "rookie", "room1"), "already_entered");
-    expect(economy.balance(a.accountId)).toBe(200);
+    expect(economy.balance(a.accountId)).toBe(300 - F);
   });
 
   it("rejects unaffordable, unknown, disabled and locked arenas without charging", () => {
     const { economy } = setup();
-    const poor = player(economy, 50);
+    const poor = player(economy, F - 10);
     expectCode(() => economy.reserveEntry(poor.accountId, "rookie", "r"), "insufficient_funds");
     expectCode(() => economy.reserveEntry(poor.accountId, "nope", "r"), "unknown_arena");
     const rich = player(economy, 5000);
     expectCode(() => economy.reserveEntry(rich.accountId, "champion", "r"), "arena_locked");
-    expect(economy.balance(poor.accountId)).toBe(50);
+    expect(economy.balance(poor.accountId)).toBe(F - 10);
     expect(economy.balance(rich.accountId)).toBe(5000);
     const off = setup({ ...FLAGS, economy: false }).economy;
     const p = player(off, 500);
@@ -143,27 +144,27 @@ describe("arena entry", () => {
 
   it("two simultaneous entries can't spend the same balance twice", async () => {
     const { economy } = setup();
-    const a = player(economy, 150);
+    const a = player(economy, F + F / 2);
     const attempts = await Promise.allSettled(
       ["roomA", "roomB", "roomC"].map(async (room) => economy.reserveEntry(a.accountId, "rookie", room)),
     );
     expect(attempts.filter((r) => r.status === "fulfilled")).toHaveLength(1);
-    expect(economy.balance(a.accountId)).toBe(50);
-    expect(economy.ledgerSum(a.accountId)).toBe(50);
+    expect(economy.balance(a.accountId)).toBe(F / 2);
+    expect(economy.ledgerSum(a.accountId)).toBe(F / 2);
   });
 
   it("leaving before the bout refunds once; after the bout starts it doesn't", () => {
     const { economy } = setup();
     const a = player(economy, 300);
     economy.reserveEntry(a.accountId, "rookie", "room1");
-    expect(economy.refundReserved("room1", a.accountId)).toBe(100);
+    expect(economy.refundReserved("room1", a.accountId)).toBe(F);
     expect(economy.refundReserved("room1", a.accountId)).toBe(0);
     expect(economy.balance(a.accountId)).toBe(300);
 
     economy.reserveEntry(a.accountId, "rookie", "room2");
     economy.lockEntries("room2", "room2:1", [a.accountId]);
     expect(economy.refundReserved("room2", a.accountId)).toBe(0);
-    expect(economy.balance(a.accountId)).toBe(200);
+    expect(economy.balance(a.accountId)).toBe(300 - F);
   });
 
   it("a cancelled room refunds everyone exactly once", () => {
@@ -172,7 +173,7 @@ describe("arena entry", () => {
     const b = player(economy, 300);
     economy.reserveEntry(a.accountId, "rookie", "room");
     economy.reserveEntry(b.accountId, "rookie", "room");
-    expect(economy.refundRoom("room", "cancelled")).toBe(200);
+    expect(economy.refundRoom("room", "cancelled")).toBe(2 * F);
     expect(economy.refundRoom("room", "cancelled")).toBe(0);
     expect(economy.balance(a.accountId)).toBe(300);
     expect(economy.balance(b.accountId)).toBe(300);
@@ -205,9 +206,9 @@ describe("settlement", () => {
     const { economy } = setup();
     const [w, l1, l2, l3] = match(economy, 4);
     const s = economy.settleMatch({ matchId: "room:1", roomId: "room", arenaId: "rookie", winnerAccountId: w!.accountId });
-    expect(s).toMatchObject({ outcome: "won", players: 4, pool: 400, prize: 360, sink: 40, created: true });
-    expect(economy.balance(w!.accountId)).toBe(1000 - 100 + 360);
-    for (const l of [l1, l2, l3]) expect(economy.balance(l!.accountId)).toBe(900);
+    expect(s).toMatchObject({ outcome: "won", players: 4, pool: 4 * F, prize: Math.floor(4 * F * 0.9), sink: 4 * F - Math.floor(4 * F * 0.9), created: true });
+    expect(economy.balance(w!.accountId)).toBe(1000 - F + Math.floor(4 * F * 0.9));
+    for (const l of [l1, l2, l3]) expect(economy.balance(l!.accountId)).toBe(1000 - F);
     expect(economy.ledgerSum(w!.accountId)).toBe(economy.balance(w!.accountId));
   });
 
@@ -218,8 +219,8 @@ describe("settlement", () => {
     const again = economy.settleMatch({ matchId: "room:1", roomId: "room", arenaId: "rookie", winnerAccountId: b!.accountId });
     expect(again.created).toBe(false);
     expect(again.winnerAccountId).toBe(a!.accountId);
-    expect(economy.balance(a!.accountId)).toBe(1080);
-    expect(economy.balance(b!.accountId)).toBe(900);
+    expect(economy.balance(a!.accountId)).toBe(1000 - F + Math.floor(2 * F * 0.9));
+    expect(economy.balance(b!.accountId)).toBe(1000 - F);
   });
 
   it("refunds everyone on a draw", () => {
@@ -245,8 +246,8 @@ describe("settlement", () => {
     const [a, b] = match(economy, 2);
     economy.settleMatch({ matchId: "room:1", roomId: "room", arenaId: "rookie", winnerAccountId: a!.accountId });
     expect(economy.refundRoom("room", "late refund")).toBe(0);
-    expect(economy.balance(a!.accountId)).toBe(1080);
-    expect(economy.balance(b!.accountId)).toBe(900);
+    expect(economy.balance(a!.accountId)).toBe(1000 - F + Math.floor(2 * F * 0.9));
+    expect(economy.balance(b!.accountId)).toBe(1000 - F);
   });
 });
 

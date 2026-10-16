@@ -6,6 +6,27 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Game icons (medals, settings, customise, coin, plus, music, sound, difficulty, bot, close, Google Play, arrows) and new coin-pack art.
+- Walk-in before every bout: wrestlers wait at the ring side in the lobby, bots join one by one (with a pop and a puff of dust), then everyone walks to the start marks, the 3-2-1 runs and the referee's whistle starts the bout.
+- Ring-outs are credited to the last wrestler in contact: the crowd cheers when you push someone out and groans when you're pushed out. Profile counts *Wrestlers pushed out*.
+- Final 30 seconds: the music speeds up a little and a glow around the screen turns from yellow to red.
+- Daily coins in the shop (100, once a day).
+- Arena row arrows for mouse users.
+
+### Changed
+
+- Rookie Arena entry is 50 coins (prize up to 180).
+- Arena entry popup: artwork and name, entry fee on the left, prize on the right, and one *Enter* button.
+- Profile: name with a pencil button (opens an edit popup), stats for bouts, wins, wrestlers pushed out, best win streak and items bought; coin history, customise and the arena list removed.
+- Settings footer: version in the middle, *About* on the right. Settings aren't available in the waiting lobby.
+- The wardrobe's try-on popup closes with *Not now* (no ×).
+
+### Fixed
+
+- Bots appeared in the middle of the ring and jumped outwards when the match started.
+
 ### Changed
 
 - When you're pushed out, a *Return home* button replaces the joystick and dash button.

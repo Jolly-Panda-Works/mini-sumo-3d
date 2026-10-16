@@ -138,9 +138,123 @@ class AudioManager {
     this.tone(660, 0.12, "square", 0.14);
   }
 
+  /** Referee's whistle: the bout starts. */
   go(): void {
-    this.tone(990, 0.3, "square", 0.16);
-    this.tone(1320, 0.3, "triangle", 0.1, undefined, 0.05);
+    this.whistle();
+  }
+
+  whistle(): void {
+    const ctx = this.ready;
+    if (!ctx || !this.sfxBus) return;
+    const t = ctx.currentTime;
+    const dur = 0.62;
+    // Pea whistle: a bright tone warbled fast by the rolling pea, plus a little breath.
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(2850, t);
+    osc.frequency.linearRampToValueAtTime(3050, t + 0.08);
+    const trill = ctx.createOscillator();
+    trill.frequency.value = 34;
+    const trillDepth = ctx.createGain();
+    trillDepth.gain.value = 140;
+    trill.connect(trillDepth).connect(osc.frequency);
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(0.32, t + 0.03);
+    env.gain.setValueAtTime(0.32, t + dur - 0.12);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(env).connect(this.sfxBus);
+    osc.start(t);
+    trill.start(t);
+    osc.stop(t + dur + 0.05);
+    trill.stop(t + dur + 0.05);
+    this.noiseBurst(t, dur, 3200, 0.08, "bandpass");
+  }
+
+  /** Crowd cheering (you pushed someone out). */
+  crowdCheer(): void {
+    const ctx = this.ready;
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    this.crowd(t, 1.8, 900, 1500, 0.32);
+    // A few voices whooping on top.
+    for (let i = 0; i < 6; i++) {
+      const start = t + 0.1 + Math.random() * 0.6;
+      const f = 420 + Math.random() * 380;
+      this.voice(start, 0.35 + Math.random() * 0.3, f, f * (1.25 + Math.random() * 0.3), 0.05);
+    }
+  }
+
+  /** Crowd groaning "aww" (you were pushed out). */
+  crowdAww(): void {
+    const ctx = this.ready;
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    this.crowd(t, 1.5, 700, 380, 0.24);
+    for (let i = 0; i < 7; i++) {
+      const start = t + Math.random() * 0.15;
+      const f = 230 + Math.random() * 180;
+      this.voice(start, 0.9 + Math.random() * 0.3, f, f * 0.7, 0.05);
+    }
+  }
+
+  /** Many voices: band-passed noise with a swell, sweeping the band from one pitch to another. */
+  private crowd(t: number, dur: number, fromHz: number, toHz: number, gain: number): void {
+    const ctx = this.ctx;
+    if (!ctx || !this.sfxBus || !this.noise) return;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noise;
+    src.loop = true;
+    const band = ctx.createBiquadFilter();
+    band.type = "bandpass";
+    band.Q.value = 0.9;
+    band.frequency.setValueAtTime(fromHz, t);
+    band.frequency.exponentialRampToValueAtTime(toHz, t + dur);
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(gain, t + dur * 0.25);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(band).connect(env).connect(this.sfxBus);
+    src.start(t);
+    src.stop(t + dur + 0.05);
+  }
+
+  /** One voice: a vowel-ish tone (saw through a formant filter) gliding between pitches. */
+  private voice(t: number, dur: number, fromHz: number, toHz: number, gain: number): void {
+    const ctx = this.ctx;
+    if (!ctx || !this.sfxBus) return;
+    const osc = ctx.createOscillator();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(fromHz, t);
+    osc.frequency.exponentialRampToValueAtTime(toHz, t + dur);
+    const formant = ctx.createBiquadFilter();
+    formant.type = "bandpass";
+    formant.frequency.value = 800;
+    formant.Q.value = 3;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(gain, t + 0.06);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(formant).connect(env).connect(this.sfxBus);
+    osc.start(t);
+    osc.stop(t + dur + 0.05);
+  }
+
+  private noiseBurst(t: number, dur: number, hz: number, gain: number, type: BiquadFilterType): void {
+    const ctx = this.ctx;
+    if (!ctx || !this.sfxBus || !this.noise) return;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noise;
+    src.loop = true;
+    const filter = ctx.createBiquadFilter();
+    filter.type = type;
+    filter.frequency.value = hz;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(gain, t);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(filter).connect(env).connect(this.sfxBus);
+    src.start(t);
+    src.stop(t + dur + 0.05);
   }
 
   victory(): void {

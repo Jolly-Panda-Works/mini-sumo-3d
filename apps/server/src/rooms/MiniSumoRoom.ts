@@ -195,7 +195,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
           });
           break;
         case "eliminated":
-          this.broadcast(ServerMessage.Eliminated, { sessionId: event.id, name: event.name, reason: event.reason });
+          this.broadcast(ServerMessage.Eliminated, { sessionId: event.id, name: event.name, reason: event.reason, by: event.by });
           break;
         case "dash":
           this.broadcast(ServerMessage.Dash, { sessionId: event.id });

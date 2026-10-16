@@ -38,6 +38,11 @@ export interface SessionPlayer extends SimBody {
   appearance: Appearance;
   /** Length of the cooldown started by the last dash (ms). */
   dashCooldownTotal: number;
+  /** Last wrestler in contact and when (for ring-out credit). */
+  lastTouchBy: string;
+  lastTouchAt: number;
+  /** Countdown entrance: from the ring side to the start mark. */
+  entrance: { fromX: number; fromY: number; toX: number; toY: number; angle: number } | null;
 }
 
 export interface SessionOptions {
@@ -61,7 +66,7 @@ export interface SessionOptions {
 export type SessionEvent =
   | { type: "phase"; from: Phase; to: Phase }
   | { type: "impact"; a: string; b: string; x: number; y: number; strength: number }
-  | { type: "eliminated"; id: string; name: string; reason: EliminationReason }
+  | { type: "eliminated"; id: string; name: string; reason: EliminationReason; by: string | null }
   | { type: "dash"; id: string }
   | { type: "roundOver"; winnerId: string | null; draw: boolean; durationMs: number }
   /** Paid arena: nobody else joined in time; the room should refund and close. */
@@ -114,6 +119,8 @@ export class GameSession {
   private playStartedAt = 0;
   /** Simulation time when the quick-match wait started, -1 when not searching. */
   private searchStartedAt = -1;
+  private nextBotAt = 0;
+  private countdownStartedAt = 0;
   private readonly rng: () => number;
   private accumulator = 0;
   private joinCounter = 0;
@@ -144,13 +151,19 @@ export class GameSession {
   }
 
   /** Quick match: ms left before bots fill the room (0 when not searching). */
+  /** True while bots are joining one by one at the end of the wait. */
+  get filling(): boolean {
+    return this.searchStartedAt >= 0 && this.time - this.searchStartedAt >= this.cfg.quickMatchWaitMs;
+  }
+
   get searchRemainingMs(): number {
     if (this.paidArena) {
       const at = this.autoStartAt >= 0 ? this.autoStartAt : this.cancelAt;
       return at >= 0 ? Math.max(0, at - this.time) : 0;
     }
     if (this.searchStartedAt < 0) return 0;
-    return Math.max(0, this.searchStartedAt + this.cfg.quickMatchWaitMs - this.time);
+    // While bots are still joining, keep reporting a moment left so the Start button waits.
+    return Math.max(this.filling ? 1 : 0, this.searchStartedAt + this.cfg.quickMatchWaitMs - this.time);
   }
 
   get alivePlayers(): SessionPlayer[] {
@@ -244,6 +257,9 @@ export class GameSession {
       nextThinkAt: 0,
       appearance,
       dashCooldownTotal: this.cfg.dashCooldownMs,
+      lastTouchBy: "",
+      lastTouchAt: -1e9,
+      entrance: null,
     };
     this.players.set(id, player);
     return player;
@@ -364,6 +380,7 @@ export class GameSession {
     this.time += this.stepMs;
     switch (this.phase) {
       case Phase.Countdown:
+        this.walkIn();
         if (this.time >= this.phaseEndsAt) this.beginPlaying();
         break;
       case Phase.Playing:
@@ -400,10 +417,12 @@ export class GameSession {
       this.events.push({ type: "impact", ...impact });
     }
 
+    this.recordContacts(bodies);
     for (const id of applyArenaEliminations(bodies, this.cfg, this.time)) {
       const player = this.players.get(id)!;
       player.elimReason = "ringOut";
-      this.events.push({ type: "eliminated", id, name: player.name, reason: "ringOut" });
+      const credited = player.lastTouchBy && this.time - player.lastTouchAt <= this.cfg.ringOutCreditMs ? player.lastTouchBy : null;
+      this.events.push({ type: "eliminated", id, name: player.name, reason: "ringOut", by: credited });
     }
 
     if (this.checkLastStanding()) return;
@@ -428,7 +447,37 @@ export class GameSession {
     player.inputX = 0;
     player.inputY = 0;
     player.elimReason = reason;
-    this.events.push({ type: "eliminated", id: player.id, name: player.name, reason });
+    this.events.push({ type: "eliminated", id: player.id, name: player.name, reason, by: null });
+  }
+
+  /** Remembers who touched whom, so a ring-out can be credited to the pusher. */
+  private recordContacts(bodies: readonly SessionPlayer[]): void {
+    const reach = (this.cfg.playerRadius * 2 + 0.08) ** 2;
+    for (let i = 0; i < bodies.length; i++) {
+      for (let j = i + 1; j < bodies.length; j++) {
+        const a = bodies[i]!;
+        const b = bodies[j]!;
+        if ((a.x - b.x) ** 2 + (a.y - b.y) ** 2 > reach) continue;
+        a.lastTouchBy = b.id;
+        a.lastTouchAt = this.time;
+        b.lastTouchBy = a.id;
+        b.lastTouchAt = this.time;
+      }
+    }
+  }
+
+  /** Countdown, first part: everyone walks from the ring side to their start mark. */
+  private walkIn(): void {
+    const t = this.cfg.entranceMs > 0 ? Math.min(1, (this.time - this.countdownStartedAt) / this.cfg.entranceMs) : 1;
+    const eased = t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+    for (const p of this.connectedPlayers) {
+      const e = p.entrance;
+      if (!e) continue;
+      p.x = e.fromX + (e.toX - e.fromX) * eased;
+      p.y = e.fromY + (e.toY - e.fromY) * eased;
+      p.angle = t < 1 ? Math.atan2(e.toY - e.fromY, e.toX - e.fromX) : e.angle;
+      if (t >= 1) p.entrance = null;
+    }
   }
 
   // ---------------------------------------------------------------- phase transitions
@@ -448,18 +497,31 @@ export class GameSession {
     this.isDraw = false;
     this.standings = [];
 
+    // Walk in from the ring-side slots, then the 3-2-1.
     const players = this.connectedPlayers;
+    const ring = ringPositions(this.maxPlayers, this.cfg.arenaRadius * this.cfg.lobbyRadiusFactor);
     const spots = ringPositions(players.length, this.cfg.arenaRadius * this.cfg.spawnRadiusFactor);
     players.forEach((player, i) => {
+      const from = ring[player.colorIndex % ring.length]!;
       const spot = spots[i]!;
-      this.resetBody(player, spot.x, spot.y, spot.angle);
+      this.resetBody(player, from.x, from.y, from.angle);
+      player.entrance = { fromX: from.x, fromY: from.y, toX: spot.x, toY: spot.y, angle: spot.angle };
     });
-    this.phaseEndsAt = this.time + this.cfg.countdownMs;
+    this.countdownStartedAt = this.time;
+    this.phaseEndsAt = this.time + this.cfg.entranceMs + this.cfg.countdownMs;
     return true;
   }
 
   private beginPlaying(): void {
     if (!this.transition(Phase.Playing)) return;
+    for (const p of this.connectedPlayers) {
+      if (p.entrance) {
+        p.x = p.entrance.toX;
+        p.y = p.entrance.toY;
+        p.angle = p.entrance.angle;
+        p.entrance = null;
+      }
+    }
     this.playStartedAt = this.time;
     this.phaseEndsAt = this.time + this.cfg.matchDurationMs;
   }
@@ -512,14 +574,14 @@ export class GameSession {
   }
 
   /** Lobby players stand in a loose circle so the 3D view has something to show. */
+  /** Lobby: everyone waits at the ring side, in a fixed slot per colour (nobody shuffles). */
   private layoutLobby(): void {
     if (this.phase !== Phase.Waiting && this.phase !== Phase.Lobby) return;
-    const players = this.connectedPlayers;
-    const spots = ringPositions(Math.max(players.length, 2), this.cfg.arenaRadius * this.cfg.lobbyRadiusFactor);
-    players.forEach((player, i) => {
-      const spot = spots[i]!;
+    const spots = ringPositions(this.maxPlayers, this.cfg.arenaRadius * this.cfg.lobbyRadiusFactor);
+    for (const player of this.connectedPlayers) {
+      const spot = spots[player.colorIndex % spots.length]!;
       this.resetBody(player, spot.x, spot.y, spot.angle);
-    });
+    }
   }
 
   private resetBody(player: SessionPlayer, x: number, y: number, angle: number): void {
@@ -536,6 +598,9 @@ export class GameSession {
     player.dashReadyAt = 0;
     player.placement = 0;
     player.elimReason = "";
+    player.lastTouchBy = "";
+    player.lastTouchAt = -1e9;
+    player.entrance = null;
   }
 
   private firstHumanId(): string {
@@ -583,7 +648,7 @@ export class GameSession {
       return;
     }
     const lobby = this.phase === Phase.Waiting || this.phase === Phase.Lobby;
-    const lonely = this.humans.length === 1 && this.bots.length === 0;
+    const lonely = this.humans.length === 1 && (this.bots.length === 0 || this.filling);
     if (!this.quickMatch || !lobby || !lonely) {
       this.searchStartedAt = -1;
     } else if (this.searchStartedAt < 0) {
@@ -591,12 +656,20 @@ export class GameSession {
     }
   }
 
-  /** Nobody joined in time: fill the room with bots. The host then starts the match. */
+  /**
+   * Nobody joined in time: bots join one by one (each appears at its ring-side slot).
+   * The search ends when the room is full; then the host starts the match.
+   */
   private tickSearch(): void {
     if (this.searchStartedAt < 0 || this.time - this.searchStartedAt < this.cfg.quickMatchWaitMs) return;
-    this.searchStartedAt = -1;
-    while (this.connectedPlayers.length < this.maxPlayers) this.createBot();
-    this.refreshLobbyPhase();
+    if (this.time < this.nextBotAt) return;
+    if (this.connectedPlayers.length < this.maxPlayers) {
+      this.createBot();
+      this.nextBotAt = this.time + this.cfg.botJoinIntervalMs;
+      this.refreshLobbyPhase();
+      this.layoutLobby();
+    }
+    if (this.connectedPlayers.length >= this.maxPlayers) this.searchStartedAt = -1;
   }
 
   /**

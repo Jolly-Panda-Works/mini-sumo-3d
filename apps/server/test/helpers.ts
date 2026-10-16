@@ -21,7 +21,7 @@ export function playingSession(ids: string[] = ["a", "b"], overrides: Partial<Si
   for (const id of ids) session.addPlayer(id, id.toUpperCase());
   const start = session.requestStart(ids[0]!);
   if (!start.ok) throw new Error(start.error);
-  advance(session, session.cfg.countdownMs + session.stepMs);
+  advance(session, session.cfg.entranceMs + session.cfg.countdownMs + session.stepMs);
   if (session.phase !== Phase.Playing) throw new Error(`expected playing, got ${session.phase}`);
   session.drainEvents();
   return session;

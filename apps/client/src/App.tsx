@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from "react";
-import { Phase } from "@mini-sumo/shared";
+import { LATE_GAME_MS, Phase } from "@mini-sumo/shared";
 import { GameCanvas } from "./game/GameCanvas";
 import { HomeBackground } from "./ui/HomeBackground";
 import { inputController } from "./input/InputController";
@@ -33,6 +33,7 @@ export function App() {
   const inRoom = session.status === "connected" && session.roomId !== "";
   const touch = touchControlsEnabled(settings.touchControls);
   const inBout = game.phase === Phase.Countdown || game.phase === Phase.Playing;
+  const inLobby = inRoom && (game.phase === Phase.Waiting || game.phase === Phase.Lobby);
   const youOut = game.phase === Phase.Playing && game.players.some((p) => p.isYou && !p.alive);
 
   useEffect(() => {
@@ -41,10 +42,15 @@ export function App() {
     return () => inputController.stop();
   }, [inRoom]);
 
-  // Background music: calm on menus and in the lobby, driving during a bout.
+  // Background music: calm on menus and in the lobby, driving during a bout,
+  // and a little faster in the final 30 seconds.
   useEffect(() => {
     music.setMode(inRoom && inBout ? "bout" : "menu");
   }, [inRoom, inBout]);
+  const finalStretch = inRoom && game.phase === Phase.Playing && game.remainingMs > 0 && game.remainingMs <= LATE_GAME_MS;
+  useEffect(() => {
+    music.setTempo(finalStretch ? 1.1 : 1);
+  }, [finalStretch]);
 
   // The wardrobe is a lobby-only screen: close it when a bout starts.
   useEffect(() => {
@@ -61,8 +67,13 @@ export function App() {
       else if (uiStore.get().shopOpen) setShopOpen(false);
       else if (uiStore.get().aboutOpen) setAboutOpen(false);
       else if (uiStore.get().friendsOpen) setFriendsOpen(false);
-      else if (uiStore.get().walletOpen) setWalletOpen(false);
-      else setSettingsOpen(!uiStore.get().settingsOpen);
+      else if (uiStore.get().settingsOpen) setSettingsOpen(false);
+      else {
+        // No settings while waiting for a match to start.
+        const phase = gameStore.get().phase;
+        const waiting = sessionStore.get().roomId !== "" && (phase === Phase.Waiting || phase === Phase.Lobby);
+        if (!waiting) setSettingsOpen(true);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -101,7 +112,7 @@ export function App() {
         {ui.profileOpen && !needsName && <ProfilePanel />}
         {ui.shopOpen && !needsName && <CoinShop />}
         {ui.walletOpen && !needsName && <Wallet />}
-        {ui.settingsOpen && !needsName && <SettingsPanel />}
+        {ui.settingsOpen && !needsName && !inLobby && <SettingsPanel />}
         {ui.aboutOpen && <AboutPanel />}
       </div>
     </div>

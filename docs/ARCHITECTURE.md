@@ -82,7 +82,7 @@ Design decisions:
 | Leave during results | Marked disconnected, removed on return to lobby or rematch. |
 | Host leaves | Host moves to the earliest-joined connected player. |
 | Everyone leaves | Colyseus auto-disposes the room. |
-| Quick match (public room) | A lone player waits up to 30 s (`quickMatchWaitMs`). If no other human joins, bots fill the room to its limit and the host starts the bout (the client unlocks the Start button one second later). A second human joining cancels the wait. On *Rematch* the bots stay; on returning to the lobby they are removed and the wait starts again. |
+| Quick match (public room) | A lone player waits up to 30 s (`quickMatchWaitMs`). If no other human joins, bots join one by one (`botJoinIntervalMs`) at their ring-side slots, and the host starts the bout (the client unlocks the Start button one second later). The countdown begins with a walk-in (`entranceMs`, 1.6 s) from the ring-side slots to the start marks, then the 3-2-1. A ring-out is credited to the last wrestler in contact within `ringOutCreditMs` (2.5 s); the `eliminated` event carries `by`. A second human joining cancels the wait. On *Rematch* the bots stay; on returning to the lobby they are removed and the wait starts again. |
 | Bots in private rooms | The host adds or removes bots in the lobby (`addBot`, `removeBot { id }`). Bots count toward the player limit and can never be host. |
 | Reconnection | **Not supported.** Any disconnect is final; rejoin with the invite link while the room is in its lobby. |
 

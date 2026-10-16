@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import type { CanvasTexture, Sprite } from "three";
 import { PLAYER_COLORS, Phase, lerpAngle, type Appearance } from "@mini-sumo/shared";
 import { roomManager } from "../network/RoomManager";
-import { lastHitAt } from "./effectsBus";
+import { dustBus, lastHitAt } from "./effectsBus";
 import { createNameTagTexture } from "./nameTag";
 import { SumoModel, useSumoParts } from "./SumoModel";
 
@@ -61,6 +61,8 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
     fvz: 0,
     tumble: 0,
     wasAlive: true,
+    /** When this wrestler first appeared (for the pop-in). */
+    bornAt: -1,
   });
 
   useFrame((frame, delta) => {
@@ -76,6 +78,11 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
     root.rotation.order = "YXZ";
 
     const jumpDistance = Math.hypot(p.x - s.x, p.y - s.z);
+    if (!s.ready) {
+      // Joined the room: pop in at the ring side with a puff of dust.
+      s.bornAt = t;
+      dustBus.emit({ x: p.x, y: p.y, count: 10, speed: 1.4 });
+    }
     if (!s.ready || (p.alive && (!s.wasAlive || jumpDistance > 4))) {
       // New player, new round or teleport (spawn): snap instead of sliding across the ring.
       s.ready = true;
@@ -108,6 +115,9 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
       const lean = p.dashing ? 0.38 : moving * 0.12;
       root.position.set(s.x, s.y, s.z);
       root.rotation.set(lean, s.yaw, 0);
+      const pop = Math.min(1, (t - s.bornAt) / 0.45);
+      const c1 = 1.70158;
+      root.scale.setScalar(pop < 1 ? Math.max(0.01, 1 + (c1 + 1) * (pop - 1) ** 3 + c1 * (pop - 1) ** 2) : 1);
 
       const bob = Math.sin(t * 3 + seed * 6) * 0.02;
       const stretch = p.dashing ? 0.12 : 0;

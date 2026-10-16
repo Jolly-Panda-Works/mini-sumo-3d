@@ -1,5 +1,6 @@
 import { Client } from "colyseus.js";
 import {
+  COUNTDOWN_MS,
   ClientMessage,
   Phase,
   ROOM_NAME,
@@ -386,7 +387,9 @@ class RoomManager {
           ? `${msg.name} left the bout`
           : isYou
             ? "You were pushed out of the ring"
-            : `${msg.name} is out of the ring`;
+            : msg.by && msg.by === this.sessionId
+              ? `You pushed ${msg.name} out!`
+              : `${msg.name} is out of the ring`;
       pushToast(text, "out");
       const player = this.state?.players.get(msg.sessionId);
       if (player && msg.reason === "ringOut") {
@@ -394,6 +397,9 @@ class RoomManager {
         shakeBus.emit(0.7);
       }
       audio.eliminated();
+      // The crowd: groans when you go out, cheers when you push someone out.
+      if (isYou && msg.reason === "ringOut") audio.crowdAww();
+      else if (msg.by && msg.by === this.sessionId) audio.crowdCheer();
       if (isYou) vibrate(120);
     });
 
@@ -502,7 +508,8 @@ class RoomManager {
   private playPhaseCues(prev: GameSnapshot, next: GameSnapshot): void {
     if (next.phase === Phase.Countdown) {
       const second = Math.ceil(next.remainingMs / 1000);
-      if (second !== this.lastCountdownSecond && second > 0) {
+      // Beeps only for the 3-2-1 (the walk-in comes first).
+      if (second !== this.lastCountdownSecond && second > 0 && second <= Math.ceil(COUNTDOWN_MS / 1000)) {
         this.lastCountdownSecond = second;
         audio.countdown();
       }

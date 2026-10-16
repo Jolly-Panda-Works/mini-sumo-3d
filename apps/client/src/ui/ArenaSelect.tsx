@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ArenaInfo } from "@mini-sumo/shared";
 import { arenaImage, themeFor } from "../game/arenaThemes";
 import { economyStore } from "../network/economyClient";
@@ -8,6 +8,7 @@ import { useStore } from "../store";
 import { Coins } from "./Coins";
 import { BotLevelPicker } from "./BotLevelPicker";
 import { Dialog } from "./Dialog";
+import { Icon } from "./Icon";
 
 /**
  * Display-only preview of the paid arenas for when the server's catalog isn't available.
@@ -45,6 +46,13 @@ export function ArenaRow() {
   const session = useStore(sessionStore);
   const settings = useStore(settingsStore);
   const [confirm, setConfirm] = useState<ArenaInfo | null>(null);
+  const rowRef = useRef<HTMLUListElement>(null);
+  const scrollRow = (dir: number) => {
+    const row = rowRef.current;
+    if (!row) return;
+    const card = row.querySelector("li");
+    row.scrollBy({ left: dir * ((card?.clientWidth ?? 240) + 16), behavior: "smooth" });
+  };
   const live = economy.status === "ready" && economy.profile !== null;
   const balance = economy.profile?.balances.coins ?? 0;
   const playerLevel = economy.profile?.level.level ?? 1;
@@ -58,7 +66,11 @@ export function ArenaRow() {
 
   return (
     <>
-      <ul className="arena-row" aria-label="Arenas">
+      <div className="arena-row-wrap">
+      <button className="arena-row__arrow arena-row__arrow--left" onClick={() => scrollRow(-1)} aria-label="Previous arenas">
+        <Icon name="arrow-left" size={34} />
+      </button>
+      <ul className="arena-row" aria-label="Arenas" ref={rowRef}>
         {arenas.map((arena) => {
           const theme = themeFor(arena.id);
           const free = arena.entryFee === 0;
@@ -110,30 +122,33 @@ export function ArenaRow() {
           );
         })}
       </ul>
+      <button className="arena-row__arrow arena-row__arrow--right" onClick={() => scrollRow(1)} aria-label="More arenas">
+        <Icon name="arrow-right" size={34} />
+      </button>
+      </div>
 
       {confirm && (
         <Dialog
-          title={`Enter ${confirm.name}?`}
+          title={confirm.name}
           onClose={() => setConfirm(null)}
           className="confirm"
-          role="alertdialog"
           footer={
-            <button className="btn btn--primary" disabled={busy} onClick={() => void enter(confirm)}>
-              Pay <Coins amount={confirm.entryFee} /> and enter
+            <button className="btn btn--primary btn--big" disabled={busy} onClick={() => void enter(confirm)}>
+              Enter
             </button>
           }
         >
-          <p>
-            Entry fee: <Coins amount={confirm.entryFee} /> (you have <Coins amount={balance} />).
-          </p>
-          <ul className="confirm__rules">
-            <li>If the bout doesn't start or ends in a draw, you get the fee back.</li>
-            <li>Leaving during the bout counts as being pushed out: no refund.</li>
-            <li>
-              The winner gets the pool minus a {confirm.economyFeePercent}% fee: up to <Coins amount={confirm.maxPrize} />. Winning is never
-              guaranteed.
-            </li>
-          </ul>
+          <img className="confirm__art" src={arenaImage(confirm.id)} alt="" width={960} height={536} />
+          <div className="confirm__terms">
+            <p>
+              <span className="field__label">Entry</span>
+              <Coins amount={confirm.entryFee} />
+            </p>
+            <p className="confirm__prize">
+              <span className="field__label">Prize up to</span>
+              <Coins amount={confirm.maxPrize} />
+            </p>
+          </div>
         </Dialog>
       )}
     </>

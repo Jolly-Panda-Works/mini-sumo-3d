@@ -49,6 +49,7 @@ export function HUD({ touch }: { touch: boolean }) {
       {session.unstable && <p className="hud__warning">Connection unstable. Waiting for the server…</p>}
 
       {finalStretch && you?.alive && <p className="hud__boost">Final stretch: your dash recharges faster!</p>}
+      {finalStretch && <FinalVignette remainingMs={game.remainingMs} />}
 
       {you && !you.alive && playing && <p className="hud__spectate">You're out. Watching the rest of the bout.</p>}
 
@@ -62,5 +63,26 @@ export function HUD({ touch }: { touch: boolean }) {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Final 30 seconds: a glow around the screen edge, yellow at first and turning red (and
+ * pulsing faster) as the clock runs out.
+ */
+function FinalVignette({ remainingMs }: { remainingMs: number }) {
+  const late = Math.max(0, Math.min(1, 1 - remainingMs / LATE_GAME_MS));
+  const r = Math.round(255 - 25 * late);
+  const g = Math.round(200 - 165 * late);
+  const b = Math.round(40 - 5 * late);
+  return (
+    <div
+      className="vignette"
+      aria-hidden="true"
+      style={{
+        ["--vignette" as string]: `rgba(${r}, ${g}, ${b}, ${0.45 + 0.35 * late})`,
+        ["--vignette-speed" as string]: `${1.6 - 0.9 * late}s`,
+      }}
+    />
   );
 }

@@ -55,7 +55,7 @@ describe("room session: lobby, host and disconnects", () => {
     s.requestStart("a");
     s.removePlayer("b");
     expect(s.phase).toBe(Phase.Waiting);
-    advance(s, cfg.countdownMs + 500);
+    advance(s, (cfg.entranceMs + cfg.countdownMs) + 500);
     expect(s.phase).toBe(Phase.Waiting);
   });
 

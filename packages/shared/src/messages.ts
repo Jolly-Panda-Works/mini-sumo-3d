@@ -45,6 +45,8 @@ export interface EliminatedPayload {
   sessionId: string;
   name: string;
   reason: EliminationReason;
+  /** Who pushed them out (last contact), if anyone. */
+  by?: string | null;
 }
 
 export interface DashPayload {

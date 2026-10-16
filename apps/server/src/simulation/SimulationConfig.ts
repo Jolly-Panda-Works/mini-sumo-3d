@@ -53,6 +53,8 @@ export interface SimulationConfig {
   /** Max positional correction per pair per iteration (m). */
   maxSeparationPerStep: number;
 
+  /** Walk from the ring side to the start marks before the 3-2-1 (ms). */
+  entranceMs: number;
   countdownMs: number;
   matchDurationMs: number;
   resultsDurationMs: number;
@@ -64,6 +66,10 @@ export interface SimulationConfig {
 
   /** Quick match: wait this long for other players before filling the room with bots. */
   quickMatchWaitMs: number;
+  /** Bots join one by one this far apart (ms). */
+  botJoinIntervalMs: number;
+  /** A ring-out counts for the last wrestler who touched you within this time (ms). */
+  ringOutCreditMs: number;
   /** Bot reaction delay range (ms between decisions). */
   botThinkMinMs: number;
   botThinkMaxMs: number;
@@ -108,15 +114,18 @@ export const DEFAULT_CONFIG: Readonly<SimulationConfig> = Object.freeze({
   collisionIterations: 3,
   maxSeparationPerStep: 0.6,
 
+  entranceMs: 1600,
   countdownMs: COUNTDOWN_MS,
   matchDurationMs: MATCH_DURATION_MS,
   resultsDurationMs: 20_000,
 
   spawnRadiusFactor: 0.55,
-  lobbyRadiusFactor: 0.45,
+  lobbyRadiusFactor: 0.86,
   timeoutDrawEpsilon: 0.05,
 
   quickMatchWaitMs: QUICK_MATCH_WAIT_MS,
+  botJoinIntervalMs: 650,
+  ringOutCreditMs: 2500,
   botThinkMinMs: 120,
   botThinkMaxMs: 280,
 

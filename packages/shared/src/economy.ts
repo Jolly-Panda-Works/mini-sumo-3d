@@ -176,7 +176,16 @@ export interface ProfileResponse {
   balances: Record<Currency, number>;
   owned: string[];
   appearance: Appearance;
-  stats: { matches: number; wins: number; coinsEarned: number };
+  stats: {
+    matches: number;
+    wins: number;
+    coinsEarned: number;
+    /** Opponents you pushed out of the ring. */
+    ringOuts?: number;
+    /** Wardrobe items bought. */
+    itemsBought?: number;
+    bestStreak?: number;
+  };
   /** Progression: level from total XP. */
   level: LevelInfo;
   /** Free rewards already earned today (UTC) and the daily cap. */
@@ -191,6 +200,7 @@ export type LedgerCategory =
   | "match_reward"
   | "daily_bonus"
   | "cosmetic_purchase"
+  | "daily_gift"
   | "adjustment";
 
 export interface LedgerEntry {
@@ -230,6 +240,9 @@ export interface EconomyResultMessage {
 /** Coins a new player starts with: enough for a first Rookie bout. */
 export const STARTING_COINS = 200;
 
+/** Free coins the shop gives once a day. */
+export const DAILY_GIFT_COINS = 100;
+
 export const REWARDS = {
   /** Training Arena only (paid arenas pay prizes instead). */
   participation: 5,
@@ -258,7 +271,7 @@ export interface ArenaDef {
 
 export const ARENA_DEFS: readonly ArenaDef[] = [
   { id: "training", name: "Training Arena", description: "Free practice bouts.", entryFee: 0, minPlayers: 2, maxPlayers: 4, economyFeePercent: 0, bots: true, requiredLevel: 1, enabled: true },
-  { id: "rookie", name: "Rookie Arena", description: "Low-stakes bouts.", entryFee: 100, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 1, enabled: true },
+  { id: "rookie", name: "Rookie Arena", description: "Low-stakes bouts.", entryFee: 50, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 1, enabled: true },
   { id: "pro", name: "Pro Arena", description: "Tougher wrestlers, bigger pool.", entryFee: 500, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 5, enabled: true },
   { id: "champion", name: "Champion Arena", description: "High stakes for proven winners.", entryFee: 2000, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 10, enabled: true },
 ];

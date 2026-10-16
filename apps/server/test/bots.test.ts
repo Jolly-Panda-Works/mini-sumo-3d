@@ -38,7 +38,7 @@ describe("bot brain", () => {
     s.addPlayer("human", "Human");
     expect(s.addBot("human").ok).toBe(true);
     s.requestStart("human");
-    advance(s, cfg.countdownMs + 100);
+    advance(s, (cfg.entranceMs + cfg.countdownMs) + 100);
     expect(s.phase).toBe(Phase.Playing);
     for (let t = 0; t < 30_000 && s.phase === Phase.Playing; t += s.stepMs) s.update(s.stepMs);
     expect(s.phase).toBe(Phase.RoundOver);
@@ -118,6 +118,13 @@ describe("quick match", () => {
     expect(s.phase).toBe(Phase.Waiting);
     expect(s.searchRemainingMs).toBeGreaterThan(0);
     advance(s, 600);
+    // Bots join one by one, each at its ring-side slot.
+    expect(s.bots).toHaveLength(1);
+    expect(s.searchRemainingMs).toBeGreaterThan(0);
+    advance(s, cfg.botJoinIntervalMs * 2 + 100);
+    expect(s.bots).toHaveLength(3);
+    expect(s.searchRemainingMs).toBe(0);
+    for (const bot of s.bots) expect(Math.hypot(bot.x, bot.y)).toBeCloseTo(cfg.arenaRadius * cfg.lobbyRadiusFactor, 3);
     expect(s.phase).toBe(Phase.Lobby);
     expect(s.requestStart("me").ok).toBe(true);
     expect(s.phase).toBe(Phase.Countdown);
@@ -157,13 +164,13 @@ describe("quick match", () => {
   it("rematch keeps the bots, returning to the lobby removes them and searches again", () => {
     const s = quick({ matchDurationMs: 2000 });
     s.addPlayer("me", "Me");
-    advance(s, cfg.quickMatchWaitMs + 100);
+    advance(s, cfg.quickMatchWaitMs + cfg.botJoinIntervalMs * 3 + 100);
     s.requestStart("me");
-    advance(s, cfg.countdownMs + 3000);
+    advance(s, (cfg.entranceMs + cfg.countdownMs) + 3000);
     expect(s.phase).toBe(Phase.RoundOver);
     expect(s.requestRematch("me").ok).toBe(true);
     expect(s.bots).toHaveLength(3);
-    advance(s, cfg.countdownMs + 3000);
+    advance(s, (cfg.entranceMs + cfg.countdownMs) + 3000);
     expect(s.phase).toBe(Phase.RoundOver);
     expect(s.requestReturnToLobby("me").ok).toBe(true);
     expect(s.bots).toHaveLength(0);
@@ -174,9 +181,9 @@ describe("quick match", () => {
   it("bots play by the same rules: inputs stay normalized and positions finite", () => {
     const s = quick();
     s.addPlayer("me", "Me");
-    advance(s, cfg.quickMatchWaitMs + 100);
+    advance(s, cfg.quickMatchWaitMs + cfg.botJoinIntervalMs * 3 + 100);
     s.requestStart("me");
-    advance(s, cfg.countdownMs + 100);
+    advance(s, (cfg.entranceMs + cfg.countdownMs) + 100);
     for (let i = 0; i < 300; i++) {
       s.update(s.stepMs);
       for (const p of s.players.values()) {

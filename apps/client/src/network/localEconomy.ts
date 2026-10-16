@@ -1,6 +1,7 @@
 import {
   Currency,
   REWARDS,
+  DAILY_GIFT_COINS,
   STARTER_ITEMS,
   STARTING_COINS,
   allCosmeticItemIds,
@@ -39,6 +40,12 @@ interface LocalState {
   rewardDay: string;
   rewardDayTotal: number;
   bonusDay: string;
+  /** Opponents pushed out, current and best win streak. */
+  ringOuts: number;
+  streak: number;
+  bestStreak: number;
+  /** Day the shop's free daily coins were last claimed. */
+  giftDay: string;
 }
 
 export interface LocalEntry {
@@ -75,6 +82,10 @@ function fresh(): LocalState {
     rewardDay: "",
     rewardDayTotal: 0,
     bonusDay: "",
+    ringOuts: 0,
+    streak: 0,
+    bestStreak: 0,
+    giftDay: "",
   };
 }
 
@@ -141,7 +152,14 @@ export const localEconomy = {
       balances: { coins: state.coins, gems: 0 },
       owned: [...new Set([...STARTER_ITEMS, ...state.owned])],
       appearance: settingsStore.get().appearance,
-      stats: { matches: state.matches, wins: state.wins, coinsEarned: state.coinsEarned },
+      stats: {
+        matches: state.matches,
+        wins: state.wins,
+        coinsEarned: state.coinsEarned,
+        ringOuts: state.ringOuts,
+        itemsBought: state.owned.length,
+        bestStreak: state.bestStreak,
+      },
       level: levelFromXp(state.xp),
       daily: {
         earned: state.rewardDay === day ? state.rewardDayTotal : 0,
@@ -153,6 +171,19 @@ export const localEconomy = {
 
   ledger(): LedgerEntry[] {
     return [...state.ledger];
+  },
+
+  /** The shop's free coins: once per (UTC) day. */
+  dailyGiftAvailable(): boolean {
+    return state.giftDay !== today();
+  },
+
+  claimDailyGift(): number {
+    if (state.giftDay === today()) return 0;
+    state.giftDay = today();
+    record(DAILY_GIFT_COINS, "daily_gift", "Daily coins");
+    save();
+    return DAILY_GIFT_COINS;
   },
 
   /** Buys a cosmetic once; already owned items are never charged again. */
@@ -205,7 +236,7 @@ export const localEconomy = {
    */
   finish(
     entry: LocalEntry,
-    result: { matchId: string; won: boolean; draw: boolean; completed: boolean; durationMs: number; players: number },
+    result: { matchId: string; won: boolean; draw: boolean; completed: boolean; durationMs: number; players: number; ringOuts?: number },
   ): EconomyResultMessage {
     const arena = arenaDef(entry.arenaId);
     const base: EconomyResultMessage = {
@@ -246,7 +277,14 @@ export const localEconomy = {
     const counts = result.completed && result.durationMs >= REWARDS.minMatchDurationMs;
     if (counts) {
       state.matches += 1;
-      if (result.won) state.wins += 1;
+      state.ringOuts += Math.max(0, result.ringOuts ?? 0);
+      if (result.won) {
+        state.wins += 1;
+        state.streak += 1;
+        state.bestStreak = Math.max(state.bestStreak, state.streak);
+      } else {
+        state.streak = 0;
+      }
       const xp = xpForMatch(entry.arenaId, result.won, true);
       state.xp += xp;
       base.xp = xp;

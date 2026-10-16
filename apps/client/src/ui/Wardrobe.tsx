@@ -124,6 +124,7 @@ function ItemPopup({
       title={item.name}
       onClose={onClose}
       className="item-popup"
+      hideClose
       footer={
         <div className="row">
           <button className="btn btn--grow" onClick={onClose}>

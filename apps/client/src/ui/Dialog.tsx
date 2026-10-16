@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
+import { Icon } from "./Icon";
 
 /**
  * Shared popup: a sticky header with the title and a close (×) button in the top-right
@@ -12,6 +13,7 @@ export function Dialog({
   footer,
   role = "dialog",
   bodyClassName = "",
+  hideClose = false,
 }: {
   title: ReactNode;
   onClose: () => void;
@@ -20,6 +22,8 @@ export function Dialog({
   footer?: ReactNode;
   role?: "dialog" | "alertdialog";
   bodyClassName?: string;
+  /** For dialogs whose own buttons close them (e.g. "Not now"). */
+  hideClose?: boolean;
 }) {
   const id = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -35,11 +39,11 @@ export function Dialog({
           <h2 id={id} className="dialog__title">
             {title}
           </h2>
-          <button ref={closeRef} type="button" className="dialog__close" onClick={onClose} aria-label="Close">
-            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-            </svg>
-          </button>
+          {!hideClose && (
+            <button ref={closeRef} type="button" className="dialog__close" onClick={onClose} aria-label="Close">
+              <Icon name="close" size={26} />
+            </button>
+          )}
         </header>
         <div className={`dialog__body ${bodyClassName}`}>{children}</div>
         {footer && <footer className="dialog__foot">{footer}</footer>}

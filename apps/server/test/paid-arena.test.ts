@@ -42,7 +42,7 @@ describe("paid arena session", () => {
     const s = paid();
     s.addPlayer("a", "A");
     s.addPlayer("b", "B");
-    advance(s, 5000 + cfg.countdownMs + 200);
+    advance(s, 5000 + (cfg.entranceMs + cfg.countdownMs) + 200);
     expect(s.phase).toBe(Phase.Playing);
     s.players.get("b")!.x = 99;
     advance(s, s.stepMs);
@@ -63,7 +63,7 @@ describe("paid arena session", () => {
     const s = paid();
     s.addPlayer("a", "A");
     s.addPlayer("b", "B");
-    advance(s, 5000 + cfg.countdownMs + 200);
+    advance(s, 5000 + (cfg.entranceMs + cfg.countdownMs) + 200);
     s.drainEvents();
     advance(s, 3000);
     s.players.get("b")!.x = 99;

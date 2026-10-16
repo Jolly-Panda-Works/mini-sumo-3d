@@ -3,6 +3,7 @@ import { gameStore, roomManager } from "../network/RoomManager";
 import { useStore } from "../store";
 import { economyStore } from "../network/economyClient";
 import { Coins } from "./Coins";
+import { Icon, type IconName } from "./Icon";
 import { settingsStore } from "../settings";
 import { PlayerBadge } from "./PlayerBadge";
 
@@ -45,6 +46,7 @@ export function Results() {
               >
                 {p.placement}
               </span>
+              {MEDALS[p.placement] && <Icon name={`medal-${MEDALS[p.placement]}` as IconName} size={30} className="standings__medal" />}
               <PlayerBadge colorIndex={p.colorIndex} />
               <span className="standings__name">{p.isYou ? `${p.name} (you)` : p.name}</span>
               <span className="standings__note">
@@ -86,7 +88,11 @@ export function Results() {
                 <strong>+{result.xp}</strong>
               </p>
             )}
-            {result.levelUp && <p className="economy-result__levelup">Level up! You're now level {result.level}.</p>}
+            {result.levelUp && (
+              <p className="economy-result__levelup">
+                <Icon name="arrow-up" size={22} /> Level up! You're now level {result.level}.
+              </p>
+            )}
             {result.note && <p className="hint">{result.note}</p>}
             {result.balance !== null && (
               <p className="economy-result__balance">

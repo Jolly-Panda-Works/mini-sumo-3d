@@ -3,6 +3,7 @@ import { settingsStore, type JoystickMode, type TouchMode } from "../settings";
 import { useStore } from "../store";
 import { setAboutOpen, setSettingsOpen } from "../uiStore";
 import { Dialog } from "./Dialog";
+import { Icon, type IconName } from "./Icon";
 
 function Segmented<T extends string>({
   label,
@@ -32,11 +33,14 @@ function Segmented<T extends string>({
   );
 }
 
-function Slider({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
+function Slider({ label, icon, value, onChange }: { label: string; icon: IconName; value: number; onChange: (value: number) => void }) {
   return (
     <label className="slider">
       <span className="slider__label">
-        {label}
+        <span className="slider__name">
+          <Icon name={icon} size={26} />
+          {label}
+        </span>
         <span className="slider__value">{Math.round(value * 100)}%</span>
       </span>
       <input type="range" min={0} max={100} step={5} value={Math.round(value * 100)} onChange={(e) => onChange(Number(e.target.value) / 100)} />
@@ -73,10 +77,11 @@ export function SettingsPanel() {
           </button>
         ) : (
           <div className="settings__about">
-            <button className="btn" onClick={() => setAboutOpen(true)}>
+            <span />
+            <span className="settings__version">{version ? `Version ${version}` : ""}</span>
+            <button className="btn settings__about-btn" onClick={() => setAboutOpen(true)}>
               About
             </button>
-            {version && <span className="settings__version">Version {version}</span>}
           </div>
         )
       }
@@ -85,8 +90,8 @@ export function SettingsPanel() {
       <div className="settings__grid">
         <section className="settings__section" aria-label="Audio">
           <h3 className="settings__heading">Audio</h3>
-          <Slider label="Music" value={settings.musicVolume} onChange={(musicVolume) => settingsStore.update({ musicVolume })} />
-          <Slider label="Sound effects" value={settings.sfxVolume} onChange={(sfxVolume) => settingsStore.update({ sfxVolume })} />
+          <Slider label="Music" icon="music" value={settings.musicVolume} onChange={(musicVolume) => settingsStore.update({ musicVolume })} />
+          <Slider label="Sound effects" icon="sfx" value={settings.sfxVolume} onChange={(sfxVolume) => settingsStore.update({ sfxVolume })} />
         </section>
 
         <section className="settings__section" aria-label="Controls">

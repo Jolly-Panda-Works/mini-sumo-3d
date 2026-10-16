@@ -2448,3 +2448,279 @@ body {
   position: static;
   align-self: flex-end;
 }
+
+/* ---------- Final stretch vignette ---------- */
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 min(14vw, 120px) min(3vw, 26px) var(--vignette);
+  animation: vignette-pulse var(--vignette-speed, 1.6s) ease-in-out infinite;
+}
+
+@keyframes vignette-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vignette {
+    animation: none;
+  }
+}
+
+/* ---------- Icons ---------- */
+
+.icon {
+  display: inline-block;
+  flex: none;
+  object-fit: contain;
+  vertical-align: middle;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.coins__img {
+  width: 1.15em;
+  height: 1.15em;
+  margin-right: 0.15em;
+}
+
+.dialog__close {
+  box-shadow: none;
+  border: 0;
+  background: transparent;
+  width: 44px;
+  height: 44px;
+}
+
+.dialog__close:active {
+  transform: scale(0.92);
+  box-shadow: none;
+}
+
+.home__coins-plus {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  background: none;
+}
+
+.icon-btn .icon {
+  width: 30px;
+  height: 30px;
+}
+
+.btn .icon {
+  margin-right: 4px;
+}
+
+.tag--bot {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.level-picker__opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.slider__name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Settings footer: version in the middle, About on the right */
+.settings__about {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings__version {
+  text-align: center;
+}
+
+.settings__about-btn {
+  justify-self: end;
+}
+
+/* ---------- Profile ---------- */
+
+.profile__name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.profile__edit {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2.5px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.profile__edit:focus-visible {
+  outline: 3px solid var(--coral);
+  outline-offset: 2px;
+}
+
+dl.profile__stats {
+  margin: 0;
+}
+
+.profile__stats div {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  border: 2px solid var(--ink-soft);
+  border-radius: 12px;
+}
+
+.profile__stats dd {
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+
+.profile__google {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.panel.dialog.edit-name {
+  width: min(420px, 100%);
+}
+
+.edit-name__form {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-name__form .input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------- Arena entry popup ---------- */
+
+.panel.dialog.confirm {
+  width: min(440px, 100%);
+}
+
+.confirm__art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-control);
+}
+
+.confirm__terms {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.confirm__terms p {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 1.25rem;
+}
+
+.confirm__prize {
+  align-items: flex-end;
+  text-align: right;
+}
+
+/* ---------- Arena row arrows ---------- */
+
+.arena-row-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 1240px;
+  display: flex;
+  align-items: center;
+  margin: auto 0;
+}
+
+.arena-row-wrap .arena-row {
+  margin: 0;
+}
+
+.arena-row__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 251, 243, 0.85);
+  box-shadow: 0 3px 0 rgba(43, 35, 64, 0.5);
+  cursor: pointer;
+}
+
+.arena-row__arrow--left {
+  left: -6px;
+}
+
+.arena-row__arrow--right {
+  right: -6px;
+}
+
+.arena-row__arrow:focus-visible {
+  outline: 3px solid var(--coral);
+}
+
+/* Touch screens swipe; arrows are for mouse users. */
+@media (hover: none) {
+  .arena-row__arrow {
+    display: none;
+  }
+}
+
+/* ---------- Shop: daily coins ---------- */
+
+.pack--daily {
+  border-color: #3fa34d;
+  box-shadow: 0 0 0 3px rgba(63, 163, 77, 0.35);
+}
+
+.pack__tag--free {
+  background: #3fa34d;
+}
+
+/* ---------- Results medals ---------- */
+
+.standings__medal {
+  margin-left: -4px;
+}
+
+.economy-result__levelup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
