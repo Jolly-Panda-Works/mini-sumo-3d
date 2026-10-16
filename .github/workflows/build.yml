@@ -69,8 +69,18 @@ jobs:
           BUMP: ${{ inputs.bump || 'none' }}
         run: |
           SHA="$GITHUB_SHA"
+          # Highest released version (tags vX.Y.Z), so a bump never goes below an existing release.
+          LATEST=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' | sed 's/^v//' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
+          newer() { [[ -n "$2" && "$1" != "$2" && "$(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -n 1)" == "$2" ]]; }
+          echo "Latest released version: ${LATEST:-none}"
+
           if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" && "$BUMP" != "none" ]]; then
             if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then echo "::error::Run the bump from the main branch."; exit 1; fi
+            CURRENT=$(node -p "require('./package.json').version")
+            if newer "$CURRENT" "$LATEST"; then
+              echo "::notice::package.json ($CURRENT) is behind the latest release v$LATEST; bumping from $LATEST."
+              npm version "$LATEST" --no-git-tag-version --no-workspaces-update --allow-same-version > /dev/null
+            fi
             npm version "$BUMP" --no-git-tag-version --no-workspaces-update > /dev/null
             NEW=$(node -p "require('./package.json').version")
             git config user.name "github-actions[bot]"
@@ -86,7 +96,10 @@ jobs:
             [[ "$VERSION" != "$PKG" ]] && echo "::warning::Tag $GITHUB_REF_NAME differs from package.json version $PKG."
           elif [[ "$GITHUB_REF" == "refs/heads/main" && "$GITHUB_EVENT_NAME" != "pull_request" ]]; then
             VERSION="$PKG"
-            if git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" > /dev/null; then
+            if newer "$PKG" "$LATEST"; then
+              RELEASE=false
+              echo "::error::package.json version $PKG is lower than the latest release v$LATEST. Set it to a higher version (or run Build with bump) to publish."
+            elif git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" > /dev/null; then
               RELEASE=false
               echo "::notice::v$VERSION is already released. Bump the version in package.json (or run Build with bump) to publish a new release."
             else

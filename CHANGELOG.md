@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Version bump started from `package.json` even when older releases (from the previous run-number scheme, e.g. `v1.0.37`) were higher, so a patch bump produced `v1.0.1`. Bumps now start from the highest `vX.Y.Z` tag, and a push whose `package.json` version is below the latest release fails with a clear message instead of releasing.
+
 ### Added
 
 - Sound effects from files (`apps/client/public/sfx/`): button click, "not available" for buttons that can't be used yet (they now explain why when tapped), dialog open/close, purchase, level up, knocked out, and a sting when the final stretch begins.
