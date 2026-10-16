@@ -41,10 +41,10 @@ export function MainMenu() {
               Level <span className="level-badge">{economy.profile?.level.level ?? 1}</span>
             </span>
           </button>
-          <button className="icon-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
-            <Icon name="customize" size={30} />
+          <button className="tile-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
+            <Icon name="customize" size={48} />
           </button>
-          <button className="icon-btn" onClick={() => setSettingsOpen(true)} aria-label="Settings">
+          <button className="tile-btn" onClick={() => setSettingsOpen(true)} aria-label="Settings">
             <GearIcon />
           </button>
           <button className="btn home__coins" onClick={() => setShopOpen(true)} aria-label={`Coin shop. Balance: ${balance ?? 0} Sumo Coins`}>
@@ -85,5 +85,5 @@ export function MainMenu() {
 }
 
 export function GearIcon() {
-  return <Icon name="settings" size={30} />;
+  return <Icon name="settings" size={48} />;
 }

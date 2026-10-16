@@ -31,30 +31,32 @@ export function CoinShop() {
 
   return (
     <Dialog
-      title={
-        <span className="coin-shop__title">
-          Coin shop <Coins amount={balance} />
-        </span>
-      }
+      title="Coin shop"
       onClose={() => setShopOpen(false)}
       className="coin-shop"
     >
+      <p className="coin-shop__balance">
+        <span className="field__label">Your coins</span>
+        <Coins amount={balance} />
+      </p>
       <ul className="packs">
         <li className="pack pack--daily">
-          <span className="pack__tag pack__tag--free">Free</span>
-          <img className="pack__img" src={`${base}coins/pack2.webp`} alt="" width={256} height={256} />
-          <p className="pack__name">Daily coins</p>
-          <p className="pack__coins">
-            <Coins amount={DAILY_GIFT_COINS} />
-          </p>
-          <button className="btn btn--primary pack__btn" disabled={!giftReady} onClick={claim} data-sfx="none">
-            {!local ? "Coming soon" : giftReady ? "Claim" : "Come back tomorrow"}
-          </button>
+          <img className="pack__art" src={`${base}coins/daily.webp`} alt="" width={360} height={486} />
+          <div className="pack__info">
+            <span className="pack__tag pack__tag--free">Free every day</span>
+            <p className="pack__name">Daily coins</p>
+            <p className="pack__coins">
+              <Coins amount={DAILY_GIFT_COINS} />
+            </p>
+            <button className="btn btn--primary pack__btn" disabled={!giftReady} onClick={claim} data-sfx="none">
+              {!local ? "Coming soon" : giftReady ? "Claim" : "Come back tomorrow"}
+            </button>
+          </div>
         </li>
-        {COIN_PACKS.map((pack) => (
-          <li key={pack.id} className={`pack${pack.tag ? " pack--tagged" : ""}`}>
+        {COIN_PACKS.map((pack, i) => (
+          <li key={pack.id} className={`pack${pack.tag ? " pack--tagged" : ""}${i === COIN_PACKS.length - 1 ? " pack--wide" : ""}`}>
             {pack.tag && <span className="pack__tag">{pack.tag}</span>}
-            <img className="pack__img" src={`${base}${pack.image}`} alt="" width={256} height={256} loading="lazy" />
+            <img className="pack__art" src={`${base}${pack.image}`} alt="" width={360} height={486} loading="lazy" />
             <p className="pack__name">{pack.name}</p>
             <p className="pack__coins">
               <Coins amount={pack.coins} />

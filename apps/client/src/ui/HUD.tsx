@@ -28,7 +28,7 @@ export function HUD({ touch }: { touch: boolean }) {
         <div className={`hud__timer${lowTime ? " hud__timer--low" : ""}`} role="timer" aria-label="Time left">
           {formatTime(game.phase === Phase.Countdown ? MATCH_DURATION_MS : game.remainingMs)}
         </div>
-        <button className="icon-btn hud__gear" onClick={() => setSettingsOpen(true)} aria-label="Settings">
+        <button className="tile-btn hud__gear" onClick={() => setSettingsOpen(true)} aria-label="Settings">
           <GearIcon />
         </button>
       </div>

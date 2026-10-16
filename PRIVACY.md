@@ -8,6 +8,10 @@ Mini Sumo is built to collect as little as possible.
 
 - Your display name and settings (sound, touch controls) in the browser's local storage, or the app's equivalent storage on desktop and Android. Clearing site data or uninstalling removes them.
 
+## Google Play (Android app)
+
+If you sign in with Google Play in your profile, your game progress (coins, level, items, name and look) is saved with Google Play Games *Saved Games* in your Google account, so you can restore it on another phone. It is stored by Google under your account and is not sent to us. Sign-in is optional.
+
 ## What the game server sees (online play, coming soon)
 
 - The display name you type, your in-game input and connection metadata (such as your IP address) for as long as you are connected to a room.

@@ -1,8 +1,8 @@
-import { PLAYER_COLORS } from "@mini-sumo/shared";
 import { gameStore, roomManager } from "../network/RoomManager";
 import { useStore } from "../store";
 import { economyStore } from "../network/economyClient";
 import { Coins } from "./Coins";
+import { Dialog } from "./Dialog";
 import { Icon, type IconName } from "./Icon";
 import { settingsStore } from "../settings";
 import { PlayerBadge } from "./PlayerBadge";
@@ -26,15 +26,8 @@ export function Results() {
   if (winner) headline = winner.isYou ? "You win!" : `${winner.name} wins!`;
 
   return (
-    <div className="overlay">
-      <section className="panel results" aria-label="Round results" aria-live="polite">
-        <p className="field__label">Round {game.round}</p>
-        <h2
-          className="results__headline"
-          style={winner ? { textDecorationColor: PLAYER_COLORS[winner.colorIndex % PLAYER_COLORS.length]!.hex } : undefined}
-        >
-          {headline}
-        </h2>
+    <Dialog title={headline} onClose={() => undefined} hideClose className="results">
+        <p className="field__label results__round">Round {game.round}</p>
         {!winner && <p className="hint hint--center">Nobody kept the ring on their own this time.</p>}
 
         <ol className="standings">
@@ -139,7 +132,6 @@ export function Results() {
         ) : (
           <p className="hint hint--center">Waiting for the host. Back to the lobby in {seconds}s.</p>
         )}
-      </section>
-    </div>
+    </Dialog>
   );
 }

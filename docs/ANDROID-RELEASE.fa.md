@@ -93,6 +93,26 @@ GitHub نسخه را در `package.json` بالا می‌برد، commit می‌
 - **Target audience:** اگر بازی را مخصوص کودکان معرفی نمی‌کنید، **13+** را انتخاب کنید. گروه‌های سنی زیر ۱۳ سال شامل قوانین Families می‌شوند.
 - **Data safety:** نسخه‌ی آفلاین هیچ داده‌ای جمع‌آوری یا ارسال نمی‌کند. نام و تنظیمات فقط روی خود دستگاه می‌مانند. گزینه‌ی «No data collected» را بزنید.
 
+## ۸.۵ ورود با Google Play و ذخیره‌ی پیشرفت (Play Games Services)
+
+این بخش **به سرور ما نیازی ندارد**: پیشرفت بازیکن (سکه، سطح، آیتم‌ها، اسم و ظاهر) روی گوشی است و با قابلیت **Saved Games** در حساب Google Play خود بازیکن هم ذخیره می‌شود.
+
+۱. Play Console ← اپ Mini Sumo ← **Grow users ← Play Games Services ← Setup and management ← Configuration**. گزینه‌ی «No, my game doesn't use Google APIs» و نام بازی را بزنید.
+۲. در **Properties**، گزینه‌ی **Saved games** را روشن کنید.
+۳. در **Credentials ← Add credential ← Android**، یک OAuth client بسازید (Play Console شما را به Google Cloud می‌برد):
+   - Package name: `com.jollypanda.mini_sumo`
+   - SHA-1 کلید **App signing** (Play Console ← Test and release ← App integrity ← App signing key certificate)
+   - یک credential دیگر هم با SHA-1 **کلید upload خودتان** بسازید تا APK امضاشده‌ای که مستقیم نصب می‌کنید هم کار کند:
+     ```cmd
+     keytool -list -v -keystore mini-sumo-upload.keystore -alias minisumo
+     ```
+۴. عدد **Project ID** را از بالای صفحه‌ی Configuration بردارید (فقط عدد، مثلاً `123456789012`).
+۵. GitHub ← Settings ← Secrets and variables ← Actions ← **Variables** ← `PLAY_GAMES_APP_ID` = همان عدد.
+۶. تا وقتی Play Games Services منتشر نشده، حساب‌های تست را در **Testers** همان بخش اضافه کنید. بعد از تست، در **Review and publish** آن را منتشر کنید.
+۷. **Data safety**: چون پیشرفت در حساب Google بازیکن ذخیره می‌شود، «App activity / Game progress» را با هدف «App functionality» علامت بزنید (توسط Google نگه‌داری می‌شود، به ما ارسال نمی‌شود).
+
+بدون `PLAY_GAMES_APP_ID` بازی مثل قبل ساخته می‌شود و دکمه‌ی Google Play در پروفایل «coming soon» نشان می‌دهد.
+
 ## ۹. انتشار
 
 ترتیب انتشار: **Internal testing ← Closed testing ← Production**. برای هر مرحله یادداشت انتشار (Release notes) بنویسید.

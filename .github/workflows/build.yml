@@ -283,10 +283,12 @@ jobs:
         working-directory: apps/mobile
         run: |
           npx cap add android
-          npx capacitor-assets generate --android --iconBackgroundColor "#2F5C8A" --splashBackgroundColor "#2F5C8A" || echo "::warning::Icon generation failed; using default icons."
+          npx capacitor-assets generate --android --iconBackgroundColor "#11276F" --splashBackgroundColor "#2F5C8A" || echo "::warning::Icon generation failed; using default icons."
           npx cap sync android
           # Portrait only.
           node scripts/orientation.mjs
+          # Google Play Games sign-in + cloud save (repository variable PLAY_GAMES_APP_ID).
+          PLAY_GAMES_APP_ID="${{ vars.PLAY_GAMES_APP_ID }}" node scripts/play-games.mjs
 
       - name: Target SDK (optional, repository variable ANDROID_TARGET_SDK)
         if: vars.ANDROID_TARGET_SDK != ''

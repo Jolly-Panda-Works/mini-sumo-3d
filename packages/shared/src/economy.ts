@@ -103,12 +103,13 @@ export interface CoinPack {
 }
 
 export const COIN_PACKS: readonly CoinPack[] = [
-  { id: "coins_500", name: "Handful of coins", coins: 500, image: "coins/pack1.webp" },
+  { id: "coins_500", name: "Lucky coin", coins: 500, image: "coins/pack1.webp" },
   { id: "coins_1200", name: "Coin stack", coins: 1200, image: "coins/pack2.webp" },
-  { id: "coins_2600", name: "Coin pouch", coins: 2600, image: "coins/pack3.webp", tag: "Popular" },
+  { id: "coins_2600", name: "Lucky pouch", coins: 2600, image: "coins/pack3.webp", tag: "Popular" },
   { id: "coins_5500", name: "Wooden chest", coins: 5500, image: "coins/pack4.webp" },
-  { id: "coins_12000", name: "Golden chest", coins: 12000, image: "coins/pack5.webp" },
-  { id: "coins_30000", name: "Treasure hoard", coins: 30000, image: "coins/pack6.webp", tag: "Best value" },
+  { id: "coins_12000", name: "Silver chest", coins: 12000, image: "coins/pack5.webp" },
+  { id: "coins_30000", name: "Golden chest", coins: 30000, image: "coins/pack6.webp" },
+  { id: "coins_70000", name: "Grand festival", coins: 70000, image: "coins/pack7.webp", tag: "Best value" },
 ];
 
 /** Price of an item (0 for starter items). */

@@ -6,6 +6,16 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- New art: Android app icon, a repeating pattern backdrop on the home screen, the wooden shrine popup frame (title on the plaque, close button on the corner, content inside the board), new icons (medals, coin, plus, settings, bot, customise, music, sound), difficulty cards (Easy / Normal / Hard art instead of words) and the Google Play *Sign in* / *Connected* buttons.
+- Coin shop: new card art, the green card for daily coins and seven packs (a new *Grand festival* pack).
+- Google Play Games (Android): sign in from the profile and your progress is saved to your Google Play account (*Saved Games*), restored automatically on a new phone. No game server needed. Enabled when the `PLAY_GAMES_APP_ID` variable is set (see `docs/ANDROID-RELEASE.fa.md`).
+
+### Changed
+
+- Results, first-run name and level-up popups use the framed dialog as well.
+
 ### Changed
 
 - Home: one row of buttons on top (profile box with name and level filling the width, then customise, settings and coins on the right), the title below it. *Play with friends* removed.

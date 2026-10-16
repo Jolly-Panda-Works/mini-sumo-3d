@@ -5,7 +5,7 @@ import { settingsStore } from "../settings";
 import { useStore } from "../store";
 import { pushToast, setProfileOpen } from "../uiStore";
 import { Dialog } from "./Dialog";
-import { Icon } from "./Icon";
+import { playGamesStore, signInToPlayGames } from "../network/playGames";
 
 function EditName({ onClose }: { onClose: () => void }) {
   const settings = useStore(settingsStore);
@@ -44,6 +44,8 @@ export function ProfilePanel() {
   const settings = useStore(settingsStore);
   const economy = useStore(economyStore);
   const [editing, setEditing] = useState(false);
+  const play = useStore(playGamesStore);
+  const base = import.meta.env.BASE_URL;
   const profile = economy.profile;
   const level = profile?.level ?? { level: 1, xp: 0, levelStartXp: 0, nextLevelXp: 100 };
   const progress = Math.min(1, (level.xp - level.levelStartXp) / Math.max(1, level.nextLevelXp - level.levelStartXp));
@@ -106,14 +108,29 @@ export function ProfilePanel() {
           ))}
         </dl>
 
-        <button
-          className="btn profile__google"
-          aria-disabled="true"
-          onClick={() => pushToast("Google Play saving is coming soon", "info")}
-        >
-          <Icon name="gplay-login" size={28} />
-          Save progress with Google Play <span className="tag tag--soon">Coming soon</span>
-        </button>
+        <section className="profile__google" aria-label="Google Play">
+          {play.status === "connected" ? (
+            <button className="gplay-btn" onClick={() => pushToast("Your progress is saved to Google Play", "info")} aria-label="Connected to Google Play">
+              <img src={`${base}icons/gplay-connected.webp`} alt="" width={560} height={133} draggable={false} />
+            </button>
+          ) : (
+            <button
+              className="gplay-btn"
+              aria-disabled={!play.available || play.status === "working"}
+              onClick={() =>
+                play.available ? void signInToPlayGames() : pushToast("Google Play is available in the Android app (coming soon)", "info")
+              }
+              aria-label="Sign in with Google Play"
+            >
+              <img src={`${base}icons/gplay-signin.webp`} alt="" width={560} height={133} draggable={false} />
+            </button>
+          )}
+          <p className="hint">
+            {play.status === "connected"
+              ? `Signed in${play.name ? ` as ${play.name}` : ""}. Your progress is saved to your Google Play account.`
+              : "Sign in to keep your progress safe on your Google Play account."}
+          </p>
+        </section>
       </Dialog>
       {editing && <EditName onClose={() => setEditing(false)} />}
     </>

@@ -2061,80 +2061,6 @@ body {
   }
 }
 
-/* ---------- Dialogs: sticky title and close button, scrolling body ---------- */
-
-.panel.dialog {
-  padding: 0;
-  gap: 0;
-  overflow: hidden;
-  max-height: calc(100dvh - 24px);
-  display: flex;
-  flex-direction: column;
-}
-
-.dialog__head {
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 12px 10px 18px;
-  border-bottom: 2.5px dashed var(--ink-soft);
-  background: var(--paper);
-}
-
-.dialog__title {
-  margin: 0;
-  font-size: 1.35rem;
-  line-height: 1.15;
-  min-width: 0;
-}
-
-.dialog__close {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 3px solid var(--ink);
-  background: var(--paper);
-  color: var(--ink);
-  box-shadow: 0 3px 0 var(--ink);
-  cursor: pointer;
-}
-
-.dialog__close:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--ink);
-}
-
-.dialog__close:focus-visible {
-  outline: 3px solid var(--coral);
-  outline-offset: 2px;
-}
-
-.dialog__body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 14px 18px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.dialog__foot {
-  flex: none;
-  padding: 10px 18px 14px;
-  border-top: 2.5px dashed var(--ink-soft);
-  background: var(--paper);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .btn--danger {
   background: #ffe1e5;
   border-color: #b8344a;
@@ -2161,7 +2087,7 @@ body {
   flex-wrap: wrap;
 }
 
-.about-panel .dialog__body {
+.dlg-about-panel .dialog__body {
   align-items: center;
   text-align: center;
 }
@@ -2174,7 +2100,7 @@ body {
 
 /* ---------- Wardrobe: preview and tabs fixed, items scroll ---------- */
 
-.panel.dialog.wardrobe {
+.dlg-wardrobe {
   width: min(900px, 100%);
   height: calc(100dvh - 16px);
   max-height: none;
@@ -2230,7 +2156,7 @@ body {
   }
 }
 
-.panel.dialog.item-popup {
+.dlg-item-popup {
   width: min(420px, 100%);
 }
 
@@ -2250,7 +2176,7 @@ body {
 
 /* ---------- Profile and levels ---------- */
 
-.panel.dialog.profile {
+.dlg-profile {
   width: min(560px, 100%);
 }
 
@@ -2488,18 +2414,6 @@ body {
   margin-right: 0.15em;
 }
 
-.dialog__close {
-  box-shadow: none;
-  border: 0;
-  background: transparent;
-  width: 44px;
-  height: 44px;
-}
-
-.dialog__close:active {
-  transform: scale(0.92);
-  box-shadow: none;
-}
 
 .home__coins-plus {
   width: 22px;
@@ -2604,7 +2518,7 @@ dl.profile__stats {
   flex-wrap: wrap;
 }
 
-.panel.dialog.edit-name {
+.dlg-edit-name {
   width: min(420px, 100%);
 }
 
@@ -2620,7 +2534,7 @@ dl.profile__stats {
 
 /* ---------- Arena entry popup ---------- */
 
-.panel.dialog.confirm {
+.dlg-confirm {
   width: min(440px, 100%);
 }
 
@@ -2882,4 +2796,455 @@ dl.profile__stats {
   padding: 1px 4px;
   font-size: 0.72rem;
   white-space: nowrap;
+}
+
+/* ======================================================================
+   Dialogs in the wooden shrine frame (ui/frame.webp, header.webp, close.webp)
+   All measurements are fractions of the popup width (cqw), taken from the art.
+   ====================================================================== */
+
+.dialog-wrap {
+  position: relative;
+  width: min(440px, 100%);
+  container-type: inline-size;
+}
+
+.dialog {
+  position: relative;
+  isolation: isolate;
+  /* Room for the roof and banners above the frame */
+  margin-top: 23.4cqw;
+  min-height: 72cqw;
+  max-height: calc(100dvh - 20px - 23.4cqw);
+  display: flex;
+  flex-direction: column;
+  color: #f4ede2;
+}
+
+/* The board inside the frame */
+.dialog::after {
+  content: "";
+  position: absolute;
+  inset: 11.9cqw 10cqw 12.1cqw 10cqw;
+  z-index: -2;
+  border-radius: 1cqw;
+  background: #30333c;
+  box-shadow: inset 0 0 3cqw rgba(0, 0, 0, 0.45);
+}
+
+/* The wooden frame, nine-sliced so it fits any height */
+.dialog::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border: 1px solid transparent;
+  border-image-source: var(--ui-frame);
+  border-image-slice: 260 230 300 230;
+  border-image-width: 23.8cqw 21cqw 27.4cqw 21cqw;
+  border-image-repeat: stretch;
+}
+
+.dialog__plaque {
+  position: absolute;
+  z-index: 2;
+  left: -2.7cqw;
+  top: -23.4cqw;
+  width: 105.4cqw;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+.dialog__title {
+  position: absolute;
+  z-index: 3;
+  left: 21.1cqw;
+  top: 0;
+  width: 57.7cqw;
+  height: 16.5cqw;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2cqw;
+  padding: 0 2cqw;
+  text-align: center;
+  font-size: clamp(1rem, 6.2cqw, 1.7rem);
+  line-height: 1.05;
+  color: #ffe7a8;
+  -webkit-text-stroke: 0.5cqw #3a0d0d;
+  paint-order: stroke fill;
+  text-shadow: 0 0.6cqw 0 #3a0d0d;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.dialog__close {
+  position: absolute;
+  z-index: 4;
+  right: -1.7cqw;
+  top: -4.8cqw;
+  width: max(40px, 11.9cqw);
+  height: max(40px, 11.9cqw);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  border-radius: 18%;
+}
+
+.dialog__close img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.dialog__close:active {
+  transform: translateY(2px) scale(0.96);
+}
+
+.dialog__close:focus-visible {
+  outline: 3px solid #ffe7a8;
+  outline-offset: 2px;
+}
+
+/* Content: inside the board, starting under the plaque; scrolls under the streamers */
+.dialog__body {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 20.4cqw 10.6cqw 0;
+  padding: 18cqw 1.2cqw 3cqw;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 231, 168, 0.5) transparent;
+}
+
+.dialog__body:last-child {
+  margin-bottom: 12.6cqw;
+}
+
+.dialog__foot {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  margin: 0 10.6cqw 12.6cqw;
+  padding: 10px 1.2cqw 2cqw;
+  border-top: 2px dashed rgba(255, 231, 168, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Light text on the dark board */
+.dialog .hint,
+.dialog .field__label,
+.dialog .settings__version,
+.dialog .slider__value,
+.dialog .arena-tile__mood {
+  color: rgba(244, 237, 226, 0.72);
+}
+
+.dialog .settings__heading,
+.dialog h3 {
+  color: #ffe7a8;
+}
+
+.dialog .settings__section,
+.dialog .profile__stats div {
+  border-color: rgba(255, 231, 168, 0.28);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.dialog a {
+  color: #ffd166;
+}
+
+.dialog .pack,
+.dialog .item,
+.dialog .wallet__row {
+  color: var(--ink);
+}
+
+/* Sizes per popup */
+.dlg-settings,
+.dlg-coin-shop,
+.dlg-wardrobe {
+  width: min(520px, 100%);
+}
+
+.dlg-wardrobe {
+  height: auto;
+}
+
+.dlg-wardrobe .dialog {
+  height: calc(100dvh - 16px - 23.4cqw);
+  max-height: none;
+}
+
+.dlg-item-popup,
+.dlg-edit-name,
+.dlg-confirm,
+.dlg-about-panel {
+  width: min(400px, 100%);
+}
+
+.dlg-wardrobe .dialog__body.wardrobe__body {
+  padding-top: 18cqw;
+}
+
+.dlg-about-panel .dialog__body {
+  align-items: center;
+  text-align: center;
+}
+
+/* ---------- Home backdrop: the pattern tile, repeated ---------- */
+
+.home-bg {
+  position: absolute;
+  inset: 0;
+  background-color: #1a2147;
+  background-image:
+    radial-gradient(ellipse at 50% 42%, rgba(120, 150, 230, 0.28), transparent 62%),
+    var(--ui-bg-tile);
+  background-repeat: no-repeat, repeat;
+  background-size:
+    100% 100%,
+    min(70vw, 420px) auto;
+  background-position:
+    center,
+    center top;
+}
+
+.home-bg > * {
+  display: none;
+}
+
+/* ---------- Coin shop cards (art from the shop sheet) ---------- */
+
+.coin-shop__balance {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.packs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pack {
+  padding: 6px 6px 8px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 2px solid rgba(255, 231, 168, 0.35);
+  color: #f4ede2;
+  overflow: visible;
+}
+
+.dialog .pack {
+  color: #f4ede2;
+}
+
+.pack__art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 360 / 486;
+  object-fit: cover;
+  border-radius: 10px;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+}
+
+.pack--wide,
+.pack--daily {
+  grid-column: 1 / -1;
+}
+
+.pack--wide .pack__art {
+  aspect-ratio: 480 / 405;
+}
+
+.pack--daily {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+.pack--daily .pack__art {
+  width: 38%;
+  flex: none;
+}
+
+.pack__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.pack--daily .pack__tag {
+  position: static;
+}
+
+/* ---------- Tile buttons (the art is the button) ---------- */
+
+.tile-btn {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 12px;
+  cursor: pointer;
+  line-height: 0;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+}
+
+.tile-btn .icon {
+  width: 48px;
+  height: 48px;
+  margin: 0;
+}
+
+.tile-btn:active {
+  transform: translateY(2px);
+}
+
+.tile-btn:focus-visible {
+  outline: 3px solid #ffe7a8;
+  outline-offset: 2px;
+}
+
+.hud__gear.tile-btn .icon {
+  width: 44px;
+  height: 44px;
+}
+
+/* ---------- Difficulty cards ---------- */
+
+.level-picker {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.level-card {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+  border-radius: 10px;
+  opacity: 0.55;
+  filter: grayscale(0.4);
+  transform: scale(0.94);
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease,
+    filter 0.15s ease;
+}
+
+.level-card img {
+  width: 100%;
+  height: auto;
+}
+
+.level-card--on {
+  opacity: 1;
+  filter: drop-shadow(0 0 6px rgba(255, 210, 63, 0.9));
+  transform: scale(1);
+}
+
+.level-card:focus-visible {
+  outline: 3px solid var(--coral);
+  outline-offset: 2px;
+}
+
+/* ---------- Google Play buttons ---------- */
+
+.profile__google {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.gplay-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+  width: min(100%, 300px);
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.4));
+}
+
+.gplay-btn img {
+  width: 100%;
+  height: auto;
+}
+
+.gplay-btn[aria-disabled="true"] {
+  opacity: 0.6;
+}
+
+.gplay-btn:active {
+  transform: translateY(2px);
+}
+
+/* Bigger medals in the standings */
+.standings__medal {
+  width: 34px;
+  height: 34px;
+}
+
+/* Results, first-run name and level-up use the frame too */
+.dlg-results,
+.dlg-name-gate,
+.dlg-levelup {
+  width: min(420px, 100%);
+}
+
+.dlg-results .standings__row {
+  color: var(--ink);
+}
+
+.results__round {
+  text-align: center;
+}
+
+.name-gate__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.name-gate__form .name-gate__logo {
+  align-self: center;
+}
+
+.name-gate__title {
+  margin: 0;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffe7a8;
+}
+
+.dlg-levelup .dialog__body {
+  align-items: center;
+  text-align: center;
 }

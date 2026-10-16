@@ -128,7 +128,23 @@ function record(amount: number, category: LedgerCategory, reason: string, extra:
   state.ledger.length = Math.min(state.ledger.length, MAX_LEDGER);
 }
 
+/** Everything a cloud save needs: the wallet, progress and ownership. */
+export type LocalSnapshot = LocalState;
+
 export const localEconomy = {
+  exportState(): LocalSnapshot {
+    return JSON.parse(JSON.stringify(state)) as LocalSnapshot;
+  },
+
+  /** Replaces the on-device progress (e.g. restored from Google Play). */
+  importState(snapshot: unknown): boolean {
+    const s = snapshot as Partial<LocalState> | null;
+    if (!s || s.v !== 1 || !Number.isInteger(s.coins) || !Number.isFinite(s.xp)) return false;
+    state = { ...fresh(), ...s, coins: Math.max(0, s.coins!), ledger: Array.isArray(s.ledger) ? s.ledger.slice(0, MAX_LEDGER) : [] };
+    save();
+    return true;
+  },
+
   catalog(): CatalogResponse {
     return {
       flags: { economy: true, shop: true, premiumCurrency: false, realMoneyPurchases: false },

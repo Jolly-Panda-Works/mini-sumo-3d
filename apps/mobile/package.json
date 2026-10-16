@@ -11,9 +11,10 @@
   "scripts": {
     "android:add": "cap add android",
     "android:assets": "capacitor-assets generate --android --iconBackgroundColor \"#2F5C8A\" --splashBackgroundColor \"#2F5C8A\"",
-    "android:sync": "cap sync android && npm run android:orientation",
+    "android:sync": "cap sync android && npm run android:orientation && npm run android:play-games",
     "android:open": "cap open android",
-    "android:orientation": "node scripts/orientation.mjs"
+    "android:orientation": "node scripts/orientation.mjs",
+    "android:play-games": "node scripts/play-games.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.0",

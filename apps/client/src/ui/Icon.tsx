@@ -13,9 +13,6 @@ export type IconName =
   | "easy"
   | "normal"
   | "hard"
-  | "close"
-  | "gplay-login"
-  | "gplay-in"
   | "arrow-left"
   | "arrow-right"
   | "arrow-up";

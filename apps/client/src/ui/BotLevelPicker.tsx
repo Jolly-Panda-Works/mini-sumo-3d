@@ -1,11 +1,10 @@
 import { BOT_LEVELS, type BotLevel } from "@mini-sumo/shared";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
-import { Icon } from "./Icon";
 
 const LABELS: Record<BotLevel, string> = { easy: "Easy", normal: "Normal", hard: "Hard" };
 
-/** Bot difficulty (saved in settings; used by training and private rooms). */
+/** Bot difficulty (saved in settings; used by training and private rooms), shown as art cards. */
 export function BotLevelPicker({ label = "Bots" }: { label?: string }) {
   const { botLevel } = useStore(settingsStore);
   return (
@@ -16,11 +15,11 @@ export function BotLevelPicker({ label = "Bots" }: { label?: string }) {
           type="button"
           role="radio"
           aria-checked={botLevel === level}
-          className={`level-picker__opt${botLevel === level ? " level-picker__opt--on" : ""}`}
+          aria-label={LABELS[level]}
+          className={`level-card${botLevel === level ? " level-card--on" : ""}`}
           onClick={() => settingsStore.update({ botLevel: level })}
         >
-          <Icon name={level} size={16} />
-          {LABELS[level]}
+          <img src={`${import.meta.env.BASE_URL}icons/${level}.webp`} alt="" width={160} height={160} draggable={false} />
         </button>
       ))}
     </div>
