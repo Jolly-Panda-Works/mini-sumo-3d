@@ -31,7 +31,7 @@ function yawFromAngle(angle: number): number {
  * smoothed for display; nothing here influences gameplay.
  */
 export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair, hairColor, face, outfit }: Props) {
-  const appearance = useMemo<Appearance>(() => ({ hair, hairColor, face, outfit }), [hair, hairColor, face, outfit]);
+  const appearance = useMemo<Appearance>(() => ({ hair, hairColor, face, outfit, avatar: 0 }), [hair, hairColor, face, outfit]);
   const color = PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]!.hex;
   const parts = useSumoParts();
   const tagRef = useRef<Sprite>(null);
