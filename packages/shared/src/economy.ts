@@ -189,6 +189,9 @@ export interface CatalogResponse {
 
 export interface ProfileResponse {
   accountId: string;
+  /** Display name and when the name / look were last changed (ISO time; "" if never). */
+  name?: string;
+  profileUpdatedAt?: string;
   balances: Record<Currency, number>;
   owned: string[];
   appearance: Appearance;
@@ -206,6 +209,20 @@ export interface ProfileResponse {
   level: LevelInfo;
   /** Free rewards already earned today (UTC) and the daily cap. */
   daily: { earned: number; cap: number; firstMatchBonusAvailable: boolean };
+}
+
+/**
+ * The device's copy of the profile, sent when the server is reachable again. Name and look:
+ * the newer side wins. XP and play stats: the higher value wins (progress is never lost).
+ */
+export interface ProfileSyncRequest {
+  name: string;
+  appearance: Appearance;
+  xp: number;
+  matches: number;
+  wins: number;
+  /** When the name / look were last changed on the device (ISO time). */
+  updatedAt: string;
 }
 
 export type LedgerCategory =

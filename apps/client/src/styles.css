@@ -5954,3 +5954,57 @@ button.is-pressed:not(:disabled):not([aria-disabled="true"]) {
 .dlg-settings-match .dialog {
   min-height: 0;
 }
+
+/* ======================================================================
+   Waiting for the server: home background, running sumo, no progress bar
+   ====================================================================== */
+
+.server-wait {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #1a2147;
+  background-image:
+    radial-gradient(ellipse at 50% 42%, rgba(120, 150, 230, 0.28), transparent 62%),
+    var(--ui-bg-tile);
+  background-repeat: no-repeat, repeat;
+  background-size:
+    100% 100%,
+    min(70vw, 420px) auto;
+  animation: overlay-in 0.25s ease-out;
+}
+
+.server-wait__runner {
+  height: min(26vh, 180px);
+  aspect-ratio: 142 / 180;
+  overflow: hidden;
+}
+
+.server-wait__runner img {
+  display: block;
+  height: 100%;
+  width: 2200%;
+  max-width: none;
+  animation: wait-run 0.92s steps(22) infinite;
+}
+
+@keyframes wait-run {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.server-wait__text {
+  margin: 0;
+  color: #ffd166;
+  font-weight: 900;
+  font-size: 1.1rem;
+  -webkit-text-stroke: 3px #3a1d05;
+  paint-order: stroke fill;
+}

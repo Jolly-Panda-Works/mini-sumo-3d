@@ -2,7 +2,7 @@ import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import {
+import { NAME_MAX_LENGTH,
   Currency,
   STARTER_ITEMS,
   restrictToOwned,
@@ -120,6 +120,8 @@ CREATE TABLE IF NOT EXISTS match_results (
 interface AccountRow {
   id: string;
   xp: number;
+  name?: string;
+  profile_updated_at?: string;
   appearance: string;
   matches: number;
   wins: number;
@@ -195,6 +197,9 @@ export class Economy {
     // Migration: XP for levels (added after the first schema).
     const columns = rows<{ name: string }>(this.db.prepare("PRAGMA table_info(accounts)").all());
     if (!columns.some((c) => c.name === "xp")) this.db.exec("ALTER TABLE accounts ADD COLUMN xp INTEGER NOT NULL DEFAULT 0");
+    // Migration: name and when the name / look last changed (profile sync from devices).
+    if (!columns.some((c) => c.name === "name")) this.db.exec("ALTER TABLE accounts ADD COLUMN name TEXT NOT NULL DEFAULT ''");
+    if (!columns.some((c) => c.name === "profile_updated_at")) this.db.exec("ALTER TABLE accounts ADD COLUMN profile_updated_at TEXT NOT NULL DEFAULT ''");
   }
 
   close(): void {
@@ -339,6 +344,8 @@ export class Economy {
     const earned = account.reward_day === today ? account.reward_day_total : 0;
     return {
       accountId,
+      name: account.name ?? "",
+      profileUpdatedAt: account.profile_updated_at ?? "",
       balances: { coins: this.balance(accountId, Currency.Coins), gems: this.balance(accountId, Currency.Gems) },
       owned: [...this.owned(accountId)],
       appearance: this.appearanceOf(accountId),
@@ -400,6 +407,34 @@ export class Economy {
       parsed = {};
     }
     return restrictToOwned(sanitizeAppearance(parsed), this.owned(accountId));
+  }
+
+  /**
+   * Merges a device's copy of the profile (sent when it reaches the server again).
+   * Name and look: the newer side wins (the look only with owned items). XP, matches and
+   * wins: the higher value wins, so progress made offline is kept. Level-up coins are not
+   * granted for synced XP (coins only come from bouts played on the server).
+   */
+  syncProfile(accountId: string, raw: unknown): ProfileResponse {
+    const body = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+    const account = this.account(accountId);
+    const at = typeof body.updatedAt === "string" && !Number.isNaN(Date.parse(body.updatedAt)) ? new Date(body.updatedAt) : null;
+    // Never trust a clock far in the future.
+    const clientAt = at && at.getTime() <= this.now().getTime() + 5 * 60_000 ? at.toISOString() : "";
+    const serverAt = account.profile_updated_at ?? "";
+    if (clientAt && clientAt > serverAt) {
+      const name = typeof body.name === "string" ? body.name.replace(/\s+/g, " ").trim().slice(0, NAME_MAX_LENGTH) : "";
+      const appearance = restrictToOwned(sanitizeAppearance(body.appearance), this.owned(accountId));
+      this.db
+        .prepare("UPDATE accounts SET name = ?, appearance = ?, profile_updated_at = ? WHERE id = ?")
+        .run(name || account.name || "", JSON.stringify(appearance), clientAt, accountId);
+    }
+    const count = (value: unknown, max: number) =>
+      typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.min(max, Math.floor(value))) : 0;
+    this.db
+      .prepare("UPDATE accounts SET xp = MAX(xp, ?), matches = MAX(matches, ?), wins = MAX(wins, ?) WHERE id = ?")
+      .run(count(body.xp, 50_000_000), count(body.matches, 10_000_000), count(body.wins, 10_000_000), accountId);
+    return this.profile(accountId);
   }
 
   /** Stores the equipped look; unowned options fall back to the default. */

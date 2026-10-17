@@ -136,3 +136,21 @@ Handled in `GameSession` (authoritative, so the same online and offline):
 - Effects are applied through body modifiers (`massScale`, `radiusScale`, `speedScale` on `SimBody`) used by the movement and collision systems, plus a shorter dash cooldown for Thunder.
 - Bots steer for the flag only after `botItemDelayMs[level]`, so players get the first chance.
 - Synced as `powerUp` / `powerUpMs` per player and `itemKind` / `itemX` / `itemY` on the room. The client draws the flag on the ring and a banner on the wrestler's back (`PowerUpFlags.tsx`) and plays the power-up sounds for your own pickups.
+
+
+## Profile: on the device first, synced with the server
+
+Name, picture/look, XP, level and play stats always work on the device (settings and the
+local wallet in localStorage), with or without a server.
+
+- When the server is reachable (at start, or when it comes back: the client re-checks
+  `/health` every 20 s between bouts), the device's copy is sent to `POST /api/profile/sync`.
+- Merge rules (`Economy.syncProfile`): name and look, the newer side wins (by the time they
+  were last changed; a clock far in the future is ignored; only owned items); XP, matches and
+  wins, the higher value wins, so progress made offline is never lost. Synced XP grants no
+  coins (level-up coins only come from bouts played on the server).
+- While online, every profile the server sends is merged back into the device's copy, so the
+  game can carry on offline at any time. If the server goes away between bouts, the game
+  switches to the device and keeps going.
+- While waiting for the server (the start-up check, or joining an online room) the client
+  shows the running-sumo screen (`ui/ServerWait.tsx`).

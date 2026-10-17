@@ -6,6 +6,11 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Profile on the device first: name, picture, XP, level and stats work and are saved without a server; when the server is reachable (or comes back) they are synced (newer name/look wins, higher XP and stats win). New `POST /api/profile/sync`. The game re-checks the server every 20 s between bouts and switches between online and on-device play by itself.
+- Waiting screen while connecting to the server: the home background with the running sumo, no progress bar.
+
 ### Fixed
 
 - UI animations on phones: taps now show a visible press (touch :active was too brief), and popup and button animations also play when the device has "remove animations" / reduced motion on.

@@ -96,7 +96,7 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init: RequestInit = {}, auth = true): Promise<T> {
+export async function request<T>(path: string, init: RequestInit = {}, auth = true): Promise<T> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (auth) headers.Authorization = `Bearer ${(await ensureAccount()).token}`;
   const response = await fetch(`${apiBase()}${path}`, { ...init, headers, cache: "no-store" });
@@ -130,6 +130,8 @@ export function accountToken(): string | undefined {
 
 function applyProfile(profile: ProfileResponse): void {
   economyStore.update({ profile, status: "ready", error: null });
+  // Online: keep the device's copy of the progress up to date (used when offline).
+  if (!isLocal()) localEconomy.mergeProgress({ xp: profile.level.xp, matches: profile.stats.matches, wins: profile.stats.wins });
   try {
     window.localStorage.setItem(OWNED_CACHE_KEY, JSON.stringify(profile.owned));
   } catch {
@@ -147,6 +149,10 @@ function applyProfile(profile: ProfileResponse): void {
 export function initLocalEconomy(): void {
   economyStore.update({ catalog: localEconomy.catalog(), status: "ready", error: null });
   applyProfile(localEconomy.profile());
+}
+
+export function applyServerProfile(profile: ProfileResponse): void {
+  applyProfile(profile);
 }
 
 export async function loadEconomy(): Promise<void> {

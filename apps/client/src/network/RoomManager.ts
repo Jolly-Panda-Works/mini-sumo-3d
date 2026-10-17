@@ -18,7 +18,8 @@ import {
 import { settingsStore } from "../settings";
 import { wrapColyseusRoom, type GameConnection } from "./connection";
 import { LocalConnection, type LocalRoomOptions } from "./LocalConnection";
-import { detectNetworkMode, networkStore } from "./networkMode";
+import { detectNetworkMode, networkStore, probeServer, serverConfigured } from "./networkMode";
+import { syncProfile } from "./profileSync";
 import { accountToken, economyStore, ensureAccount, initLocalEconomy, loadEconomy, refreshProfile, setLastResult } from "./economyClient";
 import { localEconomy } from "./localEconomy";
 
@@ -146,9 +147,34 @@ class RoomManager {
     this.modeReady = detectNetworkMode(this.serverUrl).then((mode) => {
       networkStore.set({ mode });
       if (mode === "offline") console.info("[mini-sumo] No server: rooms run on this device.");
-      else void loadEconomy();
+      else void loadEconomy().then(() => syncProfile());
       if (mode === "offline") initLocalEconomy();
+      this.watchServer();
     });
+  }
+
+  /**
+   * Keeps checking the server between bouts: when it comes back, the game goes online and
+   * the device's profile is synced; when it goes away, everything continues on the device.
+   */
+  private watchServer(): void {
+    if (!serverConfigured()) return;
+    window.setInterval(async () => {
+      if (this._room || document.hidden) return;
+      const reachable = await probeServer(this.serverUrl);
+      if (this._room) return;
+      const mode = networkStore.get().mode;
+      if (reachable && mode === "offline") {
+        console.info("[mini-sumo] Server is back: going online.");
+        networkStore.set({ mode: "online" });
+        await loadEconomy();
+        await syncProfile();
+      } else if (!reachable && mode === "online") {
+        console.info("[mini-sumo] Server unreachable: continuing on this device.");
+        networkStore.set({ mode: "offline" });
+        initLocalEconomy();
+      }
+    }, 20_000);
   }
 
   /** Resolves once the online/offline decision has been made. */

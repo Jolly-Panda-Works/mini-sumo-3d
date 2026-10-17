@@ -19,6 +19,7 @@ import { CoinShop } from "./ui/CoinShop";
 import { LevelUpPopup } from "./ui/LevelUpPopup";
 import { DevButton, DevPanel } from "./ui/DevPanel";
 import { NoticePopup } from "./ui/NoticePopup";
+import { ServerWait } from "./ui/ServerWait";
 import { audio } from "./audio/AudioManager";
 import { ProfilePanel } from "./ui/ProfilePanel";
 import { music } from "./audio/Music";
@@ -164,6 +165,7 @@ export function App() {
         <DevPanel />
         {!inRoom && !needsName && <DevButton />}
         <NoticePopup />
+        <ServerWait />
       </div>
     </div>
   );

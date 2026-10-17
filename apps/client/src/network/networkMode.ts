@@ -28,6 +28,14 @@ export async function detectNetworkMode(serverUrl: string): Promise<NetworkMode>
   return (await probeServer(serverUrl)) ? "online" : "offline";
 }
 
+/** False when this build can never use a server (offline-only, or no server address). */
+export function serverConfigured(): boolean {
+  const configured = String(import.meta.env.VITE_NETWORK_MODE ?? "auto").trim().toLowerCase();
+  if (configured === "offline") return false;
+  const hasServerUrl = Boolean((import.meta.env.VITE_SERVER_URL as string | undefined)?.trim());
+  return !(import.meta.env.PROD && !hasServerUrl);
+}
+
 export async function probeServer(serverUrl: string, timeoutMs = 2500): Promise<boolean> {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), timeoutMs);

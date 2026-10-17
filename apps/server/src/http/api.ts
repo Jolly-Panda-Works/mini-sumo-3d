@@ -12,6 +12,7 @@ import type { PaymentService } from "../economy/payments.js";
  *   GET  /api/ledger?limit=50    transaction history                     (Bearer token)
  *   POST /api/shop/purchase      { itemId, idempotencyKey }              (Bearer token)
  *   PUT  /api/profile/appearance { hair, hairColor, face, outfit }       (Bearer token)
+ *   POST /api/profile/sync { name, appearance, xp, matches, wins, updatedAt } (Bearer token)
  *   POST /api/payments/checkout  always refused (no provider)            (Bearer token)
  */
 
@@ -154,6 +155,14 @@ export function createApiHandler(economy: Economy | null, payments: PaymentServi
         const body = await readJson(req);
         if (!body) send(res, 400, { error: "bad_request", message: "Invalid request." });
         else send(res, 200, { appearance: economy.saveAppearance(accountId, body) });
+      } else if (route === "POST /api/profile/sync") {
+        if (!writeLimiter.allow(accountId)) {
+          send(res, 429, { error: "rate_limited", message: "Slow down a little." });
+        } else {
+          const body = await readJson(req);
+          if (!body) send(res, 400, { error: "bad_request", message: "Invalid request." });
+          else send(res, 200, economy.syncProfile(accountId, body));
+        }
       } else if (route === "POST /api/payments/checkout") {
         const body = (await readJson(req)) as Record<string, unknown> | null;
         const result = await payments.createCheckout(accountId, body?.productId);

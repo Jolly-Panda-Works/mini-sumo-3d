@@ -211,6 +211,25 @@ export const localEconomy = {
     return true;
   },
 
+  // ------------------------------------------------------------- profile sync
+
+  /** XP and play stats on this device (sent to the server when it's reachable). */
+  progress(): { xp: number; matches: number; wins: number } {
+    return { xp: state.xp, matches: state.matches, wins: state.wins };
+  },
+
+  /** Takes the server's progress where it's higher (never lowers what's on the device). */
+  mergeProgress(server: { xp: number; matches: number; wins: number }): void {
+    const xp = Math.max(state.xp, Math.floor(server.xp) || 0);
+    const matches = Math.max(state.matches, Math.floor(server.matches) || 0);
+    const wins = Math.max(state.wins, Math.floor(server.wins) || 0);
+    if (xp === state.xp && matches === state.matches && wins === state.wins) return;
+    state.xp = xp;
+    state.matches = matches;
+    state.wins = wins;
+    save();
+  },
+
   // ------------------------------------------------------------- dev tools
 
   /** Dev mode: add (or remove) coins. */
