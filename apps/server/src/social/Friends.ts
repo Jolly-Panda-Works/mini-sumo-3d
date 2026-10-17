@@ -166,7 +166,16 @@ export class Friends {
     if (typeof otherId !== "string" || !this.relation(accountId, otherId)) throw new EconomyError("unknown_friend", "Not on your friends list.");
     const account = this.economy.publicAccount(otherId);
     if (!account) throw new EconomyError("unknown_friend", "Not on your friends list.");
-    return { accountId: otherId, name: account.name, avatar: account.avatar, level: account.level, online: this.isOnline(otherId), matches: account.matches, wins: account.wins };
+    return {
+      accountId: otherId,
+      name: account.name,
+      avatar: account.avatar,
+      level: account.level,
+      online: this.isOnline(otherId),
+      matches: account.matches,
+      wins: account.wins,
+      appearance: account.appearance,
+    };
   }
 
   // ------------------------------------------------------------ game invites

@@ -6466,3 +6466,32 @@ button.code-field {
 .art--friends-wide {
   width: 150px;
 }
+
+/* Friend profile: their wrestler, with their picture in the corner */
+.friend-profile__hero {
+  position: relative;
+  width: 100%;
+}
+
+.wrestler-preview {
+  width: 100%;
+  aspect-ratio: 1 / 0.9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(#7cb1e6, #b8d8f5);
+  border: 3px solid #3a1d05;
+}
+
+.friend-profile__hero .friend-profile__avatar {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+}
+
+/* Notices sit above every other popup */
+.popup-layer > .overlay--notice {
+  z-index: 2;
+}

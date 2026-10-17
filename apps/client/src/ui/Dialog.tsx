@@ -6,7 +6,7 @@ const BASE = import.meta.env.BASE_URL;
 
 let layer: HTMLElement | null = null;
 /** One layer for all popups, at the end of <body>; later popups stack on earlier ones. */
-function popupLayer(): HTMLElement {
+export function popupLayer(): HTMLElement {
   if (!layer) {
     layer = document.createElement("div");
     layer.id = "popup-layer";

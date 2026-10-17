@@ -4,6 +4,8 @@ import { friendProfile, removeFriend } from "../network/friendsClient";
 import { showWarning } from "../uiStore";
 import { avatarSrc } from "./Avatar";
 import { Dialog } from "./Dialog";
+import { WrestlerPreview } from "./WrestlerPreview";
+import { sanitizeAppearance } from "@mini-sumo/shared";
 import { PlayButton } from "./FriendsPanel";
 
 /** A friend's profile: picture, name, level, bouts and wins; play or remove. */
@@ -33,7 +35,10 @@ export function FriendProfilePopup({ accountId, onClose }: { accountId: string; 
       {error && <p className="hint hint--center">{error}</p>}
       {profile && (
         <div className="friend-profile__body">
-          <img className="friend-profile__avatar" src={avatarSrc(profile.avatar)} alt="" width={160} height={160} />
+          <div className="friend-profile__hero">
+            <WrestlerPreview appearance={sanitizeAppearance(profile.appearance)} className="friend-profile__wrestler" />
+            <img className="friend-profile__avatar" src={avatarSrc(profile.avatar)} alt="" width={160} height={160} />
+          </div>
           <p className="friend-profile__name">{profile.name}</p>
           <p className="friend-profile__status">
             Level {profile.level} · {profile.online ? "Online" : "Offline"}

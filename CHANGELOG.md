@@ -6,6 +6,14 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- A friend's profile shows their wrestler (3D, with their look), with their picture in the corner.
+
+### Fixed
+
+- Warning / message popups and the level-up popup opened behind other open popups (e.g. "Remove friend?" behind the friend's profile); they now open on top.
+
 ### Changed
 
 - Welcome popup in its own frame (WELCOME sign, question, name and SAVE in the board).

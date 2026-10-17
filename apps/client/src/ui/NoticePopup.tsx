@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
+import { popupLayer } from "./Dialog";
 import { audio } from "../audio/AudioManager";
 import { useStore } from "../store";
 import { uiStore, type Notice } from "../uiStore";
@@ -26,7 +28,8 @@ export function NoticePopup() {
   const ui = useStore(uiStore);
   const notice = ui.notices[0];
   if (!notice) return null;
-  return <NoticeView key={notice.id} notice={notice} />;
+  // In the popup layer, after any open popups, so it always shows on top of them.
+  return createPortal(<NoticeView key={notice.id} notice={notice} />, popupLayer());
 }
 
 function NoticeView({ notice }: { notice: Notice }) {

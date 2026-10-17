@@ -54,6 +54,7 @@ describe("friends", () => {
     const c = make("C");
     friends.request(a, friends.codeOf(b));
     expect(friends.profile(b, a).name).toBe("A");
+    expect(friends.profile(b, a).appearance.hair).toBe(0);
     expect(() => friends.profile(c, a)).toThrow();
     friends.respond(b, a, false);
     expect(friends.list(a).outgoing).toHaveLength(0);

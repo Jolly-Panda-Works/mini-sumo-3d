@@ -249,6 +249,8 @@ export interface FriendsResponse {
 export interface FriendProfile extends FriendEntry {
   matches: number;
   wins: number;
+  /** Their wrestler's look, to show the character on their profile. */
+  appearance: Appearance;
 }
 
 /** An invitation to join a friend's room. */

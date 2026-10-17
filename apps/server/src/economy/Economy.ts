@@ -212,12 +212,14 @@ export class Economy {
   }
 
   /** What others may see of an account (friends list and profile). */
-  publicAccount(accountId: string): { name: string; avatar: number; level: number; matches: number; wins: number } | null {
+  publicAccount(accountId: string): { name: string; avatar: number; level: number; matches: number; wins: number; appearance: Appearance } | null {
     const account = row<AccountRow>(this.db.prepare("SELECT * FROM accounts WHERE id = ?").get(accountId));
     if (!account) return null;
+    const appearance = this.appearanceOf(accountId);
     return {
       name: account.name || "Wrestler",
-      avatar: this.appearanceOf(accountId).avatar,
+      appearance,
+      avatar: appearance.avatar,
       level: levelFromXp(account.xp).level,
       matches: account.matches,
       wins: account.wins,

@@ -26,7 +26,7 @@ import { useStore } from "../store";
 import { setWardrobeOpen } from "../uiStore";
 
 /** Slowly turning, idling preview of the player's wrestler. */
-function PreviewSumo({ appearance, color }: { appearance: Appearance; color: string }) {
+export function PreviewSumo({ appearance, color }: { appearance: Appearance; color: string }) {
   const parts = useSumoParts();
   useFrame((frame) => {
     const t = frame.clock.elapsedTime;

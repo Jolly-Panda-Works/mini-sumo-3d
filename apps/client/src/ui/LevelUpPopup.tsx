@@ -1,3 +1,5 @@
+import { createPortal } from "react-dom";
+import { popupLayer } from "./Dialog";
 import { useEffect, useState } from "react";
 import { audio } from "../audio/AudioManager";
 import { uiStore, showLevelUp } from "../uiStore";
@@ -29,7 +31,7 @@ export function LevelUpPopup() {
   if (!levelUp) return null;
   const close = () => showLevelUp(null);
 
-  return (
+  return createPortal(
     <div className="overlay" onClick={(e) => e.target === e.currentTarget && close()}>
       <section className="levelup-frame" role="alertdialog" aria-label={`Level up! You reached level ${levelUp.to}`}>
         <div className="levelup-frame__content">
@@ -50,6 +52,7 @@ export function LevelUpPopup() {
           </button>
         </div>
       </section>
-    </div>
+    </div>,
+    popupLayer(),
   );
 }
