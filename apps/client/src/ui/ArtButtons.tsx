@@ -1,0 +1,72 @@
+import type { ReactNode } from "react";
+import { Coins } from "./Coins";
+
+const BASE = import.meta.env.BASE_URL;
+
+/**
+ * Buttons drawn from the art sheet. They all use the same scale, so their sizes keep the
+ * art's proportions (BUY is wider than NOT NOW, COMING SOON is slimmer).
+ */
+type Props = {
+  onClick?: () => void;
+  label: string;
+  disabled?: boolean;
+  ariaDisabled?: boolean;
+  sfx?: "none";
+  className?: string;
+};
+
+function ArtButton({ art, onClick, label, disabled, ariaDisabled, sfx, className = "", children }: Props & { art: string; children?: ReactNode }) {
+  return (
+    <button
+      type="button"
+      className={`art ${className}`}
+      onClick={onClick}
+      aria-label={label}
+      disabled={disabled}
+      aria-disabled={ariaDisabled || undefined}
+      data-sfx={sfx}
+    >
+      <img src={`${BASE}ui/${art}.webp`} alt="" draggable={false} />
+      {children}
+    </button>
+  );
+}
+
+/** BUY with the price in its dark field. */
+export function BuyButton({ price, ...props }: Props & { price: number }) {
+  return (
+    <ArtButton art="btn-buy" className="art--buy" {...props}>
+      <span className="art--buy__price">
+        <Coins amount={price} />
+      </span>
+    </ArtButton>
+  );
+}
+
+export function NotNowButton(props: Props) {
+  return <ArtButton art="btn-not-now" className="art--not-now" {...props} />;
+}
+
+export function ComingSoonButton(props: Props) {
+  return <ArtButton art="btn-coming-soon" className="art--coming-soon" {...props} />;
+}
+
+export function AboutButton(props: Props) {
+  return <ArtButton art="btn-about" className="art--about" {...props} />;
+}
+
+export function FreeLabel({ className = "" }: { className?: string }) {
+  return <img className={`art-label-free ${className}`} src={`${BASE}ui/label-free.webp`} alt="Free" draggable={false} />;
+}
+
+/** The vibration switch from the art: red is off, green is on. */
+export function VibrationToggle({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {
+  return (
+    <div className="art-toggle" role="radiogroup" aria-label="Vibration">
+      <img src={`${BASE}ui/toggle-vibration.webp`} alt="" draggable={false} />
+      <button type="button" role="radio" aria-checked={!on} aria-label="Vibration off" className={`art-toggle__off${on ? "" : " art-toggle--on"}`} onClick={() => onChange(false)} />
+      <button type="button" role="radio" aria-checked={on} aria-label="Vibration on" className={`art-toggle__on${on ? " art-toggle--on" : ""}`} onClick={() => onChange(true)} />
+    </div>
+  );
+}

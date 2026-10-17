@@ -3,6 +3,7 @@ import { settingsStore, type JoystickMode, type TouchMode } from "../settings";
 import { useStore } from "../store";
 import { setAboutOpen, setSettingsOpen } from "../uiStore";
 import { Dialog } from "./Dialog";
+import { AboutButton, VibrationToggle } from "./ArtButtons";
 import { Icon, type IconName } from "./Icon";
 
 function Segmented<T extends string>({
@@ -79,9 +80,7 @@ export function SettingsPanel() {
           <div className="settings__about">
             <span />
             <span className="settings__version">{version ? `Version ${version}` : ""}</span>
-            <button className="btn settings__about-btn" onClick={() => setAboutOpen(true)}>
-              About
-            </button>
+            <AboutButton className="settings__about-btn" label="About" onClick={() => setAboutOpen(true)} />
           </div>
         )
       }
@@ -117,10 +116,10 @@ export function SettingsPanel() {
             ]}
             onChange={(joystick) => settingsStore.update({ joystick })}
           />
-          <label className="toggle">
-            <input type="checkbox" checked={settings.vibration} onChange={(e) => settingsStore.update({ vibration: e.target.checked })} />
-            <span>Vibration on dash and hits</span>
-          </label>
+          <div className="field">
+            <span className="field__label">Vibration on dash and hits</span>
+            <VibrationToggle on={settings.vibration} onChange={(vibration) => settingsStore.update({ vibration })} />
+          </div>
         </section>
       </div>
     </Dialog>

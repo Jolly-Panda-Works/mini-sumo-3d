@@ -8,6 +8,7 @@ import { useStore } from "../store";
 import { Coins } from "./Coins";
 import { BotLevelPicker } from "./BotLevelPicker";
 import { Dialog } from "./Dialog";
+import { FreeLabel } from "./ArtButtons";
 import { Icon } from "./Icon";
 import { pushToast } from "../uiStore";
 
@@ -105,7 +106,7 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
             >
               <img className="arena-tile__art" src={arenaImage(arena.id)} alt="" width={960} height={536} decoding="async" />
               {soon && <span className="arena-tile__badge">Coming soon</span>}
-              {free && <span className="arena-tile__badge arena-tile__badge--free">Free</span>}
+              {free && <FreeLabel className="arena-tile__free" />}
               {locked && <span className="arena-tile__badge">Level {arena.requires.level}</span>}
               <div className="arena-tile__body">
                 <h3 className="arena-tile__name">{arena.name}</h3>

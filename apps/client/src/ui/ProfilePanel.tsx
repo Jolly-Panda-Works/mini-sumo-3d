@@ -5,6 +5,7 @@ import { settingsStore } from "../settings";
 import { useStore } from "../store";
 import { pushToast, setProfileOpen } from "../uiStore";
 import { Dialog } from "./Dialog";
+import { BuyButton, NotNowButton } from "./ArtButtons";
 import { avatarSrc } from "./Avatar";
 import { AVATARS, cosmeticItemId, cosmeticPrice } from "@mini-sumo/shared";
 import { buyItem, ownedItems } from "../network/economyClient";
@@ -219,18 +220,15 @@ function AvatarPicker({ onPicked }: { onPicked: () => void }) {
           className="avatar-buy"
           hideClose
           footer={
-            <div className="row">
-              <button className="btn btn--grow" onClick={() => setPending(null)}>
-                Not now
-              </button>
-              <button
-                className="btn btn--primary btn--grow"
-                aria-disabled={balance < price}
-                data-sfx={balance < price ? undefined : "none"}
+            <div className="art-row">
+              <NotNowButton label="Not now" onClick={() => setPending(null)} />
+              <BuyButton
+                price={price}
+                label={`Buy this picture for ${price} Sumo Coins`}
+                ariaDisabled={balance < price}
+                sfx={balance < price ? undefined : "none"}
                 onClick={() => (balance < price ? setError("Not enough Sumo Coins.") : void buy())}
-              >
-                Buy · <Coins amount={price} />
-              </button>
+              />
             </div>
           }
         >

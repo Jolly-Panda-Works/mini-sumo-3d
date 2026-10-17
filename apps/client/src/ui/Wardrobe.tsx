@@ -16,6 +16,7 @@ import {
 import { buyItem, economyStore, ownedItems, saveAppearanceRemote } from "../network/economyClient";
 import { Coins } from "./Coins";
 import { Dialog } from "./Dialog";
+import { BuyButton, ComingSoonButton, NotNowButton } from "./ArtButtons";
 import { audio } from "../audio/AudioManager";
 import { pushToast } from "../uiStore";
 import { SumoModel, useSumoParts } from "../game/SumoModel";
@@ -128,23 +129,20 @@ function ItemPopup({
       className="item-popup"
       hideClose
       footer={
-        <div className="row">
-          <button className="btn btn--grow" onClick={onClose}>
-            Not now
-          </button>
-          <button
-            className="btn btn--primary btn--grow"
-            disabled={!canBuy || busy}
-            aria-disabled={!affordable}
-            data-sfx={affordable ? "none" : undefined}
-            onClick={() => (affordable ? void buy() : pushToast("Not enough Sumo Coins", "info"))}
-          >
-            {!canBuy ? "Coming soon" : busy ? "Buying…" : (
-              <>
-                Buy · <Coins amount={item.price} />
-              </>
-            )}
-          </button>
+        <div className="art-row">
+          <NotNowButton label="Not now" onClick={onClose} />
+          {canBuy ? (
+            <BuyButton
+              price={item.price}
+              label={`Buy ${item.name} for ${item.price} Sumo Coins`}
+              disabled={busy}
+              ariaDisabled={!affordable}
+              sfx={affordable ? "none" : undefined}
+              onClick={() => (affordable ? void buy() : pushToast("Not enough Sumo Coins", "info"))}
+            />
+          ) : (
+            <ComingSoonButton label="Buying is coming soon" ariaDisabled onClick={() => pushToast("Coming soon", "info")} />
+          )}
         </div>
       }
     >

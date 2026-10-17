@@ -4353,3 +4353,271 @@ dl.profile__stats {
 .dlg-avatar-picker {
   width: min(460px, 100%);
 }
+
+/* ======================================================================
+   Results scoreboard (public/ui/results-board.webp, 700×950)
+   ====================================================================== */
+
+.results-board {
+  position: relative;
+  width: min(92vw, 400px, calc((100dvh - 24px) * 700 / 950));
+  aspect-ratio: 700 / 950;
+  background: var(--ui-results-board) center / 100% 100% no-repeat;
+  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.35));
+  color: #3a1d05;
+  container-type: inline-size;
+}
+
+.results-board__title {
+  position: absolute;
+  left: 26.3%;
+  top: 4.3%;
+  width: 47.6%;
+  height: 7.4%;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  font-size: clamp(0.9rem, 5.2cqw, 1.4rem);
+  font-weight: 900;
+  color: #8e1f1f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.results-board__row {
+  position: absolute;
+  left: 30.9%;
+  width: 56%;
+  height: 7.1%;
+  display: flex;
+  align-items: center;
+  gap: 2.2cqw;
+  padding: 0 2cqw;
+}
+
+.results-board__avatar {
+  flex: none;
+  height: 82%;
+  width: auto;
+  aspect-ratio: 1;
+  border-radius: 1.2cqw;
+  object-fit: cover;
+  border: 0.5cqw solid #3a1d05;
+}
+
+.results-board__name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 800;
+  font-size: clamp(0.72rem, 4cqw, 1rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.results-board__row--you .results-board__name {
+  color: #8e1f1f;
+}
+
+.results-board__note {
+  flex: none;
+  font-size: clamp(0.58rem, 2.9cqw, 0.75rem);
+  font-weight: 800;
+  color: rgba(58, 29, 5, 0.6);
+}
+
+.results-board__prize {
+  position: absolute;
+  left: 40.1%;
+  top: 61.6%;
+  width: 37.5%;
+  height: 6.9%;
+  display: grid;
+  place-items: center;
+  font-size: clamp(0.95rem, 5.5cqw, 1.4rem);
+  font-weight: 900;
+  color: #3a1d05;
+}
+
+.results-board__bottom {
+  position: absolute;
+  left: 10.9%;
+  top: 75.5%;
+  width: 78.4%;
+  height: 18.3%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4cqw;
+  padding: 0 2cqw;
+}
+
+.results-board__buttons {
+  display: flex;
+  gap: 3cqw;
+  width: 100%;
+  justify-content: center;
+}
+
+.results-board__buttons .art-btn {
+  flex: 0 1 46%;
+}
+
+.results-board__info {
+  margin: 0;
+  color: #f4ede2;
+  font-size: clamp(0.62rem, 3cqw, 0.8rem);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ======================================================================
+   Art buttons from the sheet, all at one scale so their sizes keep the
+   art's proportions (BUY 439 px wide, NOT NOW 373, COMING SOON 371 × 113…)
+   ====================================================================== */
+
+:root {
+  --art-scale: 0.36;
+}
+
+.art {
+  position: relative;
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+}
+
+.art img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.art:active {
+  transform: translateY(2px);
+}
+
+.art:focus-visible {
+  outline: 3px solid #ffe7a8;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.art[aria-disabled="true"] img,
+.art:disabled img {
+  filter: grayscale(0.5) brightness(0.85);
+}
+
+.art--buy {
+  width: calc(439px * var(--art-scale));
+}
+
+.art--not-now {
+  width: calc(373px * var(--art-scale));
+}
+
+.art--coming-soon {
+  width: calc(371px * var(--art-scale));
+}
+
+.art--about {
+  width: calc(321px * var(--art-scale));
+}
+
+/* The price in BUY's dark field */
+.art--buy__price {
+  position: absolute;
+  left: 52.8%;
+  top: 29.9%;
+  width: 37.9%;
+  height: 39.5%;
+  display: grid;
+  place-items: center;
+  color: #ffe7a8;
+  font-size: 0.85rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.art--buy__price .coins__img {
+  display: none;
+}
+
+.art-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.art-label-free {
+  width: calc(160px * var(--art-scale));
+  height: auto;
+}
+
+.arena-tile__free {
+  position: absolute;
+  top: 10px;
+  right: 8px;
+  z-index: 2;
+}
+
+.pack__free {
+  width: calc(160px * var(--art-scale));
+}
+
+.pack__soon {
+  width: 100%;
+  max-width: calc(371px * var(--art-scale));
+  align-self: center;
+}
+
+/* Vibration switch: red = off, green = on; the unselected half is dimmed */
+.art-toggle {
+  position: relative;
+  width: calc(389px * var(--art-scale));
+  line-height: 0;
+}
+
+.art-toggle img {
+  width: 100%;
+  height: auto;
+}
+
+.art-toggle button {
+  position: absolute;
+  top: 24%;
+  height: 52%;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: rgba(20, 16, 34, 0.55);
+  cursor: pointer;
+}
+
+.art-toggle__off {
+  left: 34%;
+  width: 22%;
+}
+
+.art-toggle__on {
+  left: 63%;
+  width: 22%;
+}
+
+.art-toggle button.art-toggle--on {
+  background: transparent;
+  box-shadow: 0 0 0 2px #ffe7a8;
+}
+
+.art-toggle button:focus-visible {
+  outline: 3px solid #ffe7a8;
+  outline-offset: 2px;
+}

@@ -9,6 +9,7 @@ import { useStore } from "../store";
 import { setShopOpen } from "../uiStore";
 import { Coins } from "./Coins";
 import { Dialog } from "./Dialog";
+import { ComingSoonButton, FreeLabel } from "./ArtButtons";
 
 /** Coin shop. Packs show their coin amount; buying coins is coming soon. */
 export function CoinShop() {
@@ -44,7 +45,7 @@ export function CoinShop() {
         <li className="pack pack--daily">
           <img className="pack__art" src={`${base}coins/daily.webp`} alt="" width={360} height={486} />
           <div className="pack__info">
-            <span className="pack__tag pack__tag--free">Free every day</span>
+            <FreeLabel className="pack__free" />
             <p className="pack__name">Daily coins</p>
             <p className="pack__coins">
               <Coins amount={DAILY_GIFT_COINS} />
@@ -62,14 +63,12 @@ export function CoinShop() {
             <p className="pack__coins">
               <Coins amount={pack.coins} />
             </p>
-            <button
-              className="btn pack__btn"
-              aria-disabled="true"
-              aria-label={`${pack.name}, ${pack.coins} Sumo Coins: coming soon`}
+            <ComingSoonButton
+              className="pack__soon"
+              ariaDisabled
+              label={`${pack.name}, ${pack.coins} Sumo Coins: coming soon`}
               onClick={() => pushToast("Buying coins is coming soon", "info")}
-            >
-              Coming soon
-            </button>
+            />
           </li>
         ))}
       </ul>

@@ -8,6 +8,11 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Results use the new scoreboard frame: the headline on the top plaque, the four places (picture, name, status), the coins won in the prize panel, and the buttons with XP and balance in the dark area.
+- New art buttons, all at one scale so they keep the art's proportions: BUY (with the price in its field), NOT NOW, COMING SOON and ABOUT; the FREE label on the Training card and the daily coins; the vibration switch (red off, green on) in settings.
+
+### Changed
+
 - Settings: selected options are blue with white text (white on yellow was unreadable).
 - Profile: tapping the picture opens a picture picker popup.
 - The coin frame always keeps its proportions (it was stretched with the amount outside it); customise and the shop use it too, and in the shop it stays fixed under the title while the packs scroll.
