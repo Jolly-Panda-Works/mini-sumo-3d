@@ -5880,3 +5880,25 @@ button:not(:disabled):not([aria-disabled="true"]):active {
 .dev-fab {
   pointer-events: auto;
 }
+
+/* Settings: version text on the left, About on the right */
+.settings__about.settings__about--row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings__about--row .settings__version {
+  color: rgba(244, 237, 226, 0.75);
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-align: left;
+  user-select: none;
+}
+
+.settings__about--row .settings__about-btn {
+  justify-self: auto;
+  margin-left: auto;
+}

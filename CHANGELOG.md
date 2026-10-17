@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Settings: the version is plain text again (no frame), on the left, with About on the right.
+
+### Changed
+
 - Nested popups are as wide as the first popup; About's content is centred.
 - Settings: joystick buttons side by side in the centre; the vibration switch centred.
 - Coin shop: no balance strip.

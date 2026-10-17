@@ -89,30 +89,7 @@ export function SettingsPanel() {
           >
             <img src={`${import.meta.env.BASE_URL}ui/btn-leave.webp`} alt="" width={503} height={139} draggable={false} />
           </button>
-        ) : (
-          <div className="settings__about">
-            <AboutButton className="settings__about-btn" label="About" onClick={() => setAboutOpen(true)} />
-            {version && (
-              <span
-                className="version-label"
-                aria-label={`Version ${version}`}
-                onClick={() => {
-                  versionTaps += 1;
-                  window.clearTimeout(versionTimer);
-                  versionTimer = window.setTimeout(() => (versionTaps = 0), 1500);
-                  if (versionTaps >= 7) {
-                    versionTaps = 0;
-                    setDevEnabled(true);
-                    close();
-                    setDevOpen(true);
-                  }
-                }}
-              >
-                <span className="version-label__value">{version}</span>
-              </span>
-            )}
-          </div>
-        )
+        ) : undefined
       }
     >
       {inRoom && <p className="hint">The match keeps going while this is open.</p>}
@@ -154,6 +131,27 @@ export function SettingsPanel() {
           </div>
         </section>
       </div>
+      {!inRoom && (
+        <div className="settings__about settings__about--row">
+          <span
+            className="settings__version"
+            onClick={() => {
+              versionTaps += 1;
+              window.clearTimeout(versionTimer);
+              versionTimer = window.setTimeout(() => (versionTaps = 0), 1500);
+              if (versionTaps >= 7) {
+                versionTaps = 0;
+                setDevEnabled(true);
+                close();
+                setDevOpen(true);
+              }
+            }}
+          >
+            {version ? `Version ${version}` : ""}
+          </span>
+          <AboutButton className="settings__about-btn" label="About" onClick={() => setAboutOpen(true)} />
+        </div>
+      )}
     </Dialog>
   );
 }
