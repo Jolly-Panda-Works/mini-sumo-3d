@@ -6,7 +6,10 @@ import { economyStore } from "../network/economyClient";
 import { Coins } from "./Coins";
 import { Icon } from "./Icon";
 import { Dialog } from "./Dialog";
+import { FriendRow } from "./FriendsPanel";
+import { friendsAvailable, friendsStore, inviteFriend, loadFriends } from "../network/friendsClient";
 import { useStore } from "../store";
+import { pushToast } from "../uiStore";
 import { PlayerBadge } from "./PlayerBadge";
 
 export function Lobby() {
@@ -163,7 +166,45 @@ export function Lobby() {
           </button>
         )}
 
+        {!offline && <InviteFriends roomId={session.roomId} />}
         {paid && <p className="hint hint--center">Leave with × before the bout starts to get your entry back.</p>}
     </Dialog>
+  );
+}
+
+/** Online friends you can invite into this room. */
+function InviteFriends({ roomId }: { roomId: string }) {
+  const friends = useStore(friendsStore);
+  const [sent, setSent] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!friendsAvailable()) return;
+    void loadFriends().catch(() => undefined);
+    const timer = window.setInterval(() => void loadFriends().catch(() => undefined), 15_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const online = friends.data?.friends.filter((f) => f.online) ?? [];
+  if (!online.length || !roomId) return null;
+  const invite = async (accountId: string, name: string) => {
+    try {
+      await inviteFriend(accountId, roomId);
+      setSent((s) => new Set(s).add(accountId));
+      pushToast(`Invite sent to ${name}`, "info");
+    } catch (error) {
+      pushToast(error instanceof Error ? error.message : "Couldn't invite.", "error");
+    }
+  };
+  return (
+    <section className="lobby__invite" aria-label="Invite friends">
+      <h3 className="settings__heading">Invite friends</h3>
+      <ul className="friends__list">
+        {online.map((f) => (
+          <FriendRow key={f.accountId} friend={f}>
+            <button className="btn btn--small btn--primary" disabled={sent.has(f.accountId)} onClick={() => void invite(f.accountId, f.name)}>
+              {sent.has(f.accountId) ? "Sent" : "Invite"}
+            </button>
+          </FriendRow>
+        ))}
+      </ul>
+    </section>
   );
 }

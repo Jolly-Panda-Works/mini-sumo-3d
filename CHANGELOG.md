@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Friends: a friend code to share, add friends by code, accept or decline requests, and a friends list with who's online. Tap a friend for their profile (picture, level, bouts, wins). "Play" invites an online friend into a private room; the waiting room lists online friends to invite into the current room. Invites pop up with Join / Not now (never mid-bout) and expire after two minutes. Invite links (`?room=…`) join the room directly. New API: `/api/friends…` and `/api/invites…` (6 new tests, 145 total).
+
 ### Changed
 
 - Docker: one container. The game server also serves the web game (`STATIC_DIR`), so the page, API, matchmaking and websockets share port 80; nginx is no longer needed. `docker-compose.yml` has a single `web` service (`5803:80`) with the database volume.

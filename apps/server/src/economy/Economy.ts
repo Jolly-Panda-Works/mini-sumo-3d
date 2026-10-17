@@ -29,6 +29,10 @@ export class EconomyError extends Error {
       | "invalid_amount"
       | "unknown_item"
       | "item_unavailable"
+      | "unknown_friend"
+      | "not_friends"
+      | "friend_offline"
+      | "bad_request"
       | "unknown_arena"
       | "arena_locked"
       | "already_entered"
@@ -200,6 +204,24 @@ export class Economy {
     // Migration: name and when the name / look last changed (profile sync from devices).
     if (!columns.some((c) => c.name === "name")) this.db.exec("ALTER TABLE accounts ADD COLUMN name TEXT NOT NULL DEFAULT ''");
     if (!columns.some((c) => c.name === "profile_updated_at")) this.db.exec("ALTER TABLE accounts ADD COLUMN profile_updated_at TEXT NOT NULL DEFAULT ''");
+  }
+
+  /** The database, for features that keep their own tables (friends). */
+  get database(): DatabaseSync {
+    return this.db;
+  }
+
+  /** What others may see of an account (friends list and profile). */
+  publicAccount(accountId: string): { name: string; avatar: number; level: number; matches: number; wins: number } | null {
+    const account = row<AccountRow>(this.db.prepare("SELECT * FROM accounts WHERE id = ?").get(accountId));
+    if (!account) return null;
+    return {
+      name: account.name || "Wrestler",
+      avatar: this.appearanceOf(accountId).avatar,
+      level: levelFromXp(account.xp).level,
+      matches: account.matches,
+      wins: account.wins,
+    };
   }
 
   close(): void {

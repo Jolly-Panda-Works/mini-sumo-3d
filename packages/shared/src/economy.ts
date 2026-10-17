@@ -225,6 +225,40 @@ export interface ProfileSyncRequest {
   updatedAt: string;
 }
 
+// ---------------------------------------------------------------- friends
+
+/** A friend (or a pending request) as shown in the friends list. */
+export interface FriendEntry {
+  accountId: string;
+  name: string;
+  avatar: number;
+  level: number;
+  /** Seen by the server in the last minute (the game polls while it's open). */
+  online: boolean;
+}
+
+export interface FriendsResponse {
+  /** Your code; friends add you with it. */
+  code: string;
+  friends: FriendEntry[];
+  /** Requests others sent you, and requests you sent. */
+  incoming: FriendEntry[];
+  outgoing: FriendEntry[];
+}
+
+export interface FriendProfile extends FriendEntry {
+  matches: number;
+  wins: number;
+}
+
+/** An invitation to join a friend's room. */
+export interface GameInvite {
+  id: string;
+  from: { accountId: string; name: string; avatar: number };
+  roomId: string;
+  createdAt: number;
+}
+
 export type LedgerCategory =
   | "welcome"
   | "arena_entry"

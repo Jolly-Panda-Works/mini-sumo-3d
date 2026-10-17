@@ -154,3 +154,23 @@ local wallet in localStorage), with or without a server.
   switches to the device and keeps going.
 - While waiting for the server (the start-up check, or joining an online room) the client
   shows the running-sumo screen (`ui/ServerWait.tsx`).
+
+
+## Friends and game invites
+
+Server (`apps/server/src/social/Friends.ts`, tables `friend_codes` and `friendships` in the
+economy database; presence and invites in memory):
+
+- Every account gets a 6-character friend code. Adding a code sends a request; the other
+  player accepts or declines. If both add each other, they become friends right away.
+- Online = the game called the API in the last minute (the open game checks for invites
+  every 8 s, which keeps it marked online).
+- Invites: `POST /api/invites { accountId, roomId }` (friends who are online only); the
+  friend's game shows a "Join / Not now" popup and joins the room by id. Invites expire after
+  two minutes; one live invite per friend.
+
+Client: `ui/FriendsPanel.tsx` (code, add, requests, list with online dots, Play),
+`ui/FriendProfilePopup.tsx` (picture, level, bouts, wins, Play, Remove),
+`ui/InviteWatcher.tsx` (invite popups, never mid-bout) and the "Invite friends" list in the
+waiting room. "Play" from the list opens a private room and invites that friend.
+Friends need the server; offline the panel says so.

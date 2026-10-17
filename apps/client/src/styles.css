@@ -6008,3 +6008,231 @@ button.is-pressed:not(:disabled):not([aria-disabled="true"]) {
   -webkit-text-stroke: 3px #3a1d05;
   paint-order: stroke fill;
 }
+
+/* ======================================================================
+   Friends: code, add by code, requests, list with online dots, profile,
+   invites in the waiting room
+   ====================================================================== */
+
+.dlg-friends {
+  width: min(460px, 100%);
+}
+
+.friends__offline {
+  margin: 0;
+  text-align: center;
+  color: #f4ede2;
+}
+
+.friends__code {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.friends__code-value {
+  padding: 6px 18px;
+  border: 2px dashed #ffe7a8;
+  border-radius: 12px;
+  background: rgba(255, 231, 168, 0.08);
+  color: #ffd166;
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  cursor: pointer;
+}
+
+.friends__add {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.friends__add .input {
+  flex: 1;
+  min-width: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.friends__group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.friends__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.friend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  background: #fbf6ee;
+  color: #3a1d05;
+}
+
+.friend-row__who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.friend-row__avatar {
+  position: relative;
+  flex: none;
+  width: 42px;
+  height: 42px;
+}
+
+.friend-row__avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 9px;
+  border: 2px solid #3a1d05;
+  object-fit: cover;
+}
+
+.friend-row__dot {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #9a9a9a;
+  border: 2px solid #fbf6ee;
+}
+
+.friend-row__dot--on {
+  background: #3fa34d;
+}
+
+.friend-row__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.friend-row__text strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.friend-row__text span {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.friend-row__actions {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+.btn.btn--small {
+  min-height: 32px;
+  padding: 2px 12px;
+  font-size: 0.8rem;
+}
+
+/* Friend profile (nested popup) */
+.friend-profile__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.friend-profile__avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 14px;
+  border: 3px solid #3a1d05;
+  object-fit: cover;
+}
+
+.friend-profile__name {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.friend-profile__status {
+  margin: 0;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+.friend-profile__stats {
+  display: flex;
+  gap: 18px;
+  margin: 4px 0;
+}
+
+.friend-profile__stats div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.friend-profile__stats dt {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.friend-profile__stats dd {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.friend-profile__remove {
+  margin-top: 6px;
+}
+
+/* Waiting room: online friends to invite (scrolls inside if there are many) */
+.lobby__invite {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lobby__invite .friends__list {
+  max-height: 128px;
+  overflow-y: auto;
+}
+
+/* Home: friends button */
+.hub__friends-art {
+  width: 56px;
+  height: 56px;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+}
+
+.tile-btn--friends svg {
+  width: 48px;
+  height: 48px;
+}

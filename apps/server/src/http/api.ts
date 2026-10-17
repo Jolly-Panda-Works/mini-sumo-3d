@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { CatalogResponse, LedgerResponse, ProfileResponse } from "@mini-sumo/shared";
+import type { CatalogResponse, FriendProfile, FriendsResponse, GameInvite, LedgerResponse, ProfileResponse } from "@mini-sumo/shared";
+import { Friends } from "../social/Friends.js";
 import { CATALOG, listArenas } from "../economy/config.js";
 import { EconomyError, type Economy } from "../economy/Economy.js";
 import type { PaymentService } from "../economy/payments.js";
@@ -13,6 +14,14 @@ import type { PaymentService } from "../economy/payments.js";
  *   POST /api/shop/purchase      { itemId, idempotencyKey }              (Bearer token)
  *   PUT  /api/profile/appearance { hair, hairColor, face, outfit }       (Bearer token)
  *   POST /api/profile/sync { name, appearance, xp, matches, wins, updatedAt } (Bearer token)
+ *   GET  /api/friends                       your code, friends, requests     (Bearer token)
+ *   GET  /api/friends/profile?id=…          a friend's profile               (Bearer token)
+ *   POST /api/friends/request { code }      add a friend by code             (Bearer token)
+ *   POST /api/friends/respond { accountId, accept }                          (Bearer token)
+ *   POST /api/friends/remove { accountId }  remove / cancel                  (Bearer token)
+ *   GET  /api/invites                       game invites for you             (Bearer token)
+ *   POST /api/invites { accountId, roomId } invite an online friend          (Bearer token)
+ *   POST /api/invites/dismiss { id }                                         (Bearer token)
  *   POST /api/payments/checkout  always refused (no provider)            (Bearer token)
  */
 
@@ -84,9 +93,14 @@ const STATUS: Record<EconomyError["code"], number> = {
   arena_locked: 403,
   already_entered: 409,
   currency_disabled: 403,
+  unknown_friend: 404,
+  not_friends: 403,
+  friend_offline: 409,
+  bad_request: 400,
 };
 
 export function createApiHandler(economy: Economy | null, payments: PaymentService) {
+  const friends = economy ? new Friends(economy) : null;
   return async function handleApi(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
     const url = new URL(req.url ?? "/", "http://localhost");
     if (!url.pathname.startsWith("/api/")) return false;
@@ -135,6 +149,8 @@ export function createApiHandler(economy: Economy | null, payments: PaymentServi
       send(res, 401, { error: "unauthorized", message: "Unknown or missing player token." });
       return true;
     }
+    // Any call from the open game counts as being online (for friends).
+    friends?.touch(accountId);
 
     try {
       if (route === "GET /api/profile") {
@@ -155,6 +171,37 @@ export function createApiHandler(economy: Economy | null, payments: PaymentServi
         const body = await readJson(req);
         if (!body) send(res, 400, { error: "bad_request", message: "Invalid request." });
         else send(res, 200, { appearance: economy.saveAppearance(accountId, body) });
+      } else if (friends && route === "GET /api/friends") {
+        const body: FriendsResponse = friends.list(accountId);
+        send(res, 200, body);
+      } else if (friends && route === "GET /api/friends/profile") {
+        const body: FriendProfile = friends.profile(accountId, url.searchParams.get("id"));
+        send(res, 200, body);
+      } else if (friends && route.startsWith("POST /api/friends/")) {
+        if (!writeLimiter.allow(accountId)) {
+          send(res, 429, { error: "rate_limited", message: "Slow down a little." });
+        } else {
+          const body = ((await readJson(req)) ?? {}) as Record<string, unknown>;
+          const action = url.pathname.slice("/api/friends/".length);
+          if (action === "request") send(res, 200, friends.request(accountId, body.code));
+          else if (action === "respond") send(res, 200, friends.respond(accountId, body.accountId, body.accept));
+          else if (action === "remove") send(res, 200, friends.remove(accountId, body.accountId));
+          else send(res, 404, { error: "not_found", message: "Unknown endpoint." });
+        }
+      } else if (friends && route === "GET /api/invites") {
+        const body: { invites: GameInvite[] } = { invites: friends.pendingInvites(accountId) };
+        send(res, 200, body);
+      } else if (friends && route === "POST /api/invites") {
+        if (!writeLimiter.allow(accountId)) {
+          send(res, 429, { error: "rate_limited", message: "Slow down a little." });
+        } else {
+          const body = ((await readJson(req)) ?? {}) as Record<string, unknown>;
+          send(res, 200, friends.invite(accountId, body.accountId, body.roomId));
+        }
+      } else if (friends && route === "POST /api/invites/dismiss") {
+        const body = ((await readJson(req)) ?? {}) as Record<string, unknown>;
+        friends.dismissInvite(accountId, body.id);
+        send(res, 200, { ok: true });
       } else if (route === "POST /api/profile/sync") {
         if (!writeLimiter.allow(accountId)) {
           send(res, 429, { error: "rate_limited", message: "Slow down a little." });

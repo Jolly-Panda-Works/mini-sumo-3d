@@ -20,6 +20,7 @@ import { LevelUpPopup } from "./ui/LevelUpPopup";
 import { DevButton, DevPanel } from "./ui/DevPanel";
 import { NoticePopup } from "./ui/NoticePopup";
 import { ServerWait } from "./ui/ServerWait";
+import { InviteWatcher } from "./ui/InviteWatcher";
 import { audio } from "./audio/AudioManager";
 import { ProfilePanel } from "./ui/ProfilePanel";
 import { music } from "./audio/Music";
@@ -166,6 +167,7 @@ export function App() {
         {!inRoom && !needsName && <DevButton />}
         <NoticePopup />
         <ServerWait />
+        <InviteWatcher />
       </div>
     </div>
   );
