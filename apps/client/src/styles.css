@@ -2056,9 +2056,6 @@ body {
   .search__spinner {
     animation: none;
   }
-  .btn {
-    transition: none;
-  }
 }
 
 .btn--danger {
@@ -5766,18 +5763,6 @@ button.is-rejected {
   animation: reject-shake 0.4s ease-in-out;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .overlay,
-  .overlay > *,
-  button.is-rejected {
-    animation: none !important;
-  }
-
-  button:hover,
-  button:active {
-    transform: none !important;
-  }
-}
 
 /* Buttons centred with a transform keep their position while animating */
 .arena-row__arrow:not(:disabled):hover,
@@ -5915,4 +5900,57 @@ button:not(:disabled):not([aria-disabled="true"]):active {
   justify-content: center;
   margin-top: 6px;
   padding-bottom: 4px;
+}
+
+/* ======================================================================
+   Phones: visible button presses; UI animations even with reduced motion
+   (they're short and small)
+   ====================================================================== */
+
+button.is-pressed:not(:disabled):not([aria-disabled="true"]) {
+  transform: translateY(2px) scale(0.93);
+  transition-duration: 0.06s;
+}
+
+/* Settings during a match: compact, so everything (and LEAVE MATCH) fits without scrolling */
+.dlg-settings-match .dialog__body {
+  gap: 8px;
+}
+
+.dlg-settings-match .settings__grid {
+  gap: 8px;
+}
+
+.dlg-settings-match .settings__section {
+  gap: 6px;
+  padding: 8px 10px;
+}
+
+.dlg-settings-match .settings__heading {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.dlg-settings-match .field {
+  gap: 4px;
+}
+
+.dlg-settings-match .art--choice {
+  max-width: calc(306px * var(--art-scale) * 1);
+}
+
+.dlg-settings-match .vib-toggle {
+  width: calc(386px * var(--art-scale) * 0.9);
+}
+
+.dlg-settings-match .settings__leave {
+  margin-top: 2px;
+}
+
+.dlg-settings-match .art--leave {
+  width: calc(503px * var(--art-scale) * 1.05);
+}
+
+.dlg-settings-match .dialog {
+  min-height: 0;
 }

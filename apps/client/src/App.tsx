@@ -75,8 +75,27 @@ export function App() {
       if (button.getAttribute("aria-disabled") === "true") audio.reject();
       else audio.click();
     };
+    // Touch screens: :active is too brief to see, so a press class stays for a moment.
+    const onDown = (e: PointerEvent) => {
+      const button = (e.target as HTMLElement | null)?.closest?.("button");
+      if (!button || button.disabled || button.getAttribute("aria-disabled") === "true") return;
+      button.classList.add("is-pressed");
+      const started = performance.now();
+      const release = () => {
+        const left = Math.max(0, 140 - (performance.now() - started));
+        window.setTimeout(() => button.classList.remove("is-pressed"), left);
+        window.removeEventListener("pointerup", release, true);
+        window.removeEventListener("pointercancel", release, true);
+      };
+      window.addEventListener("pointerup", release, true);
+      window.addEventListener("pointercancel", release, true);
+    };
     document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
+    document.addEventListener("pointerdown", onDown, true);
+    return () => {
+      document.removeEventListener("click", onClick, true);
+      document.removeEventListener("pointerdown", onDown, true);
+    };
   }, []);
 
   // The wardrobe is a lobby-only screen: close it when a bout starts.

@@ -69,9 +69,8 @@ export function SettingsPanel() {
     <Dialog
       title="Settings"
       onClose={close}
-      className="settings"
+      className={inRoom ? "settings settings-match" : "settings"}
     >
-      {inRoom && <p className="hint">The match keeps going while this is open.</p>}
       <div className="settings__grid">
         <section className="settings__section" aria-label="Audio">
           <h3 className="settings__heading">Audio</h3>

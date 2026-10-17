@@ -6,6 +6,11 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- UI animations on phones: taps now show a visible press (touch :active was too brief), and popup and button animations also play when the device has "remove animations" / reduced motion on.
+- Settings during a match: compact layout so everything, including LEAVE MATCH, fits without scrolling.
+
 ### Changed
 
 - Settings during a match: LEAVE MATCH comes at the end of the list and scrolls with it (no longer pinned to the bottom).
