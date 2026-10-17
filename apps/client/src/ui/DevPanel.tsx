@@ -198,6 +198,17 @@ export function DevPanel() {
             Error
           </button>
           <button className="btn" onClick={() => pushToast("+150 Sumo Coins", "info")}>Toast</button>
+          <button
+            className="btn"
+            onClick={() =>
+              void showMessage("Game invite", "Kenta invites you to play. Join the game?", [
+                { id: "ok", label: "Join", primary: true },
+                { id: "cancel", label: "Not now" },
+              ]).then((choice) => pushToast(`Chose: ${choice}`, "info"))
+            }
+          >
+            Game invite
+          </button>
         </div>
       </section>
 

@@ -6495,3 +6495,25 @@ button.code-field {
 .popup-layer > .overlay--notice {
   z-index: 2;
 }
+
+/* Home (phones): friends under the profile, settings under the coins */
+.hub__top {
+  grid-template-areas:
+    "profile coins"
+    "friends settings";
+}
+
+.hub__friends {
+  grid-area: friends;
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.hub__friends img {
+  width: 48px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+}

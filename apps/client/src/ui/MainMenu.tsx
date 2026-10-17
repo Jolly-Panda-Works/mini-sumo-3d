@@ -98,6 +98,10 @@ export function MainMenu() {
           <span className="coin-frame__amount">{(balance ?? 0).toLocaleString("en-US")}</span>
           <Icon name="plus" size={26} className="coin-frame__plus" />
         </button>
+        {/* Friends under the profile (settings is under the coins) */}
+        <button className="tile-btn hub__friends" onClick={() => setFriendsOpen(true)} aria-label="Friends">
+          <img src={`${import.meta.env.BASE_URL}ui/friends-icon.webp`} alt="" width={216} height={221} />
+        </button>
         <button className="tile-btn hub__settings" onClick={() => setSettingsOpen(true)} aria-label="Settings">
           <GearIcon />
         </button>
@@ -110,10 +114,6 @@ export function MainMenu() {
         <button className="hub__side-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
           <Icon name="customize" size={56} />
           <span>Customise</span>
-        </button>
-        <button className="hub__side-btn hub__side-btn--friends" onClick={() => setFriendsOpen(true)} aria-label="Friends">
-          <img className="hub__friends-art" src={`${import.meta.env.BASE_URL}ui/friends-icon.webp`} alt="" width={216} height={221} />
-          <span>Friends</span>
         </button>
         <button className="hub__side-btn hub__side-btn--shop" onClick={() => setShopOpen(true)} aria-label="Shop">
           <img className="hub__shop-art" src={`${import.meta.env.BASE_URL}ui/shop.webp`} alt="" width={360} height={335} />

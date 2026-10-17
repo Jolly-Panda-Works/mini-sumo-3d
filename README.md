@@ -165,6 +165,8 @@ Offline, *Play now* searches for a few seconds and fills the ring with bots; *Cr
 
 The desktop app (`apps/desktop`, Electron) is still in the repository but is no longer built by CI.
 
+**Self-hosting (Docker):** `docker compose up -d --build` runs the game server and the web game on one port; it builds in Iran through registry and npm mirrors. See [docker/README.md](docker/README.md).
+
 **Cafe Bazaar:** the `bazaar` branch builds the Bazaar version (coin packs through Bazaar in-app billing, no Google Play Games) and publishes `bazaar-vX.Y.Z` releases. See [docs/BAZAAR.fa.md](docs/BAZAAR.fa.md).
 
 ## Run from source
@@ -208,6 +210,20 @@ One `.env` file at the repository root serves both apps. Only variables prefixed
 | `VITE_BASE` | client (build time) | `/` | Base path, e.g. `/<repo>/` for GitHub Pages |
 
 If `VITE_SERVER_URL` is empty, the client connects to `ws(s)://<page hostname>:<VITE_SERVER_PORT>`. That makes local and LAN development work with no configuration and never hard-codes `localhost`.
+
+
+### Testing multiplayer and friends on one computer
+
+1. `npm run dev` (starts the server on port 2567 and the game on port 5173).
+2. Open `http://localhost:5173` in **two different browsers** (or one normal and one
+   private / incognito window). Each has its own storage, so each is a separate player;
+   two tabs of the same browser share one account.
+3. In each, set a name, open **Friends**, and add the other's code; accept the request.
+4. **Play** next to the friend (or **Invite** in a waiting room): the other window shows the
+   invite within a few seconds.
+
+Phones on the same Wi-Fi can join too: open `http://<your-computer's-IP>:5173`.
+Dev mode (`?dev`) has a sample of the invite popup.
 
 ## Build the apps yourself
 

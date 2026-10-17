@@ -6,6 +6,11 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Home (phones): the Friends button sits under the profile (settings stays under the coins).
+- Game invites are checked every 5 s, also in background tabs, so two windows on one computer can test friends and invites. README: how to test multiplayer locally; dev mode has a sample invite popup.
+
 ### Added
 
 - A friend's profile shows their wrestler (3D, with their look), with their picture in the corner.

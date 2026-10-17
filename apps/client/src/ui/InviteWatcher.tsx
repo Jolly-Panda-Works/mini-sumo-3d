@@ -6,8 +6,8 @@ import { settingsStore } from "../settings";
 import { showMessage } from "../uiStore";
 
 /**
- * Checks for game invites from friends (every 8 s while online; this also keeps you shown
- * as online). An invite pops up with Join / Not now; joining leaves any waiting room first.
+ * Checks for game invites from friends (every 5 s while online, also in a background tab;
+ * this also keeps you shown as online). An invite pops up with Join / Not now; joining leaves any waiting room first.
  * Nothing pops up in the middle of a bout.
  */
 const shown = new Set<string>();
@@ -16,7 +16,7 @@ export function InviteWatcher() {
   useEffect(() => {
     let stopped = false;
     const check = async () => {
-      if (stopped || !friendsAvailable() || document.hidden) return;
+      if (stopped || !friendsAvailable()) return;
       const phase = gameStore.get().phase;
       if (sessionStore.get().status === "connected" && (phase === Phase.Playing || phase === Phase.Countdown)) return;
       let invites;
@@ -40,7 +40,7 @@ export function InviteWatcher() {
       }
     };
     void check();
-    const timer = window.setInterval(() => void check(), 8_000);
+    const timer = window.setInterval(() => void check(), 5_000);
     return () => {
       stopped = true;
       window.clearInterval(timer);
