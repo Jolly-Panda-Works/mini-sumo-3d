@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Purchase popups (wardrobe items, pictures): BUY is always above NOT NOW.
+
 ### Fixed
 
 - Welcome popup: no explanation line under the question.

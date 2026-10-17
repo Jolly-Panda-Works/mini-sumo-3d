@@ -129,8 +129,7 @@ function ItemPopup({
       className="item-popup"
       hideClose
       footer={
-        <div className="art-row">
-          <NotNowButton label="Not now" onClick={onClose} />
+        <div className="art-stack">
           {canBuy ? (
             <BuyButton
               price={item.price}
@@ -143,6 +142,7 @@ function ItemPopup({
           ) : (
             <ComingSoonButton label="Buying is coming soon" ariaDisabled onClick={() => pushToast("Coming soon", "info")} />
           )}
+          <NotNowButton label="Not now" onClick={onClose} />
         </div>
       }
     >

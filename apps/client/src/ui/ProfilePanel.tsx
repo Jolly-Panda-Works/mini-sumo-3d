@@ -220,8 +220,7 @@ function AvatarPicker({ onPicked }: { onPicked: () => void }) {
           className="avatar-buy"
           hideClose
           footer={
-            <div className="art-row">
-              <NotNowButton label="Not now" onClick={() => setPending(null)} />
+            <div className="art-stack">
               <BuyButton
                 price={price}
                 label={`Buy this picture for ${price} Sumo Coins`}
@@ -229,6 +228,7 @@ function AvatarPicker({ onPicked }: { onPicked: () => void }) {
                 sfx={balance < price ? undefined : "none"}
                 onClick={() => (balance < price ? setError("Not enough Sumo Coins.") : void buy())}
               />
+              <NotNowButton label="Not now" onClick={() => setPending(null)} />
             </div>
           }
         >
