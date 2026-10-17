@@ -18,7 +18,7 @@ import { Coins } from "./Coins";
 import { Dialog } from "./Dialog";
 import { BuyButton, ComingSoonButton, NotNowButton } from "./ArtButtons";
 import { audio } from "../audio/AudioManager";
-import { pushToast } from "../uiStore";
+import { pushToast, setShopOpen, showWarning } from "../uiStore";
 import { SumoModel, useSumoParts } from "../game/SumoModel";
 import { gameStore, roomManager } from "../network/RoomManager";
 import { settingsStore } from "../settings";
@@ -137,7 +137,10 @@ function ItemPopup({
               disabled={busy}
               ariaDisabled={!affordable}
               sfx={affordable ? "none" : undefined}
-              onClick={() => (affordable ? void buy() : pushToast("Not enough Sumo Coins", "info"))}
+              onClick={() => (affordable ? void buy() : void showWarning("Not enough coins", "You need more Sumo Coins for this. Get some in the coin shop.", [
+                  { id: "shop", label: "Coin shop", primary: true },
+                  { id: "cancel", label: "Not now" },
+                ]).then((choice) => choice === "shop" && setShopOpen(true)))}
             />
           ) : (
             <ComingSoonButton label="Buying is coming soon" ariaDisabled onClick={() => pushToast("Coming soon", "info")} />

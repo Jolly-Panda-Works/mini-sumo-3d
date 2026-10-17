@@ -4,12 +4,15 @@ import { economyStore } from "../network/economyClient";
 import { networkStore } from "../network/networkMode";
 import { sessionStore } from "../network/RoomManager";
 import { useStore } from "../store";
-import { pushToast, setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
+import { pushToast, showError, setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
 import { settingsStore } from "../settings";
 import { ArenaRow } from "./ArenaSelect";
 import { Icon } from "./Icon";
 import { avatarSrc } from "./Avatar";
 import { PHONE_QUERY, useMediaQuery } from "../useMediaQuery";
+
+/** Connection errors already shown. */
+const shownErrors = new Set<string>();
 
 /** Bout results already announced (so the toast shows once). */
 const toastedResults = new WeakSet<object>();
@@ -41,15 +44,13 @@ export function MainMenu() {
     if (inviteCode && online) setFriendsOpen(true);
   }, [online]);
 
-  const error = (
-    <>
-      {session.error && (
-        <p className="notice notice--error home__note" role="alert">
-          {session.error}
-        </p>
-      )}
-    </>
-  );
+  // Connection errors: an error popup (once per error) instead of a note in the layout.
+  useEffect(() => {
+    if (!session.error || shownErrors.has(session.error)) return;
+    shownErrors.add(session.error);
+    void showError("Couldn't connect", session.error);
+  }, [session.error]);
+  const error = null;
 
   if (!phone) {
     // Wide screens (web, desktop, tablets): buttons on top, the title, all arenas in a row.

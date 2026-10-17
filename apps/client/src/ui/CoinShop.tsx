@@ -4,7 +4,7 @@ import { bazaarEnabled, buyCoinPack, restoreBazaarPurchases } from "../network/b
 import { economyStore, refreshProfile } from "../network/economyClient";
 import { localEconomy } from "../network/localEconomy";
 import { networkStore } from "../network/networkMode";
-import { pushToast } from "../uiStore";
+import { showError, pushToast } from "../uiStore";
 import { audio } from "../audio/AudioManager";
 import { useStore } from "../store";
 import { setShopOpen } from "../uiStore";
@@ -44,8 +44,14 @@ export function CoinShop() {
         pushToast(`+${pack.coins.toLocaleString("en-US")} Sumo Coins`, "info");
       }
     } catch (error) {
-      audio.sample("reject");
-      pushToast(error instanceof Error ? error.message : "The purchase failed.", "error");
+      const choice = await showError("Purchase failed", error instanceof Error ? error.message : "The purchase failed.", [
+        { id: "retry", label: "Retry", primary: true },
+        { id: "close", label: "Close" },
+      ]);
+      if (choice === "retry") {
+        setBuying(null);
+        return buy(pack);
+      }
     } finally {
       setBuying(null);
     }

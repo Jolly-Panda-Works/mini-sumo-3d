@@ -3,7 +3,7 @@ import { NAME_MAX_LENGTH } from "@mini-sumo/shared";
 import { economyStore } from "../network/economyClient";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
-import { pushToast, setProfileOpen } from "../uiStore";
+import { pushToast, setProfileOpen, setShopOpen, showWarning } from "../uiStore";
 import { Dialog } from "./Dialog";
 import { BuyButton, NotNowButton } from "./ArtButtons";
 import { avatarSrc } from "./Avatar";
@@ -219,7 +219,10 @@ function AvatarPicker({ onPicked }: { onPicked: () => void }) {
                 label={`Buy this picture for ${price} Sumo Coins`}
                 ariaDisabled={balance < price}
                 sfx={balance < price ? undefined : "none"}
-                onClick={() => (balance < price ? setError("Not enough Sumo Coins.") : void buy())}
+                onClick={() => (balance < price ? void showWarning("Not enough coins", "You need more Sumo Coins for this. Get some in the coin shop.", [
+                    { id: "shop", label: "Coin shop", primary: true },
+                    { id: "cancel", label: "Not now" },
+                  ]).then((choice) => choice === "shop" && setShopOpen(true)) : void buy())}
               />
               <NotNowButton label="Not now" onClick={() => setPending(null)} />
             </div>

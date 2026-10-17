@@ -19,6 +19,28 @@ export interface UIState {
   /** Arena previewed in the 3D background of the home screen. */
   homeArena: string;
   toasts: Toast[];
+  /** Message / warning / error popups, shown one at a time (first in the queue). */
+  notices: Notice[];
+  /** Developer tools (?dev, or tap the version label 7 times in settings). */
+  devOpen: boolean;
+}
+
+export type NoticeKind = "message" | "warning" | "error";
+
+export interface NoticeAction {
+  id: string;
+  label: string;
+  /** The main action (drawn first and focused). */
+  primary?: boolean;
+}
+
+export interface Notice {
+  id: number;
+  kind: NoticeKind;
+  title: string;
+  message: string;
+  actions: NoticeAction[];
+  resolve: (actionId: string) => void;
 }
 
 export const uiStore = createStore<UIState>({
@@ -32,7 +54,39 @@ export const uiStore = createStore<UIState>({
   levelUp: null,
   homeArena: "training",
   toasts: [],
+  notices: [],
+  devOpen: false,
 });
+
+let noticeId = 0;
+
+/**
+ * Shows a message, warning or error popup and resolves with the id of the chosen action
+ * ("close" when dismissed). Without actions it shows a single OK.
+ */
+export function showNotice(kind: NoticeKind, title: string, message: string, actions?: NoticeAction[]): Promise<string> {
+  return new Promise((resolve) => {
+    const id = ++noticeId;
+    const notice: Notice = {
+      id,
+      kind,
+      title,
+      message,
+      actions: actions && actions.length ? actions : [{ id: "ok", label: "OK", primary: true }],
+      resolve: (actionId) => {
+        uiStore.update({ notices: uiStore.get().notices.filter((n) => n.id !== id) });
+        resolve(actionId);
+      },
+    };
+    uiStore.update({ notices: [...uiStore.get().notices, notice] });
+  });
+}
+
+export const showMessage = (title: string, message: string, actions?: NoticeAction[]) => showNotice("message", title, message, actions);
+export const showWarning = (title: string, message: string, actions?: NoticeAction[]) => showNotice("warning", title, message, actions);
+export const showError = (title: string, message: string, actions?: NoticeAction[]) => showNotice("error", title, message, actions);
+
+export const setDevOpen = (devOpen: boolean) => uiStore.update({ devOpen });
 
 let toastId = 0;
 

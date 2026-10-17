@@ -17,6 +17,8 @@ import { AboutPanel } from "./ui/AboutPanel";
 import { FriendsPanel } from "./ui/FriendsPanel";
 import { CoinShop } from "./ui/CoinShop";
 import { LevelUpPopup } from "./ui/LevelUpPopup";
+import { DevButton, DevPanel } from "./ui/DevPanel";
+import { NoticePopup } from "./ui/NoticePopup";
 import { audio } from "./audio/AudioManager";
 import { ProfilePanel } from "./ui/ProfilePanel";
 import { music } from "./audio/Music";
@@ -132,6 +134,9 @@ export function App() {
         {ui.settingsOpen && !needsName && !inLobby && <SettingsPanel />}
         {ui.aboutOpen && <AboutPanel />}
         {ui.levelUp && <LevelUpPopup />}
+        <DevPanel />
+        {!inRoom && !needsName && <DevButton />}
+        <NoticePopup />
       </div>
     </div>
   );

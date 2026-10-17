@@ -5215,3 +5215,178 @@ dl.profile__stats {
 .results-board__info {
   color: #3a1d05;
 }
+
+/* ======================================================================
+   Message / warning / error popups (public/ui/popup-<kind>.webp, 480×803):
+   title in the upper box (15–85 % × 34.5–55 %), message and buttons in the
+   lower box (15–85 % × 58.4–92.7 %)
+   ====================================================================== */
+
+.overlay--notice {
+  z-index: 80;
+}
+
+.notice-popup {
+  position: relative;
+  width: min(86vw, 340px, calc((100dvh - 24px) * 480 / 803));
+  aspect-ratio: 480 / 803;
+  background: center / 100% 100% no-repeat;
+  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.35));
+  container-type: inline-size;
+  animation: dialog-in 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.notice-popup__title {
+  position: absolute;
+  left: 15.2%;
+  top: 34.5%;
+  width: 69.4%;
+  height: 20.5%;
+  margin: 0;
+  padding: 0 4cqw;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-size: max(1rem, 7cqw);
+  font-weight: 900;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.notice-popup--message .notice-popup__title {
+  color: #7fd3ff;
+}
+
+.notice-popup--warning .notice-popup__title {
+  color: #ffd166;
+}
+
+.notice-popup--error .notice-popup__title {
+  color: #ff6b6b;
+}
+
+.notice-popup__body {
+  position: absolute;
+  left: 15.2%;
+  top: 58.4%;
+  width: 69.4%;
+  height: 34.3%;
+  padding: 4cqw 4cqw 4cqw;
+  display: flex;
+  flex-direction: column;
+  gap: 3cqw;
+}
+
+.notice-popup__message {
+  flex: 1;
+  margin: 0;
+  overflow-y: auto;
+  color: #f4ede2;
+  font-size: max(0.82rem, 4.6cqw);
+  line-height: 1.4;
+  text-align: center;
+}
+
+.notice-popup__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2.4cqw;
+  align-items: center;
+}
+
+/* Plank buttons (the empty label art with text) */
+.plank-btn {
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 240 / 54;
+  padding: 0;
+  border: 0;
+  background: var(--ui-label-empty) center / 100% 100% no-repeat;
+  color: #fff4dc;
+  font: inherit;
+  font-weight: 900;
+  font-size: max(0.82rem, 4.6cqw);
+  cursor: pointer;
+  filter: brightness(0.82) saturate(0.6) drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+}
+
+.plank-btn--primary {
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+}
+
+.plank-btn:active {
+  transform: translateY(2px);
+}
+
+.plank-btn:focus-visible {
+  outline: 3px solid #ffe7a8;
+  outline-offset: 2px;
+}
+
+/* ---------- Dev mode ---------- */
+
+.dev-fab {
+  position: fixed;
+  right: calc(10px + var(--safe-right, 0px));
+  bottom: calc(10px + var(--safe-bottom, 0px));
+  z-index: 60;
+  padding: 6px 10px;
+  border: 2px solid #ffe7a8;
+  border-radius: 10px;
+  background: #8e1f1f;
+  color: #fff4dc;
+  font: inherit;
+  font-weight: 900;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.dlg-dev-panel {
+  width: min(480px, 100%);
+}
+
+.dev-panel__group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dev-panel__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.dev-panel__grid .btn {
+  min-height: 38px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+}
+
+.dev-preview {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: radial-gradient(circle at 50% 55%, #6d9a52, #3e6b33);
+}
+
+.dev-preview .hud {
+  position: absolute;
+}
+
+.dev-preview__close {
+  position: fixed;
+  left: 50%;
+  bottom: calc(14px + var(--safe-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 75;
+  padding: 8px 16px;
+  border: 2px solid #ffe7a8;
+  border-radius: 999px;
+  background: #1a1236;
+  color: #fff4dc;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}

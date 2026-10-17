@@ -6,6 +6,11 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Message, warning and error popups (their own frames): title in the upper box, message and buttons in the lower box, queued one at a time (`showMessage`, `showWarning`, `showError` in `uiStore`). Used for: leaving a match (warning: Leave / Stay), not enough coins (warning, with a way to the coin shop), a failed coin purchase (error, with Retry) and connection errors on the home screen.
+- Dev mode: every panel, popup and match screen (waiting room, HUD, results) with sample data, plus tools (+1,000 coins, +500 XP, reset daily coins). Turn it on with `?dev` in the address, or tap the version label in settings 7 times; a DEV button then shows on the home screen.
+
 ### Changed
 
 - Settings: no touch controls option (touch controls follow the device); readable joystick options; About above the new version label; the vibration switch from the art.

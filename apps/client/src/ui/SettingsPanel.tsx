@@ -3,6 +3,8 @@ import { settingsStore, type JoystickMode } from "../settings";
 import { useStore } from "../store";
 import { setAboutOpen, setSettingsOpen } from "../uiStore";
 import { Dialog } from "./Dialog";
+import { setDevEnabled } from "./DevPanel";
+import { setDevOpen, showWarning } from "../uiStore";
 import { AboutButton, VibrationToggle } from "./ArtButtons";
 import { Icon, type IconName } from "./Icon";
 
@@ -49,6 +51,9 @@ function Slider({ label, icon, value, onChange }: { label: string; icon: IconNam
   );
 }
 
+let versionTaps = 0;
+let versionTimer = 0;
+
 /**
  * Settings: audio and controls. On the home screen it also links to About (with the
  * version); during a match it offers "Leave match" instead.
@@ -70,8 +75,15 @@ export function SettingsPanel() {
           <button
             className="btn btn--danger"
             onClick={() => {
-              close();
-              void roomManager.leave();
+              void showWarning("Leave the match?", "The bout is still going. If you leave now, you lose this bout.", [
+                { id: "leave", label: "Leave", primary: true },
+                { id: "cancel", label: "Stay" },
+              ]).then((choice) => {
+                if (choice !== "leave") return;
+                close();
+                void roomManager.leave();
+              });
+              return;
             }}
           >
             Leave match
@@ -80,7 +92,21 @@ export function SettingsPanel() {
           <div className="settings__about">
             <AboutButton className="settings__about-btn" label="About" onClick={() => setAboutOpen(true)} />
             {version && (
-              <span className="version-label" aria-label={`Version ${version}`}>
+              <span
+                className="version-label"
+                aria-label={`Version ${version}`}
+                onClick={() => {
+                  versionTaps += 1;
+                  window.clearTimeout(versionTimer);
+                  versionTimer = window.setTimeout(() => (versionTaps = 0), 1500);
+                  if (versionTaps >= 7) {
+                    versionTaps = 0;
+                    setDevEnabled(true);
+                    close();
+                    setDevOpen(true);
+                  }
+                }}
+              >
                 <span className="version-label__value">{version}</span>
               </span>
             )}

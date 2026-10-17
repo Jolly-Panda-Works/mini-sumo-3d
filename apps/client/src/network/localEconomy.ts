@@ -211,6 +211,28 @@ export const localEconomy = {
     return true;
   },
 
+  // ------------------------------------------------------------- dev tools
+
+  /** Dev mode: add (or remove) coins. */
+  devAddCoins(coins: number): void {
+    record(coins, "adjustment", "Dev mode");
+    save();
+  },
+
+  /** Dev mode: add XP; returns the levels before and after. */
+  devAddXp(xp: number): { from: number; to: number } {
+    const from = levelFromXp(state.xp).level;
+    state.xp = Math.max(0, state.xp + xp);
+    save();
+    return { from, to: levelFromXp(state.xp).level };
+  },
+
+  /** Dev mode: the daily coins can be claimed again. */
+  devResetDailyGift(): void {
+    state.giftDay = "";
+    save();
+  },
+
   claimDailyGift(): number {
     if (state.giftDay === today()) return 0;
     state.giftDay = today();
