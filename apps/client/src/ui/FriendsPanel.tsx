@@ -61,14 +61,14 @@ export function FriendsPanel() {
         <>
           <section className="friends__code">
             <span className="field__label">Your friend code</span>
-            <button className="friends__code-value" onClick={() => void copyCode()} aria-label="Copy your friend code">
-              {data?.code ?? "······"}
+            <button className="code-field friends__code-value" onClick={() => void copyCode()} aria-label="Copy your friend code">
+              <span className="code-field__text">{data?.code ?? "······"}</span>
             </button>
           </section>
 
           <form className="friends__add" onSubmit={(e) => void add(e)}>
             <input
-              className="input input--art"
+              className="code-field code-field--input"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="Friend's code"
@@ -77,8 +77,8 @@ export function FriendsPanel() {
               autoComplete="off"
               aria-label="Friend's code"
             />
-            <button type="submit" className="btn btn--primary" disabled={!code.trim() || friends.loading}>
-              Add
+            <button type="submit" className="art art--add" disabled={!code.trim() || friends.loading} aria-label="Add friend">
+              <img src={`${import.meta.env.BASE_URL}ui/btn-add.webp`} alt="" draggable={false} />
             </button>
           </form>
 
@@ -88,12 +88,8 @@ export function FriendsPanel() {
               <ul className="friends__list">
                 {data.incoming.map((f) => (
                   <FriendRow key={f.accountId} friend={f} onOpen={() => setViewing(f.accountId)}>
-                    <button className="btn btn--small btn--primary" onClick={() => void answerFriend(f.accountId, true).catch(() => undefined)}>
-                      Accept
-                    </button>
-                    <button className="btn btn--small" onClick={() => void answerFriend(f.accountId, false).catch(() => undefined)}>
-                      Decline
-                    </button>
+                    <SmallArt art="btn-accept" label={`Accept ${f.name}`} onClick={() => void answerFriend(f.accountId, true).catch(() => undefined)} />
+                    <SmallArt art="btn-decline" label={`Decline ${f.name}`} onClick={() => void answerFriend(f.accountId, false).catch(() => undefined)} />
                   </FriendRow>
                 ))}
               </ul>
@@ -135,12 +131,13 @@ export function FriendRow({ friend, onOpen, children }: { friend: FriendEntry; o
       <button className="friend-row__who" onClick={onOpen} aria-label={`${friend.name}, level ${friend.level}${friend.online ? ", online" : ""}`}>
         <span className="friend-row__avatar">
           <img src={avatarSrc(friend.avatar)} alt="" width={160} height={160} loading="lazy" />
-          <span className={`friend-row__dot${friend.online ? " friend-row__dot--on" : ""}`} aria-hidden="true" />
         </span>
         <span className="friend-row__text">
           <strong>{friend.name}</strong>
-          <span>
-            Lvl {friend.level} · {friend.online ? "Online" : "Offline"}
+          <span className="friend-row__level">Lvl {friend.level}</span>
+          <span className={`friend-row__status${friend.online ? " friend-row__status--on" : ""}`}>
+            <img src={`${import.meta.env.BASE_URL}ui/dot-${friend.online ? "online" : "offline"}.webp`} alt="" width={35} height={35} />
+            {friend.online ? "Online" : "Offline"}
           </span>
         </span>
       </button>
@@ -170,13 +167,33 @@ export function PlayButton({ friend }: { friend: FriendEntry }) {
     }
   };
   return (
-    <button
-      className="btn btn--small btn--primary"
-      aria-disabled={!friend.online || undefined}
+    <SmallArt
+      art="btn-play-friend"
+      label={`Play with ${friend.name}`}
+      ariaDisabled={!friend.online}
       disabled={busy}
       onClick={() => (friend.online ? void play() : pushToast(`${friend.name} is offline`, "info"))}
-    >
-      Play
+    />
+  );
+}
+
+/** A small art button (ACCEPT, DECLINE, PLAY, INVITE, SENT…). */
+export function SmallArt({
+  art,
+  label,
+  onClick,
+  disabled,
+  ariaDisabled,
+}: {
+  art: string;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  ariaDisabled?: boolean;
+}) {
+  return (
+    <button type="button" className="art art--small" onClick={onClick} disabled={disabled} aria-disabled={ariaDisabled || undefined} aria-label={label}>
+      <img src={`${import.meta.env.BASE_URL}ui/${art}.webp`} alt="" draggable={false} />
     </button>
   );
 }

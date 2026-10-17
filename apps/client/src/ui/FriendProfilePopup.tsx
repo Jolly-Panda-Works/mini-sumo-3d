@@ -49,8 +49,8 @@ export function FriendProfilePopup({ accountId, onClose }: { accountId: string; 
             </div>
           </dl>
           <PlayButton friend={profile} />
-          <button className="btn btn--small friend-profile__remove" onClick={() => void remove()}>
-            Remove friend
+          <button className="art art--remove-friend friend-profile__remove" onClick={() => void remove()} aria-label="Remove friend">
+            <img src={`${import.meta.env.BASE_URL}ui/btn-remove-friend.webp`} alt="" draggable={false} />
           </button>
         </div>
       )}

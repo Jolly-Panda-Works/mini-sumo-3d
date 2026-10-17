@@ -6,7 +6,7 @@ import { economyStore } from "../network/economyClient";
 import { Coins } from "./Coins";
 import { Icon } from "./Icon";
 import { Dialog } from "./Dialog";
-import { FriendRow } from "./FriendsPanel";
+import { FriendRow, SmallArt } from "./FriendsPanel";
 import { friendsAvailable, friendsStore, inviteFriend, loadFriends } from "../network/friendsClient";
 import { useStore } from "../store";
 import { pushToast } from "../uiStore";
@@ -199,9 +199,12 @@ function InviteFriends({ roomId }: { roomId: string }) {
       <ul className="friends__list">
         {online.map((f) => (
           <FriendRow key={f.accountId} friend={f}>
-            <button className="btn btn--small btn--primary" disabled={sent.has(f.accountId)} onClick={() => void invite(f.accountId, f.name)}>
-              {sent.has(f.accountId) ? "Sent" : "Invite"}
-            </button>
+            <SmallArt
+              art={sent.has(f.accountId) ? "btn-sent" : "btn-invite"}
+              label={sent.has(f.accountId) ? `Invite sent to ${f.name}` : `Invite ${f.name}`}
+              disabled={sent.has(f.accountId)}
+              onClick={() => void invite(f.accountId, f.name)}
+            />
           </FriendRow>
         ))}
       </ul>

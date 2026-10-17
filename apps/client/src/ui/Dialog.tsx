@@ -51,7 +51,7 @@ export function Dialog({
    * "sub": the smaller frame (public/ui/popup-sub.webp) for a popup opened on top of
    * another one (About, buying an item, editing the name…).
    */
-  variant?: "main" | "sub";
+  variant?: "main" | "sub" | "welcome";
 }) {
   const id = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -80,7 +80,16 @@ export function Dialog({
       className={`overlay ${overlayClassName}${variant === "sub" ? " overlay--sub" : ""}${closing ? " overlay--closing" : ""}`}
       onClick={(e) => e.target === e.currentTarget && requestClose()}
     >
-      {variant === "sub" ? (
+      {variant === "welcome" ? (
+        <div className={`dialog-wrap dialog-wrap--welcome ${wrapClass}`}>
+          <section className="welcome-dialog" role={role} aria-modal="true" aria-labelledby={id}>
+            <h2 id={id} className="visually-hidden">
+              {title}
+            </h2>
+            <div className={`welcome-dialog__inner ${bodyClassName}`}>{children}</div>
+          </section>
+        </div>
+      ) : variant === "sub" ? (
         <div className={`dialog-wrap dialog-wrap--sub ${wrapClass}`}>
           <section className="sub-dialog" role={role} aria-modal="true" aria-labelledby={id}>
             <h2 id={id} className="sub-dialog__title">

@@ -6281,3 +6281,188 @@ button.is-pressed:not(:disabled):not([aria-disabled="true"]) {
 .toasts {
   z-index: 85;
 }
+
+/* ======================================================================
+   Welcome frame (public/ui/welcome-frame.webp, 451×479; content in
+   16.4–83.1 % × 46–92.5 %) and the friends art
+   ====================================================================== */
+
+.dialog-wrap--welcome {
+  width: min(92vw, 440px, calc((100dvh - 32px) * 451 / 479));
+  max-width: none;
+  container-type: inline-size;
+}
+
+.welcome-dialog {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 451 / 479;
+  background: var(--ui-welcome-frame) center / 100% 100% no-repeat;
+  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.35));
+}
+
+.welcome-dialog__inner {
+  position: absolute;
+  left: 16.4%;
+  top: 46%;
+  width: 66.7%;
+  height: 46.5%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2cqw 3cqw;
+  color: #f4ede2;
+}
+
+.welcome-dialog .name-gate__form {
+  gap: 2.4cqw;
+}
+
+.welcome-dialog .name-gate__title {
+  margin: 0;
+  color: #ffd166;
+  font-size: max(0.9rem, 4.6cqw);
+  text-align: center;
+}
+
+.welcome-dialog .field__label {
+  color: rgba(244, 237, 226, 0.75);
+}
+
+.welcome-dialog .art--save {
+  width: min(70%, calc(329px * var(--art-scale)));
+}
+
+/* Friend code: shown and typed in the code field art */
+.code-field {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 240px;
+  aspect-ratio: 314 / 103;
+  padding: 0 7%;
+  border: 0;
+  background: var(--ui-friend-code) center / 100% 100% no-repeat;
+  color: #3a1d05;
+  font: inherit;
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+button.code-field {
+  cursor: pointer;
+}
+
+.code-field--input {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  outline: none;
+}
+
+.code-field--input::placeholder {
+  color: rgba(58, 29, 5, 0.4);
+  letter-spacing: 0.04em;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.code-field--input:focus {
+  filter: brightness(1.05);
+}
+
+.friends__code-value.code-field {
+  border: 0;
+  border-radius: 0;
+  background: var(--ui-friend-code) center / 100% 100% no-repeat;
+  color: #3a1d05;
+}
+
+.art--add {
+  flex: none;
+  width: 64px;
+}
+
+/* Small art buttons: ACCEPT, DECLINE, PLAY, INVITE, SENT */
+.art--small {
+  width: 74px;
+}
+
+.art--small img {
+  width: 100%;
+  height: auto;
+}
+
+.art--small:disabled img {
+  filter: none;
+}
+
+/* Friend rows on the card art (inner area 4–96 % × 15–83 %) */
+.friend-row {
+  aspect-ratio: 961 / 250;
+  min-height: 0;
+  padding: 3% 5.5%;
+  border-radius: 0;
+  background: var(--ui-friend-card) center / 100% 100% no-repeat;
+  color: #3a1d05;
+}
+
+.friend-row__avatar img {
+  border-radius: 6px;
+  border: 3px solid #6b3f1d;
+}
+
+.friend-row__text strong {
+  font-size: 0.95rem;
+  text-transform: none;
+}
+
+.friend-row__level {
+  font-size: 0.75rem;
+  font-weight: 800;
+  opacity: 0.8;
+}
+
+.friend-row__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #7a7a7a;
+  opacity: 1;
+}
+
+.friend-row__status--on {
+  color: #2f7d3a;
+}
+
+.friend-row__status img {
+  width: 10px;
+  height: 10px;
+}
+
+.friend-row__actions {
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* Profile: REMOVE FRIEND */
+.art--remove-friend {
+  width: 150px;
+  margin-top: 6px;
+}
+
+/* Home: friends icon (phones) and FRIENDS (wide screens) */
+.hub__friends-art {
+  width: 56px;
+  height: auto;
+}
+
+.art--friends-wide {
+  width: 150px;
+}

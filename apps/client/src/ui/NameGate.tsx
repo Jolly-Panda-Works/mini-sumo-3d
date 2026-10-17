@@ -15,9 +15,8 @@ export function NameGate() {
   };
 
   return (
-    <Dialog title="Welcome!" onClose={() => undefined} hideClose className="name-gate">
+    <Dialog title="Welcome!" onClose={() => undefined} hideClose className="name-gate" variant="welcome">
       <form className="name-gate__form" onSubmit={submit}>
-        <img className="name-gate__logo" src={`${import.meta.env.BASE_URL}logo.webp`} alt="" width={120} height={120} />
         <p className="name-gate__title">What should we call you?</p>
         <label className="field">
           <span className="field__label">Your name</span>

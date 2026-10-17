@@ -8,6 +8,11 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Welcome popup in its own frame (WELCOME sign, question, name and SAVE in the board).
+- Friends art: the friends icon on the home hub and FRIENDS on wide screens; the friend code shown and typed in the code field with ADD; friend rows on the card art with online / offline dots; ACCEPT, DECLINE, PLAY, INVITE, SENT and REMOVE FRIEND buttons.
+
+### Changed
+
 - Popups render in their own top layer: one opened from another (a friend's profile, About, buying an item) sits on top of it instead of inside it. Every popup has a dark backdrop that fades in and out.
 
 ### Fixed

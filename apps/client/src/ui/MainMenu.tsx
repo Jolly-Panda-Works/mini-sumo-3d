@@ -64,15 +64,8 @@ export function MainMenu() {
         <header className="home__top">
           <div className="home__actions">
             <ProfileCard className="home__profile-card" />
-            <button className="tile-btn tile-btn--friends" onClick={() => setFriendsOpen(true)} aria-label="Friends">
-              <svg className="hub__friends-art" viewBox="0 0 64 64" aria-hidden="true">
-                <rect x="2" y="2" width="60" height="60" rx="10" fill="#7a4a24" stroke="#3a1d05" strokeWidth="3" />
-                <rect x="8" y="8" width="48" height="48" rx="6" fill="#2f5c8a" />
-                <circle cx="25" cy="26" r="8" fill="#ffd8b0" stroke="#3a1d05" strokeWidth="2" />
-                <path d="M12 50c1-9 6-13 13-13s12 4 13 13z" fill="#e2443a" stroke="#3a1d05" strokeWidth="2" />
-                <circle cx="41" cy="24" r="7" fill="#ffd8b0" stroke="#3a1d05" strokeWidth="2" />
-                <path d="M30 48c1-8 5-11 11-11s10 3 11 11z" fill="#3d7fe0" stroke="#3a1d05" strokeWidth="2" />
-              </svg>
+            <button className="art art--friends-wide" onClick={() => setFriendsOpen(true)} aria-label="Friends">
+              <img src={`${import.meta.env.BASE_URL}ui/friends-wide.webp`} alt="" width={360} height={111} />
             </button>
             <button className="tile-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
               <Icon name="customize" size={48} />
@@ -119,14 +112,7 @@ export function MainMenu() {
           <span>Customise</span>
         </button>
         <button className="hub__side-btn hub__side-btn--friends" onClick={() => setFriendsOpen(true)} aria-label="Friends">
-          <svg className="hub__friends-art" viewBox="0 0 64 64" aria-hidden="true">
-            <rect x="2" y="2" width="60" height="60" rx="10" fill="#7a4a24" stroke="#3a1d05" strokeWidth="3" />
-            <rect x="8" y="8" width="48" height="48" rx="6" fill="#2f5c8a" />
-            <circle cx="25" cy="26" r="8" fill="#ffd8b0" stroke="#3a1d05" strokeWidth="2" />
-            <path d="M12 50c1-9 6-13 13-13s12 4 13 13z" fill="#e2443a" stroke="#3a1d05" strokeWidth="2" />
-            <circle cx="41" cy="24" r="7" fill="#ffd8b0" stroke="#3a1d05" strokeWidth="2" />
-            <path d="M30 48c1-8 5-11 11-11s10 3 11 11z" fill="#3d7fe0" stroke="#3a1d05" strokeWidth="2" />
-          </svg>
+          <img className="hub__friends-art" src={`${import.meta.env.BASE_URL}ui/friends-icon.webp`} alt="" width={216} height={221} />
           <span>Friends</span>
         </button>
         <button className="hub__side-btn hub__side-btn--shop" onClick={() => setShopOpen(true)} aria-label="Shop">
