@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Cafe Bazaar build: coin packs bought with Bazaar in-app billing (Poolakey 2.2.0, native Kotlin plugin). Each purchase is credited once, then consumed; unfinished purchases are credited the next time the shop opens. Built by the new `Bazaar` workflow on the `bazaar` branch (`bazaar-vX.Y.Z` releases), without Google Play Games. Settings in `apps/mobile/bazaar.config.json` and `apps/client/src/network/bazaarProducts.ts`; guide in `docs/BAZAAR.fa.md`.
+
 ### Changed
 
 - Purchase popups (wardrobe items, pictures): BUY is always above NOT NOW.

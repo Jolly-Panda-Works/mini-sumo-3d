@@ -165,6 +165,8 @@ Offline, *Play now* searches for a few seconds and fills the ring with bots; *Cr
 
 The desktop app (`apps/desktop`, Electron) is still in the repository but is no longer built by CI.
 
+**Cafe Bazaar:** the `bazaar` branch builds the Bazaar version (coin packs through Bazaar in-app billing, no Google Play Games) and publishes `bazaar-vX.Y.Z` releases. See [docs/BAZAAR.fa.md](docs/BAZAAR.fa.md).
+
 ## Run from source
 
 Requirements: **Node.js 22.13+** (the server uses the built-in `node:sqlite`) and npm 10+.

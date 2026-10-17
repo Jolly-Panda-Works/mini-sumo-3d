@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { COIN_PACKS, DAILY_GIFT_COINS } from "@mini-sumo/shared";
+import { useEffect, useState } from "react";
+import { COIN_PACKS, DAILY_GIFT_COINS, type CoinPack } from "@mini-sumo/shared";
+import { bazaarEnabled, buyCoinPack, restoreBazaarPurchases } from "../network/bazaar";
 import { economyStore, refreshProfile } from "../network/economyClient";
 import { localEconomy } from "../network/localEconomy";
 import { networkStore } from "../network/networkMode";
@@ -9,9 +10,9 @@ import { useStore } from "../store";
 import { setShopOpen } from "../uiStore";
 import { Coins } from "./Coins";
 import { Dialog } from "./Dialog";
-import { ComingSoonButton, FreeLabel } from "./ArtButtons";
+import { BuyButton, ComingSoonButton, FreeLabel } from "./ArtButtons";
 
-/** Coin shop. Packs show their coin amount; buying coins is coming soon. */
+/** Coin shop: daily free coins and coin packs (bought through Cafe Bazaar in the Bazaar build). */
 export function CoinShop() {
   const economy = useStore(economyStore);
   const balance = economy.profile?.balances.coins ?? 0;
@@ -19,6 +20,36 @@ export function CoinShop() {
   const { mode } = useStore(networkStore);
   const local = mode !== "online";
   const [giftReady, setGiftReady] = useState(() => local && localEconomy.dailyGiftAvailable());
+  // Cafe Bazaar build: packs are bought with real money through Bazaar.
+  const store = local && bazaarEnabled();
+  const [buying, setBuying] = useState<string | null>(null);
+
+  // Finish any purchase that was paid but not credited (e.g. the app closed mid-purchase).
+  useEffect(() => {
+    if (!store) return;
+    void restoreBazaarPurchases().then((coins) => {
+      if (coins > 0) {
+        audio.sample("purchase");
+        pushToast(`+${coins.toLocaleString("en-US")} Sumo Coins`, "info");
+      }
+    });
+  }, [store]);
+
+  const buy = async (pack: CoinPack) => {
+    setBuying(pack.id);
+    try {
+      const result = await buyCoinPack(pack);
+      if (result === "bought") {
+        audio.sample("purchase");
+        pushToast(`+${pack.coins.toLocaleString("en-US")} Sumo Coins`, "info");
+      }
+    } catch (error) {
+      audio.sample("reject");
+      pushToast(error instanceof Error ? error.message : "The purchase failed.", "error");
+    } finally {
+      setBuying(null);
+    }
+  };
 
   const claim = () => {
     const amount = localEconomy.claimDailyGift();
@@ -63,12 +94,23 @@ export function CoinShop() {
             <p className="pack__coins">
               <Coins amount={pack.coins} />
             </p>
-            <ComingSoonButton
-              className="pack__soon"
-              ariaDisabled
-              label={`${pack.name}, ${pack.coins} Sumo Coins: coming soon`}
-              onClick={() => pushToast("Buying coins is coming soon", "info")}
-            />
+            {store ? (
+              <BuyButton
+                className="pack__buy"
+                price={pack.coins}
+                label={`Buy ${pack.name}, ${pack.coins} Sumo Coins, in Cafe Bazaar`}
+                disabled={buying !== null}
+                sfx="none"
+                onClick={() => void buy(pack)}
+              />
+            ) : (
+              <ComingSoonButton
+                className="pack__soon"
+                ariaDisabled
+                label={`${pack.name}, ${pack.coins} Sumo Coins: coming soon`}
+                onClick={() => pushToast("Buying coins is coming soon", "info")}
+              />
+            )}
           </li>
         ))}
       </ul>

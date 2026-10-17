@@ -218,6 +218,7 @@ export type LedgerCategory =
   | "cosmetic_purchase"
   | "daily_gift"
   | "level_up"
+  | "coin_purchase"
   | "adjustment";
 
 export interface LedgerEntry {

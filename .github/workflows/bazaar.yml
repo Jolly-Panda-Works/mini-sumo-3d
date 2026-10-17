@@ -1,0 +1,139 @@
+# Cafe Bazaar build: the same game with Bazaar in-app billing (coin packs) instead of
+# Google Play Games. Runs on the `bazaar` branch (and on demand).
+#
+# Keep the branch up to date with main (`git checkout bazaar && git merge main && git push`);
+# each push builds the Bazaar APK/AAB with the version from package.json and publishes it as
+# a GitHub Release tagged bazaar-vX.Y.Z (the same versionCode as the main Android build).
+#
+# Settings: apps/mobile/bazaar.config.json (RSA key, Poolakey version) and
+# apps/client/src/network/bazaarProducts.ts (product ids). The repository variable
+# BAZAAR_RSA_KEY overrides the key. Signing uses the same ANDROID_KEYSTORE_* secrets.
+
+name: Bazaar
+
+on:
+  push:
+    branches: [bazaar]
+    paths-ignore:
+      - "docs/**"
+      - "**.md"
+  workflow_dispatch:
+
+concurrency:
+  group: bazaar-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: 22
+  VITE_SERVER_URL: ${{ vars.VITE_SERVER_URL }}
+
+jobs:
+  android:
+    name: Android (Cafe Bazaar)
+    runs-on: ubuntu-latest
+    env:
+      VITE_STORE: bazaar
+      VITE_BASE: /
+      HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: "**/package.json"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          IFS=. read -r MA MI PA <<< "${VERSION%%-*}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "code=$((MA * 1000000 + MI * 1000 + PA))" >> "$GITHUB_OUTPUT"
+          echo "VITE_APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Bazaar build $VERSION"
+
+      - name: Install dependencies
+        run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - run: npm run typecheck
+      - run: npm run build:web
+      - name: Install mobile dependencies
+        run: npm install --prefix apps/mobile
+
+      - name: Create Android project
+        working-directory: apps/mobile
+        run: |
+          npx cap add android
+          npx capacitor-assets generate --android --iconBackgroundColor "#11276F" --splashBackgroundColor "#2F5C8A" || echo "::warning::Icon generation failed; using default icons."
+          npx cap sync android
+          node scripts/orientation.mjs
+          # Cafe Bazaar billing (no Google Play Games in this build).
+          BAZAAR_RSA_KEY="${{ vars.BAZAAR_RSA_KEY }}" node scripts/bazaar.mjs
+
+      - name: Target SDK (optional, repository variable ANDROID_TARGET_SDK)
+        if: vars.ANDROID_TARGET_SDK != ''
+        working-directory: apps/mobile/android
+        run: sed -i -E "s/(compileSdkVersion|targetSdkVersion) = [0-9]+/\1 = ${{ vars.ANDROID_TARGET_SDK }}/" variables.gradle
+
+      - name: Set version
+        working-directory: apps/mobile/android
+        run: |
+          sed -i "s/versionCode [0-9]*/versionCode ${{ steps.version.outputs.code }}/" app/build.gradle
+          sed -i "s/versionName \"[^\"]*\"/versionName \"${{ steps.version.outputs.version }}\"/" app/build.gradle
+
+      - name: Build debug APK
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Build signed release APK and AAB
+        if: env.HAS_KEYSTORE == 'true'
+        working-directory: apps/mobile/android
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          printf '%s' "$KEYSTORE_BASE64" | tr -d '\r\n ' | base64 --decode > "$RUNNER_TEMP/release.keystore"
+          ./gradlew assembleRelease bundleRelease --no-daemon \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/release.keystore" \
+            -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
+
+      - name: Collect outputs
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          mkdir -p out
+          OUTPUTS=apps/mobile/android/app/build/outputs
+          cp "$OUTPUTS/apk/debug/app-debug.apk" "out/MiniSumo-$VERSION-Bazaar-debug.apk"
+          if [ "$HAS_KEYSTORE" = "true" ]; then
+            cp "$OUTPUTS/apk/release/app-release.apk" "out/MiniSumo-$VERSION-Bazaar.apk"
+            cp "$OUTPUTS/bundle/release/app-release.aab" "out/MiniSumo-$VERSION-Bazaar.aab"
+          fi
+          (cd out && sha256sum * > SHA256SUMS.txt)
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mini-sumo-bazaar
+          path: out/*
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="bazaar-v${{ steps.version.outputs.version }}"
+          NOTES="Cafe Bazaar build of Mini Sumo ${{ steps.version.outputs.version }}. Upload \`MiniSumo-${{ steps.version.outputs.version }}-Bazaar.apk\` to the Bazaar developer panel."
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" out/* --clobber
+          else
+            gh release create "$TAG" out/* --target "$GITHUB_SHA" --title "Mini Sumo ${{ steps.version.outputs.version }} (Cafe Bazaar)" --notes "$NOTES" --latest=false
+          fi

@@ -1,0 +1,6 @@
+{
+  "$comment": "Cafe Bazaar build. rsaKey: the in-app billing RSA public key from the Bazaar developer panel (public, safe to commit). Product ids live in apps/client/src/network/bazaarProducts.ts.",
+  "rsaKey": "MIHNMA0GCSqGSIb3DQEBAQUAA4G7ADCBtwKBrwDAknFX+blZR2WhaajSf0qVqx4gKjVmaKwoMpQs+5NlkNAx0DiVocI8lTgXog6gqvK17Pwyh99zibwJmQHCH4Uvpt5pU2jEqkgv+xQNB4lR97QUpwZQliLm4hx7xjU8CriDbQSicECdJeQWL3tRpMVGbCjS//H1d3eQUUgpgLEPoqwVYE/JI4dHqc6gkNBkwRTLFpOgMShlie/+WeMyCl/IDwdtZfm+Osp2rId8Ag0CAwEAAQ==",
+  "poolakeyVersion": "2.2.0",
+  "kotlinVersion": "1.9.24"
+}

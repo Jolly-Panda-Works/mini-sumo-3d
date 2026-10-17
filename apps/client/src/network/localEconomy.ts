@@ -47,6 +47,8 @@ interface LocalState {
   bestStreak: number;
   /** Day the shop's free daily coins were last claimed. */
   giftDay: string;
+  /** Store purchases already credited (purchase tokens), so a purchase is never credited twice. */
+  purchases: string[];
 }
 
 export interface LocalEntry {
@@ -87,6 +89,7 @@ function fresh(): LocalState {
     streak: 0,
     bestStreak: 0,
     giftDay: "",
+    purchases: [],
   };
 }
 
@@ -193,6 +196,19 @@ export const localEconomy = {
   /** The shop's free coins: once per (UTC) day. */
   dailyGiftAvailable(): boolean {
     return state.giftDay !== today();
+  },
+
+  /**
+   * Credits a coin pack bought in the store. Idempotent per purchase token: returns false if
+   * this purchase was already credited (e.g. found again when restoring unfinished purchases).
+   */
+  creditCoinPurchase(purchaseToken: string, coins: number, label: string): boolean {
+    if (!purchaseToken || state.purchases.includes(purchaseToken)) return false;
+    record(coins, "coin_purchase", `Bought ${label}`);
+    state.purchases.push(purchaseToken);
+    if (state.purchases.length > 500) state.purchases.splice(0, state.purchases.length - 500);
+    save();
+    return true;
   },
 
   claimDailyGift(): number {

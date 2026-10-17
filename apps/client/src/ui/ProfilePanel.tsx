@@ -121,6 +121,7 @@ export function ProfilePanel() {
           ))}
         </dl>
 
+        {import.meta.env.VITE_STORE !== "bazaar" && (
         <section className="profile__google" aria-label="Google Play">
           {play.status === "connected" ? (
             <button className="gplay-btn" onClick={() => pushToast("Your progress is saved to Google Play", "info")} aria-label="Connected to Google Play">
@@ -144,6 +145,7 @@ export function ProfilePanel() {
               : "Sign in to keep your progress safe on your Google Play account."}
           </p>
         </section>
+        )}
       </Dialog>
       {editing && <EditName onClose={() => setEditing(false)} />}
       {picking && (
