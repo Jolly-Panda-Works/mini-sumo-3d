@@ -19,7 +19,6 @@ export function NameGate() {
       <form className="name-gate__form" onSubmit={submit}>
         <img className="name-gate__logo" src={`${import.meta.env.BASE_URL}logo.webp`} alt="" width={120} height={120} />
         <p className="name-gate__title">What should we call you?</p>
-        <p className="hint">Other wrestlers see this name above your head. You can change it later in your profile.</p>
         <label className="field">
           <span className="field__label">Your name</span>
           <input

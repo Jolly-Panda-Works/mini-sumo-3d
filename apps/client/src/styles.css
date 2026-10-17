@@ -4621,3 +4621,80 @@ dl.profile__stats {
   outline: 3px solid #ffe7a8;
   outline-offset: 2px;
 }
+
+/* ======================================================================
+   Phone fixes (screenshots): shop tags, coin + button, carousel edges,
+   centred waiting room, HUD alignment, power-up size
+   ====================================================================== */
+
+/* Shop: the Popular / Best value tags sit inside the card, not cut off */
+.pack {
+  overflow: visible;
+}
+
+.pack__tag {
+  top: 4px;
+  z-index: 2;
+}
+
+/* Coin frame on home: the amount inside, the + just outside on the right */
+.home .coin-frame {
+  margin-right: 30px;
+}
+
+.home .coin-frame__plus {
+  right: -32px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Arena carousel reaches the screen edges (no side padding) */
+.home--hub {
+  margin-left: calc(-12px - var(--safe-left));
+  margin-right: calc(-12px - var(--safe-right));
+  padding-left: calc(12px + var(--safe-left));
+  padding-right: calc(12px + var(--safe-right));
+}
+
+/* Waiting room in the middle of the screen */
+.overlay--lobby {
+  align-items: center;
+}
+
+/* HUD: frames, timer and settings share the top edge; frames stay clear of the timer */
+.hud__top {
+  align-items: flex-start;
+}
+
+.frames {
+  top: 0;
+  left: 0;
+  width: min(36vw, 230px);
+}
+
+.hud__gear {
+  top: 0;
+}
+
+/* Your power-up: smaller, right edge in line with the settings button */
+.pu-frame {
+  right: 0;
+  width: 58px;
+}
+
+.pu-frame__name {
+  font-size: 0.4rem;
+}
+
+.pu-frame__seconds {
+  font-size: 1.15rem;
+}
+
+.pu-frame__time {
+  gap: 4px;
+}
+
+/* Item purchase popup: coin frame on the preview */
+.item-popup__preview {
+  position: relative;
+}

@@ -91,9 +91,6 @@ export function Lobby() {
           </label>
         )}
 
-        <h2 className="lobby__count">
-          Wrestlers {connected.length} of {game.maxPlayers}
-        </h2>
         <ul className="roster">
           {slots.map((p, i) =>
             p ? (

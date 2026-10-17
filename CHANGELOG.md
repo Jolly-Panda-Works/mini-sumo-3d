@@ -6,6 +6,16 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Welcome popup: no explanation line under the question.
+- Shop: the Popular / Best value tags were cut off.
+- Item purchase popup: the price shows only on BUY; the coin frame sits on the preview's corner.
+- Home: the coin amount sits inside its frame with the + beside it; the arena carousel reaches the screen edges.
+- Waiting room: centred on screen, without the "Wrestlers 1 of 4" line.
+- Match HUD on phones: the player frames no longer overlap the timer and line up with the settings button; the power-up frame is smaller and lines up with the settings button's edge.
+- Results: the balance line is gone.
+
 ### Changed
 
 - Results use the new scoreboard frame: the headline on the top plaque, the four places (picture, name, status), the coins won in the prize panel, and the buttons with XP and balance in the dark area.

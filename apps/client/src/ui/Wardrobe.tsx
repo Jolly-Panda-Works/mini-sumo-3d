@@ -146,7 +146,10 @@ function ItemPopup({
         </div>
       }
     >
-      <div className="item-popup__preview" aria-hidden="true">
+      <div className="item-popup__preview">
+        <span className="wardrobe__balance coin-frame coin-frame--static" aria-label={`Your coins: ${balance}`}>
+          <span className="coin-frame__amount">{balance.toLocaleString("en-US")}</span>
+        </span>
         <Canvas shadows dpr={[1, 2]} camera={{ fov: 32, position: [0, 1.25, 4.6] }}>
           <hemisphereLight args={["#F4F7FF", "#7B6A5A", 1.2]} />
           <directionalLight position={[2.5, 4, 3]} intensity={1.6} castShadow />
@@ -159,14 +162,6 @@ function ItemPopup({
           </group>
         </Canvas>
       </div>
-      <p className="item-popup__price">
-        <Coins amount={item.price} />
-        <span className="hint">
-          {" "}
-          · you have {balance}
-          {!affordable && " (not enough coins)"}
-        </span>
-      </p>
       {error && (
         <p className="notice notice--error" role="alert">
           {error}

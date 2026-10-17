@@ -83,10 +83,7 @@ export function Results() {
             ) : null}
           </div>
           <p className="results-board__info">
-            {result?.xp ? `+${result.xp} XP` : ""}
-            {result?.xp && result.balance !== null ? " · " : ""}
-            {result && result.balance !== null ? `${result.balance.toLocaleString("en-US")} coins` : ""}
-            {paid ? ` · Home in ${seconds}s` : !isHost ? ` · Lobby in ${seconds}s` : ""}
+            {[result?.xp ? `+${result.xp} XP` : "", paid ? `Home in ${seconds}s` : !isHost ? `Lobby in ${seconds}s` : ""].filter(Boolean).join(" · ")}
           </p>
         </div>
       </section>
