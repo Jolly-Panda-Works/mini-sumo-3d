@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Settings during a match: LEAVE MATCH comes at the end of the list and scrolls with it (no longer pinned to the bottom).
+
+### Changed
+
 - Results: HOME, PLAY AGAIN and REMATCH from the same button set as the popups.
 
 ### Changed

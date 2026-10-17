@@ -70,27 +70,6 @@ export function SettingsPanel() {
       title="Settings"
       onClose={close}
       className="settings"
-      footer={
-        inRoom ? (
-          <button
-            className="art art--leave"
-            aria-label="Leave match"
-            onClick={() => {
-              void showWarning("Leave the match?", "The bout is still going. If you leave now, you lose this bout.", [
-                { id: "leave", label: "Leave", primary: true },
-                { id: "cancel", label: "Stay" },
-              ]).then((choice) => {
-                if (choice !== "leave") return;
-                close();
-                void roomManager.leave();
-              });
-              return;
-            }}
-          >
-            <img src={`${import.meta.env.BASE_URL}ui/btn-leave.webp`} alt="" width={503} height={139} draggable={false} />
-          </button>
-        ) : undefined
-      }
     >
       {inRoom && <p className="hint">The match keeps going while this is open.</p>}
       <div className="settings__grid">
@@ -131,6 +110,27 @@ export function SettingsPanel() {
           </div>
         </section>
       </div>
+      {inRoom && (
+        <div className="settings__leave">
+          <button
+            className="art art--leave"
+            aria-label="Leave match"
+            onClick={() => {
+              void showWarning("Leave the match?", "The bout is still going. If you leave now, you lose this bout.", [
+                { id: "leave", label: "Leave", primary: true },
+                { id: "cancel", label: "Stay" },
+              ]).then((choice) => {
+                if (choice !== "leave") return;
+                close();
+                void roomManager.leave();
+              });
+              return;
+            }}
+          >
+            <img src={`${import.meta.env.BASE_URL}ui/btn-leave.webp`} alt="" width={503} height={139} draggable={false} />
+          </button>
+        </div>
+      )}
       {!inRoom && (
         <div className="settings__about settings__about--row">
           <span

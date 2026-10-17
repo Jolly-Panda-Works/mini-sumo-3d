@@ -5908,3 +5908,11 @@ button:not(:disabled):not([aria-disabled="true"]):active {
   flex: 1 1 0;
   max-width: 48%;
 }
+
+/* Settings during a match: Leave match at the end of the list (scrolls with it) */
+.settings__leave {
+  display: flex;
+  justify-content: center;
+  margin-top: 6px;
+  padding-bottom: 4px;
+}
