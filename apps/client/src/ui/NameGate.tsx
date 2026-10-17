@@ -22,7 +22,7 @@ export function NameGate() {
         <label className="field">
           <span className="field__label">Your name</span>
           <input
-            className="input"
+            className="input input--art"
             value={name}
             onChange={(e) => setName(e.target.value.slice(0, NAME_MAX_LENGTH))}
             placeholder="Little Yokozuna"

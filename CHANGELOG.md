@@ -8,6 +8,37 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Added
 
+- A smaller popup frame for popups opened on top of another (About, buying an item or a picture, the picture picker, editing the name).
+- Animations for every popup (open and close) and button (hover, press, and a shake when a tap is rejected).
+- Joystick choice again, with the FIXED CORNER / UNDER YOUR THUMB art (fixed corner by default).
+- New art: OK, STAY, LEAVE MATCH, GREAT!, HOME, PLAY AGAIN buttons and the name input field.
+
+### Changed
+
+- Warning / error / message popups: buttons side by side; text sized to fit without scrolling.
+- The menu music starts as soon as loading ends (where the device allows sound before a tap).
+
+### Fixed
+
+- The About button (and other art buttons given an extra class) lost its size.
+- The glow of the selected difficulty on the Training card was cut off.
+
+### Changed
+
+- Settings: the joystick is always the fixed corner one (option removed); a smaller About button; no text over the vibration switch art.
+- Waiting room: the start button sits in the fixed footer and the panel no longer scrolls; the room id is gone.
+- Every arena card shows PLAY; the entry popup shows ENTER.
+- Loading on landscape screens (web, desktop): the home background with the game logo.
+- Opponents' power-up flags sit just outside the right edge of their frame, as tall as the frame.
+
+### Fixed
+
+- The pencil on the profile picture uses the new art.
+- Popular / Best value tags had a border.
+- Level-up popup: the level number shows on its own, without the disc behind it.
+
+### Added
+
 - Message, warning and error popups (their own frames): title in the upper box, message and buttons in the lower box, queued one at a time (`showMessage`, `showWarning`, `showError` in `uiStore`). Used for: leaving a match (warning: Leave / Stay), not enough coins (warning, with a way to the coin shop), a failed coin purchase (error, with Retry) and connection errors on the home screen.
 - Dev mode: every panel, popup and match screen (waiting room, HUD, results) with sample data, plus tools (+1,000 coins, +500 XP, reset daily coins). Turn it on with `?dev` in the address, or tap the version label in settings 7 times; a DEV button then shows on the home screen.
 

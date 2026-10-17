@@ -5,6 +5,13 @@ import { uiStore, type Notice } from "../uiStore";
 
 const BASE = import.meta.env.BASE_URL;
 
+/** Actions drawn with their own button art (by id, or id:label). */
+const ART: Record<string, string> = {
+  ok: "btn-ok",
+  leave: "btn-leave",
+  "cancel:stay": "btn-stay",
+};
+
 /**
  * Message / warning / error popup (public/ui/popup-<kind>.webp): the kind's plaque on top,
  * the title in the upper box, the message and the buttons in the lower box.
@@ -44,17 +51,31 @@ function NoticeView({ notice }: { notice: Notice }) {
         <div className="notice-popup__body">
           <p className="notice-popup__message">{notice.message}</p>
           <div className="notice-popup__actions">
-            {actions.map((action, i) => (
-              <button
-                key={action.id}
-                type="button"
-                className={`plank-btn${action.primary ? " plank-btn--primary" : ""}`}
-                onClick={() => notice.resolve(action.id)}
-                autoFocus={i === 0}
-              >
-                {action.label}
-              </button>
-            ))}
+            {actions.map((action, i) => {
+              const art = ART[`${action.id}:${action.label}`.toLowerCase()] ?? ART[action.id];
+              return art ? (
+                <button
+                  key={action.id}
+                  type="button"
+                  className="art art--notice"
+                  onClick={() => notice.resolve(action.id)}
+                  autoFocus={i === 0}
+                  aria-label={action.label}
+                >
+                  <img src={`${BASE}ui/${art}.webp`} alt="" draggable={false} />
+                </button>
+              ) : (
+                <button
+                  key={action.id}
+                  type="button"
+                  className={`plank-btn${action.primary ? " plank-btn--primary" : ""}`}
+                  onClick={() => notice.resolve(action.id)}
+                  autoFocus={i === 0}
+                >
+                  {action.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>

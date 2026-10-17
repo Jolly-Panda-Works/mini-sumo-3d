@@ -26,10 +26,10 @@ function EditName({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <Dialog title="Your name" onClose={onClose} className="edit-name">
+    <Dialog title="Your name" onClose={onClose} className="edit-name" variant="sub">
       <form className="edit-name__form" onSubmit={save}>
         <input
-          className="input"
+          className="input input--art"
           value={name}
           onChange={(e) => setName(e.target.value.slice(0, NAME_MAX_LENGTH))}
           maxLength={NAME_MAX_LENGTH}
@@ -76,9 +76,7 @@ export function ProfilePanel() {
             <span className="level-label" aria-label={`Level ${level.level}`}>
               <span className="level-label__value">{level.level}</span>
             </span>
-            <span className="profile__avatar-edit" aria-hidden="true">
-              ✎
-            </span>
+            <img className="profile__avatar-edit" src={`${import.meta.env.BASE_URL}ui/btn-edit.webp`} alt="" width={140} height={146} aria-hidden="true" />
           </button>
           <div className="profile__xp">
             <div className="profile__name-row">
@@ -140,7 +138,7 @@ export function ProfilePanel() {
       </Dialog>
       {editing && <EditName onClose={() => setEditing(false)} />}
       {picking && (
-        <Dialog title="Pictures" onClose={() => setPicking(false)} className="avatar-picker">
+        <Dialog title="Pictures" onClose={() => setPicking(false)} className="avatar-picker" variant="sub">
           <AvatarPicker onPicked={() => setPicking(false)} />
         </Dialog>
       )}
@@ -208,6 +206,7 @@ function AvatarPicker({ onPicked }: { onPicked: () => void }) {
       </ul>
       {pending !== null && (
         <Dialog
+          variant="sub"
           title="New picture"
           onClose={() => setPending(null)}
           className="avatar-buy"

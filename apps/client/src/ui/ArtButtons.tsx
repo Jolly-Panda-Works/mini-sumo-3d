@@ -36,7 +36,7 @@ function ArtButton({ art, onClick, label, disabled, ariaDisabled, sfx, className
 /** BUY with the price in its dark field. */
 export function BuyButton({ price, ...props }: Props & { price: number }) {
   return (
-    <ArtButton art="btn-buy" className="art--buy" {...props}>
+    <ArtButton art="btn-buy" {...props} className={`art--buy ${props.className ?? ""}`}>
       <span className="art--buy__price">
         <Coins amount={price} />
       </span>
@@ -45,15 +45,15 @@ export function BuyButton({ price, ...props }: Props & { price: number }) {
 }
 
 export function NotNowButton(props: Props) {
-  return <ArtButton art="btn-not-now" className="art--not-now" {...props} />;
+  return <ArtButton art="btn-not-now" {...props} className={`art--not-now ${props.className ?? ""}`} />;
 }
 
 export function ComingSoonButton(props: Props) {
-  return <ArtButton art="btn-coming-soon" className="art--coming-soon" {...props} />;
+  return <ArtButton art="btn-coming-soon" {...props} className={`art--coming-soon ${props.className ?? ""}`} />;
 }
 
 export function AboutButton(props: Props) {
-  return <ArtButton art="btn-about" className="art--about" {...props} />;
+  return <ArtButton art="btn-about" {...props} className={`art--about ${props.className ?? ""}`} />;
 }
 
 export function FreeLabel({ className = "" }: { className?: string }) {
@@ -66,7 +66,6 @@ export function VibrationToggle({ on, onChange }: { on: boolean; onChange: (on: 
     <button type="button" className="vib-toggle" role="switch" aria-checked={on} aria-label="Vibration" onClick={() => onChange(!on)}>
       <img className="vib-toggle__frame" src={`${BASE}ui/vibration-frame.webp`} alt="" draggable={false} />
       <img className="vib-toggle__switch" src={`${BASE}ui/vibration-${on ? "on" : "off"}.webp`} alt="" draggable={false} />
-      <span className="vib-toggle__text">{on ? "On" : "Off"}</span>
     </button>
   );
 }

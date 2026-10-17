@@ -49,6 +49,7 @@ function render(): void {
     finished = true;
     window.setTimeout(() => {
       root.classList.add("boot--done");
+      window.dispatchEvent(new Event("boot:done"));
       window.setTimeout(() => root.remove(), 400);
     }, 250);
     return;

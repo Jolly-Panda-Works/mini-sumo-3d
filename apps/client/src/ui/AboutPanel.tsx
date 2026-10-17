@@ -6,7 +6,7 @@ import { Dialog } from "./Dialog";
 export function AboutPanel() {
   const version = import.meta.env.VITE_APP_VERSION as string | undefined;
   return (
-    <Dialog title="About" onClose={() => setAboutOpen(false)} className="about-panel">
+    <Dialog title="About" onClose={() => setAboutOpen(false)} className="about-panel" variant="sub">
       <img className="about-panel__logo" src={`${import.meta.env.BASE_URL}logo.webp`} alt="" width={120} height={120} />
       <p className="about-panel__name">{GAME_TITLE}</p>
       {version && <p className="hint">Version {version}</p>}

@@ -59,18 +59,40 @@ export function Lobby() {
 
   const slots = Array.from({ length: game.maxPlayers }, (_, i) => connected[i] ?? null);
 
+  // The start button sits in the fixed footer, so the waiting room never scrolls.
+  const startArea = autoStart ? null : isHost ? (
+          <>
+            <button
+              className="start-btn lobby__start"
+              disabled={!canStart || !armed}
+              onClick={() => roomManager.startMatch()}
+              aria-live="polite"
+            >
+              <span className="start-btn__text">{searching ? `Start match in ${searchSeconds}…` : "Start match"}</span>
+            </button>
+            {!canStart && !searching && (
+              <p className="hint">
+                You need at least {MIN_PLAYERS} wrestlers.{" "}
+                {offline
+                  ? "Add a bot to start."
+                  : game.isPrivate
+                    ? "Add a bot or send the invite link to a friend."
+                    : "Waiting for another player to join."}
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="hint hint--center">Waiting for the host to start the match.</p>
+        );
+
   return (
     <Dialog
+      footer={startArea}
       title={game.isPrivate ? "Private room" : (arena?.name ?? "Training Arena")}
       onClose={() => void roomManager.leave()}
       className="lobby"
       overlayClassName="overlay--lobby"
     >
-        {!offline && (
-          <p className="lobby__sub room-code" aria-label={`Room code ${session.roomId}`}>
-            {session.roomId}
-          </p>
-        )}
 
         {!offline && (
         <div className="row">
@@ -139,31 +161,6 @@ export function Lobby() {
             {!full && <Icon name="bot" size={22} />}
             {full ? "Room is full" : "Add bot"}
           </button>
-        )}
-
-        {autoStart ? null : isHost ? (
-          <>
-            <button
-              className="start-btn lobby__start"
-              disabled={!canStart || !armed}
-              onClick={() => roomManager.startMatch()}
-              aria-live="polite"
-            >
-              <span className="start-btn__text">{searching ? `Start match in ${searchSeconds}…` : "Start match"}</span>
-            </button>
-            {!canStart && !searching && (
-              <p className="hint">
-                You need at least {MIN_PLAYERS} wrestlers.{" "}
-                {offline
-                  ? "Add a bot to start."
-                  : game.isPrivate
-                    ? "Add a bot or send the invite link to a friend."
-                    : "Waiting for another player to join."}
-              </p>
-            )}
-          </>
-        ) : (
-          <p className="hint hint--center">Waiting for the host to start the match.</p>
         )}
 
         {paid && <p className="hint hint--center">Leave with × before the bout starts to get your entry back.</p>}

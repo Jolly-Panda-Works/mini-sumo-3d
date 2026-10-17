@@ -37,9 +37,29 @@
         object-fit: cover;
         object-position: center 30%;
       }
+      .boot__logo {
+        display: none;
+      }
+      /* Landscape (desktop / web): the home background and the game logo */
       @media (orientation: landscape) {
+        #boot {
+          background-color: #1a2147;
+          background-image: radial-gradient(ellipse at 50% 42%, rgba(120, 150, 230, 0.28), transparent 62%), url("/ui/bg-tile.webp");
+          background-repeat: no-repeat, repeat;
+          background-size: 100% 100%, min(70vw, 420px) auto;
+        }
         .boot__bg {
-          object-position: center 38%;
+          display: none;
+        }
+        .boot__logo {
+          display: block;
+          position: absolute;
+          left: 50%;
+          top: 44%;
+          width: min(46vh, 380px);
+          height: auto;
+          transform: translate(-50%, -50%);
+          filter: drop-shadow(0 10px 0 rgba(0, 0, 0, 0.3));
         }
       }
       .boot__ui {
@@ -164,10 +184,8 @@
   <body>
     <div id="boot" role="progressbar" aria-label="Loading Mini Sumo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="1">
       <!-- Portrait (the Android app): the tall illustration. Landscape screens: the square one. -->
-      <picture>
-        <source media="(orientation: landscape)" srcset="/boot/loading-bg-wide.webp" />
-        <img class="boot__bg" src="/boot/loading-bg.webp" alt="" />
-      </picture>
+      <img class="boot__bg" src="/boot/loading-bg.webp" alt="" />
+      <img class="boot__logo" src="/boot/game-logo.webp" alt="" />
       <div class="boot__ui">
         <div class="boot__bar">
           <img class="boot__frame" src="/boot/bar-frame.webp" alt="" />

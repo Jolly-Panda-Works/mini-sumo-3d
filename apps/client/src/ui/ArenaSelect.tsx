@@ -146,7 +146,7 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
                     free ? `Play ${arena.name} for free` : soon ? `${arena.name}: coming soon` : `Enter ${arena.name} for ${arena.entryFee} Sumo Coins`
                   }
                 >
-                  <img src={`${import.meta.env.BASE_URL}ui/${free ? "btn-play" : "btn-enter"}.webp`} alt="" width={free ? 287 : 360} height={free ? 91 : 95} draggable={false} />
+                  <img src={`${import.meta.env.BASE_URL}ui/btn-play.webp`} alt="" width={287} height={91} draggable={false} />
                 </button>
             </li>
           );

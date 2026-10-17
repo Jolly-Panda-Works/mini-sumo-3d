@@ -1,5 +1,5 @@
 import { roomManager, sessionStore } from "../network/RoomManager";
-import { settingsStore, type JoystickMode } from "../settings";
+import { settingsStore } from "../settings";
 import { useStore } from "../store";
 import { setAboutOpen, setSettingsOpen } from "../uiStore";
 import { Dialog } from "./Dialog";
@@ -73,7 +73,8 @@ export function SettingsPanel() {
       footer={
         inRoom ? (
           <button
-            className="btn btn--danger"
+            className="art art--leave"
+            aria-label="Leave match"
             onClick={() => {
               void showWarning("Leave the match?", "The bout is still going. If you leave now, you lose this bout.", [
                 { id: "leave", label: "Leave", primary: true },
@@ -86,7 +87,7 @@ export function SettingsPanel() {
               return;
             }}
           >
-            Leave match
+            <img src={`${import.meta.env.BASE_URL}ui/btn-leave.webp`} alt="" width={503} height={139} draggable={false} />
           </button>
         ) : (
           <div className="settings__about">
@@ -124,16 +125,29 @@ export function SettingsPanel() {
 
         <section className="settings__section" aria-label="Controls">
           <h3 className="settings__heading">Controls</h3>
-          <Segmented<JoystickMode>
-            label="Joystick"
-            name="joystick"
-            value={settings.joystick}
-            options={[
-              ["floating", "Under your thumb"],
-              ["fixed", "Fixed corner"],
-            ]}
-            onChange={(joystick) => settingsStore.update({ joystick })}
-          />
+          <div className="field">
+            <span className="field__label">Joystick</span>
+            <div className="art-choice" role="radiogroup" aria-label="Joystick">
+              {(
+                [
+                  ["fixed", "joystick-fixed", "Fixed corner"],
+                  ["floating", "joystick-thumb", "Under your thumb"],
+                ] as const
+              ).map(([mode, art, label]) => (
+                <button
+                  key={mode}
+                  type="button"
+                  role="radio"
+                  aria-checked={settings.joystick === mode}
+                  aria-label={label}
+                  className="art art--choice"
+                  onClick={() => settingsStore.update({ joystick: mode })}
+                >
+                  <img src={`${import.meta.env.BASE_URL}ui/${art}-${settings.joystick === mode ? "on" : "off"}.webp`} alt="" draggable={false} />
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="field">
             <span className="field__label">Vibration on dash and hits</span>
             <VibrationToggle on={settings.vibration} onChange={(vibration) => settingsStore.update({ vibration })} />

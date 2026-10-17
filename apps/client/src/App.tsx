@@ -63,7 +63,15 @@ export function App() {
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       const button = (e.target as HTMLElement | null)?.closest?.("button");
-      if (!button || button.disabled || button.dataset.sfx === "none") return;
+      if (!button) return;
+      // Rejected tap (disabled or not available yet): a short shake.
+      if (button.disabled || button.getAttribute("aria-disabled") === "true") {
+        button.classList.remove("is-rejected");
+        void button.offsetWidth;
+        button.classList.add("is-rejected");
+        window.setTimeout(() => button.classList.remove("is-rejected"), 420);
+      }
+      if (button.disabled || button.dataset.sfx === "none") return;
       if (button.getAttribute("aria-disabled") === "true") audio.reject();
       else audio.click();
     };

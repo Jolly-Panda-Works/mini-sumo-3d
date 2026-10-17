@@ -45,8 +45,8 @@ export function LevelUpPopup() {
               </>
             )}
           </p>
-          <button className="btn btn--primary" onClick={close} autoFocus>
-            Great!
+          <button className="art art--great" onClick={close} autoFocus aria-label="Great!">
+            <img src={`${import.meta.env.BASE_URL}ui/btn-great.webp`} alt="" width={361} height={115} draggable={false} />
           </button>
         </div>
       </section>

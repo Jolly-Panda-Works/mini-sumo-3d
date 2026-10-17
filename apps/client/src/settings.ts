@@ -26,7 +26,7 @@ export interface Settings {
 const KEY = "mini-sumo:settings";
 
 function load(): Settings {
-  const defaults: Settings = { musicVolume: 0.5, sfxVolume: 0.8, touchControls: "auto", joystick: "floating", vibration: true, name: "", onboarded: false, botLevel: "normal", appearance: { ...DEFAULT_APPEARANCE } };
+  const defaults: Settings = { musicVolume: 0.5, sfxVolume: 0.8, touchControls: "auto", joystick: "fixed", vibration: true, name: "", onboarded: false, botLevel: "normal", appearance: { ...DEFAULT_APPEARANCE } };
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return defaults;
@@ -38,7 +38,7 @@ function load(): Settings {
       sfxVolume: volume(parsed.sfxVolume, parsed.sound === false ? 0 : defaults.sfxVolume),
       // The option was removed from settings: touch controls always follow the device.
       touchControls: "auto",
-      joystick: parsed.joystick === "fixed" ? "fixed" : "floating",
+      joystick: parsed.joystick === "floating" ? "floating" : "fixed",
       vibration: typeof parsed.vibration === "boolean" ? parsed.vibration : true,
       name: typeof parsed.name === "string" ? parsed.name.slice(0, 32) : "",
       onboarded: typeof parsed.onboarded === "boolean" ? parsed.onboarded : Boolean(parsed.name?.trim()),

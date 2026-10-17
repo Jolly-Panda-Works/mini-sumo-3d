@@ -5390,3 +5390,407 @@ dl.profile__stats {
   font-weight: 800;
   cursor: pointer;
 }
+
+/* ======================================================================
+   Fixes round: About size, vibration, pencil badge, tags, lobby fits,
+   level-up number, opponents' flags
+   ====================================================================== */
+
+/* 1. About at half the size */
+.settings__about .art--about {
+  width: calc(321px * var(--art-scale) * 0.5 * 1.8);
+  max-width: 120px;
+}
+
+/* 3. Pencil art on the profile picture */
+img.profile__avatar-edit {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  object-fit: contain;
+}
+
+/* 4. Popular / Best value tags: just the art, no border */
+.pack__tag.pack__tag--art {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  background: none;
+  padding: 0;
+}
+
+/* 5. Waiting room: no scrolling; compact rows, start button in the footer */
+.dlg-lobby .dialog__body {
+  overflow: visible;
+  gap: 6px;
+}
+
+.dlg-lobby .roster {
+  gap: 5px;
+}
+
+.dlg-lobby .roster__item {
+  min-height: 0;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.dlg-lobby .dialog__foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.dlg-lobby .start-btn {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.dlg-lobby .art--invite {
+  width: 150px;
+}
+
+.dlg-lobby .art--share {
+  width: 90px;
+}
+
+/* 7. Level up: the number on its own, no disc behind it */
+.levelup-frame .levelup__stage {
+  position: relative;
+  height: 58px;
+  width: 100%;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.levelup-frame .levelup__stage::before,
+.levelup-frame .levelup__stage::after {
+  display: none;
+}
+
+.levelup-frame .levelup__num {
+  margin: 0;
+  border-radius: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  width: auto;
+  height: auto;
+  line-height: 1;
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: #8e1f1f;
+  -webkit-text-stroke: 0;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* 10. Opponents' power-up flag: outside the frame's right edge, as tall as the frame */
+.frame__powerup {
+  left: calc(100% + 4px);
+  right: auto;
+  top: 0;
+  height: 100%;
+}
+
+/* ======================================================================
+   Nested popups (public/ui/popup-sub.webp, 485×827): title on the plaque,
+   content in the cream area (16.3–83.7 % × 17.8–92.3 %)
+   ====================================================================== */
+
+.overlay--sub {
+  background: rgba(10, 8, 24, 0.45);
+}
+
+.dialog-wrap--sub {
+  --sub-w: min(88vw, 340px, calc((100dvh - 32px) * 485 / 827));
+  width: var(--sub-w);
+  max-width: none;
+  container-type: inline-size;
+}
+
+.sub-dialog {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 485 / 827;
+  background: var(--ui-popup-sub) center / 100% 100% no-repeat;
+  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.35));
+}
+
+.sub-dialog__title {
+  position: absolute;
+  left: 22%;
+  top: 2.2%;
+  width: 56%;
+  height: 8%;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  color: #fff4dc;
+  font-size: max(0.8rem, 5cqw);
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-text-stroke: 3px #3a1d05;
+  paint-order: stroke fill;
+}
+
+.sub-dialog__close {
+  position: absolute;
+  right: 4%;
+  top: 11%;
+  width: 11%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.sub-dialog__close img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.sub-dialog__inner {
+  position: absolute;
+  left: 16.3%;
+  top: 17.8%;
+  width: 67.4%;
+  height: 74.5%;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5cqw;
+  padding: 4cqw 3cqw;
+  color: #3a1d05;
+}
+
+.sub-dialog__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5cqw;
+  font-size: max(0.78rem, 4cqw);
+}
+
+.sub-dialog__foot {
+  flex: none;
+}
+
+.sub-dialog .hint,
+.sub-dialog p {
+  color: #3a1d05;
+}
+
+/* Name input in its art field */
+.input.input--art {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 46px;
+  padding: 0 7%;
+  background: var(--ui-input-field) center / 100% 100% no-repeat;
+  color: #3a1d05;
+  font-weight: 800;
+}
+
+.input.input--art:focus {
+  outline: 3px solid rgba(255, 231, 168, 0.8);
+  outline-offset: 2px;
+}
+
+/* Art buttons: GREAT!, LEAVE MATCH, joystick choice, notices */
+.art--great {
+  width: calc(361px * var(--art-scale) * 1.1);
+}
+
+.art--leave {
+  width: calc(503px * var(--art-scale) * 1.2);
+  align-self: center;
+}
+
+.art-choice {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.art--choice {
+  width: calc(306px * var(--art-scale) * 1.15);
+}
+
+.art--notice {
+  flex: 0 1 46%;
+  max-width: 46%;
+}
+
+.art--notice img {
+  width: 100%;
+  height: auto;
+}
+
+/* Notices: buttons side by side; text sized so it doesn't need scrolling */
+.notice-popup__actions {
+  flex-direction: row;
+  justify-content: center;
+  gap: 3cqw;
+}
+
+.notice-popup__actions .plank-btn {
+  flex: 0 1 46%;
+  max-width: 46%;
+  font-size: max(0.7rem, 3.8cqw);
+}
+
+.notice-popup__title {
+  font-size: max(0.9rem, 5.6cqw);
+}
+
+.notice-popup__message {
+  overflow: hidden;
+  font-size: max(0.72rem, 3.9cqw);
+  line-height: 1.35;
+  display: grid;
+  place-items: center;
+}
+
+/* Training card: the selected difficulty glow isn't cut off */
+.arena-tile .arena-tile__body {
+  overflow: visible;
+}
+
+/* ======================================================================
+   Animations: popups open/close, hover, press, rejected tap
+   ====================================================================== */
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.82) translateY(14px);
+  }
+}
+
+@keyframes dialog-out {
+  to {
+    opacity: 0;
+    transform: scale(0.86) translateY(10px);
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes overlay-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.overlay {
+  animation: overlay-in 0.18s ease-out;
+}
+
+.overlay > .dialog-wrap,
+.overlay > .notice-popup,
+.overlay > .levelup-frame,
+.overlay > .results-board {
+  animation: dialog-in 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.overlay.overlay--closing {
+  animation: overlay-out 0.17s ease-in forwards;
+}
+
+.overlay.overlay--closing > .dialog-wrap {
+  animation: dialog-out 0.17s ease-in forwards;
+}
+
+/* Every button: lift on hover, squash on press */
+button,
+.art,
+.art-btn,
+.plank-btn {
+  transition:
+    transform 0.12s ease-out,
+    filter 0.12s ease-out;
+}
+
+@media (hover: hover) {
+  button:not(:disabled):not([aria-disabled="true"]):hover {
+    transform: translateY(-2px) scale(1.03);
+    filter: brightness(1.08);
+  }
+}
+
+button:not(:disabled):not([aria-disabled="true"]):active {
+  transform: translateY(1px) scale(0.95);
+  filter: brightness(0.95);
+  transition-duration: 0.05s;
+}
+
+/* Rejected tap: a quick shake */
+@keyframes reject-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px) rotate(-1.5deg);
+  }
+  40% {
+    transform: translateX(5px) rotate(1.5deg);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+button.is-rejected {
+  animation: reject-shake 0.4s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .overlay > *,
+  button.is-rejected {
+    animation: none !important;
+  }
+
+  button:hover,
+  button:active {
+    transform: none !important;
+  }
+}
+
+/* Buttons centred with a transform keep their position while animating */
+.arena-row__arrow:not(:disabled):hover,
+.arena-row__arrow:not(:disabled):active,
+.dev-preview__close:hover,
+.dev-preview__close:active {
+  transform: translate(var(--tx, 0), var(--ty, 0)) scale(1.04);
+}
+
+.arena-row__arrow {
+  --ty: -50%;
+}
+
+.dev-preview__close {
+  --tx: -50%;
+}

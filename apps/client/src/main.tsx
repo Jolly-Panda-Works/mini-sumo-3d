@@ -14,7 +14,7 @@ import { initPlayGames } from "./network/playGames";
 
 // Loading screen: artwork, fonts, the server check and the first 3D frame.
 const base = import.meta.env.BASE_URL;
-const images = ["title.webp", "logo.webp", "ui/frame.webp", "ui/header.webp", "ui/close.webp", "ui/bg-tile.webp", "ui/coin-frame.webp", "ui/shop.webp", "ui/profile-frame.webp", "ui/timer-circle.webp", "ui/powerup-frame.webp", "ui/results-board.webp", "ui/arena-panel.webp", "ui/btn-enter.webp", "ui/reward-coin.webp", "ui/reward-xp.webp", "ui/label-level.webp", "ui/levelup-frame.webp", "ui/btn-about.webp", "ui/btn-buy.webp", "ui/btn-not-now.webp", "ui/btn-coming-soon.webp", "ui/label-free.webp", "ui/vibration-frame.webp", "ui/vibration-on.webp", "ui/vibration-off.webp", "ui/btn-play.webp", "ui/btn-home.webp", "ui/btn-rematch.webp", "ui/btn-play-again.webp", ...["red", "blue", "green", "yellow"].map((c) => `hud/player-${c}.webp`), ...["training", "rookie", "pro", "champion"].map((id) => `arenas/${id}.webp`), ...["iron", "thunder", "wind", "giant"].flatMap((k) => [`powerups/${k}-coin.webp`, `powerups/${k}-flag.webp`])];
+const images = ["title.webp", "logo.webp", "ui/frame.webp", "ui/header.webp", "ui/close.webp", "ui/bg-tile.webp", "ui/coin-frame.webp", "ui/shop.webp", "ui/profile-frame.webp", "ui/timer-circle.webp", "ui/powerup-frame.webp", "ui/results-board.webp", "ui/arena-panel.webp", "ui/btn-enter.webp", "ui/popup-sub.webp", "ui/popup-message.webp", "ui/popup-warning.webp", "ui/popup-error.webp", "ui/btn-ok.webp", "ui/btn-stay.webp", "ui/btn-leave.webp", "ui/btn-great.webp", "ui/reward-coin.webp", "ui/reward-xp.webp", "ui/label-level.webp", "ui/levelup-frame.webp", "ui/btn-about.webp", "ui/btn-buy.webp", "ui/btn-not-now.webp", "ui/btn-coming-soon.webp", "ui/label-free.webp", "ui/vibration-frame.webp", "ui/vibration-on.webp", "ui/vibration-off.webp", "ui/btn-play.webp", "ui/btn-home.webp", "ui/btn-rematch.webp", "ui/btn-play-again.webp", ...["red", "blue", "green", "yellow"].map((c) => `hud/player-${c}.webp`), ...["training", "rookie", "pro", "champion"].map((id) => `arenas/${id}.webp`), ...["iron", "thunder", "wind", "giant"].flatMap((k) => [`powerups/${k}-coin.webp`, `powerups/${k}-flag.webp`])];
 images.forEach((file) => bootTrack(`img:${file}`, 1, preloadImage(`${base}${file}`)));
 bootTrack("fonts", 1, document.fonts?.ready ?? Promise.resolve());
 bootTrack("network", 2, roomManager.ready);
@@ -41,6 +41,8 @@ for (const [name, file] of [
   ["levelup-frame", "levelup-frame"],
   ["reward-coin", "reward-coin"],
   ["reward-xp", "reward-xp"],
+  ["popup-sub", "popup-sub"],
+  ["input-field", "input-field"],
 ] as const) {
   document.documentElement.style.setProperty(`--ui-${name}`, `url("${base}ui/${file}.webp")`);
 }
@@ -49,6 +51,9 @@ for (const [name, file] of [
 const unlockAudio = () => audio.unlock();
 window.addEventListener("pointerdown", unlockAudio);
 window.addEventListener("keydown", unlockAudio);
+// Start the menu music as soon as the loading screen ends (where the device allows sound
+// without a tap: the Android app, or browsers that already trust the site).
+window.addEventListener("boot:done", unlockAudio, { once: true });
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Missing #root element");

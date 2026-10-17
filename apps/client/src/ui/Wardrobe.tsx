@@ -124,6 +124,7 @@ function ItemPopup({
 
   return (
     <Dialog
+      variant="sub"
       title={item.name}
       onClose={onClose}
       className="item-popup"

@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { audio } from "../audio/AudioManager";
 
 const BASE = import.meta.env.BASE_URL;
@@ -20,6 +20,7 @@ export function Dialog({
   hideClose = false,
   overlayClassName = "",
   sub,
+  variant = "main",
 }: {
   title: ReactNode;
   onClose: () => void;
@@ -33,9 +34,21 @@ export function Dialog({
   overlayClassName?: string;
   /** Fixed content right under the title (e.g. the coin balance); the body scrolls below it. */
   sub?: ReactNode;
+  /**
+   * "sub": the smaller frame (public/ui/popup-sub.webp) for a popup opened on top of
+   * another one (About, buying an item, editing the name…).
+   */
+  variant?: "main" | "sub";
 }) {
   const id = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
+  // Close with the closing animation (the × and a tap outside).
+  const [closing, setClosing] = useState(false);
+  const requestClose = () => {
+    if (closing) return;
+    setClosing(true);
+    window.setTimeout(onClose, 170);
+  };
 
   useEffect(() => {
     closeRef.current?.focus({ preventScroll: true });
@@ -50,7 +63,29 @@ export function Dialog({
     .join(" ");
 
   return (
-    <div className={`overlay ${overlayClassName}`} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div
+      className={`overlay ${overlayClassName}${variant === "sub" ? " overlay--sub" : ""}${closing ? " overlay--closing" : ""}`}
+      onClick={(e) => e.target === e.currentTarget && requestClose()}
+    >
+      {variant === "sub" ? (
+        <div className={`dialog-wrap dialog-wrap--sub ${wrapClass}`}>
+          <section className="sub-dialog" role={role} aria-modal="true" aria-labelledby={id}>
+            <h2 id={id} className="sub-dialog__title">
+              {title}
+            </h2>
+            {!hideClose && (
+              <button ref={closeRef} type="button" className="sub-dialog__close" onClick={requestClose} aria-label="Close" data-sfx="none">
+                <img src={`${BASE}ui/close.webp`} alt="" draggable={false} />
+              </button>
+            )}
+            <div className="sub-dialog__inner">
+              {sub && <div className="sub-dialog__sub">{sub}</div>}
+              <div className={`sub-dialog__body ${bodyClassName}`}>{children}</div>
+              {footer && <footer className="sub-dialog__foot">{footer}</footer>}
+            </div>
+          </section>
+        </div>
+      ) : (
       <div className={`dialog-wrap ${wrapClass}`}>
         <section className="dialog" role={role} aria-modal="true" aria-labelledby={id}>
           <img className="dialog__plaque" src={`${BASE}ui/header.webp`} alt="" draggable={false} />
@@ -58,7 +93,7 @@ export function Dialog({
             {title}
           </h2>
           {!hideClose && (
-            <button ref={closeRef} type="button" className="dialog__close" onClick={onClose} aria-label="Close" data-sfx="none">
+            <button ref={closeRef} type="button" className="dialog__close" onClick={requestClose} aria-label="Close" data-sfx="none">
               <img src={`${BASE}ui/close.webp`} alt="" draggable={false} />
             </button>
           )}
@@ -67,6 +102,7 @@ export function Dialog({
           {footer && <footer className="dialog__foot">{footer}</footer>}
         </section>
       </div>
+      )}
     </div>
   );
 }

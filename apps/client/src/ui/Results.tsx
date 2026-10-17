@@ -74,11 +74,11 @@ export function Results() {
         <div className="results-board__bottom">
           <div className="results-board__buttons">
             <button className="art-btn" onClick={() => void roomManager.leave()} aria-label="Home">
-              <img src={`${BASE}ui/btn-home.webp`} alt="" width={314} height={102} draggable={false} />
+              <img src={`${BASE}ui/btn-home.webp`} alt="" width={307} height={113} draggable={false} />
             </button>
             {paid ? (
               <button className="art-btn" onClick={playAgain} aria-label={`Play again for ${arena?.entryFee ?? 0} Sumo Coins`}>
-                <img src={`${BASE}ui/btn-play-again.webp`} alt="" width={281} height={91} draggable={false} />
+                <img src={`${BASE}ui/btn-play-again.webp`} alt="" width={307} height={113} draggable={false} />
               </button>
             ) : isHost ? (
               <button className="art-btn" onClick={() => roomManager.rematch()} aria-label="Rematch">
