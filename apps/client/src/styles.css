@@ -5902,3 +5902,9 @@ button:not(:disabled):not([aria-disabled="true"]):active {
   justify-self: auto;
   margin-left: auto;
 }
+
+/* Popup buttons: one size for the whole set, side by side */
+.notice-popup__actions .art--notice {
+  flex: 1 1 0;
+  max-width: 48%;
+}

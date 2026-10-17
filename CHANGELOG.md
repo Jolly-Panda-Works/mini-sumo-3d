@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Message / warning / error popups use one matching button set: OK, LEAVE, STAY, COIN SHOP, NOT NOW, RETRY and CLOSE.
+
+### Changed
+
 - Settings: the version is plain text again (no frame), on the left, with About on the right.
 
 ### Changed
