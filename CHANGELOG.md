@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Arena cards follow the board layout: picture at the top with the label (FREE, level or soon) in its corner, the information area in the middle and the PLAY button at the bottom.
+
+### Changed
+
 - New HOME, REMATCH, PLAY AGAIN and PLAY button art.
 - Arena cards sit on a wooden board panel, with their content inside it.
 - The + of the home coin frame is inside the frame.

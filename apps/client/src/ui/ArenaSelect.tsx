@@ -105,9 +105,15 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
               style={{ ["--accent" as string]: theme.accent, ["--tile-ink" as string]: theme.ink, ["--tile-sky" as string]: theme.sky }}
             >
               <img className="arena-tile__art" src={arenaImage(arena.id)} alt="" width={960} height={536} decoding="async" />
-              {soon && <span className="arena-tile__badge">Coming soon</span>}
-              {free && <FreeLabel className="arena-tile__free" />}
-              {locked && <span className="arena-tile__badge">Level {arena.requires.level}</span>}
+              <span className="arena-tile__label">
+                {free ? (
+                  <FreeLabel className="arena-tile__free" />
+                ) : soon ? (
+                  <span className="arena-tile__badge">Soon</span>
+                ) : locked ? (
+                  <span className="arena-tile__badge">Lvl {arena.requires.level}</span>
+                ) : null}
+              </span>
               <div className="arena-tile__body">
                 <h3 className="arena-tile__name">{arena.name}</h3>
                 <p className="arena-tile__mood">{theme.title}</p>
@@ -123,7 +129,8 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
                 </dl>
                 {status && !soon && <p className="arena-tile__status">{status}</p>}
                 {free && <BotLevelPicker />}
-                <button
+              </div>
+              <button
                   className="art-btn arena-tile__btn arena-tile__play"
                   disabled={busy}
                   aria-disabled={!available}
@@ -141,7 +148,6 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
                 >
                   <img src={`${import.meta.env.BASE_URL}ui/btn-play.webp`} alt="" width={287} height={91} draggable={false} />
                 </button>
-              </div>
             </li>
           );
         })}
