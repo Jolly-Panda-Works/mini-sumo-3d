@@ -17,8 +17,12 @@ const shownErrors = new Set<string>();
 /** Bout results already announced (so the toast shows once). */
 const toastedResults = new WeakSet<object>();
 
-const inviteCode = new URLSearchParams(window.location.search).get("room") ?? "";
-let inviteHandled = false;
+// Old invite links (?room=…) are ignored: friends invite each other from the game.
+if (new URLSearchParams(window.location.search).has("room")) {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("room");
+  window.history.replaceState(null, "", url);
+}
 
 /** Home: the hub with an arena carousel on phones; buttons, title and an arena row on wide screens. */
 export function MainMenu() {
@@ -39,15 +43,6 @@ export function MainMenu() {
     if (won > 0) pushToast(`+${won.toLocaleString("en-US")} Sumo Coins`, "info", 3000);
     else if (last.note) pushToast(last.note, "info", 3000);
   }, [last]);
-
-  // Invite links open the friends panel once we know the server is there.
-  useEffect(() => {
-    // An invite link (?room=…): join that room once the server is reachable.
-    if (inviteCode && online && !inviteHandled) {
-      inviteHandled = true;
-      void roomManager.joinByCode(inviteCode, settingsStore.get().name);
-    }
-  }, [online]);
 
   // Connection errors: an error popup (once per error) instead of a note in the layout.
   useEffect(() => {

@@ -48,6 +48,8 @@ export interface UIPlayer {
   powerUp: string;
   powerUpMs: number;
   level: number;
+  /** The player's account ("" for bots and offline rooms): friends already here aren't invited. */
+  accountId: string;
   /** Only true in private rooms; quick-match bots look like everyone else. */
   isBot: boolean;
   appearance: Appearance;
@@ -335,14 +337,6 @@ class RoomManager {
    * Shareable link. Desktop/Android builds run from a local origin, so they use the
    * public web address from VITE_PUBLIC_URL (e.g. the GitHub Pages URL) instead.
    */
-  inviteLink(): string {
-    const publicUrl = (import.meta.env.VITE_PUBLIC_URL as string | undefined)?.trim();
-    const url = new URL(publicUrl || window.location.href);
-    url.search = "";
-    url.hash = "";
-    if (this._room) url.searchParams.set("room", this._room.roomId);
-    return url.toString();
-  }
 
   // ------------------------------------------------------------------ internals
 
@@ -386,12 +380,6 @@ class RoomManager {
     setLastResult(null);
     // The entry fee (if any) was charged when the room accepted us.
     if (!room.offline) void refreshProfile();
-
-    if (!room.offline) {
-      const url = new URL(window.location.href);
-      url.searchParams.set("room", room.roomId);
-      window.history.replaceState(null, "", url.toString());
-    }
 
     room.onStateChange(() => {
       this.lastPatchAt = performance.now();
@@ -518,6 +506,7 @@ class RoomManager {
         isBot: Boolean(p.isBot),
         appearance: { hair: p.hair ?? 0, hairColor: p.hairColor ?? 0, face: p.face ?? 0, outfit: p.outfit ?? 0, avatar: p.avatar ?? 0 },
         level: p.level ?? 1,
+        accountId: p.accountId ?? "",
         isHost: id === state.hostId,
         isYou: id === you,
       });

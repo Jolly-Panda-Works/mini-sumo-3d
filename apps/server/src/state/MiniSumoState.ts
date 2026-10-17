@@ -29,6 +29,8 @@ export class PlayerState extends Schema {
   @type("uint8") face = 0;
   @type("uint8") outfit = 0;
   @type("uint8") avatar = 0;
+  /** The player's account (lets friends see who is already in the room); "" for bots. */
+  @type("string") accountId = "";
   @type("uint16") level = 1;
 }
 

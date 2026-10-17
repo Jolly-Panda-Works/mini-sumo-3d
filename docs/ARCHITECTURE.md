@@ -172,5 +172,8 @@ economy database; presence and invites in memory):
 Client: `ui/FriendsPanel.tsx` (code, add, requests, list with online dots, Play),
 `ui/FriendProfilePopup.tsx` (picture, level, bouts, wins, Play, Remove),
 `ui/InviteWatcher.tsx` (invite popups, never mid-bout) and the "Invite friends" list in the
-waiting room. "Play" from the list opens a private room and invites that friend.
+waiting room ("+ Invite a friend" in empty slots opens the friend picker; friends already in
+the room, matched by the `accountId` in the room state, are left out). "Play with friends"
+opens a private room and the picker; "Play" next to a friend opens one and invites them.
+Rooms are joined by invitation only: there are no room links.
 Friends need the server; offline the panel says so.

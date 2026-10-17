@@ -9,13 +9,12 @@ import { Dialog } from "./Dialog";
 import { FriendRow, SmallArt } from "./FriendsPanel";
 import { friendsAvailable, friendsStore, inviteFriend, loadFriends } from "../network/friendsClient";
 import { useStore } from "../store";
-import { pushToast } from "../uiStore";
+import { pushToast, setInviteUiOpen, uiStore } from "../uiStore";
 import { PlayerBadge } from "./PlayerBadge";
 
 export function Lobby() {
   const game = useStore(gameStore);
   const session = useStore(sessionStore);
-  const [copied, setCopied] = useState<"" | "link" | "failed">("");
   const { mode } = useStore(networkStore);
   const offline = mode === "offline";
   const economy = useStore(economyStore);
@@ -40,27 +39,11 @@ export function Lobby() {
     return () => window.clearTimeout(timer);
   }, [searching, canStart]);
   const searchSeconds = Math.ceil(game.searchRemainingMs / 1000);
-  const link = roomManager.inviteLink();
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(link);
-      setCopied("link");
-    } catch {
-      setCopied("failed");
-    }
-    window.setTimeout(() => setCopied(""), 2200);
-  };
-
-  const share = async () => {
-    try {
-      await navigator.share({ title: "Mini Sumo", text: "Join my Mini Sumo room!", url: link });
-    } catch {
-      // Share sheet dismissed.
-    }
-  };
-
   const slots = Array.from({ length: game.maxPlayers }, (_, i) => connected[i] ?? null);
+  const inviting = useStore(uiStore).invitePickerOpen;
+  // The picker belongs to this room: close it when leaving.
+  useEffect(() => () => setInviteUiOpen(false), []);
+  const inRoomIds = new Set(game.players.map((p) => p.accountId).filter(Boolean));
 
   // The start button sits in the fixed footer, so the waiting room never scrolls.
   const startArea = autoStart ? null : isHost ? (
@@ -79,7 +62,7 @@ export function Lobby() {
                 {offline
                   ? "Add a bot to start."
                   : game.isPrivate
-                    ? "Add a bot or send the invite link to a friend."
+                    ? "Add a bot or invite a friend with +."
                     : "Waiting for another player to join."}
               </p>
             )}
@@ -96,25 +79,6 @@ export function Lobby() {
       className="lobby"
       overlayClassName="overlay--lobby"
     >
-
-        {!offline && (
-        <div className="row">
-          <button className="art art--invite" onClick={() => void copy()} aria-label={copied === "link" ? "Invite link copied" : "Copy invite link"}>
-            <img src={`${import.meta.env.BASE_URL}ui/btn-copy-invite.webp`} alt="" width={480} height={130} draggable={false} />
-          </button>
-          {"share" in navigator && (
-            <button className="art art--share" onClick={() => void share()} aria-label="Share">
-              <img src={`${import.meta.env.BASE_URL}ui/btn-share.webp`} alt="" width={360} height={160} draggable={false} />
-            </button>
-          )}
-        </div>
-        )}
-        {copied === "failed" && !offline && (
-          <label className="field">
-            <span className="field__label">Copy this link</span>
-            <input className="input input--code" readOnly value={link} onFocus={(e) => e.currentTarget.select()} />
-          </label>
-        )}
 
         <ul className="roster">
           {slots.map((p, i) =>
@@ -137,7 +101,16 @@ export function Lobby() {
               </li>
             ) : (
               <li key={`empty-${i}`} className="roster__item roster__item--empty">
-                Waiting for a wrestler…
+                {!offline && friendsAvailable() ? (
+                  <button className="roster__invite" onClick={() => setInviteUiOpen(true)} aria-label="Invite a friend">
+                    <span className="roster__plus" aria-hidden="true">
+                      +
+                    </span>
+                    Invite a friend
+                  </button>
+                ) : (
+                  "Waiting for a wrestler…"
+                )}
               </li>
             ),
           )}
@@ -166,24 +139,23 @@ export function Lobby() {
           </button>
         )}
 
-        {!offline && <InviteFriends roomId={session.roomId} />}
+        {inviting && !offline && <InvitePicker roomId={session.roomId} inRoom={inRoomIds} onClose={() => setInviteUiOpen(false)} />}
         {paid && <p className="hint hint--center">Leave with × before the bout starts to get your entry back.</p>}
     </Dialog>
   );
 }
 
-/** Online friends you can invite into this room. */
-function InviteFriends({ roomId }: { roomId: string }) {
+/** Friends to invite into this room (online friends first; those already here are left out). */
+function InvitePicker({ roomId, inRoom, onClose }: { roomId: string; inRoom: Set<string>; onClose: () => void }) {
   const friends = useStore(friendsStore);
   const [sent, setSent] = useState<Set<string>>(new Set());
   useEffect(() => {
     if (!friendsAvailable()) return;
     void loadFriends().catch(() => undefined);
-    const timer = window.setInterval(() => void loadFriends().catch(() => undefined), 15_000);
+    const timer = window.setInterval(() => void loadFriends().catch(() => undefined), 10_000);
     return () => window.clearInterval(timer);
   }, []);
-  const online = friends.data?.friends.filter((f) => f.online) ?? [];
-  if (!online.length || !roomId) return null;
+  const list = (friends.data?.friends ?? []).filter((f) => !inRoom.has(f.accountId));
   const invite = async (accountId: string, name: string) => {
     try {
       await inviteFriend(accountId, roomId);
@@ -194,20 +166,25 @@ function InviteFriends({ roomId }: { roomId: string }) {
     }
   };
   return (
-    <section className="lobby__invite" aria-label="Invite friends">
-      <h3 className="settings__heading">Invite friends</h3>
+    <Dialog title="Invite friends" onClose={onClose} className="invite-picker" variant="sub">
+      {friends.data && list.length === 0 && (
+        <p className="hint hint--center">
+          {friends.data.friends.length === 0 ? "No friends yet. Add friends with their code in Friends." : "All your friends are already here."}
+        </p>
+      )}
       <ul className="friends__list">
-        {online.map((f) => (
+        {list.map((f) => (
           <FriendRow key={f.accountId} friend={f}>
             <SmallArt
               art={sent.has(f.accountId) ? "btn-sent" : "btn-invite"}
               label={sent.has(f.accountId) ? `Invite sent to ${f.name}` : `Invite ${f.name}`}
               disabled={sent.has(f.accountId)}
-              onClick={() => void invite(f.accountId, f.name)}
+              ariaDisabled={!f.online}
+              onClick={() => (f.online ? void invite(f.accountId, f.name) : pushToast(`${f.name} is offline`, "info"))}
             />
           </FriendRow>
         ))}
       </ul>
-    </section>
+    </Dialog>
   );
 }

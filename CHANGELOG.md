@@ -8,6 +8,16 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Waiting room: empty slots show "+ Invite a friend", which opens a friend picker (online friends can be invited; friends already in the room are left out). The invite list under the roster is gone, which also fixes the host's crowded layout.
+- Friends: "Play with friends" opens a private room and then the friend picker.
+- Rooms can only be joined by invitation: the copy-link and share buttons are gone, the address no longer carries `?room=`, and old room links are ignored.
+
+### Fixed
+
+- A friend already in the room was offered for an invite (players now carry their account id in the room state).
+
+### Changed
+
 - Home (phones): the Friends button sits under the profile (settings stays under the coins).
 - Game invites are checked every 5 s, also in background tabs, so two windows on one computer can test friends and invites. README: how to test multiplayer locally; dev mode has a sample invite popup.
 

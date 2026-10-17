@@ -349,6 +349,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
       ps.face = p.appearance.face;
       ps.outfit = p.appearance.outfit;
       ps.avatar = p.appearance.avatar;
+      ps.accountId = this.accounts.get(id) ?? "";
       ps.level = p.level;
     }
 

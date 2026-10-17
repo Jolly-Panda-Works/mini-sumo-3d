@@ -79,6 +79,7 @@ function samplePlayers(phase: Phase): UIPlayer[] {
     powerUp: phase === Phase.Playing ? ["iron", "", "wind", ""][i]! : "",
     powerUpMs: phase === Phase.Playing && (i === 0 || i === 2) ? 8400 : 0,
     level: [6, 3, 9, 1][i]!,
+    accountId: "",
     isBot: i > 0,
     appearance: { ...DEFAULT_APPEARANCE, hair: i, outfit: i, avatar: [0, 5, 12, 21][i]! },
     isHost: i === 0,

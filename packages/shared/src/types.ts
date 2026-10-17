@@ -22,6 +22,8 @@ export interface SyncedPlayer {
   /** Profile picture index and level, shown in the match HUD. */
   avatar: number;
   level: number;
+  /** Account id ("" for bots and offline). */
+  accountId: string;
   placement: number;
   elimReason: string;
   /** True only in private rooms, where the host manages bots. Always false in quick match. */

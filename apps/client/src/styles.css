@@ -6517,3 +6517,44 @@ button.code-field {
   display: block;
   filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
 }
+
+/* Waiting room: + in empty slots to invite a friend */
+.roster__invite {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #ffe7a8;
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+
+.roster__plus {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #3fa34d;
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 900;
+  line-height: 1;
+  border: 2px solid #1a3d1f;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.dlg-invite-picker .friends__list {
+  overflow-y: auto;
+}
+
+/* Friends: Play with friends */
+.friends__play {
+  align-self: center;
+  width: min(100%, 260px);
+}

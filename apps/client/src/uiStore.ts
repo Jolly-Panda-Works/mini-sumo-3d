@@ -23,6 +23,8 @@ export interface UIState {
   notices: Notice[];
   /** Developer tools (?dev, or tap the version label 7 times in settings). */
   devOpen: boolean;
+  /** The friend picker in the waiting room (from + or right after "Play with friends"). */
+  invitePickerOpen: boolean;
 }
 
 export type NoticeKind = "message" | "warning" | "error";
@@ -56,6 +58,7 @@ export const uiStore = createStore<UIState>({
   toasts: [],
   notices: [],
   devOpen: false,
+  invitePickerOpen: false,
 });
 
 let noticeId = 0;
@@ -87,6 +90,7 @@ export const showWarning = (title: string, message: string, actions?: NoticeActi
 export const showError = (title: string, message: string, actions?: NoticeAction[]) => showNotice("error", title, message, actions);
 
 export const setDevOpen = (devOpen: boolean) => uiStore.update({ devOpen });
+export const setInviteUiOpen = (invitePickerOpen: boolean) => uiStore.update({ invitePickerOpen });
 
 let toastId = 0;
 
