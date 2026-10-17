@@ -1,0 +1,35 @@
+# Mini Sumo: one container with the game server and the web game.
+#
+#   cp .env.docker.example .env      # optional: port, mirrors, proxy
+#   docker compose up -d --build
+#
+# The game: http://<host>:5803 (WEB_PORT). The database is kept in the "mini-sumo-data" volume.
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        REGISTRY: ${REGISTRY:-docker.arvancloud.ir}
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmjs.org/}
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        http_proxy: ${http_proxy:-}
+        https_proxy: ${https_proxy:-}
+        NO_PROXY: ${NO_PROXY:-}
+        no_proxy: ${no_proxy:-}
+        VITE_SERVER_URL: ${VITE_SERVER_URL:-same-origin}
+        VITE_APP_VERSION: ${VITE_APP_VERSION:-}
+    ports:
+      - "${WEB_PORT:-5803}:80"
+    environment:
+      ECONOMY_EVENT_LOG: ${ECONOMY_EVENT_LOG:-true}
+    volumes:
+      - mini-sumo-data:/data
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+volumes:
+  mini-sumo-data:

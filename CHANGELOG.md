@@ -6,6 +6,14 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Docker: one container. The game server also serves the web game (`STATIC_DIR`), so the page, API, matchmaking and websockets share port 80; nginx is no longer needed. `docker-compose.yml` has a single `web` service (`5803:80`) with the database volume.
+
+### Added
+
+- Docker: `Dockerfile` (server and web targets), `docker-compose.yml`, nginx config and `.env.docker.example`. The web game and the server share one host and port (`VITE_SERVER_URL=same-origin`); the SQLite database lives in a volume. Builds in Iran through a Docker Hub mirror (`REGISTRY`, default Arvan Cloud), an optional npm mirror and build proxy, with no system packages to install.
+
 ### Added
 
 - Profile on the device first: name, picture, XP, level and stats work and are saved without a server; when the server is reachable (or comes back) they are synced (newer name/look wins, higher XP and stats win). New `POST /api/profile/sync`. The game re-checks the server every 20 s between bouts and switches between online and on-device play by itself.

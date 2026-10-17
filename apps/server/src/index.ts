@@ -10,6 +10,7 @@ import { Economy } from "./economy/Economy.js";
 import { setEconomy } from "./economy/instance.js";
 import { PaymentService } from "./economy/payments.js";
 import { createApiHandler } from "./http/api.js";
+import { createStaticHandler } from "./http/static.js";
 
 // Load the repository-level .env (if present) without extra dependencies (Node >= 20.12).
 const envPath = fileURLToPath(new URL("../../../.env", import.meta.url));
@@ -27,15 +28,18 @@ if (economy) {
   if (refunded > 0) console.log(`[mini-sumo] refunded ${refunded} arena entries left over from the last run`);
 }
 const handleApi = createApiHandler(economy, new PaymentService(flags));
+// The built web game, when this server also hosts it (STATIC_DIR, set in the Docker image).
+const handleStatic = createStaticHandler(process.env.STATIC_DIR);
 
 // Plain HTTP handler for non-matchmaking routes. Colyseus attaches /matchmake/* itself.
 const httpServer = createServer(async (req, res) => {
   if (await handleApi(req, res)) return;
-  if (req.url === "/health" || req.url === "/") {
+  if (req.url === "/health" || (req.url === "/" && !process.env.STATIC_DIR)) {
     res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
     res.end(JSON.stringify({ ok: true, game: "mini-sumo", economy: flags.economy, author: CREDITS.author, website: CREDITS.projectUrl }));
     return;
   }
+  if (await handleStatic(req, res)) return;
   res.writeHead(404, { "Content-Type": "text/plain" });
   res.end("Not found");
 });
