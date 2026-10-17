@@ -32,14 +32,14 @@ export function CoinShop() {
   return (
     <Dialog
       title="Coin shop"
-      onClose={() => setShopOpen(false)}
-      className="coin-shop"
-    >
-      <p className="coin-shop__balance">
+      sub={
         <span className="coin-frame coin-frame--static" aria-label={`Your coins: ${balance}`}>
           <span className="coin-frame__amount">{balance.toLocaleString("en-US")}</span>
         </span>
-      </p>
+      }
+      onClose={() => setShopOpen(false)}
+      className="coin-shop"
+    >
       <ul className="packs">
         <li className="pack pack--daily">
           <img className="pack__art" src={`${base}coins/daily.webp`} alt="" width={360} height={486} />

@@ -234,8 +234,8 @@ export function Wardrobe() {
               </mesh>
             </group>
           </Canvas>
-          <span className="wardrobe__balance">
-            <Coins amount={balance} />
+          <span className="wardrobe__balance coin-frame coin-frame--static" aria-label={`Your coins: ${balance}`}>
+            <span className="coin-frame__amount">{balance.toLocaleString("en-US")}</span>
           </span>
         </div>
 

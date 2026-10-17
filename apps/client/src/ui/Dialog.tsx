@@ -19,6 +19,7 @@ export function Dialog({
   bodyClassName = "",
   hideClose = false,
   overlayClassName = "",
+  sub,
 }: {
   title: ReactNode;
   onClose: () => void;
@@ -30,6 +31,8 @@ export function Dialog({
   /** For dialogs whose own buttons close them (e.g. "Not now"). */
   hideClose?: boolean;
   overlayClassName?: string;
+  /** Fixed content right under the title (e.g. the coin balance); the body scrolls below it. */
+  sub?: ReactNode;
 }) {
   const id = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -59,7 +62,8 @@ export function Dialog({
               <img src={`${BASE}ui/close.webp`} alt="" draggable={false} />
             </button>
           )}
-          <div className={`dialog__body ${bodyClassName}`}>{children}</div>
+          {sub && <div className="dialog__sub">{sub}</div>}
+          <div className={`dialog__body ${bodyClassName}${sub ? " dialog__body--below-sub" : ""}`}>{children}</div>
           {footer && <footer className="dialog__foot">{footer}</footer>}
         </section>
       </div>

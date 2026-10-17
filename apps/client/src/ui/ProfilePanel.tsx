@@ -49,6 +49,7 @@ export function ProfilePanel() {
   const settings = useStore(settingsStore);
   const economy = useStore(economyStore);
   const [editing, setEditing] = useState(false);
+  const [picking, setPicking] = useState(false);
   const play = useStore(playGamesStore);
   const base = import.meta.env.BASE_URL;
   const profile = economy.profile;
@@ -69,12 +70,15 @@ export function ProfilePanel() {
     <>
       <Dialog title="Profile" onClose={() => setProfileOpen(false)} className="profile">
         <div className="profile__level">
-          <span className="profile__avatar">
+          <button className="profile__avatar" onClick={() => setPicking(true)} aria-label="Change picture">
             <img src={avatarSrc(settings.appearance.avatar)} alt="" width={160} height={160} />
             <span className="level-badge" aria-label={`Level ${level.level}`}>
               {level.level}
             </span>
-          </span>
+            <span className="profile__avatar-edit" aria-hidden="true">
+              ✎
+            </span>
+          </button>
           <div className="profile__xp">
             <div className="profile__name-row">
               <p className="profile__name">{settings.name}</p>
@@ -106,8 +110,6 @@ export function ProfilePanel() {
             </p>
           </div>
         </div>
-
-        <AvatarPicker />
 
         <dl className="profile__stats">
           {rows.map(([label, value]) => (
@@ -143,12 +145,17 @@ export function ProfilePanel() {
         </section>
       </Dialog>
       {editing && <EditName onClose={() => setEditing(false)} />}
+      {picking && (
+        <Dialog title="Pictures" onClose={() => setPicking(false)} className="avatar-picker">
+          <AvatarPicker onPicked={() => setPicking(false)} />
+        </Dialog>
+      )}
     </>
   );
 }
 
 /** Profile pictures: four free, the rest bought once with Sumo Coins. */
-function AvatarPicker() {
+function AvatarPicker({ onPicked }: { onPicked: () => void }) {
   const settings = useStore(settingsStore);
   const economy = useStore(economyStore);
   const owned = ownedItems();
@@ -158,8 +165,10 @@ function AvatarPicker() {
   const current = settings.appearance.avatar;
 
   const choose = (index: number) => {
-    if (owned.has(cosmeticItemId("avatar", index))) settingsStore.update({ appearance: { ...settings.appearance, avatar: index } });
-    else {
+    if (owned.has(cosmeticItemId("avatar", index))) {
+      settingsStore.update({ appearance: { ...settings.appearance, avatar: index } });
+      onPicked();
+    } else {
       setError(null);
       setPending(index);
     }
@@ -172,6 +181,7 @@ function AvatarPicker() {
       audio.sample("purchase");
       settingsStore.update({ appearance: { ...settingsStore.get().appearance, avatar: pending } });
       setPending(null);
+      onPicked();
     } catch (e) {
       setError(e instanceof Error ? e.message : "The purchase failed.");
     }
@@ -180,7 +190,6 @@ function AvatarPicker() {
   const price = pending === null ? 0 : cosmeticPrice(cosmeticItemId("avatar", pending));
   return (
     <section className="avatars" aria-label="Profile picture">
-      <h3 className="settings__heading">Picture</h3>
       <ul className="avatars__grid">
         {AVATARS.map((avatar, i) => {
           const isOwned = owned.has(cosmeticItemId("avatar", i));

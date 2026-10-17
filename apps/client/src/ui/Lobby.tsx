@@ -6,7 +6,6 @@ import { economyStore } from "../network/economyClient";
 import { Coins } from "./Coins";
 import { Icon } from "./Icon";
 import { Dialog } from "./Dialog";
-import { themeFor } from "../game/arenaThemes";
 import { useStore } from "../store";
 import { PlayerBadge } from "./PlayerBadge";
 
@@ -67,15 +66,11 @@ export function Lobby() {
       className="lobby"
       overlayClassName="overlay--lobby"
     >
-        <p className="lobby__sub">
-          {themeFor(game.arenaId).title}
-          {!offline && (
-            <span className="room-code" aria-label={`Room code ${session.roomId}`}>
-              {" "}
-              · {session.roomId}
-            </span>
-          )}
-        </p>
+        {!offline && (
+          <p className="lobby__sub room-code" aria-label={`Room code ${session.roomId}`}>
+            {session.roomId}
+          </p>
+        )}
 
         {!offline && (
         <div className="row">
@@ -96,9 +91,6 @@ export function Lobby() {
           </label>
         )}
 
-        {game.botLevel && !paid && (
-          <p className="hint">Bot difficulty: {game.botLevel[0]!.toUpperCase() + game.botLevel.slice(1)}</p>
-        )}
         <h2 className="lobby__count">
           Wrestlers {connected.length} of {game.maxPlayers}
         </h2>

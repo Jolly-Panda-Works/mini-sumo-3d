@@ -6,6 +6,18 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Settings: selected options are blue with white text (white on yellow was unreadable).
+- Profile: tapping the picture opens a picture picker popup.
+- The coin frame always keeps its proportions (it was stretched with the amount outside it); customise and the shop use it too, and in the shop it stays fixed under the title while the packs scroll.
+- Waiting room: no arena subtitle or bot difficulty line under the title.
+- About: the music credit line is gone.
+
+### Fixed
+
+- Coin shop cards reaching under the frame.
+
 ### Added
 
 - Avatars: 40 profile pictures, chosen in the profile (four free, the rest 250–1,000 coins, bought once). Shown on the home profile frame and in matches; part of the synced appearance.

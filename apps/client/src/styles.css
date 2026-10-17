@@ -4250,3 +4250,106 @@ dl.profile__stats {
   border: 3px solid #ffe7a8;
   border-radius: 14px;
 }
+
+/* ---------- Fixes: readable selected options, coin frame size, fixed shop balance ---------- */
+
+/* Selected options on the dark board: blue with white text (white on yellow was unreadable) */
+.dialog .segmented__opt--on {
+  background: #3d7fe0;
+  color: #ffffff;
+  border-color: #1a1236;
+}
+
+.dialog .toggle input {
+  accent-color: #3d7fe0;
+}
+
+.dialog .slider input {
+  accent-color: #3d7fe0;
+}
+
+/* The coin frame keeps the art's proportions: fixed size, never stretched */
+.coin-frame,
+.coin-frame--static,
+.hub__coins.coin-frame {
+  flex: none;
+  box-sizing: border-box;
+  width: 151px;
+  height: 46px;
+  aspect-ratio: auto;
+  padding: 0 14px 0 40px;
+  background: var(--ui-coin-frame) center / 100% 100% no-repeat;
+  justify-self: end;
+}
+
+.coin-frame__amount {
+  text-align: center;
+}
+
+.wardrobe__balance.coin-frame {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: 0;
+  border-radius: 0;
+  transform: scale(0.85);
+  transform-origin: top right;
+}
+
+/* A fixed strip under the title (shop balance); the content scrolls below it */
+.dialog__sub {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  margin: 20.4cqw 10.6cqw 0;
+  padding: 17cqw 0 6px;
+  display: flex;
+  justify-content: center;
+}
+
+.dialog__body.dialog__body--below-sub {
+  margin-top: 0;
+  padding-top: 6px;
+}
+
+/* Shop cards stay inside their column */
+.packs {
+  gap: 8px;
+}
+
+.pack {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.pack__art {
+  max-width: 100%;
+}
+
+/* Profile picture opens the picture picker */
+.profile__avatar {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.profile__avatar-edit {
+  position: absolute;
+  left: -6px;
+  bottom: -6px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffe7a8;
+  color: #1a1236;
+  font-size: 0.8rem;
+  font-weight: 900;
+  border: 2px solid #1a1236;
+}
+
+.dlg-avatar-picker {
+  width: min(460px, 100%);
+}
