@@ -4712,3 +4712,73 @@ dl.profile__stats {
   width: 100%;
   max-width: calc(439px * var(--art-scale));
 }
+
+/* ======================================================================
+   Arena cards on the wooden board (public/ui/arena-panel.webp, 456×706);
+   everything sits inside the dark board (6.6–93.4 % across, 4–96.6 % down)
+   ====================================================================== */
+
+.arena-tile {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  padding: 5% 8% 5%;
+  background: var(--ui-arena-panel) center / 100% 100% no-repeat;
+  filter: drop-shadow(0 5px 0 rgba(0, 0, 0, 0.35));
+  color: #f4ede2;
+}
+
+.arena-tile::before {
+  display: none;
+}
+
+.arena-tile__art {
+  border-radius: 8px;
+  border: 2px solid rgba(0, 0, 0, 0.45);
+}
+
+.arena-tile__body {
+  background: transparent;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.arena-tile__name {
+  color: #ffe7a8;
+}
+
+.arena-tile__mood,
+.arena-tile__facts dt {
+  color: rgba(244, 237, 226, 0.65);
+}
+
+.arena-tile__facts dd,
+.arena-tile__status {
+  color: #f4ede2;
+}
+
+.arena-tile__free {
+  top: 7%;
+  right: 10%;
+}
+
+.arena-tile__badge {
+  top: 7%;
+  left: 10%;
+  right: auto;
+}
+
+/* The + sits inside the coin frame, on its right; the amount is centred between the coin and the + */
+.home .coin-frame {
+  margin-right: 0;
+  padding-right: 34px;
+}
+
+.home .coin-frame__plus {
+  right: 8px;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  transform: translateY(-50%);
+}
