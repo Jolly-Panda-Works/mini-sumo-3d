@@ -6236,3 +6236,48 @@ button.is-pressed:not(:disabled):not([aria-disabled="true"]) {
   width: 48px;
   height: 48px;
 }
+
+/* ======================================================================
+   Popups: their own top layer (nested popups open on top, not inside);
+   a dark backdrop behind every popup that fades in and out
+   ====================================================================== */
+
+.popup-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.popup-layer > .overlay {
+  pointer-events: auto;
+}
+
+.overlay {
+  background: rgba(8, 6, 20, 0.62);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+.overlay.overlay--sub {
+  background: rgba(8, 6, 20, 0.55);
+}
+
+.overlay.overlay--lobby {
+  background: rgba(8, 6, 20, 0.4);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Waiting room: the "looking for opponents" box readable (dark text on its light card) */
+.dlg-lobby .search,
+.dlg-lobby .search p,
+.dlg-lobby .search__title,
+.dlg-lobby .search__hint {
+  color: #3a1d05;
+}
+
+/* Toasts stay above popups */
+.toasts {
+  z-index: 85;
+}

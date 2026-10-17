@@ -1,7 +1,20 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { audio } from "../audio/AudioManager";
 
 const BASE = import.meta.env.BASE_URL;
+
+let layer: HTMLElement | null = null;
+/** One layer for all popups, at the end of <body>; later popups stack on earlier ones. */
+function popupLayer(): HTMLElement {
+  if (!layer) {
+    layer = document.createElement("div");
+    layer.id = "popup-layer";
+    layer.className = "popup-layer";
+    document.body.appendChild(layer);
+  }
+  return layer;
+}
 
 /**
  * Shared popup in the wooden shrine frame: the title sits on the plaque at the top, the
@@ -62,7 +75,7 @@ export function Dialog({
     .map((c) => `dlg-${c}`)
     .join(" ");
 
-  return (
+  const popup = (
     <div
       className={`overlay ${overlayClassName}${variant === "sub" ? " overlay--sub" : ""}${closing ? " overlay--closing" : ""}`}
       onClick={(e) => e.target === e.currentTarget && requestClose()}
@@ -105,4 +118,7 @@ export function Dialog({
       )}
     </div>
   );
+  // In the top-level popup layer, so a popup opened from another one sits on top of it
+  // instead of inside it.
+  return createPortal(popup, popupLayer());
 }

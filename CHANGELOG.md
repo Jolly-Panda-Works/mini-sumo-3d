@@ -6,6 +6,14 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Popups render in their own top layer: one opened from another (a friend's profile, About, buying an item) sits on top of it instead of inside it. Every popup has a dark backdrop that fades in and out.
+
+### Fixed
+
+- Waiting room: the "looking for opponents" box text was unreadable.
+
 ### Added
 
 - Friends: a friend code to share, add friends by code, accept or decline requests, and a friends list with who's online. Tap a friend for their profile (picture, level, bouts, wins). "Play" invites an online friend into a private room; the waiting room lists online friends to invite into the current room. Invites pop up with Join / Not now (never mid-bout) and expire after two minutes. Invite links (`?room=…`) join the room directly. New API: `/api/friends…` and `/api/invites…` (6 new tests, 145 total).
