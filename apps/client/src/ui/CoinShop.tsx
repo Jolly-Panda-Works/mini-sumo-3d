@@ -70,11 +70,6 @@ export function CoinShop() {
   return (
     <Dialog
       title="Coin shop"
-      sub={
-        <span className="coin-frame coin-frame--static" aria-label={`Your coins: ${balance}`}>
-          <span className="coin-frame__amount">{balance.toLocaleString("en-US")}</span>
-        </span>
-      }
       onClose={() => setShopOpen(false)}
       className="coin-shop"
     >

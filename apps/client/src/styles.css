@@ -5794,3 +5794,89 @@ button.is-rejected {
 .dev-preview__close {
   --tx: -50%;
 }
+
+/* Settings: About and the version scroll with the other sections */
+.dialog__body .settings__about {
+  margin-top: 6px;
+  padding-bottom: 4px;
+}
+
+/* ======================================================================
+   Fixes: hover keeps each button's own filter (glows, shadows), nested
+   popups as wide as the main ones, centred About / joystick / vibration,
+   no focus border on the name field, dev preview clickable
+   ====================================================================== */
+
+/* Hover and press only move the button; its own filter (e.g. the difficulty glow) stays */
+@media (hover: hover) {
+  button:not(:disabled):not([aria-disabled="true"]):hover {
+    filter: none;
+  }
+}
+
+button:not(:disabled):not([aria-disabled="true"]):active {
+  filter: none;
+}
+
+.level-card--on,
+.level-card--on:hover,
+.level-card--on:active {
+  filter: drop-shadow(0 0 6px rgba(255, 210, 63, 0.9));
+}
+
+/* Nested popups: the same width as the first popup */
+.dialog-wrap--sub {
+  --sub-w: min(440px, 100%, calc((100dvh - 32px) * 485 / 827));
+}
+
+/* About: content centred in the panel */
+.dlg-about-panel .sub-dialog__body {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Joystick choice: side by side, centred */
+.art-choice {
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.art--choice {
+  flex: 0 1 46%;
+  width: auto;
+  max-width: calc(306px * var(--art-scale) * 1.15);
+}
+
+/* Vibration: centred */
+.settings__section .field:has(.vib-toggle) {
+  align-items: center;
+}
+
+.settings__section .field:has(.vib-toggle) .field__label {
+  align-self: stretch;
+}
+
+.settings__section .field:has(.art-choice) .field__label {
+  align-self: stretch;
+}
+
+/* Welcome / name field: no focus border */
+.input.input--art:focus,
+.input.input--art:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border: 0;
+}
+
+.dlg-name-gate .input.input--art {
+  border: 0;
+  box-shadow: none;
+}
+
+/* Dev mode: the preview and its close button take taps (the UI layer doesn't) */
+.dev-preview,
+.dev-preview__close,
+.dev-fab {
+  pointer-events: auto;
+}

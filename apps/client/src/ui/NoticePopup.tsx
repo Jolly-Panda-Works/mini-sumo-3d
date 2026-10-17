@@ -6,11 +6,9 @@ import { uiStore, type Notice } from "../uiStore";
 const BASE = import.meta.env.BASE_URL;
 
 /** Actions drawn with their own button art (by id, or id:label). */
-const ART: Record<string, string> = {
-  ok: "btn-ok",
-  leave: "btn-leave",
-  "cancel:stay": "btn-stay",
-};
+// Empty for now so every popup button looks the same (the plank with text); add entries
+// once a matching set of button art exists, e.g. { ok: "btn-notice-ok" }.
+const ART: Record<string, string> = {};
 
 /**
  * Message / warning / error popup (public/ui/popup-<kind>.webp): the kind's plaque on top,

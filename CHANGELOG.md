@@ -6,6 +6,25 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Nested popups are as wide as the first popup; About's content is centred.
+- Settings: joystick buttons side by side in the centre; the vibration switch centred.
+- Coin shop: no balance strip.
+- Popup buttons all share one look (the plank with text) until a matching art set exists.
+- Dev mode: closing a panel, popup or preview opened from the dev menu returns to the menu.
+
+### Fixed
+
+- The glow around the selected difficulty disappeared on hover.
+- A border around the name field when tapped.
+- Dev mode: "Close preview" didn't respond.
+
+### Changed
+
+- Settings: About and the version label come after the other sections and scroll with them (no longer pinned to the bottom).
+- Joystick: players choose again, with "Under your thumb" as the default as before.
+
 ### Added
 
 - A smaller popup frame for popups opened on top of another (About, buying an item or a picture, the picture picker, editing the name).

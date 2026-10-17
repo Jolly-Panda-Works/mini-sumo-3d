@@ -109,17 +109,33 @@ function sampleGame(phase: Phase, arenaId: string): GameSnapshot {
 
 // ------------------------------------------------------------------ panel
 
+/** Set when something was opened from the dev menu: the menu comes back once it closes. */
+let returnToDev = false;
+
 export function DevPanel() {
   const ui = useStore(uiStore);
   const [preview, setPreview] = useState<Preview | null>(null);
+
+  // Back to the dev menu when the panel / popup opened from it is closed.
+  const somethingOpen =
+    ui.settingsOpen || ui.profileOpen || ui.wardrobeOpen || ui.shopOpen || ui.walletOpen || ui.aboutOpen || ui.levelUp !== null || ui.notices.length > 0 || preview !== null;
+  useEffect(() => {
+    if (returnToDev && !somethingOpen && !ui.devOpen) {
+      returnToDev = false;
+      setDevOpen(true);
+    }
+  }, [somethingOpen, ui.devOpen]);
+
   if (preview) return <DevPreview preview={preview} onClose={() => setPreview(null)} />;
   if (!ui.devOpen) return null;
 
   const open = (fn: (open: boolean) => void) => () => {
+    returnToDev = true;
     setDevOpen(false);
     fn(true);
   };
   const show = (p: Preview) => () => {
+    returnToDev = true;
     setDevOpen(false);
     setPreview(p);
   };
@@ -143,6 +159,7 @@ export function DevPanel() {
           <button
             className="btn"
             onClick={() => {
+              returnToDev = true;
               setDevOpen(false);
               showLevelUp({ from: 3, to: 4, coins: 150 });
             }}
