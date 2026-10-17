@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Loading screen: new running sumo animation (22 frames, from the supplied video, background removed).
+
+### Changed
+
 - Arena cards follow the board layout: picture at the top with the label (FREE, level or soon) in its corner, the information area in the middle and the PLAY button at the bottom.
 
 ### Changed
