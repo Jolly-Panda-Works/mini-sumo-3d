@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Results: HOME, PLAY AGAIN and REMATCH from the same button set as the popups.
+
+### Changed
+
 - Message / warning / error popups use one matching button set: OK, LEAVE, STAY, COIN SHOP, NOT NOW, RETRY and CLOSE.
 
 ### Changed
