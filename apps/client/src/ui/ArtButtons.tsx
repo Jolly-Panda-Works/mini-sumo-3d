@@ -60,13 +60,13 @@ export function FreeLabel({ className = "" }: { className?: string }) {
   return <img className={`art-label-free ${className}`} src={`${BASE}ui/label-free.webp`} alt="Free" draggable={false} />;
 }
 
-/** The vibration switch from the art: red is off, green is on. */
+/** The vibration switch: the phone frame with the on/off switch art; tap to toggle. */
 export function VibrationToggle({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {
   return (
-    <div className="art-toggle" role="radiogroup" aria-label="Vibration">
-      <img src={`${BASE}ui/toggle-vibration.webp`} alt="" draggable={false} />
-      <button type="button" role="radio" aria-checked={!on} aria-label="Vibration off" className={`art-toggle__off${on ? "" : " art-toggle--on"}`} onClick={() => onChange(false)} />
-      <button type="button" role="radio" aria-checked={on} aria-label="Vibration on" className={`art-toggle__on${on ? " art-toggle--on" : ""}`} onClick={() => onChange(true)} />
-    </div>
+    <button type="button" className="vib-toggle" role="switch" aria-checked={on} aria-label="Vibration" onClick={() => onChange(!on)}>
+      <img className="vib-toggle__frame" src={`${BASE}ui/vibration-frame.webp`} alt="" draggable={false} />
+      <img className="vib-toggle__switch" src={`${BASE}ui/vibration-${on ? "on" : "off"}.webp`} alt="" draggable={false} />
+      <span className="vib-toggle__text">{on ? "On" : "Off"}</span>
+    </button>
   );
 }

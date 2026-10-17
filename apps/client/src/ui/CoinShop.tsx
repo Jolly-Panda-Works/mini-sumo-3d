@@ -88,7 +88,15 @@ export function CoinShop() {
         </li>
         {COIN_PACKS.map((pack, i) => (
           <li key={pack.id} className={`pack${pack.tag ? " pack--tagged" : ""}${i === COIN_PACKS.length - 1 ? " pack--wide" : ""}`}>
-            {pack.tag && <span className="pack__tag">{pack.tag}</span>}
+            {pack.tag && (
+              <img
+                className="pack__tag pack__tag--art"
+                src={`${import.meta.env.BASE_URL}ui/label-${pack.tag.toLowerCase().replace(/\s+/g, "-")}.webp`}
+                alt={pack.tag}
+                width={220}
+                height={64}
+              />
+            )}
             <img className="pack__art" src={`${base}${pack.image}`} alt="" width={360} height={486} loading="lazy" />
             <p className="pack__name">{pack.name}</p>
             <p className="pack__coins">

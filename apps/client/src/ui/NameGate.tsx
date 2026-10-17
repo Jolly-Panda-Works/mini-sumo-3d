@@ -32,8 +32,8 @@ export function NameGate() {
             autoFocus
           />
         </label>
-        <button type="submit" className="btn btn--primary btn--big" disabled={!trimmed}>
-          Save name
+        <button type="submit" className="art art--save" aria-label="Save name" disabled={!trimmed}>
+          <img src={`${import.meta.env.BASE_URL}ui/btn-save.webp`} alt="" width={329} height={124} draggable={false} />
         </button>
       </form>
     </Dialog>

@@ -36,7 +36,8 @@ function load(): Settings {
     return {
       musicVolume: volume(parsed.musicVolume, parsed.sound === false ? 0 : defaults.musicVolume),
       sfxVolume: volume(parsed.sfxVolume, parsed.sound === false ? 0 : defaults.sfxVolume),
-      touchControls: parsed.touchControls === "on" || parsed.touchControls === "off" ? parsed.touchControls : "auto",
+      // The option was removed from settings: touch controls always follow the device.
+      touchControls: "auto",
       joystick: parsed.joystick === "fixed" ? "fixed" : "floating",
       vibration: typeof parsed.vibration === "boolean" ? parsed.vibration : true,
       name: typeof parsed.name === "string" ? parsed.name.slice(0, 32) : "",

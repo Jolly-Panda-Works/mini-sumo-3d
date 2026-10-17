@@ -3,7 +3,6 @@ import { audio } from "../audio/AudioManager";
 import { uiStore, showLevelUp } from "../uiStore";
 import { useStore } from "../store";
 import { Coins } from "./Coins";
-import { Dialog } from "./Dialog";
 
 /**
  * After a bout that raised your level: the old level floats up and fades, the new one rises
@@ -31,24 +30,26 @@ export function LevelUpPopup() {
   const close = () => showLevelUp(null);
 
   return (
-    <Dialog title="Level up!" onClose={close} hideClose className="levelup" role="alertdialog">
-        <div className="levelup__stage" aria-hidden="true">
-          <span className={`levelup__num levelup__num--old${stage !== "old" ? " levelup__num--leave" : ""}`}>{levelUp.from}</span>
-          <span className={`levelup__num levelup__num--new${stage !== "old" ? " levelup__num--enter" : ""}`}>{levelUp.to}</span>
+    <div className="overlay" onClick={(e) => e.target === e.currentTarget && close()}>
+      <section className="levelup-frame" role="alertdialog" aria-label={`Level up! You reached level ${levelUp.to}`}>
+        <div className="levelup-frame__content">
+          <div className="levelup__stage" aria-hidden="true">
+            <span className={`levelup__num levelup__num--old${stage !== "old" ? " levelup__num--leave" : ""}`}>{levelUp.from}</span>
+            <span className={`levelup__num levelup__num--new${stage !== "old" ? " levelup__num--enter" : ""}`}>{levelUp.to}</span>
+          </div>
+          <p className="levelup__text">You reached level {levelUp.to}.</p>
+          <p className={`levelup__reward${stage === "done" ? " levelup__reward--on" : ""}`}>
+            {levelUp.coins > 0 && (
+              <>
+                Reward: <Coins amount={levelUp.coins} signed />
+              </>
+            )}
+          </p>
+          <button className="btn btn--primary" onClick={close} autoFocus>
+            Great!
+          </button>
         </div>
-        <p id="levelup-desc" className="levelup__text">
-          You reached level {levelUp.to}.
-        </p>
-        <p className={`levelup__reward${stage === "done" ? " levelup__reward--on" : ""}`}>
-          {levelUp.coins > 0 && (
-            <>
-              Reward: <Coins amount={levelUp.coins} signed />
-            </>
-          )}
-        </p>
-        <button className="btn btn--primary btn--big" onClick={close} autoFocus>
-          Great!
-        </button>
-    </Dialog>
+      </section>
+    </div>
   );
 }

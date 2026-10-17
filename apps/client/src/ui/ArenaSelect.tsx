@@ -109,9 +109,9 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
                 {free ? (
                   <FreeLabel className="arena-tile__free" />
                 ) : soon ? (
-                  <span className="arena-tile__badge">Soon</span>
+                  <span className="label-empty">Soon</span>
                 ) : locked ? (
-                  <span className="arena-tile__badge">Lvl {arena.requires.level}</span>
+                  <span className="label-empty">Lvl {arena.requires.level}</span>
                 ) : null}
               </span>
               <div className="arena-tile__body">
@@ -146,7 +146,7 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
                     free ? `Play ${arena.name} for free` : soon ? `${arena.name}: coming soon` : `Enter ${arena.name} for ${arena.entryFee} Sumo Coins`
                   }
                 >
-                  <img src={`${import.meta.env.BASE_URL}ui/btn-play.webp`} alt="" width={287} height={91} draggable={false} />
+                  <img src={`${import.meta.env.BASE_URL}ui/${free ? "btn-play" : "btn-enter"}.webp`} alt="" width={free ? 287 : 360} height={free ? 91 : 95} draggable={false} />
                 </button>
             </li>
           );
@@ -166,8 +166,8 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
           onClose={() => setConfirm(null)}
           className="confirm"
           footer={
-            <button className="btn btn--primary btn--big" disabled={busy} onClick={() => void enter(confirm)}>
-              Enter
+            <button className="art art--enter" disabled={busy} onClick={() => void enter(confirm)} aria-label={`Enter ${confirm.name}`}>
+              <img src={`${import.meta.env.BASE_URL}ui/btn-enter.webp`} alt="" width={360} height={95} draggable={false} />
             </button>
           }
         >

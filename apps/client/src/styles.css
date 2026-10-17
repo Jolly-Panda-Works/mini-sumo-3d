@@ -4889,3 +4889,329 @@ dl.profile__stats {
   height: auto;
   margin: 0;
 }
+
+/* ======================================================================
+   UI art pass 4: version label, vibration switch, level label, edit, save,
+   Google Play, lobby start/host/invite, shop tags, empty label, Enter,
+   level-up frame, results with coin and XP reward frames
+   ====================================================================== */
+
+/* Settings footer: About above the version label */
+.settings__about {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.version-label {
+  position: relative;
+  display: block;
+  width: calc(430px * var(--art-scale));
+  aspect-ratio: 430 / 113;
+  background: var(--ui-label-version) center / 100% 100% no-repeat;
+}
+
+.version-label__value {
+  position: absolute;
+  left: 28.8%;
+  top: 28.3%;
+  width: 63.8%;
+  height: 43.4%;
+  display: grid;
+  place-items: center;
+  color: #3a1d05;
+  font-size: 0.75rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Joystick options: readable unselected options */
+.dialog .segmented__opt {
+  color: #3a1d05;
+  background: #fbf6ee;
+}
+
+.dialog .segmented__opt--on {
+  color: #ffffff;
+}
+
+/* Vibration: frame with the switch inside its slot */
+.vib-toggle {
+  position: relative;
+  width: calc(386px * var(--art-scale));
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.vib-toggle__frame {
+  width: 100%;
+  height: auto;
+}
+
+.vib-toggle__switch {
+  position: absolute;
+  right: 12%;
+  top: 27%;
+  height: 46%;
+  width: auto;
+}
+
+.vib-toggle__text {
+  position: absolute;
+  left: 24%;
+  top: 23.6%;
+  height: 52%;
+  display: flex;
+  align-items: center;
+  color: #3a1d05;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.vib-toggle:focus-visible {
+  outline: 3px solid #ffe7a8;
+  outline-offset: 2px;
+}
+
+/* Level label: the number in its circle */
+.level-label {
+  position: absolute;
+  right: -14px;
+  bottom: -10px;
+  width: 58px;
+  aspect-ratio: 202 / 91;
+  background: var(--ui-label-level) center / 100% 100% no-repeat;
+}
+
+.level-label__value {
+  position: absolute;
+  left: 59.4%;
+  top: 15.4%;
+  width: 30.7%;
+  height: 68%;
+  display: grid;
+  place-items: center;
+  color: #ffd166;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* Edit and save art */
+.profile__edit--art {
+  padding: 0;
+  border: 0;
+  background: none;
+  width: 30px;
+  height: 30px;
+}
+
+.profile__edit--art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.art--save {
+  align-self: center;
+  width: calc(329px * var(--art-scale));
+}
+
+/* Lobby: start button art with the text inside, host label, invite buttons */
+.start-btn {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  margin: 4px auto 0;
+  aspect-ratio: 720 / 201;
+  padding: 0;
+  border: 0;
+  background: var(--ui-btn-start) center / 100% 100% no-repeat;
+  cursor: pointer;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+}
+
+.start-btn__text {
+  position: absolute;
+  left: 6.7%;
+  top: 21.9%;
+  width: 86.8%;
+  height: 53.7%;
+  display: grid;
+  place-items: center;
+  color: #fff4dc;
+  font-size: 1.15rem;
+  font-weight: 900;
+  -webkit-text-stroke: 3px #6b1a0a;
+  paint-order: stroke fill;
+}
+
+.start-btn:disabled {
+  filter: grayscale(0.5) brightness(0.85);
+  cursor: default;
+}
+
+.start-btn:not(:disabled):active {
+  transform: translateY(2px);
+}
+
+.tag-host {
+  height: 26px;
+  width: auto;
+}
+
+.art--invite {
+  width: calc(480px * var(--art-scale) * 1.2);
+}
+
+.art--share {
+  width: calc(360px * var(--art-scale) * 0.9);
+}
+
+/* Shop tags as art */
+.pack__tag--art {
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  transform: translateX(-50%);
+  width: 62%;
+  height: auto;
+  padding: 0;
+  background: none;
+  border-radius: 0;
+}
+
+/* Empty label with text (arena Soon / Lvl) */
+.label-empty {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--ui-label-empty) center / 100% 100% no-repeat;
+  color: #fff4dc;
+  font-size: max(0.55rem, 3.4cqw);
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.arena-tile__label {
+  left: 66%;
+  width: 24.4%;
+}
+
+.art--enter {
+  align-self: center;
+  width: calc(360px * var(--art-scale) * 1.2);
+}
+
+/* Level up popup in its frame */
+.levelup-frame {
+  position: relative;
+  width: min(92vw, 400px);
+  aspect-ratio: 700 / 538;
+  background: var(--ui-levelup-frame) center / 100% 100% no-repeat;
+  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.35));
+  animation: dialog-in 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.levelup-frame__content {
+  position: absolute;
+  left: 20.6%;
+  top: 45.2%;
+  width: 58.8%;
+  height: 44.4%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #3a1d05;
+  text-align: center;
+}
+
+.levelup-frame .levelup__stage {
+  height: 44px;
+}
+
+.levelup-frame .levelup__num {
+  font-size: 2.2rem;
+  color: #8e1f1f;
+}
+
+.levelup-frame .levelup__text {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.levelup-frame .levelup__reward {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 900;
+  min-height: 1.1em;
+}
+
+.levelup-frame .btn {
+  min-height: 34px;
+  padding: 4px 18px;
+  font-size: 0.85rem;
+}
+
+/* Results: coin and XP reward frames in the lower area of the board */
+.results-board__rewards {
+  position: absolute;
+  left: 9.2%;
+  top: 57.5%;
+  width: 81.6%;
+  height: 14%;
+  display: flex;
+  gap: 3%;
+  align-items: center;
+  justify-content: center;
+}
+
+.reward-frame {
+  position: relative;
+  flex: 1 1 0;
+  aspect-ratio: 480 / 178;
+  background: center / 100% 100% no-repeat;
+}
+
+.reward-frame--coin {
+  background-image: var(--ui-reward-coin);
+}
+
+.reward-frame--xp {
+  background-image: var(--ui-reward-xp);
+}
+
+.reward-frame__value {
+  position: absolute;
+  left: 41%;
+  top: 30.7%;
+  width: 46.5%;
+  height: 40.8%;
+  display: grid;
+  place-items: center;
+  color: #ffe7a8;
+  font-size: max(0.75rem, 4.4cqw);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.results-board__bottom {
+  left: 9.2%;
+  top: 74%;
+  width: 81.6%;
+  height: 20%;
+}
+
+.results-board__info {
+  color: #3a1d05;
+}

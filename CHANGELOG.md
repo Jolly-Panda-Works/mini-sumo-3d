@@ -8,6 +8,12 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Settings: no touch controls option (touch controls follow the device); readable joystick options; About above the new version label; the vibration switch from the art.
+- New art across the UI: close, settings, customise and shop buttons; edit (pencil), SAVE, ENTER, COPY INVITE LINK and SHARE buttons; Google Play sign-in and connected buttons; level, host, Popular, Best value and empty labels; the lobby start button; the level-up popup frame.
+- Results on the new board, with the coins and XP of the bout in their reward frames.
+
+### Changed
+
 - Loading screen: new running sumo animation (22 frames, from the supplied video, background removed).
 
 ### Changed

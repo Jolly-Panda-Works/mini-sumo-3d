@@ -1,5 +1,5 @@
 import { roomManager, sessionStore } from "../network/RoomManager";
-import { settingsStore, type JoystickMode, type TouchMode } from "../settings";
+import { settingsStore, type JoystickMode } from "../settings";
 import { useStore } from "../store";
 import { setAboutOpen, setSettingsOpen } from "../uiStore";
 import { Dialog } from "./Dialog";
@@ -78,9 +78,12 @@ export function SettingsPanel() {
           </button>
         ) : (
           <div className="settings__about">
-            <span />
-            <span className="settings__version">{version ? `Version ${version}` : ""}</span>
             <AboutButton className="settings__about-btn" label="About" onClick={() => setAboutOpen(true)} />
+            {version && (
+              <span className="version-label" aria-label={`Version ${version}`}>
+                <span className="version-label__value">{version}</span>
+              </span>
+            )}
           </div>
         )
       }
@@ -95,17 +98,6 @@ export function SettingsPanel() {
 
         <section className="settings__section" aria-label="Controls">
           <h3 className="settings__heading">Controls</h3>
-          <Segmented<TouchMode>
-            label="Touch controls"
-            name="touch"
-            value={settings.touchControls}
-            options={[
-              ["auto", "Auto"],
-              ["on", "Always"],
-              ["off", "Never"],
-            ]}
-            onChange={(touchControls) => settingsStore.update({ touchControls })}
-          />
           <Segmented<JoystickMode>
             label="Joystick"
             name="joystick"

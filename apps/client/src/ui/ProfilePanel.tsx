@@ -37,8 +37,8 @@ function EditName({ onClose }: { onClose: () => void }) {
           aria-label="Name"
           autoFocus
         />
-        <button type="submit" className="btn btn--primary" disabled={!trimmed || trimmed === settings.name}>
-          Save
+        <button type="submit" className="art art--save" aria-label="Save" disabled={!trimmed || trimmed === settings.name}>
+          <img src={`${import.meta.env.BASE_URL}ui/btn-save.webp`} alt="" width={329} height={124} draggable={false} />
         </button>
       </form>
     </Dialog>
@@ -73,8 +73,8 @@ export function ProfilePanel() {
         <div className="profile__level">
           <button className="profile__avatar" onClick={() => setPicking(true)} aria-label="Change picture">
             <img src={avatarSrc(settings.appearance.avatar)} alt="" width={160} height={160} />
-            <span className="level-badge" aria-label={`Level ${level.level}`}>
-              {level.level}
+            <span className="level-label" aria-label={`Level ${level.level}`}>
+              <span className="level-label__value">{level.level}</span>
             </span>
             <span className="profile__avatar-edit" aria-hidden="true">
               ✎
@@ -83,17 +83,8 @@ export function ProfilePanel() {
           <div className="profile__xp">
             <div className="profile__name-row">
               <p className="profile__name">{settings.name}</p>
-              <button className="profile__edit" onClick={() => setEditing(true)} aria-label="Edit name">
-                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                  <path
-                    d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.4"
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                  />
-                </svg>
+              <button className="profile__edit profile__edit--art" onClick={() => setEditing(true)} aria-label="Edit name">
+                <img src={`${import.meta.env.BASE_URL}ui/btn-edit.webp`} alt="" width={140} height={146} draggable={false} />
               </button>
             </div>
             <div
@@ -125,7 +116,7 @@ export function ProfilePanel() {
         <section className="profile__google" aria-label="Google Play">
           {play.status === "connected" ? (
             <button className="gplay-btn" onClick={() => pushToast("Your progress is saved to Google Play", "info")} aria-label="Connected to Google Play">
-              <img src={`${base}icons/gplay-connected.webp`} alt="" width={560} height={133} draggable={false} />
+              <img src={`${base}ui/gplay-connected.webp`} alt="" width={480} height={128} draggable={false} />
             </button>
           ) : (
             <button
@@ -136,7 +127,7 @@ export function ProfilePanel() {
               }
               aria-label="Sign in with Google Play"
             >
-              <img src={`${base}icons/gplay-signin.webp`} alt="" width={560} height={133} draggable={false} />
+              <img src={`${base}ui/gplay-sign-in.webp`} alt="" width={480} height={132} draggable={false} />
             </button>
           )}
           <p className="hint">

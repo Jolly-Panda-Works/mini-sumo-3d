@@ -74,12 +74,12 @@ export function Lobby() {
 
         {!offline && (
         <div className="row">
-          <button className="btn btn--grow" onClick={() => void copy()}>
-            {copied === "link" ? "Invite link copied" : "Copy invite link"}
+          <button className="art art--invite" onClick={() => void copy()} aria-label={copied === "link" ? "Invite link copied" : "Copy invite link"}>
+            <img src={`${import.meta.env.BASE_URL}ui/btn-copy-invite.webp`} alt="" width={480} height={130} draggable={false} />
           </button>
           {"share" in navigator && (
-            <button className="btn" onClick={() => void share()}>
-              Share
+            <button className="art art--share" onClick={() => void share()} aria-label="Share">
+              <img src={`${import.meta.env.BASE_URL}ui/btn-share.webp`} alt="" width={360} height={160} draggable={false} />
             </button>
           )}
         </div>
@@ -98,7 +98,7 @@ export function Lobby() {
                 <PlayerBadge colorIndex={p.colorIndex} />
                 <span className="roster__name">{p.name}</span>
                 {p.isYou && <span className="tag">You</span>}
-                {p.isHost && <span className="tag tag--host">Host</span>}
+                {p.isHost && <img className="tag-host" src={`${import.meta.env.BASE_URL}ui/label-host.webp`} alt="Host" width={200} height={114} />}
                 {p.isBot && (
                   <span className="tag tag--bot">
                     <Icon name="bot" size={16} /> Bot
@@ -144,12 +144,12 @@ export function Lobby() {
         {autoStart ? null : isHost ? (
           <>
             <button
-              className="btn btn--primary btn--big lobby__start"
+              className="start-btn lobby__start"
               disabled={!canStart || !armed}
               onClick={() => roomManager.startMatch()}
               aria-live="polite"
             >
-              {searching ? `Start match in ${searchSeconds}…` : "Start match"}
+              <span className="start-btn__text">{searching ? `Start match in ${searchSeconds}…` : "Start match"}</span>
             </button>
             {!canStart && !searching && (
               <p className="hint">

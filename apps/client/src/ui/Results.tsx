@@ -5,7 +5,6 @@ import { economyStore } from "../network/economyClient";
 import { settingsStore } from "../settings";
 import { audio } from "../audio/AudioManager";
 import { avatarSrc } from "./Avatar";
-import { Coins } from "./Coins";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -63,8 +62,13 @@ export function Results() {
           );
         })}
 
-        <div className="results-board__prize" aria-label={won > 0 ? `You won ${won} Sumo Coins` : "No coins this time"}>
-          {won > 0 ? <Coins amount={won} signed /> : lost > 0 ? <Coins amount={-lost} signed /> : <span>0</span>}
+        <div className="results-board__rewards">
+          <div className="reward-frame reward-frame--coin" aria-label={won > 0 ? `You won ${won} Sumo Coins` : "No coins this time"}>
+            <span className="reward-frame__value">{won > 0 ? `+${won.toLocaleString("en-US")}` : lost > 0 ? `-${lost.toLocaleString("en-US")}` : "0"}</span>
+          </div>
+          <div className="reward-frame reward-frame--xp" aria-label={`${result?.xp ?? 0} XP`}>
+            <span className="reward-frame__value">+{result?.xp ?? 0}</span>
+          </div>
         </div>
 
         <div className="results-board__bottom">
@@ -83,7 +87,7 @@ export function Results() {
             ) : null}
           </div>
           <p className="results-board__info">
-            {[result?.xp ? `+${result.xp} XP` : "", paid ? `Home in ${seconds}s` : !isHost ? `Lobby in ${seconds}s` : ""].filter(Boolean).join(" · ")}
+            {paid ? `Home in ${seconds}s` : !isHost ? `Lobby in ${seconds}s` : ""}
           </p>
         </div>
       </section>
