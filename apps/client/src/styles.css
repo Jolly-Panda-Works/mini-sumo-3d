@@ -6988,3 +6988,48 @@ button.code-field {
   max-height: 100%;
   object-fit: contain;
 }
+
+/* Leaderboard rows open the player's profile */
+.lb-row__open {
+  display: flex;
+  align-items: center;
+  gap: inherit;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lb-row__open:focus-visible {
+  outline: 3px solid #f2c14e;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.lb-row:has(.lb-row__open) {
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .lb-row:has(.lb-row__open):hover {
+    filter: brightness(1.06);
+  }
+}
+
+.friend-profile__add {
+  width: 90px;
+  margin-top: 4px;
+}
+
+.friend-profile__note {
+  margin: 4px 0 0;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #b06a12;
+}

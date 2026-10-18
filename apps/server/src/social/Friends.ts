@@ -189,6 +189,27 @@ export class Friends {
     return this.list(accountId);
   }
 
+  /** Anyone's public profile (from the leaderboard), with how you're connected. */
+  publicProfile(accountId: string, otherId: unknown): FriendProfile {
+    if (typeof otherId !== "string") throw new EconomyError("unknown_friend", "That wrestler can't be found.");
+    const account = this.economy.publicAccount(otherId);
+    if (!account) throw new EconomyError("unknown_friend", "That wrestler can't be found.");
+    const rel = this.relation(accountId, otherId);
+    const relation: FriendProfile["relation"] =
+      otherId === accountId ? "self" : !rel ? "none" : rel.status === "accepted" ? "friend" : rel.requester === accountId ? "outgoing" : "incoming";
+    return {
+      accountId: otherId,
+      name: account.name,
+      avatar: account.avatar,
+      level: account.level,
+      online: this.isOnline(otherId),
+      matches: account.matches,
+      wins: account.wins,
+      appearance: account.appearance,
+      relation,
+    };
+  }
+
   /** A friend's profile (only friends and pending requests can be viewed). */
   profile(accountId: string, otherId: unknown): FriendProfile {
     if (typeof otherId !== "string" || !this.relation(accountId, otherId)) throw new EconomyError("unknown_friend", "Not on your friends list.");

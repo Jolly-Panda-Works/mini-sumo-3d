@@ -271,6 +271,8 @@ export interface FriendProfile extends FriendEntry {
   wins: number;
   /** Their wrestler's look, to show the character on their profile. */
   appearance: Appearance;
+  /** How you're connected (profiles opened from the leaderboard can be anyone's). */
+  relation?: "self" | "friend" | "outgoing" | "incoming" | "none";
 }
 
 /** An invitation to join a friend's room. */

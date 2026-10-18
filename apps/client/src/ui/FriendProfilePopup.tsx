@@ -1,23 +1,49 @@
 import { useEffect, useState } from "react";
 import type { FriendProfile } from "@mini-sumo/shared";
-import { friendProfile, removeFriend } from "../network/friendsClient";
-import { showWarning } from "../uiStore";
+import { addFriendById, answerFriend, friendProfile, playerProfile, removeFriend } from "../network/friendsClient";
+import { pushToast, showError, showWarning } from "../uiStore";
 import { avatarSrc } from "./Avatar";
 import { Dialog } from "./Dialog";
 import { WrestlerPreview } from "./WrestlerPreview";
 import { sanitizeAppearance } from "@mini-sumo/shared";
-import { PlayButton } from "./FriendsPanel";
+import { PlayButton, SmallArt } from "./FriendsPanel";
 
-/** A friend's profile: picture, name, level, bouts and wins; play or remove. */
-export function FriendProfilePopup({ accountId, onClose }: { accountId: string; onClose: () => void }) {
+/**
+ * A player's profile: wrestler, picture, name, level, bouts and wins.
+ * Friends: play or remove. Anyone else (opened from the leaderboard): add as a friend.
+ */
+export function FriendProfilePopup({ accountId, onClose, isPublic = false }: { accountId: string; onClose: () => void; isPublic?: boolean }) {
   const [profile, setProfile] = useState<FriendProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    void friendProfile(accountId)
+    void (isPublic ? playerProfile(accountId) : friendProfile(accountId))
       .then(setProfile)
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "Couldn't load the profile."));
-  }, [accountId]);
+  }, [accountId, isPublic]);
+
+  const add = async () => {
+    if (!profile) return;
+    try {
+      await addFriendById(accountId);
+      setProfile({ ...profile, relation: "outgoing" });
+      pushToast(`Friend request sent to ${profile.name}`, "info");
+    } catch (error) {
+      void showError("Couldn't add friend", error instanceof Error ? error.message : "Try again.");
+    }
+  };
+  const accept = async () => {
+    if (!profile) return;
+    try {
+      await answerFriend(accountId, true);
+      setProfile({ ...profile, relation: "friend" });
+      pushToast(`${profile.name} is now your friend`, "info");
+    } catch (error) {
+      void showError("Couldn't accept", error instanceof Error ? error.message : "Try again.");
+    }
+  };
+  // Profiles from the friends list are friends (or requests); public ones say so.
+  const relation = profile?.relation ?? "friend";
 
   const remove = async () => {
     if (!profile) return;
@@ -53,10 +79,24 @@ export function FriendProfilePopup({ accountId, onClose }: { accountId: string; 
               <dd>{profile.wins}</dd>
             </div>
           </dl>
-          <PlayButton friend={profile} />
-          <button className="art art--remove-friend friend-profile__remove" onClick={() => void remove()} aria-label="Remove friend">
-            <img src={`${import.meta.env.BASE_URL}ui/btn-remove-friend.webp`} alt="" draggable={false} />
-          </button>
+          {relation === "friend" && (
+            <>
+              <PlayButton friend={profile} />
+              <button className="art art--remove-friend friend-profile__remove" onClick={() => void remove()} aria-label="Remove friend">
+                <img src={`${import.meta.env.BASE_URL}ui/btn-remove-friend.webp`} alt="" draggable={false} />
+              </button>
+            </>
+          )}
+          {relation === "none" && (
+            <button className="art art--add friend-profile__add" onClick={() => void add()} aria-label={`Add ${profile.name} as a friend`}>
+              <img src={`${import.meta.env.BASE_URL}ui/btn-add.webp`} alt="" draggable={false} />
+            </button>
+          )}
+          {relation === "outgoing" && <p className="friend-profile__note">Friend request sent · not accepted yet</p>}
+          {relation === "incoming" && (
+            <SmallArt art="btn-accept" label={`Accept ${profile.name}`} onClick={() => void accept()} />
+          )}
+          {relation === "self" && <p className="friend-profile__note">This is you</p>}
         </div>
       )}
     </Dialog>

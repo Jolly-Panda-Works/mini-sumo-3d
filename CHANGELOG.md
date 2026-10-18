@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Leaderboard: tap a player to see their profile (wrestler, picture, level, bouts, wins). From there you can add them as a friend, accept their request, or, for friends, play or remove. New `GET /api/players/profile` (1 new test, 154 total).
+
 ### Fixed
 
 - Leaderboard rows overlapped: the scrolling list squeezed them; rows now keep the card's proportions.

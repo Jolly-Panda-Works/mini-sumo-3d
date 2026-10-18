@@ -124,3 +124,21 @@ describe("friends with bot players", () => {
     expect(calls).toEqual([`${bot}@room42`]);
   });
 });
+
+describe("public profiles", () => {
+  it("anyone's profile can be opened, with how you're connected", () => {
+    const now = Date.parse("2026-10-18T10:00:00Z");
+    const economy = new Economy(":memory:", FLAGS, silentEventSink, () => new Date(now), false);
+    const friends = new Friends(economy, () => now);
+    const { accountId: a } = economy.createGuest();
+    const { accountId: b } = economy.createGuest();
+    expect(friends.publicProfile(a, b).relation).toBe("none");
+    expect(friends.publicProfile(a, a).relation).toBe("self");
+    friends.requestById(a, b);
+    expect(friends.publicProfile(a, b).relation).toBe("outgoing");
+    expect(friends.publicProfile(b, a).relation).toBe("incoming");
+    friends.respond(b, a, true);
+    expect(friends.publicProfile(a, b).relation).toBe("friend");
+    expect(() => friends.publicProfile(a, "nobody")).toThrow();
+  });
+});

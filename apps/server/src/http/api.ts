@@ -25,6 +25,7 @@ import type { PaymentService } from "../economy/payments.js";
  *   GET  /api/leaderboard?limit=100         top players by XP + your rank    (Bearer token)
  *   GET  /api/friends                       your code, friends, requests     (Bearer token)
  *   GET  /api/friends/profile?id=…          a friend's profile               (Bearer token)
+ *   GET  /api/players/profile?id=…          anyone's public profile (leaderboard) (Bearer token)
  *   POST /api/friends/request { code } | { accountId }  add by code, or someone from a bout (Bearer token)
  *   POST /api/friends/respond { accountId, accept }                          (Bearer token)
  *   POST /api/friends/remove { accountId }  remove / cancel                  (Bearer token)
@@ -184,6 +185,9 @@ export function createApiHandler(economy: Economy | null, payments: PaymentServi
         send(res, 200, body);
       } else if (friends && route === "GET /api/friends") {
         const body: FriendsResponse = friends.list(accountId);
+        send(res, 200, body);
+      } else if (friends && route === "GET /api/players/profile") {
+        const body: FriendProfile = friends.publicProfile(accountId, url.searchParams.get("id"));
         send(res, 200, body);
       } else if (friends && route === "GET /api/friends/profile") {
         const body: FriendProfile = friends.profile(accountId, url.searchParams.get("id"));

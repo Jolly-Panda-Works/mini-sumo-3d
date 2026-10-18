@@ -44,6 +44,9 @@ export const removeFriend = (accountId: string) =>
 
 export const friendProfile = (accountId: string) => request<FriendProfile>(`/friends/profile?id=${encodeURIComponent(accountId)}`);
 
+/** Anyone's public profile (from the leaderboard), with how you're connected. */
+export const playerProfile = (accountId: string) => request<FriendProfile>(`/players/profile?id=${encodeURIComponent(accountId)}`);
+
 export const inviteFriend = (accountId: string, roomId: string) =>
   request<GameInvite>("/invites", { method: "POST", body: JSON.stringify({ accountId, roomId }) });
 

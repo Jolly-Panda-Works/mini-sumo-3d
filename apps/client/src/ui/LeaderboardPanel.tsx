@@ -6,6 +6,7 @@ import { useStore } from "../store";
 import { setLeaderboardOpen } from "../uiStore";
 import { avatarSrc } from "./Avatar";
 import { Dialog } from "./Dialog";
+import { FriendProfilePopup } from "./FriendProfilePopup";
 
 const BASE = import.meta.env.BASE_URL;
 const MEDALS = ["gold", "silver", "bronze"] as const;
@@ -23,6 +24,7 @@ export function LeaderboardPanel() {
   const listRef = useRef<HTMLOListElement>(null);
   const meRef = useRef<HTMLLIElement>(null);
   const [pin, setPin] = useState<"none" | "top" | "bottom">("bottom");
+  const [viewing, setViewing] = useState<string | null>(null);
 
   useEffect(() => {
     if (!online) return;
@@ -63,12 +65,21 @@ export function LeaderboardPanel() {
           <ol className="leaderboard__list" ref={listRef} onScroll={updatePin}>
             {board.top.map((entry) => {
               const isMe = entry.accountId === board.you.accountId;
-              return <Row key={entry.accountId} entry={entry} you={isMe} rowRef={isMe ? meRef : undefined} />;
+              return (
+                <Row
+                  key={entry.accountId}
+                  entry={entry}
+                  you={isMe}
+                  rowRef={isMe ? meRef : undefined}
+                  onOpen={isMe ? undefined : () => setViewing(entry.accountId)}
+                />
+              );
             })}
           </ol>
           {(pin === "bottom" || !meInList) && <Row entry={board.you} you pinned />}
         </>
       )}
+      {viewing && <FriendProfilePopup accountId={viewing} isPublic onClose={() => setViewing(null)} />}
     </Dialog>
   );
 }
@@ -79,7 +90,20 @@ function rankLabel(rank: number): string {
   return String(rank);
 }
 
-function Row({ entry, you = false, pinned = false, rowRef }: { entry: LeaderboardEntry; you?: boolean; pinned?: boolean; rowRef?: Ref<HTMLLIElement> }) {
+function Row({
+  entry,
+  you = false,
+  pinned = false,
+  rowRef,
+  onOpen,
+}: {
+  entry: LeaderboardEntry;
+  you?: boolean;
+  pinned?: boolean;
+  rowRef?: Ref<HTMLLIElement>;
+  /** Open this player's profile. */
+  onOpen?: () => void;
+}) {
   const medal = MEDALS[entry.rank - 1];
   const content = (
     <>
@@ -101,7 +125,13 @@ function Row({ entry, you = false, pinned = false, rowRef }: { entry: Leaderboar
     <div className={className}>{content}</div>
   ) : (
     <li className={className} ref={rowRef}>
-      {content}
+      {onOpen ? (
+        <button type="button" className="lb-row__open" onClick={onOpen} aria-label={`${entry.name}'s profile, rank ${entry.rank}`}>
+          {content}
+        </button>
+      ) : (
+        content
+      )}
     </li>
   );
 }
