@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Arena cards: no FREE label on Private Room and Training (the card still says "Entry: Free").
+
+### Changed
+
 - Buying a profile picture uses the same window as Customise: "Buy this item?" with your coins under it, the picture in the middle, BUY with the price and a × instead of NOT NOW.
 
 ### Changed

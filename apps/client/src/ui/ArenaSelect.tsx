@@ -8,7 +8,6 @@ import { useStore } from "../store";
 import { Coins } from "./Coins";
 import { BotLevelPicker } from "./BotLevelPicker";
 import { Dialog } from "./Dialog";
-import { FreeLabel } from "./ArtButtons";
 import { Icon } from "./Icon";
 import { pushToast, setInviteUiOpen } from "../uiStore";
 import { networkStore } from "../network/networkMode";
@@ -109,9 +108,7 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
             >
               <img className="arena-tile__art" src={arenaImage(arena.id)} alt="" width={960} height={536} decoding="async" />
               <span className="arena-tile__label">
-                {free ? (
-                  <FreeLabel className="arena-tile__free" />
-                ) : soon ? (
+                {soon ? (
                   <span className="label-empty">Soon</span>
                 ) : locked ? (
                   <span className="label-empty">Lvl {arena.requires.level}</span>
@@ -206,9 +203,6 @@ function PrivateRoomCard({ busy }: { busy: boolean }) {
       style={{ ["--accent" as string]: theme.accent, ["--tile-ink" as string]: theme.ink, ["--tile-sky" as string]: theme.sky }}
     >
       <img className="arena-tile__art" src={arenaImage("private")} alt="" width={960} height={536} decoding="async" />
-      <span className="arena-tile__label">
-        <FreeLabel className="arena-tile__free" />
-      </span>
       <div className="arena-tile__body">
         <h3 className="arena-tile__name">Private Room</h3>
         <p className="arena-tile__mood">{theme.title}</p>
