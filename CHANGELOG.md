@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Settings on the home screen use the same compact layout as in a match, so the panel fits without scrolling.
+
 ### Fixed
 
 - Home: all square buttons (settings, shop, leaderboard, friends, customise) are the same size; settings was smaller.

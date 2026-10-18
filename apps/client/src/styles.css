@@ -7920,3 +7920,43 @@ button.code-field {
   height: 56px !important;
   object-fit: contain;
 }
+
+/* Settings on the home screen: the same compact layout as in a match, so the whole panel
+   fits without scrolling */
+.dlg-settings .dialog {
+  min-height: 0;
+}
+
+.dlg-settings .dialog__body {
+  gap: 8px;
+}
+
+.dlg-settings .settings__grid {
+  gap: 8px;
+}
+
+.dlg-settings .settings__section {
+  gap: 6px;
+  padding: 8px 10px;
+}
+
+.dlg-settings .settings__heading {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.dlg-settings .field {
+  gap: 4px;
+}
+
+.dlg-settings .art--choice {
+  max-width: calc(306px * var(--art-scale));
+}
+
+.dlg-settings .vib-toggle {
+  width: calc(386px * var(--art-scale) * 0.9);
+}
+
+.dlg-settings .settings__about {
+  margin-top: 2px;
+}
