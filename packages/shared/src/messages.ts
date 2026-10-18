@@ -22,7 +22,15 @@ export const ServerMessage = {
   Error: "error",
   /** Personal economy result (EconomyResultMessage): prize, refund or rewards. */
   Economy: "economy",
+  /** The room is closing (RoomClosedPayload), e.g. the host of a private room left. */
+  RoomClosed: "roomClosed",
 } as const;
+
+export interface RoomClosedPayload {
+  reason: "host_left";
+  /** The host's name, for the message. */
+  hostName: string;
+}
 export type ServerMessage = (typeof ServerMessage)[keyof typeof ServerMessage];
 
 /** Normalized movement direction. x: right, y: toward the camera (screen down). */

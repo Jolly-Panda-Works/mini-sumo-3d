@@ -14,6 +14,7 @@ import {
   type EconomyResultMessage,
   type SyncedState,
   type Appearance,
+  type RoomClosedPayload,
 } from "@mini-sumo/shared";
 import { settingsStore } from "../settings";
 import { wrapColyseusRoom, type GameConnection } from "./connection";
@@ -30,7 +31,7 @@ import { audio } from "../audio/AudioManager";
 import { resolveServerUrl } from "../config";
 import { dustBus, impactBus, lastHitAt, shakeBus } from "../game/effectsBus";
 import { createStore } from "../store";
-import { showLevelUp, pushToast } from "../uiStore";
+import { showError, showLevelUp, showMessage, showWarning, pushToast } from "../uiStore";
 import { vibrate } from "../haptics";
 
 export type ConnectionStatus = "idle" | "connecting" | "connected";
@@ -171,10 +172,15 @@ class RoomManager {
         networkStore.set({ mode: "online" });
         await loadEconomy();
         await syncProfile();
+        void showMessage("Back online", "The game server is reachable again. Your progress has been synced, and friends and online arenas are back.");
       } else if (!reachable && mode === "online") {
         console.info("[mini-sumo] Server unreachable: continuing on this device.");
         networkStore.set({ mode: "offline" });
         initLocalEconomy();
+        void showWarning(
+          "Connection lost",
+          "The game server can't be reached. You can keep playing against bots; your progress is saved on this device and synced when you're back online.",
+        );
       }
     }, 20_000);
   }
@@ -269,7 +275,7 @@ class RoomManager {
     );
   }
 
-  joinByCode(code: string, name: string): Promise<boolean> {
+  async joinByCode(code: string, name: string): Promise<boolean> {
     const trimmed = code.trim();
     if (!ROOM_CODE_PATTERN.test(trimmed)) {
       sessionStore.update({ error: "Room codes are letters and numbers. Paste the code or open the invite link." });
@@ -280,10 +286,16 @@ class RoomManager {
       return Promise.resolve(false);
     }
     const options: JoinOptions = { name, appearance: settingsStore.get().appearance };
-    return this.connect(async () => {
+    const joined = await this.connect(async () => {
       options.authToken = await this.authToken();
       return wrapColyseusRoom(await this.client.joinById(trimmed, options));
     });
+    if (!joined) {
+      const reason = sessionStore.get().error ?? "The room is full or no longer exists.";
+      sessionStore.update({ error: null });
+      void showError("Couldn't join the game", reason);
+    }
+    return joined;
   }
 
   async leave(): Promise<void> {
@@ -447,6 +459,11 @@ class RoomManager {
       void refreshProfile();
     });
 
+    let closedBy: RoomClosedPayload | null = null;
+    room.onMessage(ServerMessage.RoomClosed, (msg: RoomClosedPayload) => {
+      closedBy = msg;
+    });
+
     room.onMessage(ServerMessage.Error, (msg: ErrorPayload) => {
       if (msg && typeof msg.message === "string") pushToast(msg.message, "error");
     });
@@ -458,15 +475,15 @@ class RoomManager {
     room.onLeave((code) => {
       if (this._room !== room) return; // we left on purpose
       this.detach();
+      sessionStore.set({ status: "idle", roomId: "", sessionId: "", unstable: false, error: null });
+      if (closedBy) {
+        void showMessage("Room closed", `${closedBy.hostName} left, so the room was closed.`);
+        return;
+      }
       // 1000 = normal closure, 4000 = Colyseus "consented" close.
-      const consented = code === 1000 || code === 4000;
-      sessionStore.set({
-        status: "idle",
-        roomId: "",
-        sessionId: "",
-        unstable: false,
-        error: consented ? null : "You lost the connection to the room. Rejoin with the invite link or start a new game.",
-      });
+      if (code !== 1000 && code !== 4000) {
+        void showError("Connection lost", "You lost the connection to the room. Start a new game, or ask your friend for a new invite.");
+      }
     });
 
     window.clearInterval(this.watchdog);

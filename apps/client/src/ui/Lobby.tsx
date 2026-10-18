@@ -9,7 +9,7 @@ import { Dialog } from "./Dialog";
 import { FriendRow, SmallArt } from "./FriendsPanel";
 import { friendsAvailable, friendsStore, inviteFriend, loadFriends } from "../network/friendsClient";
 import { useStore } from "../store";
-import { pushToast, setInviteUiOpen, uiStore } from "../uiStore";
+import { pushToast, setInviteUiOpen, showError, showWarning, uiStore } from "../uiStore";
 import { PlayerBadge } from "./PlayerBadge";
 
 export function Lobby() {
@@ -40,6 +40,18 @@ export function Lobby() {
   }, [searching, canStart]);
   const searchSeconds = Math.ceil(game.searchRemainingMs / 1000);
   const slots = Array.from({ length: game.maxPlayers }, (_, i) => connected[i] ?? null);
+  // The host of a private room with other players: leaving closes it for everyone.
+  const others = connected.filter((p) => !p.isYou && !p.isBot).length;
+  const leaveRoom = async () => {
+    if (game.isPrivate && isHost && others > 0) {
+      const choice = await showWarning("Close the room?", "You're the host. If you leave, the room closes and everyone is sent home.", [
+        { id: "leave", label: "Leave", primary: true },
+        { id: "cancel", label: "Stay" },
+      ]);
+      if (choice !== "leave") return;
+    }
+    await roomManager.leave();
+  };
   const inviting = useStore(uiStore).invitePickerOpen;
   // The picker belongs to this room: close it when leaving.
   useEffect(() => () => setInviteUiOpen(false), []);
@@ -75,7 +87,7 @@ export function Lobby() {
     <Dialog
       footer={startArea}
       title={game.isPrivate ? "Private room" : (arena?.name ?? "Training Arena")}
-      onClose={() => void roomManager.leave()}
+      onClose={() => void leaveRoom()}
       className="lobby"
       overlayClassName="overlay--lobby"
     >
@@ -204,7 +216,7 @@ function InvitePicker({
       setSent((s) => new Set(s).add(accountId));
       pushToast(`Invite sent to ${name}`, "info");
     } catch (error) {
-      pushToast(error instanceof Error ? error.message : "Couldn't invite.", "error");
+      void showError("Couldn't send the invite", error instanceof Error ? error.message : "Try again.");
     }
   };
   return (

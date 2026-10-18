@@ -6,6 +6,11 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- A private room closes when its host leaves before the bout: everyone else gets "Room closed: <host> left" and goes home (a running bout carries on with a new host). The host is warned first ("Close the room?") when others are in the room.
+- More popups where they help: warning when the server becomes unreachable (keep playing against bots, progress synced later) and a message when it's back; "Connection lost" (error) when a room connection drops; "Couldn't join the game" (error) when an invite's room is full or gone; "Couldn't send the invite" (error); incoming friend requests pop up with Accept / Not now.
+
 ### Changed
 
 - Friend requests you sent show "Not accepted yet".

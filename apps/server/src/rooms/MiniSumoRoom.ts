@@ -7,6 +7,7 @@ import {
   type EconomyResultMessage,
   type ErrorPayload,
   type JoinOptions,
+  type RoomClosedPayload,
 } from "@mini-sumo/shared";
 import { ECONOMY, PRIVATE_ARENA_ID, getArena, type ArenaConfig } from "../economy/config.js";
 import { EconomyError } from "../economy/Economy.js";
@@ -158,8 +159,23 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
   }
 
   override onLeave(client: Client): void {
+    // A private room closes when its host leaves before the bout: everyone else is told and
+    // sent back home (a running bout carries on with a new host).
+    const leaving = this.session.players.get(client.sessionId);
+    const hostLeftLobby =
+      this.arenaId === PRIVATE_ARENA_ID &&
+      this.session.hostId === client.sessionId &&
+      this.session.phase !== Phase.Playing &&
+      this.session.phase !== Phase.Countdown;
     // Reconnection is not supported in this MVP: any leave (consented or not) is final.
     this.session.removePlayer(client.sessionId);
+    if (hostLeftLobby && this.clients.length > 0) {
+      const payload: RoomClosedPayload = { reason: "host_left", hostName: leaving?.name ?? "The host" };
+      this.broadcast(ServerMessage.RoomClosed, payload);
+      void this.lock();
+      // Give the message a moment to arrive, then close the room.
+      this.clock.setTimeout(() => void this.disconnect(), 300);
+    }
     // Paid arenas: leaving before the bout starts refunds the entry; after that it is spent.
     const economy = getEconomy();
     const accountId = this.accounts.get(client.sessionId);

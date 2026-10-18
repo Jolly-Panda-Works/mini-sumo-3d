@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { dismissInvite, fetchInvites, friendsAvailable } from "../network/friendsClient";
+import { answerFriend, dismissInvite, fetchInvites, friendsAvailable, friendsStore, loadFriends } from "../network/friendsClient";
 import { gameStore, roomManager, sessionStore } from "../network/RoomManager";
 import { Phase } from "@mini-sumo/shared";
 import { settingsStore } from "../settings";
-import { showMessage } from "../uiStore";
+import { pushToast, showError, showMessage } from "../uiStore";
 
 /**
  * Checks for game invites from friends (every 5 s while online, also in a background tab;
@@ -11,6 +11,9 @@ import { showMessage } from "../uiStore";
  * Nothing pops up in the middle of a bout.
  */
 const shown = new Set<string>();
+/** Friend requests already announced (once per request while the game is open). */
+const announcedRequests = new Set<string>();
+let lastRequestCheck = 0;
 
 export function InviteWatcher() {
   useEffect(() => {
@@ -19,6 +22,31 @@ export function InviteWatcher() {
       if (stopped || !friendsAvailable()) return;
       const phase = gameStore.get().phase;
       if (sessionStore.get().status === "connected" && (phase === Phase.Playing || phase === Phase.Countdown)) return;
+      // New friend requests (checked every 15 s): Accept / Not now.
+      if (Date.now() - lastRequestCheck > 15_000) {
+        lastRequestCheck = Date.now();
+        try {
+          await loadFriends();
+        } catch {
+          // keep going with invites
+        }
+        for (const request of friendsStore.get().data?.incoming ?? []) {
+          if (announcedRequests.has(request.accountId)) continue;
+          announcedRequests.add(request.accountId);
+          const choice = await showMessage("Friend request", `${request.name} (level ${request.level}) wants to be your friend.`, [
+            { id: "ok", label: "Accept", primary: true },
+            { id: "cancel", label: "Not now" },
+          ]);
+          if (choice === "ok") {
+            try {
+              await answerFriend(request.accountId, true);
+              pushToast(`${request.name} is now your friend`, "info");
+            } catch (error) {
+              void showError("Couldn't accept", error instanceof Error ? error.message : "Try again.");
+            }
+          }
+        }
+      }
       let invites;
       try {
         invites = await fetchInvites();
