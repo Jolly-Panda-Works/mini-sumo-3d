@@ -7695,3 +7695,11 @@ button.code-field {
   height: 100%;
   max-height: 46px;
 }
+
+/* BUY price: the coin is drawn into the art at the left of the field, so the number sits in
+   the part to its right instead of being centred over the coin */
+.art--buy__price {
+  box-sizing: border-box;
+  padding-left: 12%;
+  padding-right: 10%;
+}
