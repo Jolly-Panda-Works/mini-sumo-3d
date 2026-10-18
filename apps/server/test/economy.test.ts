@@ -270,7 +270,7 @@ describe("free rewards", () => {
     expect(second.get(a.accountId)).toBe(r.participation);
   });
 
-  it("ignores short rounds and players who left", () => {
+  it("pays no coins for short rounds or players who left (short rounds still count for stats)", () => {
     const { economy } = setup();
     const a = player(economy, 0);
     const b = player(economy, 0);
@@ -283,7 +283,8 @@ describe("free rewards", () => {
       participants: [{ accountId: b.accountId, won: false, completed: false }],
     });
     expect(left.size).toBe(0);
-    expect(economy.profile(a.accountId).stats.matches).toBe(0);
+    expect(economy.profile(a.accountId).stats.matches).toBe(1);
+    expect(economy.profile(b.accountId).stats.matches).toBe(0);
   });
 
   it("caps free rewards per day and resets the next day", () => {

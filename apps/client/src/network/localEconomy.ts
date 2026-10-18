@@ -347,8 +347,8 @@ export const localEconomy = {
       }
     }
 
-    // Stats, XP and free training rewards for bouts that count.
-    const counts = result.completed && result.durationMs >= REWARDS.minMatchDurationMs;
+    // Stats and XP for every bout you finish (the minimum bout length only guards coin rewards).
+    const counts = result.completed;
     if (counts) {
       state.matches += 1;
       state.ringOuts += Math.max(0, result.ringOuts ?? 0);

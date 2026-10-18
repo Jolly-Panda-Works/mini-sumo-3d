@@ -40,6 +40,8 @@ export function Lobby() {
   }, [searching, canStart]);
   const searchSeconds = Math.ceil(game.searchRemainingMs / 1000);
   const slots = Array.from({ length: game.maxPlayers }, (_, i) => connected[i] ?? null);
+  // The host may add bots in private rooms and in Training (not in paid arenas).
+  const botsAllowed = game.isPrivate || game.arenaId === "training";
   // The host of a private room with other players: leaving closes it for everyone.
   const others = connected.filter((p) => !p.isYou && !p.isBot).length;
   const leaveRoom = async () => {
@@ -122,7 +124,7 @@ export function Lobby() {
                     </span>
                     Invite a friend
                   </button>
-                ) : offline && game.isPrivate && isHost ? (
+                ) : offline && botsAllowed && isHost ? (
                   <button className="roster__invite" onClick={() => roomManager.addBot()} aria-label="Add a bot">
                     <span className="roster__plus" aria-hidden="true">
                       +
@@ -160,6 +162,7 @@ export function Lobby() {
             inRoom={inRoomIds}
             onClose={() => setInviteUiOpen(false)}
             isPrivate={game.isPrivate}
+            botsAllowed={botsAllowed}
             isHost={isHost}
             full={full}
           />
@@ -175,6 +178,7 @@ function InvitePicker({
   inRoom,
   onClose,
   isPrivate,
+  botsAllowed,
   isHost,
   full,
 }: {
@@ -182,6 +186,7 @@ function InvitePicker({
   inRoom: Set<string>;
   onClose: () => void;
   isPrivate: boolean;
+  botsAllowed: boolean;
   isHost: boolean;
   full: boolean;
 }) {
@@ -235,7 +240,7 @@ function InvitePicker({
           )}
         </div>
       )}
-      {isPrivate && isHost && (
+      {botsAllowed && isHost && (
         <button className="btn invite-picker__bot" disabled={full} onClick={() => roomManager.addBot()}>
           <Icon name="bot" size={22} /> {full ? "Room is full" : "Add bot"}
         </button>

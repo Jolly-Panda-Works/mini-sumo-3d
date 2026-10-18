@@ -240,7 +240,7 @@ export class GameSession {
   /** Host of a private room adds a bot while in the lobby. */
   addBot(requesterId: string): ActionResult {
     if (this.paidArena) return fail("Bots can't join paid arenas.");
-    if (this.quickMatch) return fail("Bots can only be added in private rooms.");
+    // Private rooms and Training: the host may add bots while waiting.
     if (requesterId !== this.hostId) return fail("Only the host can add bots.");
     const check = this.canJoin();
     if (!check.ok) return check;

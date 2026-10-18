@@ -755,8 +755,25 @@ export class Economy {
     participants: readonly MatchParticipant[];
     arenaId?: string;
   }): Map<string, number> {
+    return this.recordMatchDetailed(input).rewards;
+  }
+
+  /**
+   * Records a finished bout: stats and XP for everyone who finished it (any length),
+   * level-up coins, and the free training rewards (only for bouts of at least
+   * minMatchDurationMs, so very short bouts can't farm coins). Returns the coins and the
+   * XP / level change per account.
+   */
+  recordMatchDetailed(input: {
+    matchId: string;
+    durationMs: number;
+    rewarded: boolean;
+    participants: readonly MatchParticipant[];
+    arenaId?: string;
+  }): { rewards: Map<string, number>; progress: Map<string, { xp: number; levelBefore: number; levelAfter: number; levelCoins: number }> } {
     const granted = new Map<string, number>();
-    if (!this.flags.economy) return granted;
+    const progress = new Map<string, { xp: number; levelBefore: number; levelAfter: number; levelCoins: number }>();
+    if (!this.flags.economy) return { rewards: granted, progress };
     const today = utcDay(this.now());
     const r = ECONOMY.rewards;
     this.tx(() => {
@@ -768,11 +785,12 @@ export class Economy {
           .run(input.matchId, p.accountId, p.won ? 1 : 0, this.timestamp());
         if (Number(inserted.changes) !== 1) continue; // already processed
 
-        const counts = p.completed && input.durationMs >= r.minMatchDurationMs;
+        const counts = p.completed;
         if (counts) {
           const xp = xpForMatch(input.arenaId ?? "training", p.won, true);
           const before = levelFromXp(account.xp).level;
           const after = levelFromXp(account.xp + xp).level;
+          progress.set(p.accountId, { xp, levelBefore: before, levelAfter: after, levelCoins: levelUpCoins(before, after) });
           this.db
             .prepare("UPDATE accounts SET matches = matches + 1, wins = wins + ?, xp = xp + ? WHERE id = ?")
             .run(p.won ? 1 : 0, xp, p.accountId);
@@ -789,7 +807,7 @@ export class Economy {
             });
           }
         }
-        if (!input.rewarded || !counts) continue;
+        if (!input.rewarded || !counts || input.durationMs < r.minMatchDurationMs) continue;
 
         const earnedToday = account.reward_day === today ? account.reward_day_total : 0;
         const bonus = account.bonus_day !== today ? r.firstMatchOfDay : 0;
@@ -812,7 +830,7 @@ export class Economy {
       }
     });
     if (granted.size > 0) this.emit("rewards_granted", { matchId: input.matchId, total: [...granted.values()].reduce((a, b) => a + b, 0) });
-    return granted;
+    return { rewards: granted, progress };
   }
 
   /** Refunds every unsettled entry of a room (cancelled before start, or disposed mid-match). */

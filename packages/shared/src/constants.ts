@@ -51,7 +51,7 @@ export function isPowerUpKind(value: unknown): value is PowerUpKind {
 export const LATE_GAME_MS = 30_000;
 
 /** Quick match: how long a lone player waits for others before opponents are filled in. */
-export const QUICK_MATCH_WAIT_MS = 30_000;
+export const QUICK_MATCH_WAIT_MS = 10_000;
 
 export const NAME_MAX_LENGTH = 16;
 

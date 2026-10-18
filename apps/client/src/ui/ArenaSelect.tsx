@@ -53,6 +53,34 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
   const balance = economy.profile?.balances.coins ?? 0;
   const playerLevel = economy.profile?.level.level ?? 1;
   const arenas = (live ? economy.catalog?.arenas : null)?.filter((a) => a.enabled) ?? PREVIEW;
+  // Phones: the card nearest the middle is full size, the others shrink by up to 15 %.
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row || variant !== "carousel") return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const box = row.getBoundingClientRect();
+      const middle = box.left + box.width / 2;
+      for (const card of Array.from(row.children) as HTMLElement[]) {
+        const r = card.getBoundingClientRect();
+        const away = Math.min(1, Math.abs(r.left + r.width / 2 - middle) / Math.max(1, r.width));
+        card.style.setProperty("--focus-scale", String(1 - 0.15 * away));
+      }
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    row.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      row.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [arenas.length, variant]);
+
   // Wide screens: arrows only when some arenas are off screen.
   const [overflows, setOverflows] = useState(false);
   useEffect(() => {

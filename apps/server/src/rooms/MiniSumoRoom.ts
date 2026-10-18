@@ -260,16 +260,23 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
 
   private onRoundOver(winnerId: string | null, durationMs: number): void {
     const economy = getEconomy();
-    if (!economy || this.arenaId === PRIVATE_ARENA_ID) return;
+    if (!economy) return;
     const matchId = this.matchId();
     const winnerAccountId = winnerId ? (this.accounts.get(winnerId) ?? null) : null;
 
+    // Private rooms (friends) count for stats and XP like Training, with no coins.
     const settlement = this.paid ? economy.settleMatch({ matchId, roomId: this.roomId, arenaId: this.arenaId, winnerAccountId }) : null;
     const participants = [...this.session.players.values()]
       .filter((p) => !p.isBot && this.accounts.has(p.id))
       .map((p) => ({ accountId: this.accounts.get(p.id)!, won: p.id === winnerId, completed: p.connected && p.elimReason !== "left" }));
     // Training is practice: bouts count for stats and XP, but pay no coins.
-    const rewards = economy.recordMatch({ matchId, durationMs, rewarded: false, participants, arenaId: this.arenaId });
+    const { rewards, progress } = economy.recordMatchDetailed({
+      matchId,
+      durationMs,
+      rewarded: false,
+      participants,
+      arenaId: this.arenaId === PRIVATE_ARENA_ID ? "training" : this.arenaId,
+    });
 
     for (const client of this.clients) {
       const accountId = this.accounts.get(client.sessionId);
@@ -285,6 +292,15 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
         economyFee: settlement?.outcome === "won" ? settlement.sink : 0,
         rewards: rewards.get(accountId) ?? 0,
         balance: economy.balance(accountId),
+        ...(progress.has(accountId)
+          ? {
+              xp: progress.get(accountId)!.xp,
+              level: progress.get(accountId)!.levelAfter,
+              previousLevel: progress.get(accountId)!.levelBefore,
+              levelUp: progress.get(accountId)!.levelAfter > progress.get(accountId)!.levelBefore,
+              levelReward: progress.get(accountId)!.levelCoins,
+            }
+          : {}),
         note: refunded
           ? "No single winner: your entry fee was refunded."
           : won

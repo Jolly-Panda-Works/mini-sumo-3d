@@ -8,6 +8,16 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Home (phones): Shop moved to the bottom right; the arena carousel sizes itself to the space between the top buttons and the bottom row, so no buttons sit under the cards. The card in the middle is full size and the others shrink by up to 15 % as they move to the side.
+- Training: the host can add bots (+ in an empty slot: straight away offline, or from the friend picker online).
+- Matchmaking waits 10 s (was 30 s) before filling the room with bots.
+
+### Fixed
+
+- Win/loss and XP didn't go up after short bouts: a bout had to last 20 s to count. Every bout you finish now counts for stats and XP (the 20 s minimum only guards coin rewards). Online, the result now carries the XP gained and level changes, and private rooms count for stats and XP too (no coins).
+
+### Changed
+
 - Docker: the game is published on port 6803 (was 5803); `WEB_PORT` still overrides it.
 
 ### Changed

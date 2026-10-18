@@ -72,6 +72,15 @@ describe("private room bots", () => {
     expect(s.phase).toBe(Phase.Waiting);
   });
 
+  it("the host can add bots in Training too (not in paid arenas)", () => {
+    const training = new GameSession(cfg, 4, { quickMatch: true, seed: 2, botLevel: "normal" });
+    training.addPlayer("host", "Host");
+    expect(training.addBot("host").ok).toBe(true);
+    const paid = new GameSession(cfg, 4, { quickMatch: true, seed: 2, paidArena: { startDelayMs: 5000, cancelAfterMs: 60000 } });
+    paid.addPlayer("host", "Host");
+    expect(paid.addBot("host").ok).toBe(false);
+  });
+
   it("only the host can manage bots, never humans", () => {
     const s = privateRoom();
     s.addPlayer("host", "Host");
@@ -138,7 +147,7 @@ describe("quick match", () => {
   it("a second player joining cancels the bot fill", () => {
     const s = quick();
     s.addPlayer("a", "A");
-    advance(s, 10_000);
+    advance(s, cfg.quickMatchWaitMs / 2);
     s.addPlayer("b", "B");
     expect(s.searchRemainingMs).toBe(0);
     advance(s, cfg.quickMatchWaitMs + 1000);
@@ -153,12 +162,6 @@ describe("quick match", () => {
     advance(s, 5000);
     s.removePlayer("b");
     expect(s.searchRemainingMs).toBeCloseTo(cfg.quickMatchWaitMs, 3);
-  });
-
-  it("host cannot add bots manually in quick match", () => {
-    const s = quick();
-    s.addPlayer("a", "A");
-    expect(s.addBot("a").ok).toBe(false);
   });
 
   it("rematch keeps the bots, returning to the lobby removes them and searches again", () => {
