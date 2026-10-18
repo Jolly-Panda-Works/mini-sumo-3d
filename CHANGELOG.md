@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Customise slots: a soft see-through panel behind the item picture, a little bigger than the picture and inside the frame.
+
+### Changed
+
 - Customise slots: the item picture is a little smaller (5 % more room at the left, right and top).
 
 ### Fixed
