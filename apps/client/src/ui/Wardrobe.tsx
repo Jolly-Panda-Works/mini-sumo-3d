@@ -16,6 +16,7 @@ import {
 import { buyItem, economyStore, ownedItems, saveAppearanceRemote } from "../network/economyClient";
 import { Coins } from "./Coins";
 import { Dialog } from "./Dialog";
+import { PHONE_QUERY, useMediaQuery } from "../useMediaQuery";
 import { BuyButton, ComingSoonButton, NotNowButton } from "./ArtButtons";
 import { audio } from "../audio/AudioManager";
 import { pushToast, setShopOpen, showWarning } from "../uiStore";
@@ -216,9 +217,34 @@ export function Wardrobe() {
       }
     : null;
 
+  // Desktop: the category tabs hang on the panel's outer left edge; phones: under the preview.
+  const sideTabs = !useMediaQuery(PHONE_QUERY);
+  const tabs = (
+    <div className="tabs" role="tablist" aria-label="Categories">
+              {TABS.map((t) => (
+                <button
+                  key={t.category}
+                  type="button"
+                  role="tab"
+                  aria-selected={t.category === tab.category}
+                  className={`tab${t.category === tab.category ? " tab--on" : ""}`}
+                  onClick={() => setTab(t)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+  );
+
   return (
     <>
-      <Dialog title="Your wrestler" onClose={() => setWardrobeOpen(false)} className="wardrobe" bodyClassName="wardrobe__body">
+      <Dialog
+        title="Your wrestler"
+        onClose={() => setWardrobeOpen(false)}
+        className="wardrobe"
+        bodyClassName={`wardrobe__body${sideTabs ? " wardrobe__body--side-tabs" : ""}`}
+        aside={sideTabs ? tabs : undefined}
+      >
         <div className="wardrobe__preview" aria-hidden="true">
           <Canvas shadows dpr={[1, 2]} camera={{ fov: 32, position: [0, 1.25, 4.6] }}>
             <hemisphereLight args={["#F4F7FF", "#7B6A5A", 1.2]} />
@@ -236,20 +262,7 @@ export function Wardrobe() {
           </span>
         </div>
 
-        <div className="tabs" role="tablist" aria-label="Categories">
-          {TABS.map((t) => (
-            <button
-              key={t.category}
-              type="button"
-              role="tab"
-              aria-selected={t.category === tab.category}
-              className={`tab${t.category === tab.category ? " tab--on" : ""}`}
-              onClick={() => setTab(t)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        {!sideTabs && tabs}
 
         <div className="wardrobe__items">
           <ItemGrid

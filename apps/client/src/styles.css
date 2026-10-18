@@ -7223,3 +7223,59 @@ button.code-field {
   -webkit-mask-image: linear-gradient(transparent 0, #000 22px, #000 calc(100% - 26px), transparent 100%);
   mask-image: linear-gradient(transparent 0, #000 22px, #000 calc(100% - 26px), transparent 100%);
 }
+
+/* ======================================================================
+   Customise on every screen like on phones: preview on top, the item list
+   under it. Desktop: the category tabs hang on the panel's outer left edge
+   ====================================================================== */
+
+@media (orientation: landscape) and (min-width: 700px) {
+  .dialog__body.wardrobe__body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(150px, 32vh) auto minmax(0, 1fr);
+    grid-template-areas: "preview" "tabs" "items";
+  }
+}
+
+.dialog__body.wardrobe__body.wardrobe__body--side-tabs {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(150px, 34vh) minmax(0, 1fr);
+  grid-template-areas: "preview" "items";
+}
+
+.dialog {
+  position: relative;
+}
+
+.dialog__aside {
+  position: absolute;
+  right: calc(100% - 8px);
+  top: 30%;
+  z-index: 3;
+  pointer-events: auto;
+}
+
+.dialog__aside .tabs {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  overflow: visible;
+  padding: 0;
+}
+
+.dialog__aside .tab {
+  min-width: 96px;
+  border-radius: 14px 0 0 14px;
+  border-right-width: 0;
+  padding: 8px 16px 8px 14px;
+  text-align: right;
+  box-shadow: -3px 3px 0 rgba(0, 0, 0, 0.3);
+  transform-origin: right center;
+}
+
+.dialog__aside .tab--on {
+  background: #f2c14e;
+  color: #3a1d05;
+  border-color: #3a1d05;
+  min-width: 112px;
+}

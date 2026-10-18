@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Customise looks the same on the web as on phones: the preview on top and the item list under it. On desktop the category tabs hang on the panel's outer left edge; on phones they stay under the preview.
+
+### Changed
+
 - Bots no longer just chase: they mix three moves (pressing, keeping their distance and circling, and backing off to charge in and dash from afar), each bot with a bit of its own temper. Easy hesitates and lunges clumsily, Normal mixes everything, Hard waits less and times its lunges. In simulated duels an average player wins about 93 % / 63 % / 20 % (Easy / Normal / Hard). 1 new test (156 total).
 
 ### Changed

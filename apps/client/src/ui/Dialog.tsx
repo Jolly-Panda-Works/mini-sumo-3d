@@ -50,6 +50,7 @@ export function Dialog({
   overlayClassName = "",
   sub,
   variant = "main",
+  aside,
 }: {
   title: ReactNode;
   onClose: () => void;
@@ -68,6 +69,8 @@ export function Dialog({
    * another one (About, buying an item, editing the name…).
    */
   variant?: "main" | "sub" | "welcome" | "board";
+  /** Content attached to the outside of the panel (main popups), e.g. side tabs. */
+  aside?: ReactNode;
 }) {
   const id = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -142,6 +145,7 @@ export function Dialog({
       ) : (
       <div className={`dialog-wrap ${wrapClass}`}>
         <section className="dialog" role={role} aria-modal="true" aria-labelledby={id}>
+          {aside && <div className="dialog__aside">{aside}</div>}
           <img className="dialog__plaque" src={`${BASE}ui/header.webp`} alt="" draggable={false} />
           <h2 id={id} className="dialog__title">
             {title}
