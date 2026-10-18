@@ -346,7 +346,8 @@ jobs:
       - name: Write release notes
         env:
           REPO: ${{ github.repository }}
-          SERVER_URL: ${{ vars.VITE_SERVER_URL }}
+          # The address the build actually uses (the repository variable, or the default).
+          SERVER_URL: ${{ env.VITE_SERVER_URL }}
         run: |
           node tools/release-notes.mjs > release-notes.md
           # The changes since the previous release, from the commit messages.

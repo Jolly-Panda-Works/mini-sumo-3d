@@ -5,9 +5,8 @@ const server = (process.env.SERVER_URL ?? "").trim();
 const f = (kind) => `MiniSumo-${version}-${kind}`;
 
 const serverNote = server
-  ? `These builds connect to the game server at \`${server}\`.`
-  : `> [!NOTE]
-> **Online play is coming soon.** This build includes the free Training Arena against bots; paid arenas, coins, the shop and playing with friends arrive once the game server is live.`;
+  ? `Online play: friends, the leaderboard, all arenas and the coin shop, through the game server at \`${server}\`. Without a connection the game still plays against bots, and progress syncs once you're back online.`
+  : `This build has no game server set, so it plays against bots on the device only.`;
 
 console.log(`## Mini Sumo ${version}
 

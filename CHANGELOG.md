@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Release notes said online play was "coming soon": they looked only at the repository variable, not the default server the build uses. They now get the real address and describe online play.
+
 ### Changed
 
 - Friend picker: no INVITE button; every card shows a coloured status (Online, Invited, In lobby, In a lobby, In match, Offline) and tapping an Online card sends the invite. Free online friends come first. Cards are bigger. Add random player (new art) sits in the same box as the invite link.
