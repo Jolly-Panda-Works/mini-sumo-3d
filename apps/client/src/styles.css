@@ -7795,10 +7795,34 @@ button.code-field {
   margin-right: 6px;
 }
 
+/* The + sits inside the coin frame, at its right end */
+.home:not(.home--hub) .coin-frame {
+  padding-right: 40px;
+}
+
 .home:not(.home--hub) .coin-frame__plus {
-  right: -8px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
+}
+
+/* Top-left buttons clear of the screen edge */
+.home__left {
+  left: 6px;
+}
+
+.home__right {
+  right: 6px;
+}
+
+/* The home screen reaches the screen edges and never scrolls sideways (that was the white
+   bar at the bottom); only the arena row scrolls */
+.home:not(.home--hub) {
+  overflow-x: hidden;
+  margin-left: calc(-12px - var(--safe-left));
+  margin-right: calc(-12px - var(--safe-right));
+  padding-left: calc(12px + var(--safe-left));
+  padding-right: calc(12px + var(--safe-right));
 }
 
 .home:not(.home--hub) .arena-row-wrap {
@@ -7808,10 +7832,16 @@ button.code-field {
   margin-right: calc(-12px - var(--safe-right));
 }
 
+/* Bigger cards, from edge to edge */
+.home:not(.home--hub) .arena-tile {
+  flex: 0 0 clamp(250px, 21vw, 360px);
+  max-width: none;
+}
+
 .home:not(.home--hub) .arena-row {
   max-width: none;
-  padding-left: 24px;
-  padding-right: 24px;
+  padding-left: 12px;
+  padding-right: 12px;
   scrollbar-width: thin;
   scrollbar-color: #b07a3a rgba(90, 56, 26, 0.25);
 }
@@ -7821,7 +7851,7 @@ button.code-field {
 }
 
 .home:not(.home--hub) .arena-row::-webkit-scrollbar-track {
-  margin: 0 24px;
+  margin: 0 12px;
   border-radius: 999px;
   background: rgba(90, 56, 26, 0.25);
 }

@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Home on wide screens: the arena row reaches both screen edges (no empty strips at the sides) and the white scrollbar at the bottom of the page is gone (the home screen scrolled sideways); the arena cards are bigger; the + is inside the coin frame; the top-left buttons no longer touch the screen edge.
+
 ### Changed
 
 - Home on wide screens: profile, Customise, Shop and Friends top left; coins in the top-right corner with Settings under them and the Leaderboard under that. The arena row spans the whole screen and scrolls only when the cards don't fit, with an art-coloured scrollbar.
