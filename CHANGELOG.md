@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Leaderboard rows overlapped: the scrolling list squeezed them; rows now keep the card's proportions.
+
 ### Added
 
 - Five new arenas with their own art and 3D look, in order after Training and Rookie: Amateur (150 coins, level 3), Pro, Veteran (1,000, level 8), Champion (new art), Master (5,000, level 15), Legend (10,000, level 20), Godlike (25,000, level 30). Higher arenas give more XP (up to ×6) and tougher bots.

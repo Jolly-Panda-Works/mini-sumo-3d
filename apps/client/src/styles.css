@@ -6963,3 +6963,28 @@ button.code-field {
 .art--leaderboard-wide {
   width: 170px;
 }
+
+/* Leaderboard rows keep their card proportions: in the scrolling list they must not shrink */
+.leaderboard__list > .lb-row,
+.board-dialog__body > .lb-row {
+  flex: none;
+}
+
+.lb-row__who {
+  justify-content: center;
+  gap: 1px;
+}
+
+.lb-row__who strong {
+  font-size: clamp(0.7rem, 3.6cqw, 1rem);
+  line-height: 1.1;
+}
+
+.lb-row__who span {
+  line-height: 1.1;
+}
+
+.lb-row__rank img {
+  max-height: 100%;
+  object-fit: contain;
+}
