@@ -11,6 +11,7 @@ import {
 } from "@mini-sumo/shared";
 import { ECONOMY, PRIVATE_ARENA_ID, getArena, type ArenaConfig } from "../economy/config.js";
 import { EconomyError } from "../economy/Economy.js";
+import { presence } from "../social/presence.js";
 import { getEconomy } from "../economy/instance.js";
 import { GameSession, type ActionResult } from "../game/GameSession.js";
 import { isDashing } from "../simulation/MovementSystem.js";
@@ -67,6 +68,21 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
     bot.name = account.name;
     bot.appearance = account.appearance;
     bot.level = account.level;
+  }
+
+  /** Accounts in this room (players and dressed bots) and whether a bout is on. */
+  private readonly present = new Set<string>();
+  private updatePresence(): void {
+    const inMatch = this.session.phase === Phase.Playing || this.session.phase === Phase.Countdown;
+    const now = new Set<string>();
+    for (const p of this.session.players.values()) {
+      const account = this.accounts.get(p.id) || this.botAccounts.get(p.id);
+      if (account) now.add(account);
+    }
+    for (const account of now) presence.set(account, { roomId: this.roomId, inMatch });
+    for (const account of this.present) if (!now.has(account)) presence.clear(account, this.roomId);
+    this.present.clear();
+    for (const account of now) this.present.add(account);
   }
 
   /** Bots that joined on their own take a free bot player's identity. */
@@ -230,6 +246,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
 
   override onDispose(): void {
     MiniSumoRoom.live.delete(this.roomId);
+    for (const account of this.present) presence.clear(account, this.roomId);
     // Any entry not settled by now belongs to a bout that never finished: refund it.
     const economy = getEconomy();
     if (this.paid && economy) economy.refundRoom(this.roomId, "Match closed before it finished: entry refunded");
@@ -397,6 +414,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
       if (!s.players.has(id)) state.players.delete(id);
     }
     this.dressNewBots();
+    this.updatePresence();
     for (const [id, p] of s.players) {
       let ps = state.players.get(id);
       if (!ps) {

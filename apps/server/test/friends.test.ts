@@ -142,3 +142,22 @@ describe("public profiles", () => {
     expect(() => friends.publicProfile(a, "nobody")).toThrow();
   });
 });
+
+describe("friend activity", () => {
+  it("shows a friend in a match or in a lobby, from room presence", async () => {
+    const { presence } = await import("../src/social/presence.js");
+    const now = Date.parse("2026-10-18T10:00:00Z");
+    const economy = new Economy(":memory:", FLAGS, silentEventSink, () => new Date(now), false);
+    const friends = new Friends(economy, () => now);
+    const { accountId: a } = economy.createGuest();
+    const { accountId: b } = economy.createGuest();
+    friends.requestById(a, b);
+    friends.respond(b, a, true);
+    presence.set(b, { roomId: "r1", inMatch: true });
+    expect(friends.list(a).friends[0]).toMatchObject({ activity: "in_match", roomId: "r1", online: true });
+    presence.set(b, { roomId: "r1", inMatch: false });
+    expect(friends.list(a).friends[0]!.activity).toBe("in_lobby");
+    presence.clear(b, "r1");
+    expect(friends.list(a).friends[0]!.activity).toBe(undefined);
+  });
+});

@@ -255,6 +255,9 @@ export interface FriendEntry {
   level: number;
   /** Seen by the server in the last minute (the game polls while it's open). */
   online: boolean;
+  /** In a room: "in_match" during a bout, "in_lobby" while waiting (with that room's id). */
+  activity?: "in_match" | "in_lobby";
+  roomId?: string;
 }
 
 export interface FriendsResponse {

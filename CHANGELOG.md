@@ -6,6 +6,12 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Waiting room: no "Bot" label on bots; "Add bot" is now "Add random player".
+- Friend picker: lists every friend with what they're doing when they can't be invited: "In lobby" (already in this room), "In match", "In a lobby" (another room) or "Offline"; the rest get INVITE. The server keeps track of who is in which room and whether a bout is on (1 new test, 155 total).
+- The invite-link box sits a little lower in the friend picker.
+
 ### Fixed
 
 - Leaderboard: no horizontal scrollbar when a row is hovered or pressed, and rows no longer slip under the frame; the vertical scrollbar sits inside the frame in the art's colours; a leftover sliver of the old avatar slot behind each picture is gone from the row art.

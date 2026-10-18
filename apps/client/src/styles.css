@@ -7117,3 +7117,25 @@ button.code-field {
 .board-dialog__body > .lb-row--pinned {
   margin: 0 16px 0 8px;
 }
+
+/* Friend picker: what a friend is doing when they can't be invited */
+.friend-row__state {
+  flex: none;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(58, 29, 5, 0.12);
+  color: #6b3f1d;
+  font-size: 0.72rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.friend-row__state--here {
+  background: rgba(63, 163, 77, 0.18);
+  color: #2f7d3a;
+}
+
+/* The invite-link box keeps some space from the top of the panel */
+.invite-picker__share {
+  margin-top: 10px;
+}

@@ -78,7 +78,7 @@ export function Lobby() {
                 {offline
                   ? "Add a bot to start."
                   : game.isPrivate
-                    ? "Add a bot or invite a friend with +."
+                    ? "Add a random player or invite a friend with +."
                     : "Waiting for another player to join."}
               </p>
             )}
@@ -104,13 +104,8 @@ export function Lobby() {
                 <span className="roster__name">{p.name}</span>
                 {p.isYou && <span className="tag">You</span>}
                 {p.isHost && <img className="tag-host" src={`${import.meta.env.BASE_URL}ui/label-host.webp`} alt="Host" width={200} height={114} />}
-                {p.isBot && (
-                  <span className="tag tag--bot">
-                    <Icon name="bot" size={16} /> Bot
-                  </span>
-                )}
                 {p.isBot && isHost && (
-                  <button className="roster__remove" onClick={() => roomManager.removeBot(p.id)} aria-label={`Remove bot ${p.name}`}>
+                  <button className="roster__remove" onClick={() => roomManager.removeBot(p.id)} aria-label={`Remove ${p.name}`}>
                     Remove
                   </button>
                 )}
@@ -125,11 +120,11 @@ export function Lobby() {
                     Invite a friend
                   </button>
                 ) : offline && botsAllowed && isHost ? (
-                  <button className="roster__invite" onClick={() => roomManager.addBot()} aria-label="Add a bot">
+                  <button className="roster__invite" onClick={() => roomManager.addBot()} aria-label="Add a random player">
                     <span className="roster__plus" aria-hidden="true">
                       +
                     </span>
-                    Add bot
+                    Add random player
                   </button>
                 ) : (
                   "Waiting for a wrestler…"
@@ -216,7 +211,8 @@ function InvitePicker({
     const timer = window.setInterval(() => void loadFriends().catch(() => undefined), 10_000);
     return () => window.clearInterval(timer);
   }, []);
-  const list = (friends.data?.friends ?? []).filter((f) => !inRoom.has(f.accountId));
+  // Everyone on your friends list: friends already here (or busy elsewhere) say so instead of INVITE.
+  const list = friends.data?.friends ?? [];
   const invite = async (accountId: string, name: string) => {
     try {
       await inviteFriend(accountId, roomId);
@@ -242,25 +238,32 @@ function InvitePicker({
       )}
       {botsAllowed && isHost && (
         <button className="btn invite-picker__bot" disabled={full} onClick={() => roomManager.addBot()}>
-          <Icon name="bot" size={22} /> {full ? "Room is full" : "Add bot"}
+          {full ? "Room is full" : "Add random player"}
         </button>
       )}
       {friends.data && list.length === 0 && (
-        <p className="hint hint--center invite-picker__empty">
-          {friends.data.friends.length === 0 ? "No friends yet. Add friends with their code in Friends." : "All your friends are already here."}
-        </p>
+        <p className="hint hint--center invite-picker__empty">No friends yet. Add friends with their code in Friends.</p>
       )}
       {list.length > 0 && (
       <ul className="friends__list">
         {list.map((f) => (
           <FriendRow key={f.accountId} friend={f}>
-            <SmallArt
-              art={sent.has(f.accountId) ? "btn-sent" : "btn-invite"}
-              label={sent.has(f.accountId) ? `Invite sent to ${f.name}` : `Invite ${f.name}`}
-              disabled={sent.has(f.accountId)}
-              ariaDisabled={!f.online}
-              onClick={() => (f.online ? void invite(f.accountId, f.name) : pushToast(`${f.name} is offline`, "info"))}
-            />
+            {inRoom.has(f.accountId) ? (
+              <span className="friend-row__state friend-row__state--here">In lobby</span>
+            ) : f.activity === "in_match" ? (
+              <span className="friend-row__state">In match</span>
+            ) : f.activity === "in_lobby" ? (
+              <span className="friend-row__state">In a lobby</span>
+            ) : !f.online ? (
+              <span className="friend-row__state">Offline</span>
+            ) : (
+              <SmallArt
+                art={sent.has(f.accountId) ? "btn-sent" : "btn-invite"}
+                label={sent.has(f.accountId) ? `Invite sent to ${f.name}` : `Invite ${f.name}`}
+                disabled={sent.has(f.accountId)}
+                onClick={() => void invite(f.accountId, f.name)}
+              />
+            )}
           </FriendRow>
         ))}
       </ul>

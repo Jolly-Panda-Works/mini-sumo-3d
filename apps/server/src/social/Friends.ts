@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import type { FriendEntry, FriendProfile, FriendsResponse, GameInvite } from "@mini-sumo/shared";
 import { EconomyError, type Economy } from "../economy/Economy.js";
+import { presence } from "./presence.js";
 
 /**
  * Friends: every account has a short code; adding a code sends a request, accepting it makes
@@ -94,7 +95,15 @@ export class Friends {
   private entry(accountId: string): FriendEntry | null {
     const account = this.economy.publicAccount(accountId);
     if (!account) return null;
-    return { accountId, name: account.name, avatar: account.avatar, level: account.level, online: this.isOnline(accountId) };
+    const where = presence.get(accountId);
+    return {
+      accountId,
+      name: account.name,
+      avatar: account.avatar,
+      level: account.level,
+      online: this.isOnline(accountId) || Boolean(where),
+      ...(where ? { activity: where.inMatch ? ("in_match" as const) : ("in_lobby" as const), roomId: where.roomId } : {}),
+    };
   }
 
   private relation(a: string, b: string): FriendshipRow | undefined {
