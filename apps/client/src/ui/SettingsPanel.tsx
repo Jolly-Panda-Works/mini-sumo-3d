@@ -46,7 +46,21 @@ function Slider({ label, icon, value, onChange }: { label: string; icon: IconNam
         </span>
         <span className="slider__value">{Math.round(value * 100)}%</span>
       </span>
-      <input type="range" min={0} max={100} step={5} value={Math.round(value * 100)} onChange={(e) => onChange(Number(e.target.value) / 100)} />
+      <span className="art-slider" style={{ ["--v" as string]: String(value) }}>
+        <span className="art-slider__back" aria-hidden="true" />
+        <span className="art-slider__fill" aria-hidden="true" />
+        <span className="art-slider__frame" aria-hidden="true" />
+        <span className="art-slider__handle" aria-hidden="true" />
+        <input
+          className="art-slider__input"
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={Math.round(value * 100)}
+          onChange={(e) => onChange(Number(e.target.value) / 100)}
+        />
+      </span>
     </label>
   );
 }

@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Slider art (`public/ui/slider/`): the music and sound volume sliders use the gold track with the wooden handle (the fill follows the value; the real slider sits on top, so touch, mouse, keyboard and screen readers work as before); the profile XP bar uses the blue bar in its gold frame with the star, and the fill grows smoothly to your progress.
+
+### Changed
+
 - Settings on the home screen use the same compact layout as in a match, so the panel fits without scrolling.
 
 ### Fixed

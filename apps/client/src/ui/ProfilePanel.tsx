@@ -85,14 +85,18 @@ export function ProfilePanel() {
               </button>
             </div>
             <div
-              className="xp-bar"
+              className="xp-bar xp-bar--art"
+              style={{ ["--p" as string]: String(progress) }}
               role="progressbar"
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={Math.round(progress * 100)}
               aria-label="Progress to the next level"
             >
-              <span className="xp-bar__fill" style={{ transform: `scaleX(${progress})` }} />
+              {/* The art bar: back, the fill cut to your progress, the frame with its star */}
+              <span className="xp-bar__back" aria-hidden="true" />
+              <span className="xp-bar__fill" aria-hidden="true" />
+              <span className="xp-bar__frame" aria-hidden="true" />
             </div>
             <p className="hint">
               {level.xp - level.levelStartXp} / {level.nextLevelXp - level.levelStartXp} XP to level {level.level + 1}
