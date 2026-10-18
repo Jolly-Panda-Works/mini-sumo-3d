@@ -8060,3 +8060,13 @@ button.code-field {
 .xp-bar--art .xp-bar__frame {
   background: var(--ui-xp-frame) center / 100% 100% no-repeat;
 }
+
+/* Waiting room, offline: the invite + is shown but muted */
+.roster__invite--off {
+  opacity: 0.6;
+}
+
+.roster__invite--off .roster__plus {
+  background: #7a7a7a;
+  border-color: #3a3a3a;
+}

@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Waiting room, offline: empty seats show a muted "+ Invite a friend" that explains inviting needs the game server (bots fill the seats), instead of a silent "Waiting for a wrestler…". Online, every arena (paid ones included) already offers + to invite friends, like the private room.
+
+### Changed
+
 - Slider art (`public/ui/slider/`): the music and sound volume sliders use the gold track with the wooden handle (the fill follows the value; the real slider sits on top, so touch, mouse, keyboard and screen readers work as before); the profile XP bar uses the blue bar in its gold frame with the star, and the fill grows smoothly to your progress.
 
 ### Changed

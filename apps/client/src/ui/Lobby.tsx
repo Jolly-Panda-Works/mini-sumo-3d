@@ -9,7 +9,7 @@ import { Dialog } from "./Dialog";
 import { FriendRow, SmallArt } from "./FriendsPanel";
 import { friendsAvailable, friendsStore, inviteFriend, loadFriends } from "../network/friendsClient";
 import { useStore } from "../store";
-import { pushToast, setInviteUiOpen, showError, showWarning, uiStore } from "../uiStore";
+import { pushToast, setInviteUiOpen, showError, showMessage, showWarning, uiStore } from "../uiStore";
 import { PlayerBadge } from "./PlayerBadge";
 
 export function Lobby() {
@@ -125,6 +125,23 @@ export function Lobby() {
                       +
                     </span>
                     Add random player
+                  </button>
+                ) : offline ? (
+                  // Offline: inviting needs the game server, so say so instead of a silent seat.
+                  <button
+                    className="roster__invite roster__invite--off"
+                    onClick={() =>
+                      void showMessage(
+                        "Friends need the server",
+                        "Inviting friends works when the game is connected to the server. Check your internet connection; bots will fill the empty seats.",
+                      )
+                    }
+                    aria-label="Invite a friend (needs the game server)"
+                  >
+                    <span className="roster__plus" aria-hidden="true">
+                      +
+                    </span>
+                    Invite a friend
                   </button>
                 ) : (
                   "Waiting for a wrestler…"
