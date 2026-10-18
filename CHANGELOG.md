@@ -8,6 +8,11 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Fixed
 
+- Customise: the item you wear leads the list when you enter a tab, and the order then stays put (tapping an item no longer jumps it to the top).
+- Customise: the thumbnail of the first item in a list (the one you wear) never appeared: the thumbnail renderer took a second job before the first was on screen and lost the first. It now keeps the current job in a ref and waits until it's drawn.
+
+### Fixed
+
 - BUY buttons: the price stays inside its field on phones (12 % left padding). Home: the + on the coin frame no longer runs off the screen (22 px).
 
 ### Changed

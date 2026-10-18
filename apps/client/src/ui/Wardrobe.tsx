@@ -223,11 +223,13 @@ interface ItemGridProps {
   onPick: (index: number) => void;
   /** The item being tried on (not owned yet), if any. */
   trying: number | null;
+  /** Shown first: the item you wore when you opened this tab (the order then stays put). */
+  lead: number;
   onBuy: (index: number) => void;
 }
 
 /** One category's items: owned first (in catalog order), then the rest by price. */
-function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick, trying, onBuy }: ItemGridProps) {
+function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick, trying, onBuy, lead }: ItemGridProps) {
   const items = tab.options
     .map((option, index) => {
       const id = cosmeticItemId(tab.category, index);
@@ -235,7 +237,7 @@ function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick, tryin
     })
     .sort((a, b) => {
       // The item you wear comes first, then the rest you own, then the rest by price.
-      if (a.index === worn !== (b.index === worn)) return a.index === worn ? -1 : 1;
+      if (a.index === lead !== (b.index === lead)) return a.index === lead ? -1 : 1;
       if (a.owned !== b.owned) return a.owned ? -1 : 1;
       return a.owned ? a.index - b.index : a.price - b.price || a.index - b.index;
     });
@@ -298,7 +300,10 @@ export function Wardrobe() {
   const [trying, setTrying] = useState<{ category: CosmeticCategory; index: number } | null>(null);
   // Each tab opens at the top of its list (where the item you wear is).
   const itemsRef = useRef<HTMLDivElement>(null);
+  // The item you wear leads the list when you enter a tab; picking others doesn't reorder it.
+  const [lead, setLead] = useState(() => settingsStore.get().appearance[tab.category]);
   useEffect(() => {
+    setLead(settingsStore.get().appearance[tab.category]);
     itemsRef.current?.scrollTo({ top: 0 });
   }, [tab.category]);
 
@@ -453,6 +458,7 @@ export function Wardrobe() {
             priceOf={priceOf}
             onPick={(index) => pick(tab.category, index)}
             trying={trying && trying.category === tab.category ? trying.index : null}
+            lead={lead}
             onBuy={(index) => {
               setTrying({ category: tab.category, index });
               void confirmBuy(tab.category, index);

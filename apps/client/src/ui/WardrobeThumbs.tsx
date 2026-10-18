@@ -48,24 +48,31 @@ function Studio() {
   const { gl, camera } = useThree();
   const parts = useSumoParts();
   const [job, setJob] = useState<Job | null>(null);
+  // The job being drawn. A ref, because the state update reaches the next frames late: reading
+  // it from state used to take a second job before the first was on screen, losing the first.
+  const current = useRef<Job | null>(null);
   const frames = useRef(0);
 
   useFrame(() => {
-    if (!job) {
+    if (!current.current) {
       const next = queue.shift();
       if (!next) return;
       const shot = SHOTS[next.category];
       camera.position.set(...shot.position);
       camera.lookAt(...shot.target);
       frames.current = 0;
+      current.current = next;
       setJob(next);
       return;
     }
-    // Let the new look render for a couple of frames, then take the picture.
+    // Wait until the new look is actually on screen, then a couple of frames more.
+    if (job !== current.current) return;
     frames.current += 1;
     if (frames.current < 3) return;
-    thumbs.update({ [job.key]: gl.domElement.toDataURL("image/png") });
-    queued.delete(job.key);
+    const done = current.current;
+    thumbs.update({ [done.key]: gl.domElement.toDataURL("image/png") });
+    queued.delete(done.key);
+    current.current = null;
     setJob(null);
   });
 
