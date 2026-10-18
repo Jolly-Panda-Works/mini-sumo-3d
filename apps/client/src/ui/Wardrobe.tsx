@@ -202,13 +202,13 @@ function tintColor(hex: string): Color {
   return c;
 }
 
-type Tab = { category: CosmeticCategory; label: string; options: readonly { label: string; hex?: string }[] };
+type Tab = { category: CosmeticCategory; label: string; icon: string; options: readonly { label: string; hex?: string }[] };
 
 const TABS: readonly Tab[] = [
-  { category: "hair", label: "Hair", options: HAIR_STYLES },
-  { category: "hairColor", label: "Colour", options: HAIR_COLORS },
-  { category: "face", label: "Face", options: FACES },
-  { category: "outfit", label: "Outfit", options: OUTFITS },
+  { category: "hair", label: "Hair", icon: "tab-hair", options: HAIR_STYLES },
+  { category: "hairColor", label: "Colour", icon: "tab-color", options: HAIR_COLORS },
+  { category: "face", label: "Face", icon: "tab-face", options: FACES },
+  { category: "outfit", label: "Outfit", icon: "tab-outfit", options: OUTFITS },
 ];
 
 interface ItemGridProps {
@@ -252,7 +252,7 @@ function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick, tryin
             <ItemThumb category={tab.category} look={look} index={index} color={color} />
             {option.hex && <span className="item__swatch" style={{ background: option.hex }} aria-hidden="true" />}
             <span className="item__text">
-              <span className="item__name">{option.label}</span>
+              <span className="item__name item__name--plate">{option.label}</span>
               <span className="item__price">
                 {isOwned ? (index === worn ? "Wearing" : price === 0 ? "Free" : "Owned") : index === trying ? "Trying on" : <Coins amount={price} />}
               </span>
@@ -393,10 +393,12 @@ export function Wardrobe() {
                   type="button"
                   role="tab"
                   aria-selected={t.category === tab.category}
-                  className={`tab${t.category === tab.category ? " tab--on" : ""}`}
+                  className={`tab tab--art${t.category === tab.category ? " tab--on" : ""}`}
                   onClick={() => setTab(t)}
+                  aria-label={t.label}
+                  title={t.label}
                 >
-                  {t.label}
+                  <img src={`${import.meta.env.BASE_URL}ui/wardrobe/${t.icon}.webp`} alt="" draggable={false} />
                 </button>
               ))}
             </div>
@@ -429,6 +431,8 @@ export function Wardrobe() {
         {!sideTabs && tabs}
 
         <div className="wardrobe__items">
+          {/* The current category on the ribbon above its items */}
+          <h3 className="wardrobe__ribbon">{tab.label}</h3>
           <ItemGrid
             tab={tab}
             look={appearance}

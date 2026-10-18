@@ -7578,3 +7578,117 @@ button.code-field {
   width: 100% !important;
   height: 100% !important;
 }
+
+/* ======================================================================
+   Customise art (public/ui/wardrobe/): square icon tabs on the frames
+   (light frame when selected), thumbnails in the same frames (light for
+   the item you wear or try on), the category ribbon and the name plates
+   ====================================================================== */
+
+.tabs .tab.tab--art {
+  flex: none;
+  width: 58px;
+  height: 58px;
+  min-width: 0;
+  min-height: 0;
+  padding: 9px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: grid;
+  place-items: center;
+  background: var(--ui-slot-frame) center / 100% 100% no-repeat;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+  transition: transform 0.12s ease-out;
+}
+
+.tabs .tab.tab--art.tab--on {
+  background-image: var(--ui-slot-frame-on);
+  transform: scale(1.08);
+}
+
+.tabs .tab.tab--art img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Phones: the four square tabs in a row under the preview */
+.wardrobe__body .tabs:has(.tab--art) {
+  justify-content: center;
+  gap: 12px;
+  padding: 4px 0;
+  overflow: visible;
+}
+
+/* Desktop: the square tabs stacked on the panel's outer left edge */
+.dialog__aside .tabs .tab.tab--art {
+  width: 64px;
+  height: 64px;
+  min-width: 0;
+  padding: 10px;
+  text-align: center;
+}
+
+.dialog__aside .tabs .tab.tab--art.tab--on {
+  min-width: 0;
+  background-color: transparent;
+}
+
+.dialog__aside {
+  right: calc(100% - 14px);
+}
+
+/* Thumbnails in the frames */
+.wardrobe__items .item__thumb {
+  width: 56px;
+  height: 56px;
+  padding: 12%;
+  border: 0;
+  border-radius: 0;
+  background: var(--ui-slot-frame) center / 100% 100% no-repeat;
+}
+
+.wardrobe__items .item--on .item__thumb,
+.wardrobe__items .item--trying .item__thumb {
+  background-image: var(--ui-slot-frame-on);
+}
+
+.wardrobe__items .item__thumb img {
+  border-radius: 4px;
+}
+
+/* The category ribbon at the top of the list */
+.wardrobe__ribbon {
+  align-self: center;
+  flex: none;
+  margin: 0 0 2px;
+  width: 170px;
+  aspect-ratio: 213 / 64;
+  display: grid;
+  place-items: center;
+  padding-bottom: 4%;
+  background: var(--ui-title-ribbon) center / 100% 100% no-repeat;
+  color: #fff4dc;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* Item names on the dark plate */
+.item__name--plate {
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 3px 12px 4px;
+  background: var(--ui-name-plate) center / 100% 100% no-repeat;
+  color: #fff4dc;
+  font-size: 0.85rem;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+.item__text {
+  gap: 3px;
+}

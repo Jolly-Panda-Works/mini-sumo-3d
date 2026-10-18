@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Customise art (`public/ui/wardrobe/`): the tabs are square icon buttons (helmet for Hair, palette for Colour, mask for Face, kimono for Outfit) on the dark frame, with the light frame for the selected tab; item thumbnails sit in the same frames (light for the item you wear or try on); the category name is on a ribbon above the list; item names are on the dark plate.
+
 ### Fixed
 
 - Customise, Hair and Colour tabs: the close-up sits lower and a little further back, like Face, so tall hairstyles stay clear of the coin label.
