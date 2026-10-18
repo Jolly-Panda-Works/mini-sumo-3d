@@ -101,8 +101,8 @@ export function PreviewSumo({
 /** Where the wardrobe camera looks: the head (hair, colour, face) or the belt (outfits). */
 const FOCUS: Record<CosmeticCategory, { position: [number, number, number]; target: [number, number, number] }> = {
   // The model stands at y = -0.85 in the preview: head centre ≈ 0.57, belt ≈ -0.25.
-  hair: { position: [0, 0.9, 2.1], target: [0, 0.62, 0] },
-  hairColor: { position: [0, 0.9, 2.1], target: [0, 0.62, 0] },
+  hair: { position: [0, 0.98, 2.6], target: [0, 0.88, 0] },
+  hairColor: { position: [0, 0.98, 2.6], target: [0, 0.88, 0] },
   face: { position: [0, 0.72, 2.35], target: [0, 0.72, 0] },
   outfit: { position: [0, 0.25, 2.7], target: [0, -0.2, 0] },
   // Not a wardrobe tab (portraits are picked on the profile), but keep the whole wrestler in view.
@@ -412,7 +412,7 @@ export function Wardrobe() {
         aside={sideTabs ? tabs : undefined}
       >
         <div className="wardrobe__preview" aria-hidden="true">
-          <Canvas shadows dpr={[1, 2]} camera={{ fov: 32, position: [0, 0.9, 2.1] }}>
+          <Canvas shadows dpr={[1, 2]} camera={{ fov: 32, position: [0, 0.98, 2.6] }}>
             <PreviewCamera focus={tab.category} />
             <hemisphereLight args={["#F4F7FF", "#7B6A5A", 1.2]} />
             <directionalLight position={[2.5, 4, 3]} intensity={1.6} castShadow />

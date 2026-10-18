@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Fixed
 
+- Customise, Hair and Colour tabs: the close-up sits lower and a little further back, like Face, so tall hairstyles stay clear of the coin label.
+
+### Fixed
+
 - Customise, Face tab: the close-up sits lower and a little further back, so the face is no longer under the coin label.
 
 ### Fixed
