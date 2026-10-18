@@ -66,6 +66,9 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
     bornAt: -1,
     /** Display size (grows with the Giant power-up). */
     size: 1,
+    /** Which foot last touched down (footstep dust), and the last dash puff. */
+    step: 0,
+    trailAt: 0,
   });
 
   useFrame((frame, delta) => {
@@ -127,6 +130,17 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
       const bob = Math.sin(t * 3 + seed * 6) * 0.02;
       const stretch = p.dashing ? 0.12 : 0;
       torso.scale.set(1 + hitSquash + stretch * 0.3, 1 - hitSquash * 0.8 + bob - stretch * 0.4, 1 + hitSquash * 0.5 + stretch);
+
+      // Particles: a little dust at each footstep, a trail while dashing.
+      const foot = Math.sin(s.walk) >= 0 ? 1 : -1;
+      if (moving > 0.35 && foot !== s.step) {
+        dustBus.emit({ x: s.x + Math.cos(s.yaw) * 0.25 * foot, y: s.z - Math.sin(s.yaw) * 0.25 * foot, count: 2, speed: 0.45 });
+      }
+      s.step = foot;
+      if (p.dashing && t - s.trailAt > 0.045) {
+        s.trailAt = t;
+        dustBus.emit({ x: s.x, y: s.z, count: 3, speed: 1.1 });
+      }
 
       const swing = Math.sin(s.walk) * 0.7 * moving;
       if (parts.armL.current) parts.armL.current.rotation.set(isWinner ? 0 : swing, 0, isWinner ? 2.6 : 0.7);

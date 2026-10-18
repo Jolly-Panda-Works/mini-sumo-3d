@@ -7518,3 +7518,45 @@ button.code-field {
   align-self: center;
   margin-left: auto;
 }
+
+/* Notices with custom content */
+.notice-popup__custom {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+
+/* "Buy this item?": the item next to your coins */
+.buy-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4cqw;
+  width: 100%;
+}
+
+.buy-confirm__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5cqw;
+}
+
+.buy-confirm__item .item__thumb {
+  width: 18cqw;
+  height: 18cqw;
+  border-radius: 12px;
+}
+
+.buy-confirm__name {
+  color: #f4ede2;
+  font-weight: 900;
+  font-size: max(0.75rem, 3.8cqw);
+  text-align: center;
+}
+
+.buy-confirm__coins.coin-frame {
+  height: max(40px, 11cqw);
+  font-size: max(0.8rem, 4cqw);
+}

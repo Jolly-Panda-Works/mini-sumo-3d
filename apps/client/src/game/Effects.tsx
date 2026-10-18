@@ -3,7 +3,8 @@ import { useFrame } from "@react-three/fiber";
 import { Object3D, type InstancedMesh, type Mesh, type MeshBasicMaterial } from "three";
 import { dustBus, impactBus } from "./effectsBus";
 
-const DUST_COUNT = 80;
+const DUST_COUNT = 160;
+const SPARK_COUNT = 90;
 const RING_COUNT = 6;
 
 interface Particle {
@@ -21,6 +22,12 @@ interface Particle {
 /** Pooled dust particles and impact shockwave rings (cosmetic only). */
 export function Effects() {
   const dustRef = useRef<InstancedMesh>(null);
+  const sparkRef = useRef<InstancedMesh>(null);
+  const sparks = useMemo<Particle[]>(
+    () => Array.from({ length: SPARK_COUNT }, () => ({ x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, life: 0, maxLife: 1, size: 0.1 })),
+    [],
+  );
+  const sparkCursor = useRef(0);
   const ringRefs = useRef<(Mesh | null)[]>([]);
   const dummy = useMemo(() => new Object3D(), []);
   const particles = useMemo<Particle[]>(
@@ -56,12 +63,29 @@ export function Effects() {
       ring.strength = Math.min(1, strength / 12);
       const mesh = ringRefs.current[index];
       if (mesh) mesh.position.set(x, 0.06, y);
+      // Sparks fly out of the bump, more for harder hits.
+      const n = Math.round(6 + Math.min(1, strength / 12) * 12);
+      for (let i = 0; i < n; i++) {
+        const sp = sparks[sparkCursor.current]!;
+        sparkCursor.current = (sparkCursor.current + 1) % SPARK_COUNT;
+        const a = Math.random() * Math.PI * 2;
+        const out = 2.5 + Math.random() * 3.5;
+        sp.x = x;
+        sp.y = 0.8 + Math.random() * 0.4;
+        sp.z = y;
+        sp.vx = Math.cos(a) * out;
+        sp.vz = Math.sin(a) * out;
+        sp.vy = 2 + Math.random() * 3;
+        sp.maxLife = 0.35 + Math.random() * 0.3;
+        sp.life = sp.maxLife;
+        sp.size = 0.05 + Math.random() * 0.07;
+      }
     });
     return () => {
       offDust();
       offImpact();
     };
-  }, [particles, rings]);
+  }, [particles, rings, sparks]);
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.1);
@@ -90,6 +114,33 @@ export function Effects() {
       mesh.instanceMatrix.needsUpdate = true;
     }
 
+    const sparkMesh = sparkRef.current;
+    if (sparkMesh) {
+      for (let i = 0; i < SPARK_COUNT; i++) {
+        const p = sparks[i]!;
+        if (p.life > 0) {
+          p.life -= dt;
+          p.vy -= 12 * dt;
+          p.x += p.vx * dt;
+          p.y = Math.max(0.05, p.y + p.vy * dt);
+          p.z += p.vz * dt;
+          p.vx *= 0.9;
+          p.vz *= 0.9;
+          const k = Math.max(0, p.life / p.maxLife);
+          dummy.position.set(p.x, p.y, p.z);
+          dummy.rotation.set(p.life * 9, p.life * 7, 0);
+          dummy.scale.setScalar(p.size * (0.3 + k));
+        } else {
+          dummy.position.set(0, -50, 0);
+          dummy.scale.setScalar(0.0001);
+        }
+        dummy.updateMatrix();
+        sparkMesh.setMatrixAt(i, dummy.matrix);
+      }
+      sparkMesh.instanceMatrix.needsUpdate = true;
+      dummy.rotation.set(0, 0, 0);
+    }
+
     for (let i = 0; i < RING_COUNT; i++) {
       const ring = rings[i]!;
       const ringMesh = ringRefs.current[i];
@@ -111,6 +162,10 @@ export function Effects() {
       <instancedMesh ref={dustRef} args={[undefined, undefined, DUST_COUNT]} frustumCulled={false}>
         <icosahedronGeometry args={[1, 0]} />
         <meshStandardMaterial color="#F1DDB4" roughness={1} flatShading />
+      </instancedMesh>
+      <instancedMesh ref={sparkRef} args={[undefined, undefined, SPARK_COUNT]} frustumCulled={false}>
+        <octahedronGeometry args={[1, 0]} />
+        <meshBasicMaterial color="#FFE08A" toneMapped={false} />
       </instancedMesh>
       {rings.map((_, i) => (
         <mesh

@@ -64,7 +64,7 @@ function NoticeView({ notice }: { notice: Notice }) {
         )}
         <h2 className="notice-popup__title">{notice.title}</h2>
         <div className="notice-popup__body">
-          <p className="notice-popup__message">{notice.message}</p>
+          {notice.body ? <div className="notice-popup__custom">{notice.body}</div> : <p className="notice-popup__message">{notice.message}</p>}
           <div className="notice-popup__actions">
             {actions.map((action, i) => {
               if (action.price !== undefined) {

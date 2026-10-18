@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Color, Object3D, type InstancedMesh } from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   FACES,
@@ -28,17 +29,139 @@ import { useStore } from "../store";
 import { setWardrobeOpen } from "../uiStore";
 
 /** Slowly turning, idling preview of the player's wrestler. */
-export function PreviewSumo({ appearance, color }: { appearance: Appearance; color: string }) {
+/** A reaction when an item goes on: which part changed and when (performance.now()). */
+export interface Reaction {
+  category: CosmeticCategory;
+  at: number;
+}
+
+const REACT_MS = 900;
+
+/**
+ * The turning wrestler in the wardrobe. When an item goes on it reacts, with a move for each
+ * kind of item: hair and colour (a happy head wiggle and hop), face (a nod with a squash),
+ * outfit (a jump with a full spin).
+ */
+export function PreviewSumo({ appearance, color, reaction }: { appearance: Appearance; color: string; reaction?: Reaction | null }) {
   const parts = useSumoParts();
   useFrame((frame) => {
     const t = frame.clock.elapsedTime;
     const root = parts.root.current;
     if (!root) return;
-    root.rotation.set(0, Math.sin(t * 0.6) * 0.7, 0);
-    if (parts.torso.current) parts.torso.current.scale.set(1, 1 + Math.sin(t * 3) * 0.02, 1);
+    let yaw = Math.sin(t * 0.6) * 0.7;
+    let lift = 0;
+    let squash = 0;
+    let headTilt = 0;
+    let headNod = 0;
+    let arms = 0;
+    const r = reaction ? (performance.now() - reaction.at) / REACT_MS : 1;
+    if (reaction && r >= 0 && r < 1) {
+      const wave = Math.sin(r * Math.PI); // 0 → 1 → 0
+      if (reaction.category === "outfit") {
+        // Jump and spin all the way round.
+        lift = Math.sin(r * Math.PI) * 0.55;
+        yaw += r * Math.PI * 2;
+        squash = r < 0.15 ? Math.sin((r / 0.15) * Math.PI) * 0.18 : 0;
+        arms = wave;
+      } else if (reaction.category === "face") {
+        // A big nod, squashing down and back up.
+        headNod = Math.sin(r * Math.PI * 3) * 0.35 * (1 - r);
+        squash = wave * 0.16;
+        yaw *= 1 - wave;
+      } else {
+        // Hair and colour: wiggle the head, hop and show it off.
+        headTilt = Math.sin(r * Math.PI * 4) * 0.35 * (1 - r);
+        lift = Math.abs(Math.sin(r * Math.PI * 2)) * 0.18 * (1 - r);
+        yaw *= 1 - wave;
+        arms = wave * 0.6;
+      }
+    }
+    root.rotation.set(0, yaw, 0);
+    root.position.y = lift;
+    if (parts.torso.current) parts.torso.current.scale.set(1 + squash * 0.6, 1 + Math.sin(t * 3) * 0.02 - squash, 1 + squash * 0.6);
+    if (parts.head.current) parts.head.current.rotation.set(headNod, 0, headTilt);
+    if (parts.armL.current) parts.armL.current.rotation.set(0, 0, 0.7 + arms * 1.6);
+    if (parts.armR.current) parts.armR.current.rotation.set(0, 0, -0.7 - arms * 1.6);
     if (parts.eyes.current) parts.eyes.current.scale.y = t % 3.4 < 0.12 ? 0.2 : 1;
   });
   return <SumoModel parts={parts} color={color} appearance={appearance} showRing={false} />;
+}
+
+const SPARKLES = 28;
+
+/** A burst of sparkles from the part that just changed (head for hair, colour and face; belt for outfits). */
+export function PreviewSparkles({ reaction, tint }: { reaction?: Reaction | null; tint: string }) {
+  const ref = useRef<InstancedMesh>(null);
+  const dummy = useMemo(() => new Object3D(), []);
+  const parts = useMemo(
+    () => Array.from({ length: SPARKLES }, () => ({ x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, life: 0, max: 1, size: 0.05 })),
+    [],
+  );
+  useEffect(() => {
+    if (!reaction) return;
+    const y = reaction.category === "outfit" ? 0.65 : 1.55;
+    for (const p of parts) {
+      const a = Math.random() * Math.PI * 2;
+      const up = Math.random();
+      const out = 1.2 + Math.random() * 1.8;
+      p.x = Math.cos(a) * 0.3;
+      p.z = Math.sin(a) * 0.3;
+      p.y = y + (Math.random() - 0.5) * 0.3;
+      p.vx = Math.cos(a) * out;
+      p.vz = Math.sin(a) * out;
+      p.vy = 1 + up * 2.5;
+      p.max = 0.55 + Math.random() * 0.45;
+      p.life = p.max;
+      p.size = 0.035 + Math.random() * 0.05;
+    }
+  }, [reaction, parts]);
+  useFrame((_, delta) => {
+    const mesh = ref.current;
+    if (!mesh) return;
+    const dt = Math.min(delta, 0.1);
+    parts.forEach((p, i) => {
+      if (p.life > 0) {
+        p.life -= dt;
+        p.vy -= 4 * dt;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.z += p.vz * dt;
+        p.vx *= 0.92;
+        p.vz *= 0.92;
+        const k = Math.max(0, p.life / p.max);
+        dummy.position.set(p.x, p.y, p.z);
+        dummy.rotation.set(p.life * 8, p.life * 6, 0);
+        // Twinkle: grow in, then shrink away.
+        dummy.scale.setScalar(p.size * Math.sin(k * Math.PI) * 1.6);
+      } else {
+        dummy.position.set(0, -50, 0);
+        dummy.scale.setScalar(0.0001);
+      }
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+      mesh.setColorAt(i, i % 3 === 0 ? WHITE_SPARK : i % 3 === 1 ? GOLD_SPARK : tintColor(tint));
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  });
+  return (
+    <instancedMesh ref={ref} args={[undefined, undefined, SPARKLES]} frustumCulled={false}>
+      <octahedronGeometry args={[1, 0]} />
+      <meshBasicMaterial toneMapped={false} />
+    </instancedMesh>
+  );
+}
+
+const WHITE_SPARK = new Color("#ffffff");
+const GOLD_SPARK = new Color("#ffd166");
+const tintCache = new Map<string, Color>();
+function tintColor(hex: string): Color {
+  let c = tintCache.get(hex);
+  if (!c) {
+    c = new Color(hex);
+    tintCache.set(hex, c);
+  }
+  return c;
 }
 
 type Tab = { category: CosmeticCategory; label: string; options: readonly { label: string; hex?: string }[] };
@@ -131,6 +254,9 @@ export function Wardrobe() {
   const [tab, setTab] = useState<Tab>(TABS[0]!);
   // Tapping an item you don't own tries it on (in the preview) until you buy it or pick another.
   const [trying, setTrying] = useState<{ category: CosmeticCategory; index: number } | null>(null);
+  // The preview reacts (and sparkles) whenever an item goes on.
+  const [reaction, setReaction] = useState<Reaction | null>(null);
+  const react = (category: CosmeticCategory) => setReaction({ category, at: performance.now() });
   const shopOpen = economy.status === "ready" && Boolean(economy.catalog?.flags.shop) && economy.profile !== null;
   const balance = economy.profile?.balances.coins ?? 0;
   const you = game.players.find((p) => p.isYou);
@@ -149,8 +275,10 @@ export function Wardrobe() {
     if (owned.has(cosmeticItemId(category, index))) {
       setTrying(null);
       wear({ ...appearance, [category]: index } as Appearance);
+      react(category);
     } else {
       setTrying({ category, index });
+      react(category);
       void confirmBuy(category, index);
     }
   };
@@ -159,11 +287,25 @@ export function Wardrobe() {
   const confirmBuy = async (category: CosmeticCategory, index: number) => {
     const id = cosmeticItemId(category, index);
     const name = TABS.find((t) => t.category === category)!.options[index]!.label;
+    // The item's picture next to your coins; the price is on BUY.
     const choice = await showMessage(
       "Buy this item?",
       `${name} for ${priceOf(id).toLocaleString("en-US")} Sumo Coins. You have ${balance.toLocaleString("en-US")}.`,
       [{ id: "buy", label: "Buy", primary: true, price: priceOf(id) }],
-      { closable: true },
+      {
+        closable: true,
+        body: (
+          <div className="buy-confirm">
+            <div className="buy-confirm__item">
+              <ItemThumb category={category} look={appearance} index={index} color={color} />
+              <span className="buy-confirm__name">{name}</span>
+            </div>
+            <span className="coin-frame coin-frame--static buy-confirm__coins" aria-label={`Your coins: ${balance}`}>
+              <span className="coin-frame__amount">{balance.toLocaleString("en-US")}</span>
+            </span>
+          </div>
+        ),
+      },
     );
     if (choice === "buy") await buy(category, index);
     else setTrying(null);
@@ -188,10 +330,17 @@ export function Wardrobe() {
       audio.sample("purchase");
       setTrying(null);
       wear({ ...settingsStore.get().appearance, [category]: index } as Appearance);
+      react(category);
     } catch (error) {
       void showError("Couldn't buy", error instanceof Error ? error.message : "Try again.");
     }
   };
+
+  // Sparkles take the hair colour when a colour goes on, gold otherwise.
+  const sparkleTint = reaction?.category === "hairColor" ? (HAIR_COLORS[previewLookColor()]?.hex ?? "#ffd166") : "#ffd166";
+  function previewLookColor(): number {
+    return (trying?.category === "hairColor" ? trying.index : appearance.hairColor) ?? 0;
+  }
 
   // What the preview shows: your look, with the item being tried on.
   const previewLook = trying ? ({ ...appearance, [trying.category]: trying.index } as Appearance) : appearance;
@@ -229,7 +378,8 @@ export function Wardrobe() {
             <hemisphereLight args={["#F4F7FF", "#7B6A5A", 1.2]} />
             <directionalLight position={[2.5, 4, 3]} intensity={1.6} castShadow />
             <group position-y={-0.85}>
-              <PreviewSumo appearance={previewLook} color={color} />
+              <PreviewSumo appearance={previewLook} color={color} reaction={reaction} />
+              <PreviewSparkles reaction={reaction} tint={sparkleTint} />
             </group>
           </Canvas>
           <span className="wardrobe__balance coin-frame coin-frame--static" aria-label={`Your coins: ${balance}`}>

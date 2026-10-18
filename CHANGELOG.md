@@ -6,6 +6,15 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Particles in the match: a puff of dust at each footstep, a dust trail while dashing, and a burst of sparks on every bump (more for harder hits), on top of the impact ring.
+- Customise: when an item goes on (worn, tried on or bought), sparkles burst from that part (head or belt; in the hair colour for colours) and the wrestler reacts: a head wiggle and hop for hair and colour, a big nod for faces, a jump with a full spin for outfits.
+
+### Changed
+
+- "Buy this item?" shows the item's picture and name next to your coins (the coin frame) instead of a sentence; the price is on BUY. Notices can carry custom content (`body`).
+
 ### Fixed
 
 - Customise slots: BUY stays on the right of the slot (it dropped under the picture); picture on the left.

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { createStore } from "./store";
 
 export interface Toast {
@@ -47,6 +48,8 @@ export interface Notice {
   actions: NoticeAction[];
   /** A close (×) button in the corner; it answers "cancel". */
   closable?: boolean;
+  /** Shown in the lower box instead of the message text (e.g. an item and your coins). */
+  body?: ReactNode;
   resolve: (actionId: string) => void;
 }
 
@@ -78,7 +81,7 @@ export function showNotice(
   title: string,
   message: string,
   actions?: NoticeAction[],
-  options: { closable?: boolean } = {},
+  options: { closable?: boolean; body?: ReactNode } = {},
 ): Promise<string> {
   return new Promise((resolve) => {
     const id = ++noticeId;
@@ -89,6 +92,7 @@ export function showNotice(
       message,
       actions: actions && actions.length ? actions : [{ id: "ok", label: "OK", primary: true }],
       closable: options.closable,
+      body: options.body,
       resolve: (actionId) => {
         uiStore.update({ notices: uiStore.get().notices.filter((n) => n.id !== id) });
         resolve(actionId);
@@ -98,7 +102,7 @@ export function showNotice(
   });
 }
 
-export const showMessage = (title: string, message: string, actions?: NoticeAction[], options?: { closable?: boolean }) =>
+export const showMessage = (title: string, message: string, actions?: NoticeAction[], options?: { closable?: boolean; body?: ReactNode }) =>
   showNotice("message", title, message, actions, options);
 export const showWarning = (title: string, message: string, actions?: NoticeAction[]) => showNotice("warning", title, message, actions);
 export const showError = (title: string, message: string, actions?: NoticeAction[]) => showNotice("error", title, message, actions);
