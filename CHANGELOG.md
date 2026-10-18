@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Customise slots: BUY stays on the right of the slot (it dropped under the picture); picture on the left.
+
 ### Changed
 
 - "Buy this item?": the BUY art button with the price, and a × in the corner instead of NOT NOW. Notices can now show the BUY art (`price` on an action) and a close button (`closable`).

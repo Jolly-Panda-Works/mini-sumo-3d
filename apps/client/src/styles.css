@@ -7497,3 +7497,24 @@ button.code-field {
   width: min(70%, calc(439px * var(--art-scale)));
   max-width: none;
 }
+
+/* Wardrobe slot (as in the sketch): picture on the left, name next to it, BUY on the right,
+   all on one line; the base .item stacks its content in a column, so override that */
+.wardrobe__items .items .item {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.wardrobe__items .items .item__pick {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.wardrobe__items .items .item__buy {
+  flex: 0 0 auto;
+  align-self: center;
+  margin-left: auto;
+}
