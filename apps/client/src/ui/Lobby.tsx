@@ -6,7 +6,7 @@ import { economyStore } from "../network/economyClient";
 import { Coins } from "./Coins";
 import { Icon } from "./Icon";
 import { Dialog } from "./Dialog";
-import { FriendRow, SmallArt } from "./FriendsPanel";
+import { FriendRow } from "./FriendsPanel";
 import { friendsAvailable, friendsStore, inviteFriend, loadFriends } from "../network/friendsClient";
 import { useStore } from "../store";
 import { pushToast, setInviteUiOpen, showError, showMessage, showWarning, uiStore } from "../uiStore";
@@ -185,6 +185,15 @@ export function Lobby() {
 }
 
 /** Friends to invite into this room (online friends first; those already here are left out). */
+const STATUS_LABEL = {
+  online: "Online",
+  invited: "Invited",
+  here: "In lobby",
+  lobby: "In a lobby",
+  match: "In match",
+  offline: "Offline",
+} as const;
+
 function InvitePicker({
   roomId,
   inRoom,
@@ -230,6 +239,22 @@ function InvitePicker({
   }, []);
   // Everyone on your friends list: friends already here (or busy elsewhere) say so instead of INVITE.
   const list = friends.data?.friends ?? [];
+  type Status = "online" | "invited" | "here" | "lobby" | "match" | "offline";
+  const statusOf = (f: (typeof list)[number]): Status =>
+    inRoom.has(f.accountId)
+      ? "here"
+      : f.activity === "in_match"
+        ? "match"
+        : f.activity === "in_lobby"
+          ? "lobby"
+          : !f.online
+            ? "offline"
+            : sent.has(f.accountId)
+              ? "invited"
+              : "online";
+  // Online friends who are free come first, then the ones you invited, then the busy ones.
+  const ORDER: Record<Status, number> = { online: 0, invited: 1, here: 2, lobby: 3, match: 4, offline: 5 };
+  const sorted = [...list].sort((a, b) => ORDER[statusOf(a)] - ORDER[statusOf(b)] || a.name.localeCompare(b.name));
   const invite = async (accountId: string, name: string) => {
     try {
       await inviteFriend(accountId, roomId);
@@ -241,49 +266,54 @@ function InvitePicker({
   };
   return (
     <Dialog title="Invite friends" onClose={onClose} className="invite-picker" variant="sub">
-      {isPrivate && (
+      {/* One box: the invite link (private rooms) and, for the host, Add random player */}
+      {(isPrivate || (botsAllowed && isHost)) && (
         <div className="invite-picker__share">
-          <button className="art art--invite" onClick={() => void copy()} aria-label={copied ? "Invite link copied" : "Copy invite link"}>
-            <img src={`${import.meta.env.BASE_URL}ui/btn-copy-invite.webp`} alt="" width={480} height={130} draggable={false} />
-          </button>
-          {"share" in navigator && (
-            <button className="art art--share" onClick={() => void share()} aria-label="Share">
-              <img src={`${import.meta.env.BASE_URL}ui/btn-share.webp`} alt="" width={360} height={160} draggable={false} />
+          {isPrivate && (
+            <div className="invite-picker__links">
+              <button className="art art--invite" onClick={() => void copy()} aria-label={copied ? "Invite link copied" : "Copy invite link"}>
+                <img src={`${import.meta.env.BASE_URL}ui/btn-copy-invite.webp`} alt="" width={480} height={130} draggable={false} />
+              </button>
+              {"share" in navigator && (
+                <button className="art art--share" onClick={() => void share()} aria-label="Share">
+                  <img src={`${import.meta.env.BASE_URL}ui/btn-share.webp`} alt="" width={360} height={160} draggable={false} />
+                </button>
+              )}
+            </div>
+          )}
+          {botsAllowed && isHost && (
+            <button
+              className="art art--add-random"
+              disabled={full}
+              onClick={() => roomManager.addBot()}
+              aria-label={full ? "The room is full" : "Add a random player"}
+            >
+              <img src={`${import.meta.env.BASE_URL}ui/btn-add-random.webp`} alt="" width={460} height={155} draggable={false} />
             </button>
           )}
         </div>
-      )}
-      {botsAllowed && isHost && (
-        <button className="btn invite-picker__bot" disabled={full} onClick={() => roomManager.addBot()}>
-          {full ? "Room is full" : "Add random player"}
-        </button>
       )}
       {friends.data && list.length === 0 && (
         <p className="hint hint--center invite-picker__empty">No friends yet. Add friends with their code in Friends.</p>
       )}
       {list.length > 0 && (
-      <ul className="friends__list">
-        {list.map((f) => (
-          <FriendRow key={f.accountId} friend={f} hideStatus={inRoom.has(f.accountId) || Boolean(f.activity) || !f.online}>
-            {inRoom.has(f.accountId) ? (
-              <span className="friend-row__state friend-row__state--here">In lobby</span>
-            ) : f.activity === "in_match" ? (
-              <span className="friend-row__state">In match</span>
-            ) : f.activity === "in_lobby" ? (
-              <span className="friend-row__state">In a lobby</span>
-            ) : !f.online ? (
-              <span className="friend-row__state">Offline</span>
-            ) : (
-              <SmallArt
-                art={sent.has(f.accountId) ? "btn-sent" : "btn-invite"}
-                label={sent.has(f.accountId) ? `Invite sent to ${f.name}` : `Invite ${f.name}`}
-                disabled={sent.has(f.accountId)}
-                onClick={() => void invite(f.accountId, f.name)}
-              />
-            )}
-          </FriendRow>
-        ))}
-      </ul>
+        <ul className="friends__list">
+          {sorted.map((f) => {
+            const status = statusOf(f);
+            const canInvite = status === "online";
+            return (
+              <FriendRow
+                key={f.accountId}
+                friend={f}
+                hideStatus
+                // Online and free: tap the card to invite
+                onOpen={canInvite ? () => void invite(f.accountId, f.name) : undefined}
+              >
+                <span className={`friend-row__state friend-row__state--${status}`}>{STATUS_LABEL[status]}</span>
+              </FriendRow>
+            );
+          })}
+        </ul>
       )}
     </Dialog>
   );

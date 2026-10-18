@@ -8137,10 +8137,6 @@ button.code-field {
   width: min(42%, calc(329px * var(--art-scale)));
 }
 
-/* Friend picker: Add random player clear of the top */
-.invite-picker__bot {
-  margin-top: 10px;
-}
 
 /* ======================================================================
    Customise slots: a grid of square slots (picture on top, name under it)
@@ -8599,4 +8595,87 @@ button.code-field {
 
 .frame__state.frame__state--out {
   z-index: 3;
+}
+
+/* ======================================================================
+   Friend picker: one box for the invite link and Add random player;
+   bigger cards; a coloured status on every card (tap an Online card to
+   invite)
+   ====================================================================== */
+
+.invite-picker__share {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.invite-picker__links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.art.art--add-random {
+  width: min(100%, 230px);
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.art--add-random img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.art--add-random:disabled {
+  filter: grayscale(0.8) opacity(0.6);
+}
+
+.dlg-invite-picker .friend-row {
+  aspect-ratio: 961 / 320;
+}
+
+.dlg-invite-picker .friend-row__avatar {
+  width: 52px;
+  height: 52px;
+}
+
+.dlg-invite-picker .friend-row__text strong {
+  font-size: 1rem;
+}
+
+.friend-row__state {
+  font-size: 0.78rem;
+  padding: 4px 12px;
+}
+
+.friend-row__state--online {
+  background: #3fa34d;
+  color: #fff;
+}
+
+.friend-row__state--invited {
+  background: #3d7fe0;
+  color: #fff;
+}
+
+.friend-row__state--here {
+  background: rgba(63, 163, 77, 0.2);
+  color: #2f7d3a;
+}
+
+.friend-row__state--lobby {
+  background: #f2c14e;
+  color: #3a1d05;
+}
+
+.friend-row__state--match {
+  background: #e2443a;
+  color: #fff;
+}
+
+.friend-row__state--offline {
+  background: rgba(58, 29, 5, 0.12);
+  color: #6b3f1d;
 }

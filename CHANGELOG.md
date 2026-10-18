@@ -6,6 +6,14 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Friend picker: no INVITE button; every card shows a coloured status (Online, Invited, In lobby, In a lobby, In match, Offline) and tapping an Online card sends the invite. Free online friends come first. Cards are bigger. Add random player (new art) sits in the same box as the invite link.
+
+### Added
+
+- Dev mode shows every UI state: waiting rooms (host, guest, private, private with the friend picker, paid arena searching, offline), the countdown (3, 2, 1, GO!), the match HUD (desktop, touch with joystick and dash, players out), results (Training, paid win, lost, draw), level up, waiting for the server, and every popup (friend request, room closed, close the room?, not enough coins, server unreachable / back online, connection lost, couldn't join, buy this item?) and toast (info, error, several at once).
+
 ### Fixed
 
 - Match: notices show above the HUD and frames, for 2 s at most; a wrestler's OUT banner is no longer hidden by the next player frame.

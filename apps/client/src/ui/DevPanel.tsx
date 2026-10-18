@@ -8,6 +8,7 @@ import {
   pushToast,
   setAboutOpen,
   setFriendsOpen,
+  setInviteUiOpen,
   setLeaderboardOpen,
   setDevOpen,
   setProfileOpen,
@@ -23,6 +24,10 @@ import {
 } from "../uiStore";
 import { Dialog } from "./Dialog";
 import { HUD } from "./HUD";
+import { Countdown } from "./Countdown";
+import { TouchControls } from "./TouchControls";
+import { networkStore } from "../network/networkMode";
+import { settingsStore } from "../settings";
 import { Lobby } from "./Lobby";
 import { NameGate } from "./NameGate";
 import { Results } from "./Results";
@@ -61,7 +66,26 @@ export function DevButton() {
   );
 }
 
-type Preview = "lobby" | "hud" | "results-training" | "results-paid" | "welcome";
+type Preview =
+  | "lobby"
+  | "lobby-guest"
+  | "lobby-private"
+  | "lobby-private-invite"
+  | "lobby-paid"
+  | "lobby-offline"
+  | "count-3"
+  | "count-2"
+  | "count-1"
+  | "count-go"
+  | "hud"
+  | "hud-touch"
+  | "hud-out"
+  | "results-training"
+  | "results-paid"
+  | "results-lose"
+  | "results-draw"
+  | "server-wait"
+  | "welcome";
 
 // ------------------------------------------------------------------ sample data
 
@@ -203,6 +227,99 @@ export function DevPanel() {
             Error
           </button>
           <button className="btn" onClick={() => pushToast("+150 Sumo Coins", "info")}>Toast</button>
+          <button className="btn" onClick={() => pushToast("Couldn't invite: your friend is offline", "error")}>Toast: error</button>
+          <button
+            className="btn"
+            onClick={() => {
+              pushToast("Invite sent to Kenta", "info");
+              pushToast("+150 Sumo Coins", "info");
+              pushToast("Kenta is now your friend", "info");
+            }}
+          >
+            Toasts: several
+          </button>
+          <button
+            className="btn"
+            onClick={() =>
+              void showMessage("Friend request", "Kenta (level 4) wants to be your friend.", [
+                { id: "ok", label: "Accept", primary: true },
+                { id: "cancel", label: "Not now" },
+              ])
+            }
+          >
+            Friend request
+          </button>
+          <button className="btn" onClick={() => void showMessage("Room closed", "Kenta left, so the room was closed.")}>
+            Room closed
+          </button>
+          <button
+            className="btn"
+            onClick={() =>
+              void showWarning("Close the room?", "You're the host. If you leave, the room closes and everyone is sent home.", [
+                { id: "leave", label: "Leave", primary: true },
+                { id: "cancel", label: "Stay" },
+              ])
+            }
+          >
+            Close the room?
+          </button>
+          <button
+            className="btn"
+            onClick={() =>
+              void showWarning("Not enough coins", "You need more Sumo Coins for this. Get some in the coin shop.", [
+                { id: "shop", label: "Coin shop", primary: true },
+                { id: "cancel", label: "Not now" },
+              ])
+            }
+          >
+            Not enough coins
+          </button>
+          <button
+            className="btn"
+            onClick={() =>
+              void showWarning(
+                "Connection lost",
+                "The game server can't be reached. You can keep playing against bots; your progress is saved on this device and synced when you're back online.",
+              )
+            }
+          >
+            Server unreachable
+          </button>
+          <button className="btn" onClick={() => void showMessage("Back online", "The game server is reachable again. Your progress has been synced.")}>
+            Back online
+          </button>
+          <button
+            className="btn"
+            onClick={() => void showError("Connection lost", "You lost the connection to the room. Start a new game, or ask your friend for a new invite.")}
+          >
+            Room connection lost
+          </button>
+          <button className="btn" onClick={() => void showError("Couldn't join the game", "The room is full or no longer exists.")}>
+            Couldn't join
+          </button>
+          <button
+            className="btn"
+            onClick={() =>
+              void showMessage("Buy this item?", "Samurai helmet for 1,500 Sumo Coins.", [{ id: "buy", label: "Buy", primary: true, price: 1500 }], {
+                closable: true,
+                titleExtra: (
+                  <span className="coin-frame coin-frame--static buy-confirm__coins">
+                    <span className="coin-frame__amount">7.9k</span>
+                  </span>
+                ),
+                body: (
+                  <div className="buy-confirm">
+                    <div className="buy-confirm__item">
+                      <img className="buy-confirm__avatar" src={`${import.meta.env.BASE_URL}avatars/5.webp`} alt="" width={160} height={160} />
+                      <span className="buy-confirm__name">Samurai helmet</span>
+                    </div>
+                  </div>
+                ),
+              })
+            }
+          >
+            Buy this item?
+          </button>
           <button
             className="btn"
             onClick={() =>
@@ -220,10 +337,25 @@ export function DevPanel() {
       <section className="dev-panel__group">
         <h3 className="settings__heading">Match screens</h3>
         <div className="dev-panel__grid">
-          <button className="btn" onClick={show("lobby")}>Waiting room</button>
+          <button className="btn" onClick={show("lobby")}>Waiting room (host)</button>
+          <button className="btn" onClick={show("lobby-guest")}>Waiting room (guest)</button>
+          <button className="btn" onClick={show("lobby-private")}>Private room</button>
+          <button className="btn" onClick={show("lobby-private-invite")}>Private room: invite</button>
+          <button className="btn" onClick={show("lobby-paid")}>Paid arena: searching</button>
+          <button className="btn" onClick={show("lobby-offline")}>Waiting room (offline)</button>
+          <button className="btn" onClick={show("count-3")}>Countdown 3</button>
+          <button className="btn" onClick={show("count-2")}>Countdown 2</button>
+          <button className="btn" onClick={show("count-1")}>Countdown 1</button>
+          <button className="btn" onClick={show("count-go")}>GO!</button>
           <button className="btn" onClick={show("hud")}>Match HUD</button>
+          <button className="btn" onClick={show("hud-touch")}>Match HUD (touch)</button>
+          <button className="btn" onClick={show("hud-out")}>Match HUD: players out</button>
           <button className="btn" onClick={show("results-training")}>Results: Training</button>
-          <button className="btn" onClick={show("results-paid")}>Results: paid</button>
+          <button className="btn" onClick={show("results-paid")}>Results: paid win</button>
+          <button className="btn" onClick={show("results-lose")}>Results: lost</button>
+          <button className="btn" onClick={show("results-draw")}>Results: draw</button>
+          <button className="btn" onClick={() => showLevelUp({ from: 4, to: 5, coins: 175 })}>Level up</button>
+          <button className="btn" onClick={show("server-wait")}>Waiting for the server</button>
         </div>
       </section>
 
@@ -266,11 +398,64 @@ export function DevPanel() {
 function DevPreview({ preview, onClose }: { preview: Preview; onClose: () => void }) {
   const [ready, setReady] = useState(false);
   useEffect(() => {
+    const cleanups: (() => void)[] = [];
     const savedGame = gameStore.get();
     const savedSession = sessionStore.get();
     const savedResult = economyStore.get().lastResult;
-    if (preview === "lobby") gameStore.set(sampleGame(Phase.Lobby, "training"));
-    if (preview === "hud") gameStore.set(sampleGame(Phase.Playing, "training"));
+    const savedNetwork = networkStore.get();
+    const savedJoystick = settingsStore.get().joystick;
+    const lobby = (arenaId: string, patch: Partial<GameSnapshot> = {}, count = 4) => {
+      const g = sampleGame(Phase.Lobby, arenaId);
+      gameStore.set({ ...g, players: g.players.slice(0, count), aliveCount: count, ...patch });
+    };
+    if (preview === "lobby") lobby("training");
+    if (preview === "lobby-guest") {
+      const g = sampleGame(Phase.Lobby, "training");
+      gameStore.set({ ...g, hostId: "p1", players: g.players.map((p) => ({ ...p, isHost: p.id === "p1" })) });
+    }
+    if (preview === "lobby-private") lobby("private", { isPrivate: true }, 2);
+    if (preview === "lobby-private-invite") {
+      lobby("private", { isPrivate: true }, 2);
+      setInviteUiOpen(true);
+    }
+    if (preview === "lobby-paid") lobby("rookie", { searchRemainingMs: 7_000 }, 1);
+    if (preview === "lobby-offline") {
+      networkStore.set({ mode: "offline" });
+      lobby("training", {}, 1);
+    }
+    if (preview === "count-3" || preview === "count-2" || preview === "count-1") {
+      const n = Number(preview.slice(-1));
+      gameStore.set({ ...sampleGame(Phase.Countdown, "training"), remainingMs: n * 1000 - 300 });
+    }
+    if (preview === "count-go") {
+      // GO shows when the countdown turns into the bout: replay it every 1.5 s.
+      const g = sampleGame(Phase.Countdown, "training");
+      gameStore.set({ ...g, remainingMs: 500 });
+      const loop = window.setInterval(() => {
+        gameStore.set({ ...g, remainingMs: 500 });
+        window.setTimeout(() => gameStore.set({ ...g, phase: Phase.Playing, remainingMs: 60_000 }), 60);
+      }, 1500);
+      cleanups.push(() => window.clearInterval(loop));
+    }
+    if (preview === "hud" || preview === "hud-touch") gameStore.set(sampleGame(Phase.Playing, "training"));
+    if (preview === "hud-touch") settingsStore.update({ joystick: "fixed" });
+    if (preview === "hud-out") {
+      const g = sampleGame(Phase.Playing, "training");
+      gameStore.set({
+        ...g,
+        players: g.players.map((p, i) => (i === 2 || i === 3 ? { ...p, alive: false, elimReason: i === 2 ? "ring_out" : "left" } : p)),
+        aliveCount: 2,
+      });
+    }
+    if (preview === "results-lose" || preview === "results-draw") {
+      gameStore.set(
+        preview === "results-draw" ? { ...sampleGame(Phase.RoundOver, "training"), winnerId: "", isDraw: true } : sampleGame(Phase.RoundOver, "training"),
+      );
+      economyStore.update({
+        lastResult: { kind: "rewarded", arenaId: "training", entryFee: 0, prize: 0, economyFee: 0, rewards: 0, balance: null, note: "", xp: 20 },
+      });
+    }
+    if (preview === "server-wait") networkStore.set({ mode: "checking" });
     if (preview === "results-training") {
       gameStore.set(sampleGame(Phase.RoundOver, "training"));
       economyStore.update({
@@ -285,6 +470,10 @@ function DevPreview({ preview, onClose }: { preview: Preview; onClose: () => voi
     }
     setReady(true);
     return () => {
+      for (const done of cleanups) done();
+      setInviteUiOpen(false);
+      networkStore.set(savedNetwork);
+      settingsStore.update({ joystick: savedJoystick });
       gameStore.set(savedGame);
       sessionStore.set(savedSession);
       economyStore.update({ lastResult: savedResult });
@@ -294,9 +483,17 @@ function DevPreview({ preview, onClose }: { preview: Preview; onClose: () => voi
   if (!ready) return null;
   return (
     <div className={`dev-preview dev-preview--${preview}`}>
-      {preview === "lobby" && <Lobby />}
-      {preview === "hud" && <HUD touch={false} />}
-      {(preview === "results-training" || preview === "results-paid") && <Results />}
+      {preview.startsWith("lobby") && <Lobby />}
+      {(preview === "hud" || preview === "hud-out") && <HUD touch={false} />}
+      {preview === "hud-touch" && (
+        <>
+          <HUD touch />
+          <TouchControls />
+        </>
+      )}
+      {preview.startsWith("count-") && <Countdown />}
+      {preview.startsWith("results-") && <Results />}
+      {/* server-wait: the app's own waiting screen shows (the preview only sets "checking") */}
       {preview === "welcome" && <NameGate />}
       <button className="dev-preview__close" onClick={onClose}>
         Close preview
