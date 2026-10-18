@@ -27,6 +27,16 @@ const OPTIONS: Record<CosmeticCategory, readonly { label: string; id?: string }[
 const slug = (option: { label: string; id?: string }) => option.id ?? option.label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
 /** Stable item id for an appearance option, e.g. "hair.mohawk", "hairColor.blue". */
+/** How rare an item is (from its price): its slot frame in Customise. */
+export type Rarity = "common" | "rare" | "epic" | "legendary";
+
+export function rarityOfPrice(price: number): Rarity {
+  if (price <= 300) return "common";
+  if (price <= 700) return "rare";
+  if (price <= 1500) return "epic";
+  return "legendary";
+}
+
 export function cosmeticItemId(category: CosmeticCategory, index: number): string {
   const option = OPTIONS[category][index];
   return option ? `${category}.${slug(option)}` : `${category}.unknown`;
@@ -85,12 +95,18 @@ export const COSMETIC_PRICES: Readonly<Record<string, number>> = Object.freeze({
   "hairColor.purple": 300,
   "hairColor.gold": 800,
   "hairColor.white": 400,
+  "hairColor.crimson": 300,
+  "hairColor.teal": 450,
+  "hairColor.lilac": 700,
+  "hairColor.midnight": 1000,
   "face.cool": 400,
   "face.sleepy": 100,
   "face.fierce": 300,
   "face.surprised": 150,
   "face.grumpy": 150,
   "face.sparkly": 500,
+  "face.laughing": 300,
+  "face.smug": 650,
   "face.kitsune": 1000,
   "face.oni": 1200,
   "face.tengu": 1400,
@@ -99,6 +115,10 @@ export const COSMETIC_PRICES: Readonly<Record<string, number>> = Object.freeze({
   "outfit.sagari": 600,
   "outfit.cape": 1200,
   "outfit.armbands": 450,
+  "outfit.sakura": 450,
+  "outfit.dragon": 1200,
+  "outfit.kesho": 2200,
+  "outfit.golden": 3000,
 });
 
 /**

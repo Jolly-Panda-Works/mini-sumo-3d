@@ -30,6 +30,10 @@ export const HAIR_COLORS = [
   { hex: "#8E6CEF", label: "Purple" },
   { hex: "#E8B730", label: "Gold" },
   { hex: "#F3F1EA", label: "White" },
+  { hex: "#C2272D", label: "Crimson" },
+  { hex: "#2BB3A8", label: "Teal" },
+  { hex: "#C59BE8", label: "Lilac" },
+  { hex: "#1E2A5A", label: "Midnight" },
 ] as const;
 
 export const FACES = [
@@ -42,6 +46,8 @@ export const FACES = [
   { id: "surprised", label: "Surprised" },
   { id: "grumpy", label: "Grumpy" },
   { id: "sparkly", label: "Sparkly eyes" },
+  { id: "laughing", label: "Laughing" },
+  { id: "smug", label: "Smug" },
   // Masks
   { id: "kitsune", label: "Kitsune mask" },
   { id: "oni", label: "Oni mask" },
@@ -57,6 +63,10 @@ export const OUTFITS = [
   { id: "sagari", label: "Sagari fringe" },
   { id: "cape", label: "Hero cape" },
   { id: "armbands", label: "Armbands" },
+  { id: "sakura", label: "Sakura" },
+  { id: "dragon", label: "Dragon belt" },
+  { id: "kesho", label: "Ceremonial apron" },
+  { id: "golden", label: "Golden belt" },
 ] as const;
 
 /** Profile pictures (public/avatars/<index>.webp). The first four are free. */

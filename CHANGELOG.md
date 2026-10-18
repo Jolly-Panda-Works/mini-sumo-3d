@@ -8,6 +8,11 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Added
 
+- Rarity in Customise: every item is common, rare, epic or legendary (from its price: up to 300 / 700 / 1,500 / more), shown by its slot frame (`public/ui/rarity/`); the item you wear gets the glowing equipped frame of its tier. The EQUIPPED badges are in the project for later.
+- More items: hair colours Crimson, Teal, Lilac, Midnight; faces Laughing and Smug; outfits Sakura, Dragon belt, Ceremonial apron and Golden belt (all at the end of their lists, so saved looks keep their choices).
+
+### Added
+
 - Daily coins online: the server grants them once a day (`POST /api/daily-gift`, ledger "daily_gift"); the profile says whether they're available (1 new test, 157 total).
 
 ### Changed

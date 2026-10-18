@@ -5,6 +5,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import {
   FACES,
   HAIR_COLORS,
+  rarityOfPrice,
   HAIR_STYLES,
   OUTFITS,
   PLAYER_COLORS,
@@ -255,17 +256,23 @@ function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick, tryin
             aria-label={`${option.label}, ${isOwned ? (index === worn ? "wearing" : "owned") : index === trying ? "trying on" : `try on, ${price} Sumo Coins`}`}
             onClick={() => onPick(index)}
           >
-            <ItemThumb category={tab.category} look={look} index={index} color={color} />
-            {option.hex && <span className="item__swatch" style={{ background: option.hex }} aria-hidden="true" />}
-            {!isOwned && (
-              <span className="item__lock" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="18" height="18">
-                  <rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="#f2c14e" stroke="#3a1d05" strokeWidth="1.8" />
-                  <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="#3a1d05" strokeWidth="2.2" strokeLinecap="round" />
-                  <circle cx="12" cy="15.5" r="1.6" fill="#3a1d05" />
-                </svg>
-              </span>
-            )}
+            {/* The picture in its rarity frame; the item you wear gets the glowing frame */}
+            <span
+              className={`item__frame item__frame--${rarityOfPrice(price)}${index === worn ? " item__frame--on" : ""}`}
+              title={rarityOfPrice(price)}
+            >
+              <ItemThumb category={tab.category} look={look} index={index} color={color} />
+              {option.hex && <span className="item__swatch" style={{ background: option.hex }} aria-hidden="true" />}
+              {!isOwned && (
+                <span className="item__lock" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="#f2c14e" stroke="#3a1d05" strokeWidth="1.8" />
+                    <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="#3a1d05" strokeWidth="2.2" strokeLinecap="round" />
+                    <circle cx="12" cy="15.5" r="1.6" fill="#3a1d05" />
+                  </svg>
+                </span>
+              )}
+            </span>
             <span className="item__text">
               <span className="item__name item__name--plate">{option.label}</span>
               {/* Owned items need no label; items you don't own show their price (or that you're trying them) */}

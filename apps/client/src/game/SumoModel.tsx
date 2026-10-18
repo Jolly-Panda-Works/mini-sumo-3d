@@ -85,6 +85,8 @@ const WHITE = new MeshStandardMaterial({ color: "#FBF8F2", roughness: 0.7, flatS
 const GOLD = new MeshStandardMaterial({ color: "#F2C14E", roughness: 0.4, metalness: 0.3, flatShading: true });
 const CHEEK = new MeshBasicMaterial({ color: "#FF8FA3", transparent: true, opacity: 0.75 });
 const BAND = new MeshStandardMaterial({ color: "#E2443A", roughness: 0.6, flatShading: true });
+const SAKURA = new MeshStandardMaterial({ color: "#FF9EC4", roughness: 0.6, flatShading: true });
+const DRAGON = new MeshStandardMaterial({ color: "#1C1A24", roughness: 0.55, flatShading: true });
 const IRON = new MeshStandardMaterial({ color: "#3B3F4E", roughness: 0.45, metalness: 0.45, flatShading: true });
 const STRAW = new MeshStandardMaterial({ color: "#D8B266", roughness: 0.95, flatShading: true });
 const MASK_WHITE = new MeshStandardMaterial({ color: "#F7F3EA", roughness: 0.5, flatShading: true });
@@ -261,6 +263,32 @@ function Face({ style, eyesRef }: { style: string; eyesRef: RefObject<Group | nu
   );
 
   switch (style) {
+    case "laughing":
+      // Eyes shut tight with joy, a big open laugh
+      return (
+        <>
+          <group ref={eyesRef} position={[0, 0.06, 0.47]}>
+            <mesh geometry={GEO.eyeClosed} material={INK} position={[-0.17, 0, 0.035]} rotation-z={0.25} scale={[1.15, 1.4, 1.6]} />
+            <mesh geometry={GEO.eyeClosed} material={INK} position={[0.17, 0, 0.035]} rotation-z={-0.25} scale={[1.15, 1.4, 1.6]} />
+          </group>
+          <mesh geometry={GEO.mouth} material={INK} position={[0, -0.15, 0.49]} scale={[1.7, 1.5, 1]} />
+          <mesh geometry={GEO.cheek} material={CHEEK} position={[-0.3, -0.06, 0.4]} />
+          <mesh geometry={GEO.cheek} material={CHEEK} position={[0.3, -0.06, 0.4]} />
+        </>
+      );
+    case "smug":
+      // Half-closed eyes, one raised brow, a lopsided smile
+      return (
+        <>
+          <group ref={eyesRef} position={[0, 0.05, 0.47]}>
+            <mesh geometry={GEO.eye} material={INK} position-x={-0.17} scale={[1, 0.55, 1]} />
+            <mesh geometry={GEO.eye} material={INK} position-x={0.17} scale={[1, 0.55, 1]} />
+          </group>
+          <mesh geometry={GEO.brow} material={INK} position={[-0.17, 0.17, 0.48]} rotation-z={0.05} />
+          <mesh geometry={GEO.brow} material={INK} position={[0.17, 0.22, 0.46]} rotation-z={-0.3} />
+          <mesh geometry={GEO.smile} material={INK} position={[0.06, -0.13, 0.49]} rotation-z={0.25} scale={[0.8, 1, 1]} />
+        </>
+      );
     case "kitsune":
       // White fox mask: pointed ears, narrow eyes, red markings
       return (
@@ -495,6 +523,54 @@ function Outfit({ style, color }: { style: string; color: string }) {
           <mesh geometry={GEO.cape} material={belt} position={[0, 0.55, -0.7]} rotation-x={0.18} castShadow />
           <mesh geometry={GEO.dot} material={GOLD} position={[-0.42, 1.0, -0.6]} />
           <mesh geometry={GEO.dot} material={GOLD} position={[0.42, 1.0, -0.6]} />
+        </>
+      );
+    case "sakura":
+      // Pink blossoms dotted round the belt
+      return (
+        <>
+          {base}
+          {Array.from({ length: 10 }, (_, i) => {
+            const a = (i / 10) * Math.PI * 2;
+            return <mesh key={i} geometry={GEO.dot} material={SAKURA} position={[Math.sin(a) * 0.75, 0.2 + (i % 2 ? 0.07 : -0.05), Math.cos(a) * 0.75]} scale={1.25} />;
+          })}
+          <mesh geometry={GEO.flap} material={belt} position={[0, 0.12, 0.66]} castShadow />
+        </>
+      );
+    case "dragon":
+      // A black belt with gold studs and the champion's rope
+      return (
+        <>
+          <mesh geometry={GEO.belt} material={DRAGON} position-y={0.2} castShadow />
+          {Array.from({ length: 12 }, (_, i) => {
+            const a = (i / 12) * Math.PI * 2;
+            return <mesh key={i} geometry={GEO.dot} material={GOLD} position={[Math.sin(a) * 0.76, 0.2, Math.cos(a) * 0.76]} scale={0.8} />;
+          })}
+          <mesh geometry={GEO.rope} material={GOLD} position-y={0.31} rotation-x={Math.PI / 2} castShadow />
+          <mesh geometry={GEO.flap} material={DRAGON} position={[0, 0.12, 0.66]} castShadow />
+        </>
+      );
+    case "kesho":
+      // The ceremonial apron of the top wrestlers: apron, emblem, rope and paper strips
+      return (
+        <>
+          {base}
+          <mesh geometry={GEO.rope} material={WHITE} position-y={0.22} rotation-x={Math.PI / 2} castShadow />
+          <mesh geometry={GEO.apron} material={belt} position={[0, -0.06, 0.7]} rotation-x={-0.08} castShadow />
+          <mesh geometry={GEO.emblem} material={GOLD} position={[0, -0.02, 0.735]} rotation-x={-0.08} />
+          {[-0.3, 0.3].map((x) => (
+            <mesh key={x} geometry={GEO.shide} material={WHITE} position={[x, 0.02, 0.74]} rotation-z={x * 0.8} />
+          ))}
+        </>
+      );
+    case "golden":
+      // All gold: the belt, its flap and the rope
+      return (
+        <>
+          <mesh geometry={GEO.belt} material={GOLD} position-y={0.2} castShadow />
+          <mesh geometry={GEO.rope} material={GOLD} position-y={0.22} rotation-x={Math.PI / 2} castShadow />
+          <mesh geometry={GEO.flap} material={GOLD} position={[0, 0.12, 0.66]} castShadow />
+          <mesh geometry={GEO.emblem} material={GEM} position={[0, 0.2, 0.79]} />
         </>
       );
     default: // classic and armbands (bands are drawn on the arms)

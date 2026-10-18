@@ -8211,3 +8211,102 @@ button.code-field {
   top: 2px;
   left: 2px;
 }
+
+/* ======================================================================
+   Rarity frames (public/ui/rarity/): common, rare, epic, legendary, each
+   with a glowing "equipped" version for the item you wear. The picture sits
+   in the frame's inner panel (about 15 % in from each side)
+   ====================================================================== */
+
+.wardrobe__items .items .item {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  outline: 0;
+}
+
+.wardrobe__items .items .item.item--on,
+.wardrobe__items .items .item.item--trying {
+  background: none;
+}
+
+.item__frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 236 / 273;
+  background: center bottom / contain no-repeat;
+}
+
+.item__frame--common {
+  background-image: var(--ui-frame-common);
+}
+
+.item__frame--rare {
+  background-image: var(--ui-frame-rare);
+}
+
+.item__frame--epic {
+  background-image: var(--ui-frame-epic);
+}
+
+.item__frame--legendary {
+  background-image: var(--ui-frame-legendary);
+}
+
+/* Equipped: the glowing frames are a little taller (glow and flames above), so they're
+   drawn bottom-aligned at the same width and spill over the top */
+.item__frame--on {
+  background-size: 100% auto;
+  overflow: visible;
+}
+
+.item__frame--on.item__frame--common {
+  background-image: var(--ui-frame-on-common);
+}
+
+.item__frame--on.item__frame--rare {
+  background-image: var(--ui-frame-on-rare);
+}
+
+.item__frame--on.item__frame--epic {
+  background-image: var(--ui-frame-on-epic);
+}
+
+.item__frame--on.item__frame--legendary {
+  background-image: var(--ui-frame-on-legendary);
+}
+
+.item__frame .item__thumb {
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  top: 14%;
+  bottom: 14%;
+  width: auto !important;
+  height: auto !important;
+  aspect-ratio: auto !important;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+}
+
+.item__frame .item__thumb img {
+  border-radius: 4px;
+}
+
+.item__frame .item__lock {
+  top: 4%;
+  right: 4%;
+}
+
+.item__frame .item__swatch {
+  top: 8% !important;
+  left: 10% !important;
+}
+
+/* Trying an item on: a soft blue glow round its frame */
+.wardrobe__items .items .item--trying .item__frame {
+  filter: drop-shadow(0 0 6px #6fb3ff);
+}
