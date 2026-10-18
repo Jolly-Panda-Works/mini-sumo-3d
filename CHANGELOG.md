@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Customise slots: the item picture is a little smaller (5 % more room at the left, right and top).
+
 ### Fixed
 
 - Customise slots: the name plate still ran past the frame's right edge (an earlier rule gave it the full width on top of its offset); it now spans only the frame's inner panel.

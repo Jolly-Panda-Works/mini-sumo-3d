@@ -8426,3 +8426,11 @@ button.code-field {
   width: 100%;
   max-width: 100%;
 }
+
+/* Customise slot: the item picture a little smaller, 5 % more room at the left, right and top */
+.wardrobe__items .items .item__frame .item__thumb {
+  top: 20%;
+  left: 24%;
+  right: 24%;
+  bottom: 33%;
+}
