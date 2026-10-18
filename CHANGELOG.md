@@ -8,6 +8,16 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Home (phones): no text under the Customise and Shop buttons; the Leaderboard button sits under Friends.
+- Friend picker: no second "Offline" under the level when the status is already on the right.
+
+### Fixed
+
+- Arenas: the app always lists every arena it knows; one the server doesn't offer yet (an older server) shows as coming soon instead of being missing.
+- Scrolling the arena carousel on phones was jerky after the focus scaling was added: card positions are now measured once and the scale has no transition.
+
+### Changed
+
 - Arena cards: no FREE label on Private Room and Training (the card still says "Entry: Free").
 
 ### Changed

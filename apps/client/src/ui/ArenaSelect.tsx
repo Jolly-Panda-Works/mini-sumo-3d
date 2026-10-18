@@ -25,31 +25,48 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
   const live = economy.status === "ready" && economy.profile !== null;
   const balance = economy.profile?.balances.coins ?? 0;
   const playerLevel = economy.profile?.level.level ?? 1;
-  const arenas = (live ? economy.catalog?.arenas : null)?.filter((a) => a.enabled) ?? PREVIEW;
+  // Every arena this version knows, in order; the server's figures where it has them. An arena
+  // the server doesn't offer yet (an older server) shows as coming soon instead of missing.
+  const serverArenas = live ? economy.catalog?.arenas.filter((a) => a.enabled) : undefined;
+  const onServer = new Set(serverArenas?.map((a) => a.id));
+  const arenas = PREVIEW.map((local) => serverArenas?.find((a) => a.id === local.id) ?? local);
   // Phones: the card nearest the middle is full size, the others shrink by up to 15 %.
+  // Card positions are measured once (and on resize); scrolling only reads scrollLeft and
+  // writes transforms, so it stays smooth.
   useEffect(() => {
     const row = rowRef.current;
     if (!row || variant !== "carousel") return;
     let frame = 0;
+    let centres: number[] = [];
+    let widths: number[] = [];
+    const cards = () => Array.from(row.children) as HTMLElement[];
+    const measure = () => {
+      const list = cards();
+      centres = list.map((c) => c.offsetLeft + c.offsetWidth / 2);
+      widths = list.map((c) => Math.max(1, c.offsetWidth));
+    };
     const update = () => {
       frame = 0;
-      const box = row.getBoundingClientRect();
-      const middle = box.left + box.width / 2;
-      for (const card of Array.from(row.children) as HTMLElement[]) {
-        const r = card.getBoundingClientRect();
-        const away = Math.min(1, Math.abs(r.left + r.width / 2 - middle) / Math.max(1, r.width));
-        card.style.setProperty("--focus-scale", String(1 - 0.15 * away));
-      }
+      const middle = row.scrollLeft + row.clientWidth / 2;
+      cards().forEach((card, i) => {
+        const away = Math.min(1, Math.abs((centres[i] ?? 0) - middle) / (widths[i] ?? 1));
+        card.style.transform = `scale(${(1 - 0.15 * away).toFixed(3)})`;
+      });
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);
     };
+    const resize = () => {
+      measure();
+      schedule();
+    };
+    measure();
     update();
     row.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
+    window.addEventListener("resize", resize);
     return () => {
       row.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
+      window.removeEventListener("resize", resize);
       if (frame) cancelAnimationFrame(frame);
     };
   }, [arenas.length, variant]);
@@ -94,8 +111,8 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
           const free = arena.entryFee === 0;
           const locked = live && playerLevel < arena.requires.level;
           const affordable = free || (live && balance >= arena.entryFee);
-          const available = free || (live && !locked && affordable);
-          const soon = !free && !live;
+          const available = free || (live && onServer.has(arena.id) && !locked && affordable);
+          const soon = !free && (!live || !onServer.has(arena.id));
           let status = "";
           if (soon) status = "Coming soon";
           else if (locked) status = `Unlocks at level ${arena.requires.level}`;

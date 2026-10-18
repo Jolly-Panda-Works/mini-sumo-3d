@@ -247,7 +247,7 @@ function InvitePicker({
       {list.length > 0 && (
       <ul className="friends__list">
         {list.map((f) => (
-          <FriendRow key={f.accountId} friend={f}>
+          <FriendRow key={f.accountId} friend={f} hideStatus={inRoom.has(f.accountId) || Boolean(f.activity) || !f.online}>
             {inRoom.has(f.accountId) ? (
               <span className="friend-row__state friend-row__state--here">In lobby</span>
             ) : f.activity === "in_match" ? (

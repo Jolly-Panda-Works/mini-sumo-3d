@@ -6775,9 +6775,9 @@ button.code-field {
 }
 
 .home--hub .arena-tile {
-  transform: scale(var(--focus-scale, 1));
+  /* scaled every frame while scrolling (no transition: it would lag behind the finger) */
   transform-origin: center center;
-  transition: transform 0.12s ease-out;
+  will-change: transform;
 }
 
 .hub__side {
@@ -7716,4 +7716,32 @@ button.code-field {
   border-radius: 12px;
   border: 3px solid #3a1d05;
   object-fit: cover;
+}
+
+/* Home (phones): leaderboard under Friends */
+.hub__top {
+  grid-template-areas:
+    "profile coins"
+    "friends settings"
+    "board .";
+}
+
+.hub__leaderboard {
+  grid-area: board;
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.hub__leaderboard img {
+  width: 48px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+}
+
+/* The top area is one row taller now (leaderboard under Friends): keep the cards clear of it */
+.home--hub .arena-row {
+  --card: min(72vw, 300px, calc((100dvh - 345px - var(--safe-top) - var(--safe-bottom)) * 456 / 706));
 }

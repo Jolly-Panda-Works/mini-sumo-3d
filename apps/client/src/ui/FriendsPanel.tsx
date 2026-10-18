@@ -148,12 +148,15 @@ export function FriendRow({
   onOpen,
   children,
   pending = false,
+  hideStatus = false,
 }: {
   friend: FriendEntry;
   onOpen?: () => void;
   children?: ReactNode;
   /** A request you sent that they haven't accepted yet. */
   pending?: boolean;
+  /** Leave out the online/offline line (when the row shows the status on the right). */
+  hideStatus?: boolean;
 }) {
   return (
     <li className="friend-row">
@@ -164,7 +167,7 @@ export function FriendRow({
         <span className="friend-row__text">
           <strong>{friend.name}</strong>
           <span className="friend-row__level">Lvl {friend.level}</span>
-          {pending ? (
+          {hideStatus ? null : pending ? (
             <span className="friend-row__status friend-row__status--pending">Not accepted yet</span>
           ) : (
             <span className={`friend-row__status${friend.online ? " friend-row__status--on" : ""}`}>
