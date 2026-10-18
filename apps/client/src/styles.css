@@ -7897,3 +7897,26 @@ button.code-field {
   width: 56px;
   height: auto;
 }
+
+/* All square buttons the same size (home on phones and wide screens): settings, shop,
+   leaderboard, friends and customise */
+.home .gear-icon,
+.home .tile-btn--square img,
+.home .tile-btn > .icon,
+.home .tile-btn > img,
+.hub__shop-art,
+.hub__friends img,
+.hub__leaderboard img,
+.hub__settings .gear-icon {
+  display: block;
+  width: 56px !important;
+  height: 56px !important;
+  object-fit: contain;
+}
+
+.hub__side-btn .icon,
+.hub__side-btn > img {
+  width: 56px !important;
+  height: 56px !important;
+  object-fit: contain;
+}

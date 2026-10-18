@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Home: all square buttons (settings, shop, leaderboard, friends, customise) are the same size; settings was smaller.
+
 ### Changed
 
 - New button art for Settings (home and in the match), Shop and Leaderboard. Art for daily tasks (`ui/icon-daily.webp`) and the lucky wheel (`ui/icon-wheel.webp`) is in the project for later.
