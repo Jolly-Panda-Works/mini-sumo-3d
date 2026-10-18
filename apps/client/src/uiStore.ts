@@ -35,6 +35,8 @@ export interface NoticeAction {
   label: string;
   /** The main action (drawn first and focused). */
   primary?: boolean;
+  /** Drawn as the BUY art button with this price in its field. */
+  price?: number;
 }
 
 export interface Notice {
@@ -43,6 +45,8 @@ export interface Notice {
   title: string;
   message: string;
   actions: NoticeAction[];
+  /** A close (×) button in the corner; it answers "cancel". */
+  closable?: boolean;
   resolve: (actionId: string) => void;
 }
 
@@ -69,7 +73,13 @@ let noticeId = 0;
  * Shows a message, warning or error popup and resolves with the id of the chosen action
  * ("close" when dismissed). Without actions it shows a single OK.
  */
-export function showNotice(kind: NoticeKind, title: string, message: string, actions?: NoticeAction[]): Promise<string> {
+export function showNotice(
+  kind: NoticeKind,
+  title: string,
+  message: string,
+  actions?: NoticeAction[],
+  options: { closable?: boolean } = {},
+): Promise<string> {
   return new Promise((resolve) => {
     const id = ++noticeId;
     const notice: Notice = {
@@ -78,6 +88,7 @@ export function showNotice(kind: NoticeKind, title: string, message: string, act
       title,
       message,
       actions: actions && actions.length ? actions : [{ id: "ok", label: "OK", primary: true }],
+      closable: options.closable,
       resolve: (actionId) => {
         uiStore.update({ notices: uiStore.get().notices.filter((n) => n.id !== id) });
         resolve(actionId);
@@ -87,7 +98,8 @@ export function showNotice(kind: NoticeKind, title: string, message: string, act
   });
 }
 
-export const showMessage = (title: string, message: string, actions?: NoticeAction[]) => showNotice("message", title, message, actions);
+export const showMessage = (title: string, message: string, actions?: NoticeAction[], options?: { closable?: boolean }) =>
+  showNotice("message", title, message, actions, options);
 export const showWarning = (title: string, message: string, actions?: NoticeAction[]) => showNotice("warning", title, message, actions);
 export const showError = (title: string, message: string, actions?: NoticeAction[]) => showNotice("error", title, message, actions);
 

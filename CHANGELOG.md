@@ -8,6 +8,22 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- "Buy this item?": the BUY art button with the price, and a × in the corner instead of NOT NOW. Notices can now show the BUY art (`price` on an action) and a close button (`closable`).
+
+### Changed
+
+- Customise: colour thumbnails are a close-up of the coloured hair (on a bowl cut if you're bald). Tapping an item you don't own tries it on and asks first ("Buy this item?" with Buy / Not now); BUY on the slot does the same. Slots show the picture and name on the left and BUY on the right.
+
+### Changed
+
+- Customise: slots are full width with BUY on the right for items you don't own. Tapping an item you don't own tries it on in the preview (outlined in blue, "Trying on"); tapping an owned item wears it. The separate try-on popup is gone.
+
+### Fixed
+
+- The Wink face's closed eye was hidden inside the head on that side; it now shows, with a brow over it.
+
+### Changed
+
 - Customise: every item slot shows a thumbnail of that item on your own wrestler (close-up of the head for hair, colour and face; the belt for outfits), rendered once and cached. The ground disc under the preview is gone, so the preview is smaller. On desktop the category tabs are tucked under the panel's frame, with no gap.
 
 ### Changed

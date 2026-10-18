@@ -16,11 +16,11 @@ import {
 import { buyItem, economyStore, ownedItems, saveAppearanceRemote } from "../network/economyClient";
 import { Coins } from "./Coins";
 import { Dialog } from "./Dialog";
+import { BuyButton } from "./ArtButtons";
 import { ThumbStudio, requestThumb, thumbKey, useThumb } from "./WardrobeThumbs";
 import { PHONE_QUERY, useMediaQuery } from "../useMediaQuery";
-import { BuyButton, ComingSoonButton, NotNowButton } from "./ArtButtons";
 import { audio } from "../audio/AudioManager";
-import { pushToast, setShopOpen, showWarning } from "../uiStore";
+import { pushToast, setShopOpen, showError, showMessage, showWarning } from "../uiStore";
 import { SumoModel, useSumoParts } from "../game/SumoModel";
 import { gameStore, roomManager } from "../network/RoomManager";
 import { settingsStore } from "../settings";
@@ -60,10 +60,13 @@ interface ItemGridProps {
   owned: ReadonlySet<string>;
   priceOf: (id: string) => number;
   onPick: (index: number) => void;
+  /** The item being tried on (not owned yet), if any. */
+  trying: number | null;
+  onBuy: (index: number) => void;
 }
 
 /** One category's items: owned first (in catalog order), then the rest by price. */
-function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick }: ItemGridProps) {
+function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick, trying, onBuy }: ItemGridProps) {
   const items = tab.options
     .map((option, index) => {
       const id = cosmeticItemId(tab.category, index);
@@ -74,21 +77,28 @@ function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick }: Ite
   return (
     <div className="items" role="tabpanel" aria-label={tab.label}>
       {items.map(({ option, index, owned: isOwned, price }) => (
-        <button
+        <div
           key={option.label}
-          type="button"
-          className={`item${index === value ? " item--on" : ""}${isOwned ? " item--owned" : ""}`}
-          aria-pressed={index === value}
-          aria-label={`${option.label}, ${isOwned ? (index === worn ? "wearing" : "owned") : `${price} Sumo Coins`}`}
-          onClick={() => onPick(index)}
+          className={`item${index === value ? " item--on" : ""}${index === trying ? " item--trying" : ""}${isOwned ? " item--owned" : ""}`}
         >
-          <ItemThumb category={tab.category} look={look} index={index} color={color} />
-          {option.hex && <span className="item__swatch" style={{ background: option.hex }} aria-hidden="true" />}
-          <span className="item__name">{option.label}</span>
-          <span className="item__price">
-            {isOwned ? (index === worn ? "Wearing" : price === 0 ? "Free" : "Owned") : <Coins amount={price} />}
-          </span>
-        </button>
+          <button
+            type="button"
+            className="item__pick"
+            aria-pressed={index === value}
+            aria-label={`${option.label}, ${isOwned ? (index === worn ? "wearing" : "owned") : index === trying ? "trying on" : `try on, ${price} Sumo Coins`}`}
+            onClick={() => onPick(index)}
+          >
+            <ItemThumb category={tab.category} look={look} index={index} color={color} />
+            {option.hex && <span className="item__swatch" style={{ background: option.hex }} aria-hidden="true" />}
+            <span className="item__text">
+              <span className="item__name">{option.label}</span>
+              <span className="item__price">
+                {isOwned ? (index === worn ? "Wearing" : price === 0 ? "Free" : "Owned") : index === trying ? "Trying on" : <Coins amount={price} />}
+              </span>
+            </span>
+          </button>
+          {!isOwned && <BuyButton className="item__buy" price={price} label={`Buy ${option.label} for ${price} Sumo Coins`} sfx="none" onClick={() => onBuy(index)} />}
+        </div>
       ))}
     </div>
   );
@@ -97,6 +107,10 @@ function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick }: Ite
 /** The item drawn on your wrestler (rendered once, then cached). */
 function ItemThumb({ category, look, index, color }: { category: CosmeticCategory; look: Appearance; index: number; color: string }) {
   const appearance = { ...look, [category]: index } as Appearance;
+  // Hair colours show on your hairstyle; with none (bald), on a bowl cut so the colour shows.
+  if (category === "hairColor" && HAIR_STYLES[appearance.hair]?.id === "bald") {
+    appearance.hair = HAIR_STYLES.findIndex((h) => h.id === "bowl");
+  }
   const key = thumbKey(category, appearance, color);
   const src = useThumb(key);
   useEffect(() => requestThumb({ key, appearance, category, color }), [key]);
@@ -107,93 +121,6 @@ function ItemThumb({ category, look, index, color }: { category: CosmeticCategor
   );
 }
 
-/** Try-on popup for an item you don't own yet: preview, name, price, Buy / Not now. */
-function ItemPopup({
-  item,
-  look,
-  color,
-  balance,
-  canBuy,
-  onBuy,
-  onClose,
-}: {
-  item: { id: string; name: string; price: number; category: CosmeticCategory; index: number };
-  look: Appearance;
-  color: string;
-  balance: number;
-  canBuy: boolean;
-  onBuy: () => Promise<void>;
-  onClose: () => void;
-}) {
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const affordable = balance >= item.price;
-  const tryOn = { ...look, [item.category]: item.index } as Appearance;
-
-  const buy = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      await onBuy();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "The purchase failed. Try again.");
-      setBusy(false);
-    }
-  };
-
-  return (
-    <Dialog
-      variant="sub"
-      title={item.name}
-      onClose={onClose}
-      className="item-popup"
-      hideClose
-      footer={
-        <div className="art-stack">
-          {canBuy ? (
-            <BuyButton
-              price={item.price}
-              label={`Buy ${item.name} for ${item.price} Sumo Coins`}
-              disabled={busy}
-              ariaDisabled={!affordable}
-              sfx={affordable ? "none" : undefined}
-              onClick={() => (affordable ? void buy() : void showWarning("Not enough coins", "You need more Sumo Coins for this. Get some in the coin shop.", [
-                  { id: "shop", label: "Coin shop", primary: true },
-                  { id: "cancel", label: "Not now" },
-                ]).then((choice) => choice === "shop" && setShopOpen(true)))}
-            />
-          ) : (
-            <ComingSoonButton label="Buying is coming soon" ariaDisabled onClick={() => pushToast("Coming soon", "info")} />
-          )}
-          <NotNowButton label="Not now" onClick={onClose} />
-        </div>
-      }
-    >
-      <div className="item-popup__preview">
-        <span className="wardrobe__balance coin-frame coin-frame--static" aria-label={`Your coins: ${balance}`}>
-          <span className="coin-frame__amount">{balance.toLocaleString("en-US")}</span>
-        </span>
-        <Canvas shadows dpr={[1, 2]} camera={{ fov: 32, position: [0, 1.25, 4.6] }}>
-          <hemisphereLight args={["#F4F7FF", "#7B6A5A", 1.2]} />
-          <directionalLight position={[2.5, 4, 3]} intensity={1.6} castShadow />
-          <group position-y={-0.85}>
-            <PreviewSumo appearance={tryOn} color={color} />
-          </group>
-        </Canvas>
-      </div>
-      {error && (
-        <p className="notice notice--error" role="alert">
-          {error}
-        </p>
-      )}
-    </Dialog>
-  );
-}
-
-/**
- * Customise hair, face and outfit. The preview and the category tabs stay in place; only the
- * item grid scrolls. Owned items are worn at once; other items open a try-on popup.
- */
 export function Wardrobe() {
   const { appearance } = useStore(settingsStore);
   const economy = useStore(economyStore);
@@ -202,7 +129,8 @@ export function Wardrobe() {
   const catalogPrices = new Map((economy.catalog?.items ?? []).map((i) => [i.id, i.price] as const));
   const priceOf = (id: string) => catalogPrices.get(id) ?? cosmeticPrice(id);
   const [tab, setTab] = useState<Tab>(TABS[0]!);
-  const [pending, setPending] = useState<{ category: CosmeticCategory; index: number } | null>(null);
+  // Tapping an item you don't own tries it on (in the preview) until you buy it or pick another.
+  const [trying, setTrying] = useState<{ category: CosmeticCategory; index: number } | null>(null);
   const shopOpen = economy.status === "ready" && Boolean(economy.catalog?.flags.shop) && economy.profile !== null;
   const balance = economy.profile?.balances.coins ?? 0;
   const you = game.players.find((p) => p.isYou);
@@ -218,18 +146,55 @@ export function Wardrobe() {
   };
 
   const pick = (category: CosmeticCategory, index: number) => {
-    if (owned.has(cosmeticItemId(category, index))) wear({ ...appearance, [category]: index } as Appearance);
-    else setPending({ category, index });
+    if (owned.has(cosmeticItemId(category, index))) {
+      setTrying(null);
+      wear({ ...appearance, [category]: index } as Appearance);
+    } else {
+      setTrying({ category, index });
+      void confirmBuy(category, index);
+    }
   };
 
-  const pendingItem = pending
-    ? {
-        ...pending,
-        id: cosmeticItemId(pending.category, pending.index),
-        name: TABS.find((t) => t.category === pending.category)!.options[pending.index]!.label,
-        price: priceOf(cosmeticItemId(pending.category, pending.index)),
-      }
-    : null;
+  /** Asks before buying; the item stays on in the preview while you decide. */
+  const confirmBuy = async (category: CosmeticCategory, index: number) => {
+    const id = cosmeticItemId(category, index);
+    const name = TABS.find((t) => t.category === category)!.options[index]!.label;
+    const choice = await showMessage(
+      "Buy this item?",
+      `${name} for ${priceOf(id).toLocaleString("en-US")} Sumo Coins. You have ${balance.toLocaleString("en-US")}.`,
+      [{ id: "buy", label: "Buy", primary: true, price: priceOf(id) }],
+      { closable: true },
+    );
+    if (choice === "buy") await buy(category, index);
+    else setTrying(null);
+  };
+
+  const buy = async (category: CosmeticCategory, index: number) => {
+    const id = cosmeticItemId(category, index);
+    const price = priceOf(id);
+    if (!shopOpen) {
+      pushToast("Buying is coming soon", "info");
+      return;
+    }
+    if (balance < price) {
+      void showWarning("Not enough coins", "You need more Sumo Coins for this. Get some in the coin shop.", [
+        { id: "shop", label: "Coin shop", primary: true },
+        { id: "cancel", label: "Not now" },
+      ]).then((choice) => choice === "shop" && setShopOpen(true));
+      return;
+    }
+    try {
+      await buyItem(id);
+      audio.sample("purchase");
+      setTrying(null);
+      wear({ ...settingsStore.get().appearance, [category]: index } as Appearance);
+    } catch (error) {
+      void showError("Couldn't buy", error instanceof Error ? error.message : "Try again.");
+    }
+  };
+
+  // What the preview shows: your look, with the item being tried on.
+  const previewLook = trying ? ({ ...appearance, [trying.category]: trying.index } as Appearance) : appearance;
 
   // Desktop: the category tabs hang on the panel's outer left edge; phones: under the preview.
   const sideTabs = !useMediaQuery(PHONE_QUERY);
@@ -264,7 +229,7 @@ export function Wardrobe() {
             <hemisphereLight args={["#F4F7FF", "#7B6A5A", 1.2]} />
             <directionalLight position={[2.5, 4, 3]} intensity={1.6} castShadow />
             <group position-y={-0.85}>
-              <PreviewSumo appearance={appearance} color={color} />
+              <PreviewSumo appearance={previewLook} color={color} />
             </group>
           </Canvas>
           <span className="wardrobe__balance coin-frame coin-frame--static" aria-label={`Your coins: ${balance}`}>
@@ -284,27 +249,16 @@ export function Wardrobe() {
             owned={owned}
             priceOf={priceOf}
             onPick={(index) => pick(tab.category, index)}
+            trying={trying && trying.category === tab.category ? trying.index : null}
+            onBuy={(index) => {
+              setTrying({ category: tab.category, index });
+              void confirmBuy(tab.category, index);
+            }}
           />
         </div>
       </Dialog>
 
       <ThumbStudio />
-      {pendingItem && (
-        <ItemPopup
-          item={pendingItem}
-          look={appearance}
-          color={color}
-          balance={balance}
-          canBuy={shopOpen}
-          onClose={() => setPending(null)}
-          onBuy={async () => {
-            await buyItem(pendingItem.id);
-            audio.sample("purchase");
-            wear({ ...settingsStore.get().appearance, [pendingItem.category]: pendingItem.index } as Appearance);
-            setPending(null);
-          }}
-        />
-      )}
     </>
   );
 }

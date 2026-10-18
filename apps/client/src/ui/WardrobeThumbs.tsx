@@ -37,7 +37,8 @@ export function useThumb(key: string): string | undefined {
 
 const SHOTS: Record<CosmeticCategory | "avatar", { position: [number, number, number]; target: [number, number, number] }> = {
   hair: { position: [0.55, 1.75, 2.3], target: [0, 1.5, 0] },
-  hairColor: { position: [0.55, 1.75, 2.3], target: [0, 1.5, 0] },
+  // Colours: a close-up of the hair from slightly above, so the colour fills the picture.
+  hairColor: { position: [0.35, 2.35, 1.55], target: [0, 1.82, 0] },
   face: { position: [0.25, 1.55, 2.1], target: [0, 1.42, 0] },
   outfit: { position: [0.6, 1.0, 3.1], target: [0, 0.65, 0] },
   avatar: { position: [0, 1.25, 4.6], target: [0, 1, 0] },

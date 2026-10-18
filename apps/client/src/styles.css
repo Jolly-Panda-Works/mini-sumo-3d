@@ -7368,3 +7368,132 @@ button.code-field {
 .dialog__aside .tab {
   padding-right: 34px;
 }
+
+/* ======================================================================
+   Wardrobe slots: full width; tap to try on (or wear if owned), BUY on the
+   right for items you don't own
+   ====================================================================== */
+
+.wardrobe__items .items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wardrobe__items .item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  grid-template-columns: none;
+}
+
+.item__pick {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.item__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.item__text .item__name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item__buy.art--buy {
+  flex: none;
+  width: calc(439px * var(--art-scale) * 0.85);
+}
+
+.item--trying {
+  outline: 3px solid #3d7fe0;
+  outline-offset: -3px;
+}
+
+/* the inner tap target stays put; the whole slot reacts */
+.item__pick:hover,
+.item__pick:active,
+.item__pick.is-pressed {
+  transform: none !important;
+}
+
+.wardrobe__items .item {
+  transition: transform 0.12s ease-out;
+}
+
+@media (hover: hover) {
+  .wardrobe__items .item:has(.item__pick:hover) {
+    transform: translateY(-1px) scale(1.01);
+  }
+}
+
+.wardrobe__items .item:has(.item__pick:active),
+.wardrobe__items .item:has(.item__pick.is-pressed) {
+  transform: scale(0.98);
+}
+
+/* The colour swatch sits on the thumbnail's corner (clear of BUY) */
+.item__pick {
+  position: relative;
+}
+
+.wardrobe__items .item .item__swatch {
+  top: -3px;
+  left: 40px;
+  right: auto;
+}
+
+/* Wardrobe slots: picture and text on the left, BUY on the right */
+.wardrobe__items .item {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wardrobe__items .item__pick {
+  flex: 1 1 auto;
+  width: auto;
+  justify-content: flex-start;
+}
+
+/* Notices: the × in the corner, and the BUY art button with its price */
+.notice-popup__close {
+  position: absolute;
+  top: 27%;
+  right: 4%;
+  width: 11%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.notice-popup__close img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.notice-popup__actions .notice-popup__buy.art--buy {
+  flex: 0 1 auto;
+  width: min(70%, calc(439px * var(--art-scale)));
+  max-width: none;
+}

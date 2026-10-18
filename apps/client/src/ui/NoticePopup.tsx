@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { popupLayer, useStackLevel } from "./Dialog";
+import { BuyButton } from "./ArtButtons";
 import { audio } from "../audio/AudioManager";
 import { useStore } from "../store";
 import { uiStore, type Notice } from "../uiStore";
@@ -56,11 +57,28 @@ function NoticeView({ notice }: { notice: Notice }) {
         aria-modal="true"
         aria-label={`${notice.kind}: ${notice.title}`}
       >
+        {notice.closable && (
+          <button type="button" className="notice-popup__close" onClick={() => notice.resolve("cancel")} aria-label="Close" data-sfx="none">
+            <img src={`${BASE}ui/close.webp`} alt="" draggable={false} />
+          </button>
+        )}
         <h2 className="notice-popup__title">{notice.title}</h2>
         <div className="notice-popup__body">
           <p className="notice-popup__message">{notice.message}</p>
           <div className="notice-popup__actions">
             {actions.map((action, i) => {
+              if (action.price !== undefined) {
+                return (
+                  <BuyButton
+                    key={action.id}
+                    className="notice-popup__buy"
+                    price={action.price}
+                    label={`${action.label} for ${action.price} Sumo Coins`}
+                    sfx="none"
+                    onClick={() => notice.resolve(action.id)}
+                  />
+                );
+              }
               const art = ART[`${action.id}:${action.label}`.toLowerCase()] ?? ART[action.id];
               return art ? (
                 <button
