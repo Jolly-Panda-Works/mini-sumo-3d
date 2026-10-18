@@ -8523,3 +8523,10 @@ button.code-field {
   background: none;
   box-shadow: none;
 }
+
+/* Notices: the × on the frame's top-right corner (beside the MESSAGE plaque) */
+.notice-popup__close {
+  top: 14%;
+  right: -3%;
+  width: 12%;
+}

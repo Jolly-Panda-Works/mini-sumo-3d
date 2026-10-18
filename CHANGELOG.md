@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Notices (e.g. "Buy this item?"): the × sits on the frame's top-right corner beside the plaque.
+
+### Changed
+
 - Match art (`public/hud/`): the countdown uses the 3-2-1 and GO! art; the DASH button is the round DASH art (dimmed with a dark sweep and the seconds while it recharges); the joystick uses the wooden base and knob; a wrestler who's out gets the OUT banner on their frame.
 - Customise: tapping an item you don't own goes straight to the buy window without trying it on; the preview changes once it's bought.
 
