@@ -8577,3 +8577,9 @@ button.code-field {
   opacity: 1;
   cursor: default;
 }
+
+/* Daily coins: CLAIM / CLAIMED the same size as the COMING SOON buttons on the other packs */
+.pack__btn.pack__btn--claim {
+  width: calc(371px * var(--art-scale));
+  max-width: 100%;
+}

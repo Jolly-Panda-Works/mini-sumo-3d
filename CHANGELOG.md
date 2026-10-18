@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Coin shop: the CLAIM / CLAIMED button is the same size as the COMING SOON buttons.
+
 ### Changed
 
 - New art for the Rookie and Pro arenas.
