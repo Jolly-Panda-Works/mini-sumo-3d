@@ -9,7 +9,7 @@ import { BuyButton, NotNowButton } from "./ArtButtons";
 import { avatarSrc } from "./Avatar";
 import { AVATARS, cosmeticItemId, cosmeticPrice } from "@mini-sumo/shared";
 import { buyItem, ownedItems } from "../network/economyClient";
-import { Coins } from "./Coins";
+import { Coins, compactCoins } from "./Coins";
 import { audio } from "../audio/AudioManager";
 import { playGamesStore, signInToPlayGames } from "../network/playGames";
 
@@ -228,7 +228,7 @@ function AvatarPicker({ onPicked }: { onPicked: () => void }) {
           }
         >
           <img className="avatar-buy__img" src={avatarSrc(pending)} alt="" width={160} height={160} />
-          <p className="hint hint--center">You have {balance.toLocaleString("en-US")} coins.</p>
+          <p className="hint hint--center">You have {compactCoins(balance)} coins.</p>
           {error && (
             <p className="notice notice--error" role="alert">
               {error}

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { compactCoins } from "./Coins";
 import { GAME_TITLE } from "../config";
 import { economyStore } from "../network/economyClient";
 import { networkStore } from "../network/networkMode";
@@ -82,7 +83,7 @@ export function MainMenu() {
               <GearIcon />
             </button>
             <button className="coin-frame" onClick={() => setShopOpen(true)} aria-label={`Coin shop. Balance: ${balance ?? 0} Sumo Coins`}>
-              <span className="coin-frame__amount">{(balance ?? 0).toLocaleString("en-US")}</span>
+              <span className="coin-frame__amount" aria-label={`${(balance ?? 0).toLocaleString("en-US")} Sumo Coins`}>{compactCoins(balance ?? 0)}</span>
               <Icon name="plus" size={26} className="coin-frame__plus" />
             </button>
           </div>
@@ -103,7 +104,7 @@ export function MainMenu() {
       <header className="hub__top">
         <ProfileCard className="hub__profile" />
         <button className="coin-frame hub__coins" onClick={() => setShopOpen(true)} aria-label={`Coin shop. Balance: ${balance ?? 0} Sumo Coins`}>
-          <span className="coin-frame__amount">{(balance ?? 0).toLocaleString("en-US")}</span>
+          <span className="coin-frame__amount" aria-label={`${(balance ?? 0).toLocaleString("en-US")} Sumo Coins`}>{compactCoins(balance ?? 0)}</span>
           <Icon name="plus" size={26} className="coin-frame__plus" />
         </button>
         {/* Friends under the profile (settings is under the coins) */}

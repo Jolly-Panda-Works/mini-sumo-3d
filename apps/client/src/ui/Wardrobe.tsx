@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { compactCoins } from "./Coins";
 import { Color, Object3D, Vector3, type InstancedMesh } from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
@@ -343,7 +344,7 @@ export function Wardrobe() {
         closable: true,
         titleExtra: (
           <span className="coin-frame coin-frame--static buy-confirm__coins" aria-label={`Your coins: ${balance}`}>
-            <span className="coin-frame__amount">{balance.toLocaleString("en-US")}</span>
+            <span className="coin-frame__amount">{compactCoins(balance)}</span>
           </span>
         ),
         body: (
@@ -435,7 +436,7 @@ export function Wardrobe() {
             </group>
           </Canvas>
           <span className="wardrobe__balance coin-frame coin-frame--static" aria-label={`Your coins: ${balance}`}>
-            <span className="coin-frame__amount">{balance.toLocaleString("en-US")}</span>
+            <span className="coin-frame__amount">{compactCoins(balance)}</span>
           </span>
         </div>
 

@@ -43,7 +43,7 @@ export function Wallet() {
         ) : (
           <>
             <p className="wallet__balance">
-              <Coins amount={profile.balances.coins} />
+              <Coins amount={profile.balances.coins} compact />
             </p>
             <div className="wallet__stats">
               <p>

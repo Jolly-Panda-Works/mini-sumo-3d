@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Your coins show in short form everywhere (home, Customise, the buy window, profile, wallet): 7.9k, 25k, 1.5M; screen readers still hear the exact amount. The + on the home coin frame sits a little further in.
+
 ### Fixed
 
 - BUY buttons: the price sits to the right of the coin in the button art instead of over it.

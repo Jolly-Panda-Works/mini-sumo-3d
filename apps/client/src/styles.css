@@ -7703,3 +7703,8 @@ button.code-field {
   padding-left: 12%;
   padding-right: 10%;
 }
+
+/* Home: the + on the coin frame sits a little further in */
+.home .coin-frame__plus {
+  right: 17px;
+}
