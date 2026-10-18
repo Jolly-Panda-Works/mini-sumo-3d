@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Customise: the item you wear is first in its list, and every tab opens at the top. Prices are only on BUY now (not repeated under the name), in short form: 950, 1k, 1.2k, 25k, 1.5M, so they always fit the button.
+
 ### Added
 
 - Hats in the Hair tab: Straw hat (700), Samurai helmet (1,500), Crown (2,500). Masks in the Face tab: Kitsune (1,000), Oni (1,200), Tengu (1,400). New items are added at the end of their lists, so saved looks keep their choices.

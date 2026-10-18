@@ -38,7 +38,8 @@ export function BuyButton({ price, ...props }: Props & { price: number }) {
   return (
     <ArtButton art="btn-buy" {...props} className={`art--buy ${props.className ?? ""}`}>
       <span className="art--buy__price">
-        <Coins amount={price} />
+        {/* Short form (1k, 1.2k…) so the price always fits the button's field */}
+        <Coins amount={price} compact />
       </span>
     </ArtButton>
   );

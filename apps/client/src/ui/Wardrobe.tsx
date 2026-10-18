@@ -15,7 +15,6 @@ import {
   type CosmeticCategory,
 } from "@mini-sumo/shared";
 import { buyItem, economyStore, ownedItems, saveAppearanceRemote } from "../network/economyClient";
-import { Coins } from "./Coins";
 import { Dialog } from "./Dialog";
 import { BuyButton } from "./ArtButtons";
 import { ThumbStudio, requestThumb, thumbKey, useThumb } from "./WardrobeThumbs";
@@ -233,7 +232,12 @@ function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick, tryin
       const id = cosmeticItemId(tab.category, index);
       return { option, index, id, owned: owned.has(id), price: priceOf(id) };
     })
-    .sort((a, b) => (a.owned === b.owned ? (a.owned ? a.index - b.index : a.price - b.price || a.index - b.index) : a.owned ? -1 : 1));
+    .sort((a, b) => {
+      // The item you wear comes first, then the rest you own, then the rest by price.
+      if (a.index === worn !== (b.index === worn)) return a.index === worn ? -1 : 1;
+      if (a.owned !== b.owned) return a.owned ? -1 : 1;
+      return a.owned ? a.index - b.index : a.price - b.price || a.index - b.index;
+    });
 
   return (
     <div className="items" role="tabpanel" aria-label={tab.label}>
@@ -254,7 +258,7 @@ function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick, tryin
             <span className="item__text">
               <span className="item__name item__name--plate">{option.label}</span>
               {/* Owned items need no label; items you don't own show their price (or that you're trying them) */}
-              {!isOwned && <span className="item__price">{index === trying ? "Trying on" : <Coins amount={price} />}</span>}
+              {!isOwned && index === trying && <span className="item__price">Trying on</span>}
             </span>
           </button>
           {!isOwned && <BuyButton className="item__buy" price={price} label={`Buy ${option.label} for ${price} Sumo Coins`} sfx="none" onClick={() => onBuy(index)} />}
@@ -291,6 +295,12 @@ export function Wardrobe() {
   const [tab, setTab] = useState<Tab>(TABS[0]!);
   // Tapping an item you don't own tries it on (in the preview) until you buy it or pick another.
   const [trying, setTrying] = useState<{ category: CosmeticCategory; index: number } | null>(null);
+  // Each tab opens at the top of its list (where the item you wear is).
+  const itemsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    itemsRef.current?.scrollTo({ top: 0 });
+  }, [tab.category]);
+
   // The preview reacts (and sparkles) whenever an item goes on.
   const [reaction, setReaction] = useState<Reaction | null>(null);
   const react = (category: CosmeticCategory) => setReaction({ category, at: performance.now() });
@@ -431,7 +441,7 @@ export function Wardrobe() {
 
         {!sideTabs && tabs}
 
-        <div className="wardrobe__items">
+        <div className="wardrobe__items" ref={itemsRef}>
           <ItemGrid
             tab={tab}
             look={appearance}
