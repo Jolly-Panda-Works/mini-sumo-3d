@@ -165,6 +165,8 @@ Offline, *Play now* searches for a few seconds and fills the ring with bots; *Cr
 
 The desktop app (`apps/desktop`, Electron) is still in the repository but is no longer built by CI.
 
+**Game server:** `https://sumo.ryujin.fans` (web game, API and websockets on one address). Android, Cafe Bazaar and GitHub Pages builds connect to `wss://sumo.ryujin.fans` by default; the repository variables `VITE_SERVER_URL` / `VITE_PUBLIC_URL` override it. `npm run dev` still uses a local server.
+
 **Self-hosting (Docker):** `docker compose up -d --build` runs the game server and the web game on one port; it builds in Iran through registry and npm mirrors. See [docker/README.md](docker/README.md).
 
 **Cafe Bazaar:** the `bazaar` branch builds the Bazaar version (coin packs through Bazaar in-app billing, no Google Play Games) and publishes `bazaar-vX.Y.Z` releases. See [docs/BAZAAR.fa.md](docs/BAZAAR.fa.md).

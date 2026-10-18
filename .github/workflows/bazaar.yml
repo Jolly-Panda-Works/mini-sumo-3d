@@ -28,7 +28,8 @@ permissions:
 
 env:
   NODE_VERSION: 22
-  VITE_SERVER_URL: ${{ vars.VITE_SERVER_URL }}
+  VITE_SERVER_URL: ${{ vars.VITE_SERVER_URL || 'wss://sumo.ryujin.fans' }}
+  VITE_PUBLIC_URL: ${{ vars.VITE_PUBLIC_URL || 'https://sumo.ryujin.fans/' }}
 
 jobs:
   android:
