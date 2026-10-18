@@ -21,12 +21,56 @@ export interface BotTuning {
   inputScale: number;
   /** Starts retreating at this fraction of the ring radius. */
   edgeStart: number;
+  /**
+   * How the bot plays, as weights for its moves (picked again every few decisions):
+   *  press  - close in and shove (the old behaviour)
+   *  stalk  - keep some distance and circle, waiting for an opening
+   *  charge - back off, then run in from afar and dash
+   */
+  style: { press: number; stalk: number; charge: number };
+  /** Distance kept while stalking (in player radii). */
+  stalkDistance: number;
+  /** A charge dashes from this far away (in player radii). */
+  chargeDashRange: number;
 }
 
 export const BOT_TUNING: Readonly<Record<BotLevel, BotTuning>> = Object.freeze({
-  easy: { thinkMinMs: 240, thinkMaxMs: 440, noise: 0.95, dashChance: 0.15, inputScale: 0.72, edgeStart: 0.66 },
-  normal: { thinkMinMs: 140, thinkMaxMs: 300, noise: 0.5, dashChance: 0.35, inputScale: 0.9, edgeStart: 0.72 },
-  hard: { thinkMinMs: 90, thinkMaxMs: 180, noise: 0.22, dashChance: 0.55, inputScale: 1, edgeStart: 0.76 },
+  // Easy: hesitant, keeps its distance a lot, charges clumsily from too far.
+  easy: {
+    thinkMinMs: 240,
+    thinkMaxMs: 440,
+    noise: 0.95,
+    dashChance: 0.15,
+    inputScale: 0.72,
+    edgeStart: 0.66,
+    style: { press: 0.4, stalk: 0.4, charge: 0.2 },
+    stalkDistance: 5,
+    chargeDashRange: 6,
+  },
+  // Normal: a mix of pressure, waiting and the odd running charge.
+  normal: {
+    thinkMinMs: 140,
+    thinkMaxMs: 300,
+    noise: 0.5,
+    dashChance: 0.35,
+    inputScale: 0.9,
+    edgeStart: 0.72,
+    style: { press: 0.52, stalk: 0.2, charge: 0.28 },
+    stalkDistance: 4.2,
+    chargeDashRange: 4.6,
+  },
+  // Hard: circles to set up, then well-timed lunges from a distance.
+  hard: {
+    thinkMinMs: 90,
+    thinkMaxMs: 180,
+    noise: 0.22,
+    dashChance: 0.55,
+    inputScale: 1,
+    edgeStart: 0.76,
+    style: { press: 0.5, stalk: 0.15, charge: 0.35 },
+    stalkDistance: 3.6,
+    chargeDashRange: 4.4,
+  },
 });
 
 /**
@@ -43,7 +87,54 @@ export function easedTuning(level: BotLevel, ease: number): BotTuning {
     dashChance: t.dashChance * (1 - 0.6 * e),
     inputScale: t.inputScale * (1 - 0.3 * e),
     edgeStart: t.edgeStart,
+    // Easing off: more waiting, fewer charges.
+    style: { press: t.style.press, stalk: t.style.stalk + 0.25 * e, charge: t.style.charge * (1 - 0.5 * e) },
+    stalkDistance: t.stalkDistance,
+    chargeDashRange: t.chargeDashRange,
   };
+}
+
+type Move = "press" | "stalk" | "charge";
+
+interface BotMemory {
+  move: Move;
+  /** Decisions left in this move. */
+  left: number;
+  /** Which way to circle while stalking. */
+  side: 1 | -1;
+  /** A charge first backs off (a few decisions at most), then runs in. */
+  phase: "back" | "run";
+  backSteps: number;
+  /** A little personality per bot: shifts its weights. */
+  temper: number;
+}
+
+const memory = new Map<string, BotMemory>();
+
+/** Forget a bot (when it leaves); the memory is also rebuilt on demand. */
+export function forgetBot(id: string): void {
+  memory.delete(id);
+}
+
+/** Forget every bot (tests). */
+export function resetBotMemory(): void {
+  memory.clear();
+}
+
+function pickMove(tuning: BotTuning, temper: number, rng: () => number): Move {
+  // temper > 0: more aggressive (press/charge); < 0: more patient (stalk).
+  const press = Math.max(0.05, tuning.style.press * (1 + 0.5 * temper));
+  const stalk = Math.max(0.05, tuning.style.stalk * (1 - 0.6 * temper));
+  const charge = Math.max(0.05, tuning.style.charge * (1 + 0.4 * temper));
+  const r = rng() * (press + stalk + charge);
+  return r < press ? "press" : r < press + stalk ? "stalk" : "charge";
+}
+
+function movesFor(move: Move, rng: () => number): number {
+  // Decisions come every ~0.1–0.45 s depending on the level.
+  if (move === "stalk") return 6 + Math.floor(rng() * 8);
+  if (move === "charge") return 8 + Math.floor(rng() * 6);
+  return 8 + Math.floor(rng() * 10);
 }
 
 /**
@@ -71,6 +162,22 @@ export function decideBot(
   let dy = -bot.y;
   let dash = false;
 
+  // What the bot is doing right now (kept for a few decisions, then picked again).
+  let mem = memory.get(bot.id);
+  if (!mem) {
+    // A fresh bot opens by closing in; it mixes things up after that.
+    mem = { move: "press", left: movesFor("press", rng), side: rng() < 0.5 ? 1 : -1, phase: "back", backSteps: 0, temper: (rng() - 0.5) * 0.8 };
+    memory.set(bot.id, mem);
+  }
+  if (mem.left <= 0) {
+    mem.move = pickMove(tuning, mem.temper, rng);
+    mem.left = movesFor(mem.move, rng);
+    mem.phase = "back";
+    mem.backSteps = 0;
+    if (rng() < 0.35) mem.side = mem.side === 1 ? -1 : 1;
+  }
+  mem.left -= 1;
+
   let target: SimBody | null = null;
   let bestScore = Number.POSITIVE_INFINITY;
   for (const o of opponents) {
@@ -91,7 +198,39 @@ export function decideBot(
     const outY = tDist > 0.3 ? target.y / tDist : toTy / (gap || 1);
     const inside = botDist < tDist - 0.3;
 
-    if (inside && gap < cfg.playerRadius * 4) {
+    const r = cfg.playerRadius;
+    // Near the rope the target is easy prey: always press then.
+    const move: Move = tDist > R * 0.72 ? "press" : mem.move;
+
+    if (move === "stalk") {
+      // Keep some distance and circle the target, staying on the centre side.
+      const want = r * tuning.stalkDistance;
+      const ux = toTx / (gap || 1);
+      const uy = toTy / (gap || 1);
+      const radial = (gap - want) / want; // > 0: too far, < 0: too close
+      dx = ux * radial * 1.2 + -uy * mem.side * 0.9;
+      dy = uy * radial * 1.2 + ux * mem.side * 0.9;
+      // Drift back toward the middle when wandering out.
+      dx -= (bot.x / R) * 0.6;
+      dy -= (bot.y / R) * 0.6;
+      // An opening (target turned close to the edge): finish the wait early.
+      if (tDist > R * 0.62) mem.left = Math.min(mem.left, 1);
+    } else if (move === "charge") {
+      const runUp = r * (tuning.chargeDashRange + 1.5);
+      if (mem.phase === "back" && gap < runUp && mem.backSteps < 4) {
+        mem.backSteps += 1;
+        // Back off first (toward the centre side of the target) to get a run-up.
+        dx = -toTx / (gap || 1) - (bot.x / R) * 0.8;
+        dy = -toTy / (gap || 1) - (bot.y / R) * 0.8;
+      } else {
+        mem.phase = "run";
+        dx = toTx;
+        dy = toTy;
+        // Dash once in range and lined up with the target.
+        dash = gap < r * tuning.chargeDashRange && gap > r * 2.6 && rng() < Math.min(0.95, tuning.dashChance + 0.35);
+        if (dash) mem.left = Math.min(mem.left, 2); // after the lunge, think again
+      }
+    } else if (inside && gap < cfg.playerRadius * 4) {
       // Charge through the target, outward.
       dx = toTx;
       dy = toTy;

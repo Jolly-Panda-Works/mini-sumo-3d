@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Bots no longer just chase: they mix three moves (pressing, keeping their distance and circling, and backing off to charge in and dash from afar), each bot with a bit of its own temper. Easy hesitates and lunges clumsily, Normal mixes everything, Hard waits less and times its lunges. In simulated duels an average player wins about 93 % / 63 % / 20 % (Easy / Normal / Hard). 1 new test (156 total).
+
+### Changed
+
 - Every scrolling list (popups, friends, leaderboard, wardrobe, messages) fades out softly at an edge when there's more to scroll beyond it; lists that fit don't fade, and the top/bottom edge returns to normal at the start/end.
 
 ### Fixed

@@ -199,3 +199,20 @@ the room state carries its account id. That makes them first-class on the result
 you can send a friend request to any wrestler from the bout, bots included. A bot accepts
 by itself after about 20 seconds, is "online" roughly two hours in three, and when you invite
 a bot friend it joins your room as a bot (private rooms and Training; not paid arenas).
+
+
+## Bot moves
+
+`BotBrain.decideBot` mixes three moves, each kept for a few decisions and then picked again
+(weighted per level in `BOT_TUNING.style`, shifted a little by each bot's own "temper"):
+
+- **press**: close in from the centre side and shove (the original behaviour);
+- **stalk**: keep some distance and circle, waiting for an opening (cut short when the
+  target drifts toward the rope);
+- **charge**: back off for a run-up (a few decisions at most), then run in and dash from
+  range.
+
+A target near the rope is always pressed. Easy waits a lot and lunges from too far, Normal
+mixes all three, Hard waits less and times its lunges. Simulated duels against an average
+player (80 per level): the player wins about 93 % on Easy, 63 % on Normal and 20 % on Hard,
+and about a quarter of the bots' dashes are run-up lunges.

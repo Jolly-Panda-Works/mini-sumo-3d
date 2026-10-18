@@ -19,7 +19,7 @@ import { stepMovement, tryDash } from "../simulation/MovementSystem.js";
 import { createBody, type SimBody } from "../simulation/SimBody.js";
 import { DEFAULT_CONFIG, type SimulationConfig } from "../simulation/SimulationConfig.js";
 import { sanitizeName, validateMoveInput } from "../validation/InputValidator.js";
-import { decideBot, easedTuning, type BotTuning } from "./BotBrain.js";
+import { decideBot, easedTuning, forgetBot, type BotTuning } from "./BotBrain.js";
 
 /** Bots go for a power-up flag only once it's their turn (players get the first chance). */
 export function botSeeksItem(cfg: SimulationConfig, level: BotLevel, sinceSpawnMs: number): boolean {
@@ -30,7 +30,18 @@ export function botSeeksItem(cfg: SimulationConfig, level: BotLevel, sinceSpawnM
 const BOT_LEVEL_RANGE: Record<BotLevel, [number, number]> = { easy: [1, 4], normal: [3, 8], hard: [7, 14] };
 
 /** The bot that gives up in a bots-only finish: slow, wobbly, never dashes, ignores the edge. */
-const WEAK_BOT: BotTuning = { thinkMinMs: 350, thinkMaxMs: 600, noise: 1.6, dashChance: 0, inputScale: 0.3, edgeStart: 0.97 };
+const WEAK_BOT: BotTuning = {
+  thinkMinMs: 350,
+  thinkMaxMs: 600,
+  noise: 1.6,
+  dashChance: 0,
+  inputScale: 0.3,
+  edgeStart: 0.97,
+  // The bot that gives up just shuffles toward the others.
+  style: { press: 1, stalk: 0, charge: 0 },
+  stalkDistance: 4,
+  chargeDashRange: 0,
+};
 import { createRng, pickBotName, randomId } from "./botNames.js";
 
 export interface SessionPlayer extends SimBody {
@@ -328,6 +339,7 @@ export class GameSession {
   }
 
   removePlayer(id: string): void {
+    forgetBot(id);
     const player = this.players.get(id);
     if (!player) return;
 

@@ -218,3 +218,35 @@ describe("bots-only finish", () => {
     }
   });
 });
+
+describe("bot moves", () => {
+  it("bots don't only chase: they sometimes keep their distance, and lunge from afar", () => {
+    let backedOff = 0;
+    let lunges = 0;
+    for (let seed = 1; seed <= 6; seed++) {
+      const s = new GameSession(cfg, 2, { seed, botLevel: "hard" });
+      s.addPlayer("me", "Me");
+      s.addBot("me");
+      s.requestStart("me");
+      while (s.phase !== Phase.Playing) s.update(s.stepMs);
+      const bot = s.bots[0]!;
+      const me = s.players.get("me")!;
+      let lastDash = 0;
+      for (let t = 0; t < 20_000 && s.phase === Phase.Playing; t += s.stepMs) {
+        // A player who just stands in the middle.
+        s.handleInput("me", { x: -me.x, y: -me.y });
+        s.update(s.stepMs);
+        if (!bot.alive || !me.alive) break;
+        const gap = Math.hypot(bot.x - me.x, bot.y - me.y);
+        // Moving away from the player on purpose.
+        if (bot.inputX * (me.x - bot.x) + bot.inputY * (me.y - bot.y) < -0.2 * gap) backedOff++;
+        if (bot.dashEndsAt > lastDash) {
+          if (gap > cfg.playerRadius * 2.5) lunges++;
+          lastDash = bot.dashEndsAt;
+        }
+      }
+    }
+    expect(backedOff).toBeGreaterThan(0);
+    expect(lunges).toBeGreaterThan(0);
+  });
+});
