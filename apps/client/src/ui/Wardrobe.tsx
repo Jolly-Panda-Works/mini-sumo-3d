@@ -103,7 +103,7 @@ const FOCUS: Record<CosmeticCategory, { position: [number, number, number]; targ
   // The model stands at y = -0.85 in the preview: head centre ≈ 0.57, belt ≈ -0.25.
   hair: { position: [0, 0.9, 2.1], target: [0, 0.62, 0] },
   hairColor: { position: [0, 0.9, 2.1], target: [0, 0.62, 0] },
-  face: { position: [0, 0.68, 1.85], target: [0, 0.55, 0] },
+  face: { position: [0, 0.72, 2.35], target: [0, 0.72, 0] },
   outfit: { position: [0, 0.25, 2.7], target: [0, -0.2, 0] },
   // Not a wardrobe tab (portraits are picked on the profile), but keep the whole wrestler in view.
   avatar: { position: [0, 0.4, 3.4], target: [0, 0, 0] },
