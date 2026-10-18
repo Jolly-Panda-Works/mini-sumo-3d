@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Arenas: drag the row with the mouse to scroll it; on release it settles on the nearest card. A drag doesn't count as a click, so letting go over PLAY doesn't start a bout.
+
 ### Fixed
 
 - Home on wide screens: the arena row reaches both screen edges (no empty strips at the sides) and the white scrollbar at the bottom of the page is gone (the home screen scrolled sideways); the arena cards are bigger; the + is inside the coin frame; the top-left buttons no longer touch the screen edge.

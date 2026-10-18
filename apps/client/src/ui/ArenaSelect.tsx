@@ -71,6 +71,72 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
     };
   }, [arenas.length, variant]);
 
+  // Mouse: drag the row to scroll it (touch and the wheel already scroll). A drag of more than
+  // a few pixels doesn't count as a click, so letting go over PLAY doesn't start a bout.
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+    let startX = 0;
+    let startScroll = 0;
+    let dragging = false;
+    let moved = false;
+    const down = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      dragging = true;
+      moved = false;
+      startX = e.clientX;
+      startScroll = row.scrollLeft;
+    };
+    const move = (e: PointerEvent) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      if (!moved && Math.abs(dx) > 6) {
+        moved = true;
+        // Snapping would fight the drag: off while dragging, back on at the end.
+        row.classList.add("arena-row--dragging");
+        row.setPointerCapture(e.pointerId);
+      }
+      if (moved) row.scrollLeft = startScroll - dx;
+    };
+    const up = (e: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      if (row.hasPointerCapture(e.pointerId)) row.releasePointerCapture(e.pointerId);
+      if (moved) {
+        row.classList.remove("arena-row--dragging");
+        // Settle on the nearest card.
+        const cards = Array.from(row.children) as HTMLElement[];
+        const middle = row.scrollLeft + row.clientWidth / 2;
+        let best = cards[0];
+        for (const c of cards) {
+          if (best && Math.abs(c.offsetLeft + c.offsetWidth / 2 - middle) < Math.abs(best.offsetLeft + best.offsetWidth / 2 - middle)) best = c;
+        }
+        if (best) row.scrollTo({ left: best.offsetLeft + best.offsetWidth / 2 - row.clientWidth / 2, behavior: "smooth" });
+      }
+    };
+    const click = (e: MouseEvent) => {
+      if (!moved) return;
+      e.preventDefault();
+      e.stopPropagation();
+      moved = false;
+    };
+    const noDrag = (e: DragEvent) => e.preventDefault();
+    row.addEventListener("pointerdown", down);
+    row.addEventListener("pointermove", move);
+    row.addEventListener("pointerup", up);
+    row.addEventListener("pointercancel", up);
+    row.addEventListener("click", click, true);
+    row.addEventListener("dragstart", noDrag);
+    return () => {
+      row.removeEventListener("pointerdown", down);
+      row.removeEventListener("pointermove", move);
+      row.removeEventListener("pointerup", up);
+      row.removeEventListener("pointercancel", up);
+      row.removeEventListener("click", click, true);
+      row.removeEventListener("dragstart", noDrag);
+    };
+  }, []);
+
   // Wide screens: arrows only when some arenas are off screen.
   const [overflows, setOverflows] = useState(false);
   useEffect(() => {

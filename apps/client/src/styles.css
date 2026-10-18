@@ -7866,3 +7866,21 @@ button.code-field {
   display: none;
   width: 0;
 }
+
+/* Arena row: drag with the mouse */
+@media (hover: hover) and (pointer: fine) {
+  .arena-row {
+    cursor: grab;
+    user-select: none;
+  }
+}
+
+.arena-row.arena-row--dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+}
+
+.arena-row img {
+  -webkit-user-drag: none;
+}
