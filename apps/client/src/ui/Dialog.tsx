@@ -5,6 +5,22 @@ import { audio } from "../audio/AudioManager";
 const BASE = import.meta.env.BASE_URL;
 
 let layer: HTMLElement | null = null;
+let stackLevel = 0;
+
+/**
+ * The stacking level for a popup that is opening: every new popup goes above all the ones
+ * already open (whatever kind it is: panel, nested popup, warning, level up).
+ */
+export function nextStackLevel(): number {
+  stackLevel += 1;
+  return stackLevel;
+}
+
+/** Hook: this popup's level, fixed when it opens. */
+export function useStackLevel(): number {
+  const [level] = useState(nextStackLevel);
+  return level;
+}
 /** One layer for all popups, at the end of <body>; later popups stack on earlier ones. */
 export function popupLayer(): HTMLElement {
   if (!layer) {
@@ -55,6 +71,7 @@ export function Dialog({
 }) {
   const id = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
+  const zIndex = useStackLevel();
   // Close with the closing animation (the × and a tap outside).
   const [closing, setClosing] = useState(false);
   const requestClose = () => {
@@ -78,6 +95,7 @@ export function Dialog({
   const popup = (
     <div
       className={`overlay ${overlayClassName}${variant === "sub" ? " overlay--sub" : ""}${closing ? " overlay--closing" : ""}`}
+      style={{ zIndex }}
       onClick={(e) => e.target === e.currentTarget && requestClose()}
     >
       {variant === "welcome" ? (

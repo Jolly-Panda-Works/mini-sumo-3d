@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { popupLayer } from "./Dialog";
+import { popupLayer, useStackLevel } from "./Dialog";
 import { audio } from "../audio/AudioManager";
 import { useStore } from "../store";
 import { uiStore, type Notice } from "../uiStore";
@@ -33,6 +33,7 @@ export function NoticePopup() {
 }
 
 function NoticeView({ notice }: { notice: Notice }) {
+  const zIndex = useStackLevel();
   useEffect(() => {
     audio.sample(notice.kind === "message" ? "menu-open" : "reject");
     const onKey = (e: KeyboardEvent) => {
@@ -47,7 +48,7 @@ function NoticeView({ notice }: { notice: Notice }) {
 
   const actions = [...notice.actions].sort((a, b) => Number(Boolean(b.primary)) - Number(Boolean(a.primary)));
   return (
-    <div className="overlay overlay--notice">
+    <div className="overlay overlay--notice" style={{ zIndex }}>
       <section
         className={`notice-popup notice-popup--${notice.kind}`}
         style={{ backgroundImage: `url("${BASE}ui/popup-${notice.kind}.webp")` }}

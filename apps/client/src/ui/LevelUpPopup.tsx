@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { popupLayer } from "./Dialog";
+import { popupLayer, useStackLevel } from "./Dialog";
 import { useEffect, useState } from "react";
 import { audio } from "../audio/AudioManager";
 import { uiStore, showLevelUp } from "../uiStore";
@@ -28,11 +28,12 @@ export function LevelUpPopup() {
     };
   }, [levelUp]);
 
+  const zIndex = useStackLevel();
   if (!levelUp) return null;
   const close = () => showLevelUp(null);
 
   return createPortal(
-    <div className="overlay" onClick={(e) => e.target === e.currentTarget && close()}>
+    <div className="overlay" style={{ zIndex }} onClick={(e) => e.target === e.currentTarget && close()}>
       <section className="levelup-frame" role="alertdialog" aria-label={`Level up! You reached level ${levelUp.to}`}>
         <div className="levelup-frame__content">
           <div className="levelup__stage" aria-hidden="true">

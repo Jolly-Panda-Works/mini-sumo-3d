@@ -344,6 +344,15 @@ class RoomManager {
    * Joins online, or creates a local bot room when offline. If the server turns out to be
    * unreachable while joining and an offline fallback is possible, switches to offline mode.
    */
+  /** A link that opens the game and joins this private room. */
+  inviteLink(): string {
+    const roomId = sessionStore.get().roomId;
+    const base = (import.meta.env.VITE_PUBLIC_URL as string | undefined)?.trim() || `${window.location.origin}${window.location.pathname}`;
+    const url = new URL(base, window.location.href);
+    url.searchParams.set("room", roomId);
+    return url.toString();
+  }
+
   private async connect(join: () => Promise<GameConnection>, offlineRoom?: LocalRoomOptions): Promise<boolean> {
     if (sessionStore.get().status === "connecting") return false;
     if (this._room) await this.leave();

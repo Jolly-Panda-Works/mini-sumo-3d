@@ -8,6 +8,15 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Friend requests you sent show "Not accepted yet".
+- Private rooms: the friend picker (from + in an empty slot) has a box with COPY INVITE LINK and SHARE, then Add bot (host), then your friends. Invite links join the room again; they are only offered there. Offline private rooms: + adds a bot.
+
+### Fixed
+
+- Popups stack in the order they open: whatever opens last (a warning, a nested popup, level up) is always on top. A leftover rule had put warnings underneath.
+
+### Changed
+
 - Waiting room: empty slots show "+ Invite a friend", which opens a friend picker (online friends can be invited; friends already in the room are left out). The invite list under the roster is gone, which also fixes the host's crowded layout.
 - Friends: "Play with friends" opens a private room and then the friend picker.
 - Rooms can only be joined by invitation: the copy-link and share buttons are gone, the address no longer carries `?room=`, and old room links are ignored.

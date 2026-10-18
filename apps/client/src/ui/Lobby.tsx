@@ -108,6 +108,13 @@ export function Lobby() {
                     </span>
                     Invite a friend
                   </button>
+                ) : offline && game.isPrivate && isHost ? (
+                  <button className="roster__invite" onClick={() => roomManager.addBot()} aria-label="Add a bot">
+                    <span className="roster__plus" aria-hidden="true">
+                      +
+                    </span>
+                    Add bot
+                  </button>
                 ) : (
                   "Waiting for a wrestler…"
                 )}
@@ -132,22 +139,57 @@ export function Lobby() {
           </div>
         )}
 
-        {isHost && game.isPrivate && (
-          <button className="btn" disabled={full} onClick={() => roomManager.addBot()}>
-            {!full && <Icon name="bot" size={22} />}
-            {full ? "Room is full" : "Add bot"}
-          </button>
-        )}
 
-        {inviting && !offline && <InvitePicker roomId={session.roomId} inRoom={inRoomIds} onClose={() => setInviteUiOpen(false)} />}
+        {inviting && !offline && (
+          <InvitePicker
+            roomId={session.roomId}
+            inRoom={inRoomIds}
+            onClose={() => setInviteUiOpen(false)}
+            isPrivate={game.isPrivate}
+            isHost={isHost}
+            full={full}
+          />
+        )}
         {paid && <p className="hint hint--center">Leave with × before the bout starts to get your entry back.</p>}
     </Dialog>
   );
 }
 
 /** Friends to invite into this room (online friends first; those already here are left out). */
-function InvitePicker({ roomId, inRoom, onClose }: { roomId: string; inRoom: Set<string>; onClose: () => void }) {
+function InvitePicker({
+  roomId,
+  inRoom,
+  onClose,
+  isPrivate,
+  isHost,
+  full,
+}: {
+  roomId: string;
+  inRoom: Set<string>;
+  onClose: () => void;
+  isPrivate: boolean;
+  isHost: boolean;
+  full: boolean;
+}) {
   const friends = useStore(friendsStore);
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(roomManager.inviteLink());
+      setCopied(true);
+      pushToast("Invite link copied", "info");
+      window.setTimeout(() => setCopied(false), 2200);
+    } catch {
+      pushToast(roomManager.inviteLink(), "info", 6000);
+    }
+  };
+  const share = async () => {
+    try {
+      await navigator.share({ title: "Mini Sumo", text: "Join my Mini Sumo room!", url: roomManager.inviteLink() });
+    } catch {
+      // Share sheet dismissed.
+    }
+  };
   const [sent, setSent] = useState<Set<string>>(new Set());
   useEffect(() => {
     if (!friendsAvailable()) return;
@@ -167,6 +209,23 @@ function InvitePicker({ roomId, inRoom, onClose }: { roomId: string; inRoom: Set
   };
   return (
     <Dialog title="Invite friends" onClose={onClose} className="invite-picker" variant="sub">
+      {isPrivate && (
+        <div className="invite-picker__share">
+          <button className="art art--invite" onClick={() => void copy()} aria-label={copied ? "Invite link copied" : "Copy invite link"}>
+            <img src={`${import.meta.env.BASE_URL}ui/btn-copy-invite.webp`} alt="" width={480} height={130} draggable={false} />
+          </button>
+          {"share" in navigator && (
+            <button className="art art--share" onClick={() => void share()} aria-label="Share">
+              <img src={`${import.meta.env.BASE_URL}ui/btn-share.webp`} alt="" width={360} height={160} draggable={false} />
+            </button>
+          )}
+        </div>
+      )}
+      {isPrivate && isHost && (
+        <button className="btn invite-picker__bot" disabled={full} onClick={() => roomManager.addBot()}>
+          <Icon name="bot" size={22} /> {full ? "Room is full" : "Add bot"}
+        </button>
+      )}
       {friends.data && list.length === 0 && (
         <p className="hint hint--center">
           {friends.data.friends.length === 0 ? "No friends yet. Add friends with their code in Friends." : "All your friends are already here."}

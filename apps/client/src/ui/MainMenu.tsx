@@ -17,8 +17,11 @@ const shownErrors = new Set<string>();
 /** Bout results already announced (so the toast shows once). */
 const toastedResults = new WeakSet<object>();
 
-// Old invite links (?room=…) are ignored: friends invite each other from the game.
-if (new URLSearchParams(window.location.search).has("room")) {
+// A private room's invite link (?room=…): joined once the server is reachable, then the
+// address is cleaned up.
+const inviteCode = new URLSearchParams(window.location.search).get("room") ?? "";
+let inviteHandled = false;
+if (inviteCode) {
   const url = new URL(window.location.href);
   url.searchParams.delete("room");
   window.history.replaceState(null, "", url);
@@ -43,6 +46,13 @@ export function MainMenu() {
     if (won > 0) pushToast(`+${won.toLocaleString("en-US")} Sumo Coins`, "info", 3000);
     else if (last.note) pushToast(last.note, "info", 3000);
   }, [last]);
+
+  useEffect(() => {
+    if (inviteCode && online && !inviteHandled) {
+      inviteHandled = true;
+      void roomManager.joinByCode(inviteCode, settingsStore.get().name);
+    }
+  }, [online]);
 
   // Connection errors: an error popup (once per error) instead of a note in the layout.
   useEffect(() => {

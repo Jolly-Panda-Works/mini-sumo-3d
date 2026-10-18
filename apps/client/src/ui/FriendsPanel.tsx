@@ -131,7 +131,7 @@ export function FriendsPanel() {
               <h3 className="settings__heading">Waiting for an answer</h3>
               <ul className="friends__list">
                 {data.outgoing.map((f) => (
-                  <FriendRow key={f.accountId} friend={f} onOpen={() => setViewing(f.accountId)} />
+                  <FriendRow key={f.accountId} friend={f} pending onOpen={() => setViewing(f.accountId)} />
                 ))}
               </ul>
             </section>
@@ -143,7 +143,18 @@ export function FriendsPanel() {
   );
 }
 
-export function FriendRow({ friend, onOpen, children }: { friend: FriendEntry; onOpen?: () => void; children?: ReactNode }) {
+export function FriendRow({
+  friend,
+  onOpen,
+  children,
+  pending = false,
+}: {
+  friend: FriendEntry;
+  onOpen?: () => void;
+  children?: ReactNode;
+  /** A request you sent that they haven't accepted yet. */
+  pending?: boolean;
+}) {
   return (
     <li className="friend-row">
       <button className="friend-row__who" onClick={onOpen} aria-label={`${friend.name}, level ${friend.level}${friend.online ? ", online" : ""}`}>
@@ -153,10 +164,14 @@ export function FriendRow({ friend, onOpen, children }: { friend: FriendEntry; o
         <span className="friend-row__text">
           <strong>{friend.name}</strong>
           <span className="friend-row__level">Lvl {friend.level}</span>
-          <span className={`friend-row__status${friend.online ? " friend-row__status--on" : ""}`}>
-            <img src={`${import.meta.env.BASE_URL}ui/dot-${friend.online ? "online" : "offline"}.webp`} alt="" width={35} height={35} />
-            {friend.online ? "Online" : "Offline"}
-          </span>
+          {pending ? (
+            <span className="friend-row__status friend-row__status--pending">Not accepted yet</span>
+          ) : (
+            <span className={`friend-row__status${friend.online ? " friend-row__status--on" : ""}`}>
+              <img src={`${import.meta.env.BASE_URL}ui/dot-${friend.online ? "online" : "offline"}.webp`} alt="" width={35} height={35} />
+              {friend.online ? "Online" : "Offline"}
+            </span>
+          )}
         </span>
       </button>
       {children && <span className="friend-row__actions">{children}</span>}

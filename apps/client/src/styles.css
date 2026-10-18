@@ -6491,10 +6491,6 @@ button.code-field {
   border-radius: 10px;
 }
 
-/* Notices sit above every other popup */
-.popup-layer > .overlay--notice {
-  z-index: 2;
-}
 
 /* Home (phones): friends under the profile, settings under the coins */
 .hub__top {
@@ -6557,4 +6553,37 @@ button.code-field {
 .friends__play {
   align-self: center;
   width: min(100%, 260px);
+}
+
+/* Friend picker: share box, Add bot, then friends */
+.invite-picker__share {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 2px dashed rgba(58, 29, 5, 0.35);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.invite-picker__share .art--invite {
+  width: 150px;
+}
+
+.invite-picker__share .art--share {
+  width: 84px;
+}
+
+.invite-picker__bot {
+  align-self: center;
+  min-height: 36px;
+  padding: 4px 14px;
+  font-size: 0.85rem;
+}
+
+/* A request you sent that wasn't accepted yet */
+.friend-row__status--pending {
+  color: #b06a12;
+  font-style: italic;
 }
