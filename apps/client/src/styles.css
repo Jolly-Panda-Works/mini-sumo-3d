@@ -7139,3 +7139,15 @@ button.code-field {
 .invite-picker__share {
   margin-top: 10px;
 }
+
+/* Leaderboard: the list fades out at its edges, so a half-cut row never peeks out next to
+   the pinned row (or the frame) */
+.board-dialog .leaderboard__list {
+  -webkit-mask-image: linear-gradient(transparent 0, #000 14px, #000 calc(100% - 22px), transparent 100%);
+  mask-image: linear-gradient(transparent 0, #000 14px, #000 calc(100% - 22px), transparent 100%);
+}
+
+.board-dialog__body > .lb-row--pinned + .leaderboard__list,
+.board-dialog__body > .leaderboard__list + .lb-row--pinned {
+  margin-top: -4px;
+}

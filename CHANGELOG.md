@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Leaderboard: a half-cut row no longer peeks out between the list and your pinned row; the list fades out at its edges.
+
 ### Changed
 
 - Waiting room: no "Bot" label on bots; "Add bot" is now "Add random player".
