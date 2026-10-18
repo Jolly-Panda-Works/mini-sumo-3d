@@ -6,6 +6,14 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Friends and leaderboard rows: hover and press now scale the whole card with its background, not just the content inside it.
+
+### Changed
+
+- Wide screens (web, desktop) use the same square Leaderboard and Friends buttons as phones; the wide versions were removed.
+
 ### Added
 
 - Leaderboard: tap a player to see their profile (wrestler, picture, level, bouts, wins). From there you can add them as a friend, accept their request, or, for friends, play or remove. New `GET /api/players/profile` (1 new test, 154 total).

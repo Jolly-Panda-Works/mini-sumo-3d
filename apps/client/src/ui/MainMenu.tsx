@@ -69,11 +69,11 @@ export function MainMenu() {
         <header className="home__top">
           <div className="home__actions">
             <ProfileCard className="home__profile-card" />
-            <button className="art art--leaderboard-wide" onClick={() => setLeaderboardOpen(true)} aria-label="Leaderboard">
-              <img src={`${import.meta.env.BASE_URL}ui/leaderboard-wide.webp`} alt="" width={420} height={71} />
+            <button className="tile-btn tile-btn--square" onClick={() => setLeaderboardOpen(true)} aria-label="Leaderboard">
+              <img src={`${import.meta.env.BASE_URL}ui/leaderboard-icon.webp`} alt="" width={216} height={177} />
             </button>
-            <button className="art art--friends-wide" onClick={() => setFriendsOpen(true)} aria-label="Friends">
-              <img src={`${import.meta.env.BASE_URL}ui/friends-wide.webp`} alt="" width={360} height={111} />
+            <button className="tile-btn tile-btn--square" onClick={() => setFriendsOpen(true)} aria-label="Friends">
+              <img src={`${import.meta.env.BASE_URL}ui/friends-icon.webp`} alt="" width={216} height={221} />
             </button>
             <button className="tile-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
               <Icon name="customize" size={48} />

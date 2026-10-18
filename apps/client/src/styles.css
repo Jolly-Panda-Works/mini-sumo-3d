@@ -7016,11 +7016,6 @@ button.code-field {
   cursor: pointer;
 }
 
-@media (hover: hover) {
-  .lb-row:has(.lb-row__open):hover {
-    filter: brightness(1.06);
-  }
-}
 
 .friend-profile__add {
   width: 90px;
@@ -7032,4 +7027,50 @@ button.code-field {
   font-weight: 800;
   font-size: 0.85rem;
   color: #b06a12;
+}
+
+/* Wide screens: the same square buttons as on phones */
+.tile-btn--square img {
+  display: block;
+  width: auto;
+  height: 52px;
+}
+
+/* ======================================================================
+   Player rows (friends, leaderboard): hover and press move the whole card
+   (background included), not just the content inside it
+   ====================================================================== */
+
+.lb-row,
+.friend-row {
+  transition:
+    transform 0.12s ease-out,
+    filter 0.12s ease-out;
+}
+
+/* The inner tap target itself stays put */
+.lb-row__open:hover,
+.lb-row__open:active,
+.lb-row__open.is-pressed,
+.friend-row__who:hover,
+.friend-row__who:active,
+.friend-row__who.is-pressed {
+  transform: none !important;
+  filter: none !important;
+}
+
+@media (hover: hover) {
+  .lb-row:has(.lb-row__open:hover),
+  .friend-row:has(.friend-row__who:hover) {
+    transform: translateY(-2px) scale(1.02);
+    filter: brightness(1.06);
+  }
+}
+
+.lb-row:has(.lb-row__open:active),
+.lb-row:has(.lb-row__open.is-pressed),
+.friend-row:has(.friend-row__who:active),
+.friend-row:has(.friend-row__who.is-pressed) {
+  transform: translateY(1px) scale(0.97);
+  transition-duration: 0.06s;
 }
