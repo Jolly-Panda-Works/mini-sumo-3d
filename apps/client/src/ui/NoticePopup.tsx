@@ -62,7 +62,8 @@ function NoticeView({ notice }: { notice: Notice }) {
             <img src={`${BASE}ui/close.webp`} alt="" draggable={false} />
           </button>
         )}
-        <h2 className="notice-popup__title">{notice.title}</h2>
+        <h2 className={`notice-popup__title${notice.titleExtra ? " notice-popup__title--with-extra" : ""}`}>{notice.title}</h2>
+        {notice.titleExtra && <div className="notice-popup__title-extra">{notice.titleExtra}</div>}
         <div className="notice-popup__body">
           {notice.body ? <div className="notice-popup__custom">{notice.body}</div> : <p className="notice-popup__message">{notice.message}</p>}
           <div className="notice-popup__actions">

@@ -7640,43 +7640,6 @@ button.code-field {
   right: calc(100% - 14px);
 }
 
-/* Thumbnails in the frames */
-.wardrobe__items .item__thumb {
-  width: 56px;
-  height: 56px;
-  padding: 12%;
-  border: 0;
-  border-radius: 0;
-  background: var(--ui-slot-frame) center / 100% 100% no-repeat;
-}
-
-.wardrobe__items .item--on .item__thumb,
-.wardrobe__items .item--trying .item__thumb {
-  background-image: var(--ui-slot-frame-on);
-}
-
-.wardrobe__items .item__thumb img {
-  border-radius: 4px;
-}
-
-/* The category ribbon at the top of the list */
-.wardrobe__ribbon {
-  align-self: center;
-  flex: none;
-  margin: 0 0 2px;
-  width: 170px;
-  aspect-ratio: 213 / 64;
-  display: grid;
-  place-items: center;
-  padding-bottom: 4%;
-  background: var(--ui-title-ribbon) center / 100% 100% no-repeat;
-  color: #fff4dc;
-  font-size: 1rem;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
-}
 
 /* Item names on the dark plate */
 .item__name--plate {
@@ -7691,4 +7654,44 @@ button.code-field {
 
 .item__text {
   gap: 3px;
+}
+
+/* Tab icons fit inside their frames */
+.tabs .tab.tab--art img {
+  max-width: 68%;
+  max-height: 68%;
+}
+
+/* "Buy this item?": your coins under the question, the item centred below */
+/* With something under the title: the title takes the top half of the upper box, the extra
+   (your coins) the bottom half */
+.notice-popup__title.notice-popup__title--with-extra {
+  height: 11%;
+  top: 35.5%;
+  font-size: max(0.9rem, 5.6cqw);
+}
+
+.notice-popup__title-extra {
+  position: absolute;
+  left: 15.2%;
+  top: 46%;
+  width: 69.4%;
+  height: 8.5%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buy-confirm {
+  justify-content: center;
+}
+
+.buy-confirm__item .item__thumb {
+  width: 22cqw;
+  height: 22cqw;
+}
+
+.notice-popup__title-extra .buy-confirm__coins.coin-frame {
+  height: 100%;
+  max-height: 46px;
 }

@@ -253,9 +253,8 @@ function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick, tryin
             {option.hex && <span className="item__swatch" style={{ background: option.hex }} aria-hidden="true" />}
             <span className="item__text">
               <span className="item__name item__name--plate">{option.label}</span>
-              <span className="item__price">
-                {isOwned ? (index === worn ? "Wearing" : price === 0 ? "Free" : "Owned") : index === trying ? "Trying on" : <Coins amount={price} />}
-              </span>
+              {/* Owned items need no label; items you don't own show their price (or that you're trying them) */}
+              {!isOwned && <span className="item__price">{index === trying ? "Trying on" : <Coins amount={price} />}</span>}
             </span>
           </button>
           {!isOwned && <BuyButton className="item__buy" price={price} label={`Buy ${option.label} for ${price} Sumo Coins`} sfx="none" onClick={() => onBuy(index)} />}
@@ -332,15 +331,17 @@ export function Wardrobe() {
       [{ id: "buy", label: "Buy", primary: true, price: priceOf(id) }],
       {
         closable: true,
+        titleExtra: (
+          <span className="coin-frame coin-frame--static buy-confirm__coins" aria-label={`Your coins: ${balance}`}>
+            <span className="coin-frame__amount">{balance.toLocaleString("en-US")}</span>
+          </span>
+        ),
         body: (
           <div className="buy-confirm">
             <div className="buy-confirm__item">
               <ItemThumb category={category} look={appearance} index={index} color={color} />
               <span className="buy-confirm__name">{name}</span>
             </div>
-            <span className="coin-frame coin-frame--static buy-confirm__coins" aria-label={`Your coins: ${balance}`}>
-              <span className="coin-frame__amount">{balance.toLocaleString("en-US")}</span>
-            </span>
           </div>
         ),
       },
@@ -431,8 +432,6 @@ export function Wardrobe() {
         {!sideTabs && tabs}
 
         <div className="wardrobe__items">
-          {/* The current category on the ribbon above its items */}
-          <h3 className="wardrobe__ribbon">{tab.label}</h3>
           <ItemGrid
             tab={tab}
             look={appearance}

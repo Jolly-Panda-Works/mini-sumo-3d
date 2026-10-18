@@ -13,6 +13,10 @@ export const HAIR_STYLES = [
   { id: "afro", label: "Afro" },
   { id: "buns", label: "Twin buns" },
   { id: "samurai", label: "Samurai band" },
+  // Hats
+  { id: "kasa", label: "Straw hat" },
+  { id: "kabuto", label: "Samurai helmet" },
+  { id: "crown", label: "Crown" },
 ] as const;
 
 export const HAIR_COLORS = [
@@ -38,6 +42,10 @@ export const FACES = [
   { id: "surprised", label: "Surprised" },
   { id: "grumpy", label: "Grumpy" },
   { id: "sparkly", label: "Sparkly eyes" },
+  // Masks
+  { id: "kitsune", label: "Kitsune mask" },
+  { id: "oni", label: "Oni mask" },
+  { id: "tengu", label: "Tengu mask" },
 ] as const;
 
 export const OUTFITS = [

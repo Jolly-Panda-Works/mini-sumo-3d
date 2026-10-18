@@ -48,8 +48,10 @@ export interface Notice {
   actions: NoticeAction[];
   /** A close (×) button in the corner; it answers "cancel". */
   closable?: boolean;
-  /** Shown in the lower box instead of the message text (e.g. an item and your coins). */
+  /** Shown in the lower box instead of the message text (e.g. an item). */
   body?: ReactNode;
+  /** Shown under the title (e.g. your coins). */
+  titleExtra?: ReactNode;
   resolve: (actionId: string) => void;
 }
 
@@ -81,7 +83,7 @@ export function showNotice(
   title: string,
   message: string,
   actions?: NoticeAction[],
-  options: { closable?: boolean; body?: ReactNode } = {},
+  options: { closable?: boolean; body?: ReactNode; titleExtra?: ReactNode } = {},
 ): Promise<string> {
   return new Promise((resolve) => {
     const id = ++noticeId;
@@ -93,6 +95,7 @@ export function showNotice(
       actions: actions && actions.length ? actions : [{ id: "ok", label: "OK", primary: true }],
       closable: options.closable,
       body: options.body,
+      titleExtra: options.titleExtra,
       resolve: (actionId) => {
         uiStore.update({ notices: uiStore.get().notices.filter((n) => n.id !== id) });
         resolve(actionId);
@@ -102,7 +105,12 @@ export function showNotice(
   });
 }
 
-export const showMessage = (title: string, message: string, actions?: NoticeAction[], options?: { closable?: boolean; body?: ReactNode }) =>
+export const showMessage = (
+  title: string,
+  message: string,
+  actions?: NoticeAction[],
+  options?: { closable?: boolean; body?: ReactNode; titleExtra?: ReactNode },
+) =>
   showNotice("message", title, message, actions, options);
 export const showWarning = (title: string, message: string, actions?: NoticeAction[]) => showNotice("warning", title, message, actions);
 export const showError = (title: string, message: string, actions?: NoticeAction[]) => showNotice("error", title, message, actions);

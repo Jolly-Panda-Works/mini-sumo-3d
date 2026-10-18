@@ -28,6 +28,24 @@ const GEO = {
   rope: new TorusGeometry(0.78, 0.075, 6, 20),
   shide: new BoxGeometry(0.1, 0.2, 0.02),
   head: new IcosahedronGeometry(0.52, 1),
+  // Hats
+  helmet: new SphereGeometry(0.6, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.55),
+  neckGuard: new CylinderGeometry(0.62, 0.78, 0.3, 12, 1, true),
+  horn: new BoxGeometry(0.07, 0.42, 0.04),
+  crest: new CylinderGeometry(0.09, 0.09, 0.03, 10),
+  kasa: new ConeGeometry(0.95, 0.42, 14),
+  kasaBand: new CylinderGeometry(0.47, 0.5, 0.08, 12),
+  crownBand: new CylinderGeometry(0.4, 0.42, 0.2, 12, 1, true),
+  crownPoint: new ConeGeometry(0.08, 0.2, 4),
+  gem: new OctahedronGeometry(0.05, 0),
+  // Masks (a curved plate in front of the face)
+  mask: new SphereGeometry(0.56, 14, 10, -Math.PI * 0.32, Math.PI * 0.64, Math.PI * 0.22, Math.PI * 0.52),
+  maskEye: new BoxGeometry(0.13, 0.04, 0.03),
+  maskEar: new ConeGeometry(0.1, 0.26, 4),
+  maskHorn: new ConeGeometry(0.06, 0.24, 6),
+  fang: new ConeGeometry(0.03, 0.08, 4),
+  nose: new CylinderGeometry(0.035, 0.07, 0.42, 8),
+  stripe: new BoxGeometry(0.03, 0.12, 0.02),
   knot: new IcosahedronGeometry(0.15, 0),
   knotFan: new BoxGeometry(0.1, 0.08, 0.3),
   spike: new ConeGeometry(0.11, 0.3, 5),
@@ -67,6 +85,11 @@ const WHITE = new MeshStandardMaterial({ color: "#FBF8F2", roughness: 0.7, flatS
 const GOLD = new MeshStandardMaterial({ color: "#F2C14E", roughness: 0.4, metalness: 0.3, flatShading: true });
 const CHEEK = new MeshBasicMaterial({ color: "#FF8FA3", transparent: true, opacity: 0.75 });
 const BAND = new MeshStandardMaterial({ color: "#E2443A", roughness: 0.6, flatShading: true });
+const IRON = new MeshStandardMaterial({ color: "#3B3F4E", roughness: 0.45, metalness: 0.45, flatShading: true });
+const STRAW = new MeshStandardMaterial({ color: "#D8B266", roughness: 0.95, flatShading: true });
+const MASK_WHITE = new MeshStandardMaterial({ color: "#F7F3EA", roughness: 0.5, flatShading: true });
+const MASK_RED = new MeshStandardMaterial({ color: "#D23A2E", roughness: 0.5, flatShading: true });
+const GEM = new MeshStandardMaterial({ color: "#E2443A", roughness: 0.2, emissive: "#5A0E0A", flatShading: true });
 const SPARKLE = new MeshStandardMaterial({ color: "#FFD23F", roughness: 0.3, emissive: "#8A6400", flatShading: true });
 
 const materialCache = new Map<string, MeshStandardMaterial>();
@@ -172,6 +195,41 @@ function Hair({ style, color }: { style: string; color: string }) {
           <mesh geometry={GEO.bun} material={mat} position={[0.3, 0.44, -0.06]} castShadow />
         </group>
       );
+    case "kasa":
+      // Straw hat: a wide shallow cone over the head
+      return (
+        <group position-y={0.42}>
+          <mesh geometry={GEO.kasa} material={STRAW} castShadow />
+          <mesh geometry={GEO.kasaBand} material={BAND} position-y={-0.12} />
+        </group>
+      );
+    case "kabuto":
+      // Samurai helmet: iron dome, flared neck guard, gold horns and crest
+      return (
+        <group>
+          <mesh geometry={GEO.helmet} material={IRON} position-y={0.02} castShadow />
+          <mesh geometry={GEO.neckGuard} material={IRON} position={[0, 0.02, -0.04]} castShadow />
+          <mesh geometry={GEO.horn} material={GOLD} position={[-0.16, 0.6, 0.38]} rotation={[0.25, 0, 0.45]} />
+          <mesh geometry={GEO.horn} material={GOLD} position={[0.16, 0.6, 0.38]} rotation={[0.25, 0, -0.45]} />
+          <mesh geometry={GEO.crest} material={GOLD} position={[0, 0.42, 0.45]} rotation-x={Math.PI / 2 - 0.5} />
+        </group>
+      );
+    case "crown":
+      // Gold crown with points and gems
+      return (
+        <group position-y={0.48}>
+          <mesh geometry={GEO.crownBand} material={GOLD} castShadow />
+          {Array.from({ length: 6 }, (_, i) => {
+            const a = (i / 6) * Math.PI * 2;
+            return (
+              <group key={i}>
+                <mesh geometry={GEO.crownPoint} material={GOLD} position={[Math.sin(a) * 0.4, 0.18, Math.cos(a) * 0.4]} />
+                <mesh geometry={GEO.gem} material={GEM} position={[Math.sin(a + 0.52) * 0.42, 0, Math.cos(a + 0.52) * 0.42]} />
+              </group>
+            );
+          })}
+        </group>
+      );
     case "samurai":
       return (
         <group>
@@ -203,6 +261,56 @@ function Face({ style, eyesRef }: { style: string; eyesRef: RefObject<Group | nu
   );
 
   switch (style) {
+    case "kitsune":
+      // White fox mask: pointed ears, narrow eyes, red markings
+      return (
+        <>
+          <mesh geometry={GEO.mask} material={MASK_WHITE} position-z={0.02} />
+          <group ref={eyesRef} position={[0, 0.07, 0.53]}>
+            <mesh geometry={GEO.maskEye} material={INK} position-x={-0.16} rotation-z={-0.3} />
+            <mesh geometry={GEO.maskEye} material={INK} position-x={0.16} rotation-z={0.3} />
+          </group>
+          <mesh geometry={GEO.maskEar} material={MASK_WHITE} position={[-0.27, 0.48, 0.25]} rotation-z={0.35} />
+          <mesh geometry={GEO.maskEar} material={MASK_WHITE} position={[0.27, 0.48, 0.25]} rotation-z={-0.35} />
+          <mesh geometry={GEO.stripe} material={MASK_RED} position={[-0.17, 0.19, 0.53]} rotation-z={0.5} />
+          <mesh geometry={GEO.stripe} material={MASK_RED} position={[0.17, 0.19, 0.53]} rotation-z={-0.5} />
+          <mesh geometry={GEO.stripe} material={MASK_RED} position={[0, 0.27, 0.53]} />
+          <mesh geometry={GEO.smile} material={MASK_RED} position={[0, -0.14, 0.55]} rotation-z={Math.PI} />
+        </>
+      );
+    case "oni":
+      // Red demon mask: horns, angry brows, fangs
+      return (
+        <>
+          <mesh geometry={GEO.mask} material={MASK_RED} position-z={0.02} />
+          <group ref={eyesRef} position={[0, 0.07, 0.54]}>
+            <mesh geometry={GEO.bigEye} material={GOLD} position-x={-0.16} scale={[1, 0.7, 0.5]} />
+            <mesh geometry={GEO.bigEye} material={GOLD} position-x={0.16} scale={[1, 0.7, 0.5]} />
+          </group>
+          <mesh geometry={GEO.brow} material={INK} position={[-0.16, 0.2, 0.54]} rotation-z={-0.45} />
+          <mesh geometry={GEO.brow} material={INK} position={[0.16, 0.2, 0.54]} rotation-z={0.45} />
+          <mesh geometry={GEO.maskHorn} material={MASK_WHITE} position={[-0.22, 0.5, 0.22]} rotation-z={0.3} />
+          <mesh geometry={GEO.maskHorn} material={MASK_WHITE} position={[0.22, 0.5, 0.22]} rotation-z={-0.3} />
+          <mesh geometry={GEO.mouth} material={INK} position={[0, -0.15, 0.55]} scale={[1.6, 1.4, 1]} />
+          <mesh geometry={GEO.fang} material={MASK_WHITE} position={[-0.07, -0.13, 0.57]} rotation-x={Math.PI} />
+          <mesh geometry={GEO.fang} material={MASK_WHITE} position={[0.07, -0.13, 0.57]} rotation-x={Math.PI} />
+        </>
+      );
+    case "tengu":
+      // Red tengu mask: the long nose, bushy white brows
+      return (
+        <>
+          <mesh geometry={GEO.mask} material={MASK_RED} position-z={0.02} />
+          <group ref={eyesRef} position={[0, 0.1, 0.54]}>
+            <mesh geometry={GEO.eye} material={INK} position-x={-0.16} />
+            <mesh geometry={GEO.eye} material={INK} position-x={0.16} />
+          </group>
+          <mesh geometry={GEO.brow} material={MASK_WHITE} position={[-0.16, 0.23, 0.54]} rotation-z={-0.25} scale={[1.3, 1.6, 1]} />
+          <mesh geometry={GEO.brow} material={MASK_WHITE} position={[0.16, 0.23, 0.54]} rotation-z={0.25} scale={[1.3, 1.6, 1]} />
+          <mesh geometry={GEO.nose} material={MASK_RED} position={[0, -0.02, 0.72]} rotation-x={Math.PI / 2 - 0.15} castShadow />
+          <mesh geometry={GEO.mouth} material={INK} position={[0, -0.2, 0.53]} />
+        </>
+      );
     case "happy":
       return (
         <>

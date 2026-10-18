@@ -6,6 +6,15 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Hats in the Hair tab: Straw hat (700), Samurai helmet (1,500), Crown (2,500). Masks in the Face tab: Kitsune (1,000), Oni (1,200), Tengu (1,400). New items are added at the end of their lists, so saved looks keep their choices.
+
+### Changed
+
+- Customise: tab icons fit inside their frames; item thumbnails are back to their plain look (no frames); the category ribbon is gone; owned items no longer show "Free" / "Wearing".
+- "Buy this item?": your coins sit under the question and the item is centred in the lower box.
+
 ### Changed
 
 - Customise art (`public/ui/wardrobe/`): the tabs are square icon buttons (helmet for Hair, palette for Colour, mask for Face, kimono for Outfit) on the dark frame, with the light frame for the selected tab; item thumbnails sit in the same frames (light for the item you wear or try on); the category name is on a ribbon above the list; item names are on the dark plate.
