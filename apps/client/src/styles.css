@@ -7074,3 +7074,46 @@ button.code-field {
   transform: translateY(1px) scale(0.97);
   transition-duration: 0.06s;
 }
+
+/* ======================================================================
+   Leaderboard list: no sideways scrolling (the hover scale used to spill
+   over), room around the cards so they don't slip under the frame, and a
+   scrollbar inside the frame in the art's colours
+   ====================================================================== */
+
+.board-dialog .leaderboard__list {
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* space for the 2 % hover scale and the shadow, plus the scrollbar gutter */
+  padding: 6px 6px 8px 8px;
+  margin-right: 2px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #b07a3a rgba(90, 56, 26, 0.18);
+}
+
+.board-dialog .leaderboard__list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.board-dialog .leaderboard__list::-webkit-scrollbar-track {
+  margin: 6px 0;
+  border-radius: 999px;
+  background: rgba(90, 56, 26, 0.18);
+}
+
+.board-dialog .leaderboard__list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: linear-gradient(#d9a24e, #a8743e);
+  border: 1px solid #6b3f1d;
+}
+
+.board-dialog .leaderboard__list::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+}
+
+/* The pinned row keeps the same side margins as the list rows */
+.board-dialog__body > .lb-row--pinned {
+  margin: 0 16px 0 8px;
+}

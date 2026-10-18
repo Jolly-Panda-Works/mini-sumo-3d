@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Fixed
 
+- Leaderboard: no horizontal scrollbar when a row is hovered or pressed, and rows no longer slip under the frame; the vertical scrollbar sits inside the frame in the art's colours; a leftover sliver of the old avatar slot behind each picture is gone from the row art.
+
+### Fixed
+
 - Friends and leaderboard rows: hover and press now scale the whole card with its background, not just the content inside it.
 
 ### Changed
