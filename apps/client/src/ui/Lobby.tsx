@@ -66,7 +66,9 @@ export function Lobby() {
               onClick={() => roomManager.startMatch()}
               aria-live="polite"
             >
-              <span className="start-btn__text">{searching ? `Start match in ${searchSeconds}…` : "Start match"}</span>
+              <span className="start-btn__text">
+                {searching ? `Start match in ${searchSeconds}…` : canStart ? "Start match" : "Waiting for others…"}
+              </span>
             </button>
             {!canStart && !searching && (
               <p className="hint">

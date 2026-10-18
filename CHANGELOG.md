@@ -6,6 +6,11 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Friend requests: DECLINE and ACCEPT side by side on one line (ACCEPT on the right).
+- Waiting room: the start button reads "Waiting for others…" until there are at least two wrestlers.
+
 ### Added
 
 - A private room closes when its host leaves before the bout: everyone else gets "Room closed: <host> left" and goes home (a running bout carries on with a new host). The host is warned first ("Close the room?") when others are in the room.

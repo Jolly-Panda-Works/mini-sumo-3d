@@ -101,13 +101,13 @@ export function FriendsPanel() {
           </form>
 
           {data && data.incoming.length > 0 && (
-            <section className="friends__group">
+            <section className="friends__group friends__requests">
               <h3 className="settings__heading">Requests</h3>
               <ul className="friends__list">
                 {data.incoming.map((f) => (
                   <FriendRow key={f.accountId} friend={f} onOpen={() => setViewing(f.accountId)}>
-                    <SmallArt art="btn-accept" label={`Accept ${f.name}`} onClick={() => void answerFriend(f.accountId, true).catch(() => undefined)} />
                     <SmallArt art="btn-decline" label={`Decline ${f.name}`} onClick={() => void answerFriend(f.accountId, false).catch(() => undefined)} />
+                    <SmallArt art="btn-accept" label={`Accept ${f.name}`} onClick={() => void answerFriend(f.accountId, true).catch(() => undefined)} />
                   </FriendRow>
                 ))}
               </ul>
