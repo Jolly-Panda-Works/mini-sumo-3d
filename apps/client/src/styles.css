@@ -7151,3 +7151,58 @@ button.code-field {
 .board-dialog__body > .leaderboard__list + .lb-row--pinned {
   margin-top: -4px;
 }
+
+/* ======================================================================
+   Friend lists (friend picker, friends panel, waiting room): same system
+   as the leaderboard: no sideways scrolling when a card scales on hover,
+   room around the cards, and the art-coloured scrollbar
+   ====================================================================== */
+
+.sub-dialog__body,
+.dialog__body,
+.friends__list {
+  overflow-x: hidden;
+}
+
+.friends__list {
+  padding: 4px 6px 6px;
+}
+
+.sub-dialog__body,
+.dialog__body,
+.dlg-invite-picker .friends__list,
+.lobby__invite .friends__list {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #b07a3a rgba(90, 56, 26, 0.18);
+}
+
+.sub-dialog__body::-webkit-scrollbar,
+.dialog__body::-webkit-scrollbar,
+.friends__list::-webkit-scrollbar {
+  width: 8px;
+  height: 0;
+}
+
+.sub-dialog__body::-webkit-scrollbar-track,
+.dialog__body::-webkit-scrollbar-track,
+.friends__list::-webkit-scrollbar-track {
+  margin: 6px 0;
+  border-radius: 999px;
+  background: rgba(90, 56, 26, 0.18);
+}
+
+.sub-dialog__body::-webkit-scrollbar-thumb,
+.dialog__body::-webkit-scrollbar-thumb,
+.friends__list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: linear-gradient(#d9a24e, #a8743e);
+  border: 1px solid #6b3f1d;
+}
+
+.sub-dialog__body::-webkit-scrollbar-button,
+.dialog__body::-webkit-scrollbar-button,
+.friends__list::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+}

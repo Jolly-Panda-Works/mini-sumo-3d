@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Fixed
 
+- Friend lists (friend picker, friends panel) and popup bodies: no horizontal scrollbar when a card scales on hover; room around the cards; the scrollbar uses the art's colours, like the leaderboard.
+
+### Fixed
+
 - Leaderboard: a half-cut row no longer peeks out between the list and your pinned row; the list fades out at its edges.
 
 ### Changed
