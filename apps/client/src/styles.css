@@ -8310,3 +8310,105 @@ button.code-field {
 .wardrobe__items .items .item--trying .item__frame {
   filter: drop-shadow(0 0 6px #6fb3ff);
 }
+
+/* ======================================================================
+   Customise slot: picture, name and price all inside the rarity frame's
+   inner panel (picture on top, name plate and price under it); lock art
+   ====================================================================== */
+
+.item__frame .item__thumb {
+  top: 14%;
+  bottom: 36%;
+  left: 18%;
+  right: 18%;
+}
+
+.item__frame .item__text {
+  position: absolute;
+  left: 13%;
+  right: 13%;
+  top: 65%;
+  bottom: 13%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+}
+
+.item__frame .item__name--plate {
+  align-self: stretch;
+  max-width: 100%;
+  padding: 1px 4px 2px;
+  font-size: clamp(0.55rem, 2.6cqw, 0.72rem);
+  line-height: 1.15;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item__frame .item__price {
+  font-size: clamp(0.55rem, 2.6cqw, 0.7rem);
+  font-weight: 900;
+  color: #fff4dc;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+  line-height: 1.1;
+}
+
+.item__frame .item__price .coins__img {
+  width: 12px;
+  height: 12px;
+}
+
+/* The lock art (was a drawn lock) */
+.item__frame .item__lock {
+  position: absolute;
+  top: 6%;
+  right: 8%;
+  width: 20%;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.4));
+}
+
+/* Customise slot, as in the sketch: the picture in the upper part of the frame's inner panel,
+   the name in its own box in the lower part, both inside the panel; the lock on the corner.
+   (No price here: it's in the buy window.) */
+.item__frame .item__thumb {
+  top: 15%;
+  bottom: 33%;
+  left: 19%;
+  right: 19%;
+}
+
+.item__frame .item__text {
+  left: 19%;
+  right: 19%;
+  top: 70%;
+  bottom: 15%;
+  overflow: hidden;
+}
+
+.item__frame .item__name--plate {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 1px 3px 2px;
+  border-radius: 3px;
+}
+
+.item__frame .item__lock {
+  top: -4%;
+  right: -2%;
+  width: 22%;
+}
+
+/* The slot grid never scrolls sideways */
+.wardrobe__items {
+  overflow-x: hidden;
+}

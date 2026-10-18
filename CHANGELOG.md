@@ -6,6 +6,14 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Customise slots: the name stays inside the frame (it ran outside), in its own box under the picture; no price on the slot (it's in the buy window); the lock sits on the frame's corner; the grid no longer scrolls sideways.
+
+### Changed
+
+- Customise: each item's picture, name and price sit inside its rarity frame (picture on top, name plate and price under it); the lock on items you don't own uses the new lock art.
+
 ### Added
 
 - Rarity in Customise: every item is common, rare, epic or legendary (from its price: up to 300 / 700 / 1,500 / more), shown by its slot frame (`public/ui/rarity/`); the item you wear gets the glowing equipped frame of its tier. The EQUIPPED badges are in the project for later.
