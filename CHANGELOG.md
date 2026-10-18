@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Customise preview: the camera is much closer and glides to the part being customised: the head for Hair and Colour, a close-up of the face for Face, the belt for Outfit. The wrestler sways far less while idle (hardly at all on Face), so the face reads straight on instead of the eyes sliding round the side of the head.
+
 ### Added
 
 - Particles in the match: a puff of dust at each footstep, a dust trail while dashing, and a burst of sparks on every bump (more for harder hits), on top of the impact ring.

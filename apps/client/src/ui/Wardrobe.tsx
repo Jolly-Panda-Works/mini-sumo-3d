@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Color, Object3D, type InstancedMesh } from "three";
+import { Color, Object3D, Vector3, type InstancedMesh } from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   FACES,
@@ -42,13 +42,24 @@ const REACT_MS = 900;
  * kind of item: hair and colour (a happy head wiggle and hop), face (a nod with a squash),
  * outfit (a jump with a full spin).
  */
-export function PreviewSumo({ appearance, color, reaction }: { appearance: Appearance; color: string; reaction?: Reaction | null }) {
+export function PreviewSumo({
+  appearance,
+  color,
+  reaction,
+  sway = 0.7,
+}: {
+  appearance: Appearance;
+  color: string;
+  reaction?: Reaction | null;
+  /** How far it turns either way while idle (radians); small for face close-ups. */
+  sway?: number;
+}) {
   const parts = useSumoParts();
   useFrame((frame) => {
     const t = frame.clock.elapsedTime;
     const root = parts.root.current;
     if (!root) return;
-    let yaw = Math.sin(t * 0.6) * 0.7;
+    let yaw = Math.sin(t * 0.6) * sway;
     let lift = 0;
     let squash = 0;
     let headTilt = 0;
@@ -85,6 +96,33 @@ export function PreviewSumo({ appearance, color, reaction }: { appearance: Appea
     if (parts.eyes.current) parts.eyes.current.scale.y = t % 3.4 < 0.12 ? 0.2 : 1;
   });
   return <SumoModel parts={parts} color={color} appearance={appearance} showRing={false} />;
+}
+
+/** Where the wardrobe camera looks: the head (hair, colour, face) or the belt (outfits). */
+const FOCUS: Record<CosmeticCategory, { position: [number, number, number]; target: [number, number, number] }> = {
+  // The model stands at y = -0.85 in the preview: head centre ≈ 0.57, belt ≈ -0.25.
+  hair: { position: [0, 0.9, 2.1], target: [0, 0.62, 0] },
+  hairColor: { position: [0, 0.9, 2.1], target: [0, 0.62, 0] },
+  face: { position: [0, 0.68, 1.85], target: [0, 0.55, 0] },
+  outfit: { position: [0, 0.25, 2.7], target: [0, -0.2, 0] },
+  // Not a wardrobe tab (portraits are picked on the profile), but keep the whole wrestler in view.
+  avatar: { position: [0, 0.4, 3.4], target: [0, 0, 0] },
+};
+
+/** Glides the preview camera to the part being customised. */
+export function PreviewCamera({ focus }: { focus: CosmeticCategory }) {
+  const target = useMemo(() => new Vector3(), []);
+  const goal = useMemo(() => new Vector3(), []);
+  useFrame(({ camera }, delta) => {
+    const shot = FOCUS[focus];
+    const k = 1 - Math.exp(-6 * Math.min(delta, 0.1));
+    goal.set(...shot.position);
+    camera.position.lerp(goal, k);
+    goal.set(...shot.target);
+    target.lerp(goal, k);
+    camera.lookAt(target);
+  });
+  return null;
 }
 
 const SPARKLES = 28;
@@ -374,11 +412,12 @@ export function Wardrobe() {
         aside={sideTabs ? tabs : undefined}
       >
         <div className="wardrobe__preview" aria-hidden="true">
-          <Canvas shadows dpr={[1, 2]} camera={{ fov: 32, position: [0, 1.25, 4.6] }}>
+          <Canvas shadows dpr={[1, 2]} camera={{ fov: 32, position: [0, 0.9, 2.1] }}>
+            <PreviewCamera focus={tab.category} />
             <hemisphereLight args={["#F4F7FF", "#7B6A5A", 1.2]} />
             <directionalLight position={[2.5, 4, 3]} intensity={1.6} castShadow />
             <group position-y={-0.85}>
-              <PreviewSumo appearance={previewLook} color={color} reaction={reaction} />
+              <PreviewSumo appearance={previewLook} color={color} reaction={reaction} sway={tab.category === "outfit" ? 0.5 : tab.category === "face" ? 0.12 : 0.28} />
               <PreviewSparkles reaction={reaction} tint={sparkleTint} />
             </group>
           </Canvas>
