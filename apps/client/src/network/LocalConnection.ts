@@ -11,7 +11,7 @@ import type { GameConnection } from "./connection";
 import { localEconomy, type LocalEntry } from "./localEconomy";
 
 /** Offline quick match: a short, natural-feeling "search" before bots fill the room. */
-const OFFLINE_SEARCH_MS = 4000;
+const OFFLINE_SEARCH_MS = 10_000;
 const TICK_MS = 1000 / 30;
 const roundUp100 = (ms: number) => Math.ceil(ms / 100) * 100;
 

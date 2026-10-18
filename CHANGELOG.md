@@ -6,6 +6,14 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- BUY buttons: the price stays inside its field on phones (12 % left padding). Home: the + on the coin frame no longer runs off the screen (22 px).
+
+### Changed
+
+- Every matchmaking wait is 10 s: Training and other quick matches (bots fill the room after 10 s), offline games (was 4 s), paid arenas once a second player is in (was 12 s), and a lone player in a paid arena is refunded after 10 s (was 60 s).
+
 ### Changed
 
 - Home (phones): no text under the Customise and Shop buttons; the Leaderboard button sits under Friends.

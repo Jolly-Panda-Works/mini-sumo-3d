@@ -43,9 +43,9 @@ export const ECONOMY = {
   welcomeCoins: STARTING_COINS,
   rewards: REWARDS,
   /** Paid arenas: start this long after a second player joins (or at once when full). */
-  paidStartDelayMs: 12_000,
+  paidStartDelayMs: 10_000,
   /** Paid arenas: cancel and refund when no opponent arrives in time. */
-  paidCancelAfterMs: 60_000,
+  paidCancelAfterMs: 10_000,
 } as const;
 
 /**

@@ -7745,3 +7745,13 @@ button.code-field {
 .home--hub .arena-row {
   --card: min(72vw, 300px, calc((100dvh - 345px - var(--safe-top) - var(--safe-bottom)) * 456 / 706));
 }
+
+/* BUY price field: the number starts 12 % in, so it stays inside the field on every screen */
+.art--buy__price {
+  padding-left: 12%;
+}
+
+/* Home: the + on the coin frame, kept inside the screen */
+.home .coin-frame__plus {
+  right: 22px;
+}

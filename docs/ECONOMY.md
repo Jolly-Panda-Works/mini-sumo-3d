@@ -75,7 +75,7 @@ Defined once in `ARENA_CONFIG` (`config.ts`) and served to clients by `GET /api/
 
 The Training Arena is always free and open, so a player with zero coins can always keep playing and earning.
 
-Paid arenas are humans only: a prize must come from other players' entries, never from bots. They start automatically 12 s after a second player joins (at once when full), and are **cancelled and refunded** if nobody else joins within 60 s. Each paid bout is a single round; *Play again* takes you back to the arena list for a new entry.
+Paid arenas are humans only: a prize must come from other players' entries, never from bots. They start automatically 10 s after a second player joins (at once when full), and are **cancelled and refunded** if nobody else joins within 10 s. Each paid bout is a single round; *Play again* takes you back to the arena list for a new entry.
 
 ## Payout formula
 
