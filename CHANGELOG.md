@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Customise preview: the 3D view fills its box to the bottom edge (an empty strip showed under the wrestler).
+
 ### Changed
 
 - Customise preview: the camera is much closer and glides to the part being customised: the head for Hair and Colour, a close-up of the face for Face, the belt for Outfit. The wrestler sways far less while idle (hardly at all on Face), so the face reads straight on instead of the eyes sliding round the side of the head.

@@ -7560,3 +7560,21 @@ button.code-field {
   height: max(40px, 11cqw);
   font-size: max(0.8rem, 4cqw);
 }
+
+/* Wardrobe preview: the 3D canvas always fills its box edge to edge (no empty strip below) */
+.wardrobe__preview {
+  position: relative;
+}
+
+.wardrobe__preview > div:first-child {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.wardrobe__preview canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
