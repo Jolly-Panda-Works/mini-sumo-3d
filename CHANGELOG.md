@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Fixed
 
+- Customise slots: the name plate still ran past the frame's right edge (an earlier rule gave it the full width on top of its offset); it now spans only the frame's inner panel.
+
+### Fixed
+
 - Customise slots: the name stays inside the frame (it ran outside), in its own box under the picture; no price on the slot (it's in the buy window); the lock sits on the frame's corner; the grid no longer scrolls sideways.
 
 ### Changed

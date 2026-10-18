@@ -8412,3 +8412,17 @@ button.code-field {
 .wardrobe__items {
   overflow-x: hidden;
 }
+
+/* The name box spans only the frame's inner panel: an earlier rule gave it width: 100%, which
+   with the left offset pushed it past the frame's right edge */
+.wardrobe__items .items .item__frame .item__text {
+  width: auto;
+  left: 19%;
+  right: 19%;
+}
+
+.wardrobe__items .items .item__frame .item__name--plate {
+  align-self: stretch;
+  width: 100%;
+  max-width: 100%;
+}
