@@ -7884,3 +7884,16 @@ button.code-field {
 .arena-row img {
   -webkit-user-drag: none;
 }
+
+/* The new square buttons: settings, shop, leaderboard (same size as the others) */
+.gear-icon {
+  display: block;
+  width: 48px;
+  height: auto;
+}
+
+.hub__shop-art,
+.hub__leaderboard img {
+  width: 56px;
+  height: auto;
+}

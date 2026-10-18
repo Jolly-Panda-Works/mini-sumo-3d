@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- New button art for Settings (home and in the match), Shop and Leaderboard. Art for daily tasks (`ui/icon-daily.webp`) and the lucky wheel (`ui/icon-wheel.webp`) is in the project for later.
+
 ### Added
 
 - Arenas: drag the row with the mouse to scroll it; on release it settles on the nearest card. A drag doesn't count as a click, so letting go over PLAY doesn't start a bout.

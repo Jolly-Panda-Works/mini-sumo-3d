@@ -75,7 +75,7 @@ export function MainMenu() {
               <Icon name="customize" size={48} />
             </button>
             <button className="tile-btn tile-btn--square" onClick={() => setShopOpen(true)} aria-label="Shop">
-              <img src={`${import.meta.env.BASE_URL}ui/shop.webp`} alt="" width={360} height={335} />
+              <img src={`${import.meta.env.BASE_URL}ui/icon-shop.webp`} alt="" width={249} height={256} />
             </button>
             <button className="tile-btn tile-btn--square" onClick={() => setFriendsOpen(true)} aria-label="Friends">
               <img src={`${import.meta.env.BASE_URL}ui/friends-icon.webp`} alt="" width={216} height={221} />
@@ -94,7 +94,7 @@ export function MainMenu() {
               <GearIcon />
             </button>
             <button className="tile-btn tile-btn--square" onClick={() => setLeaderboardOpen(true)} aria-label="Leaderboard">
-              <img src={`${import.meta.env.BASE_URL}ui/leaderboard-icon.webp`} alt="" width={216} height={177} />
+              <img src={`${import.meta.env.BASE_URL}ui/icon-leaderboard.webp`} alt="" width={252} height={256} />
             </button>
           </div>
         </header>
@@ -119,7 +119,7 @@ export function MainMenu() {
           <img src={`${import.meta.env.BASE_URL}ui/friends-icon.webp`} alt="" width={216} height={221} />
         </button>
         <button className="tile-btn hub__leaderboard" onClick={() => setLeaderboardOpen(true)} aria-label="Leaderboard">
-          <img src={`${import.meta.env.BASE_URL}ui/leaderboard-icon.webp`} alt="" width={216} height={177} />
+          <img src={`${import.meta.env.BASE_URL}ui/icon-leaderboard.webp`} alt="" width={252} height={256} />
         </button>
         <button className="tile-btn hub__settings" onClick={() => setSettingsOpen(true)} aria-label="Settings">
           <GearIcon />
@@ -134,7 +134,7 @@ export function MainMenu() {
           <Icon name="customize" size={56} />
         </button>
         <button className="hub__side-btn hub__side-btn--shop" onClick={() => setShopOpen(true)} aria-label="Shop">
-          <img className="hub__shop-art" src={`${import.meta.env.BASE_URL}ui/shop.webp`} alt="" width={360} height={335} />
+          <img className="hub__shop-art" src={`${import.meta.env.BASE_URL}ui/icon-shop.webp`} alt="" width={249} height={256} />
         </button>
       </nav>
 
@@ -143,8 +143,9 @@ export function MainMenu() {
   );
 }
 
+/** The settings button art (home and the in-match HUD). */
 export function GearIcon() {
-  return <Icon name="settings" size={48} />;
+  return <img className="gear-icon" src={`${import.meta.env.BASE_URL}ui/icon-settings.webp`} alt="" width={251} height={256} draggable={false} />;
 }
 
 /** The profile frame on the home screen: picture, name and level; opens the profile. */
