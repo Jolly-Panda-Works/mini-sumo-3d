@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { LATE_GAME_MS, MATCH_DURATION_MS, POWER_UPS, POWER_UP_MS, Phase, isPowerUpKind, type PowerUpKind } from "@mini-sumo/shared";
 import { gameStore, sessionStore } from "../network/RoomManager";
 import { useStore } from "../store";
@@ -13,6 +14,12 @@ function formatTime(ms: number): string {
 }
 
 export function HUD({ touch }: { touch: boolean }) {
+  // Marks the page while the match HUD is up (notices are shorter then).
+  useEffect(() => {
+    document.documentElement.classList.add("in-match");
+    return () => document.documentElement.classList.remove("in-match");
+  }, []);
+
   const game = useStore(gameStore);
   const session = useStore(sessionStore);
   const you = game.players.find((p) => p.isYou);

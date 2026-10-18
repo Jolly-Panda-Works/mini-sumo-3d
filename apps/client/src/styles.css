@@ -8583,3 +8583,20 @@ button.code-field {
   width: calc(371px * var(--art-scale));
   max-width: 100%;
 }
+
+/* Notices always sit above the match HUD and the player frames */
+.toasts {
+  position: fixed;
+  z-index: 95;
+  pointer-events: none;
+}
+
+/* OUT: each frame has its own layer (its drop shadow), so the frame of a wrestler who's out
+   comes forward, and its OUT banner isn't hidden by the next frame */
+.frame.frame--out {
+  z-index: 2;
+}
+
+.frame__state.frame__state--out {
+  z-index: 3;
+}

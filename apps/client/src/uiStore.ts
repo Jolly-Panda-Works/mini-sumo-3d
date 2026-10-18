@@ -122,6 +122,8 @@ export const setLeaderboardOpen = (leaderboardOpen: boolean) => uiStore.update({
 let toastId = 0;
 
 export function pushToast(text: string, tone: Toast["tone"] = "info", durationMs = 2600): void {
+  // During a match a notice shows for 2 s at most, so it doesn't sit over the action.
+  if (document.documentElement.classList.contains("in-match")) durationMs = Math.min(durationMs, 2000);
   const id = ++toastId;
   const toasts = [...uiStore.get().toasts, { id, text, tone }].slice(-4);
   uiStore.update({ toasts });

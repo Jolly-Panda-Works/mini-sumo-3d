@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Fixed
 
+- Match: notices show above the HUD and frames, for 2 s at most; a wrestler's OUT banner is no longer hidden by the next player frame.
+
+### Fixed
+
 - Coin shop: the CLAIM / CLAIMED button is the same size as the COMING SOON buttons.
 
 ### Changed
