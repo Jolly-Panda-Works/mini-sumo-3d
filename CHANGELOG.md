@@ -8,6 +8,12 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Added
 
+- Five new arenas with their own art and 3D look, in order after Training and Rookie: Amateur (150 coins, level 3), Pro, Veteran (1,000, level 8), Champion (new art), Master (5,000, level 15), Legend (10,000, level 20), Godlike (25,000, level 30). Higher arenas give more XP (up to ×6) and tougher bots.
+- Private Room is the first arena card: it opens a private room and (online) the friend picker.
+- Leaderboard art: the board frame with its plaque (stretches to the screen while the plaque stays sharp), row cards (yours in blue), the rank circle from 4th place on, the score box with its star, and the leaderboard buttons on the home screen.
+
+### Added
+
 - After a bout, ADD next to every other wrestler sends a friend request (shows "Sent" / "Friend" afterwards).
 - Bot players: 20 bot accounts fill the leaderboard and gain XP every day. In-game bots play as them (name, look, level), so you can add a bot as a friend too: it accepts after about 20 seconds, is online most of the time, and joins your room as a bot when you invite it (private rooms and Training).
 - API: `POST /api/friends/request { accountId }` (6 new tests, 153 total).

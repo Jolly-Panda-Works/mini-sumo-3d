@@ -67,7 +67,7 @@ export function Dialog({
    * "sub": the smaller frame (public/ui/popup-sub.webp) for a popup opened on top of
    * another one (About, buying an item, editing the name…).
    */
-  variant?: "main" | "sub" | "welcome";
+  variant?: "main" | "sub" | "welcome" | "board";
 }) {
   const id = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -98,7 +98,21 @@ export function Dialog({
       style={{ zIndex }}
       onClick={(e) => e.target === e.currentTarget && requestClose()}
     >
-      {variant === "welcome" ? (
+      {variant === "board" ? (
+        <div className={`dialog-wrap dialog-wrap--board ${wrapClass}`}>
+          <section className="board-dialog" role={role} aria-modal="true" aria-labelledby={id}>
+            <h2 id={id} className="visually-hidden">
+              {title}
+            </h2>
+            {!hideClose && (
+              <button ref={closeRef} type="button" className="board-dialog__close" onClick={requestClose} aria-label="Close" data-sfx="none">
+                <img src={`${BASE}ui/close.webp`} alt="" draggable={false} />
+              </button>
+            )}
+            <div className={`board-dialog__body ${bodyClassName}`}>{children}</div>
+          </section>
+        </div>
+      ) : variant === "welcome" ? (
         <div className={`dialog-wrap dialog-wrap--welcome ${wrapClass}`}>
           <section className="welcome-dialog" role={role} aria-modal="true" aria-labelledby={id}>
             <h2 id={id} className="visually-hidden">

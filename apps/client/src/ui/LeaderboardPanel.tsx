@@ -50,7 +50,7 @@ export function LeaderboardPanel() {
   useLayoutEffect(updatePin, [board]);
 
   return (
-    <Dialog title="Leaderboard" onClose={() => setLeaderboardOpen(false)} className="leaderboard" bodyClassName="leaderboard__body">
+    <Dialog title="Leaderboard" onClose={() => setLeaderboardOpen(false)} className="leaderboard" bodyClassName="leaderboard__body" variant="board">
       {!online ? (
         <p className="leaderboard__note">The leaderboard needs the game server. Connect to the internet and try again.</p>
       ) : error ? (
@@ -92,10 +92,7 @@ function Row({ entry, you = false, pinned = false, rowRef }: { entry: Leaderboar
         <span>Lvl {entry.level}</span>
       </span>
       <span className="lb-row__score" aria-label={`${entry.xp} XP`}>
-        <span className="lb-row__star" aria-hidden="true">
-          ★
-        </span>
-        {entry.xp.toLocaleString("en-US")}
+        <span className="lb-row__score-value">{entry.xp.toLocaleString("en-US")}</span>
       </span>
     </>
   );

@@ -6808,3 +6808,158 @@ button.code-field {
   font-size: clamp(0.55rem, 2.6cqw, 0.7rem);
   font-weight: 900;
 }
+
+/* ======================================================================
+   Leaderboard art: the board frame (public/ui/lb-panel.webp, 700×597)
+   as a 9-slice so the plaque stays sharp while the frame grows to the
+   screen; art rows, rank circle and score box
+   ====================================================================== */
+
+.dialog-wrap--board {
+  width: min(94vw, 460px);
+  max-width: none;
+  container-type: inline-size;
+}
+
+.board-dialog {
+  position: relative;
+  height: min(calc(100dvh - 32px), 760px);
+  box-sizing: border-box;
+  border-style: solid;
+  border-width: calc(100cqw * 185 / 700) calc(100cqw * 45 / 700) calc(100cqw * 40 / 700);
+  border-image-source: var(--ui-lb-panel);
+  border-image-slice: 185 45 40 fill;
+  border-image-width: calc(100cqw * 185 / 700) calc(100cqw * 45 / 700) calc(100cqw * 40 / 700);
+  border-image-repeat: stretch;
+  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.35));
+}
+
+.board-dialog__close {
+  position: absolute;
+  top: calc(-100cqw * 150 / 700);
+  right: calc(-100cqw * 30 / 700);
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.board-dialog__close img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.board-dialog__body {
+  height: 100%;
+  margin-top: calc(-100cqw * 40 / 700);
+  padding: 6px 2px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.board-dialog .leaderboard__note {
+  color: #3a1d05;
+}
+
+/* Rows on the row card art (inner strip 3.4–96.5 % × 20–80 %) */
+.lb-row {
+  position: relative;
+  min-height: 0;
+  aspect-ratio: 700 / 140;
+  padding: 0 4.5% 0 4%;
+  gap: 2.4%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--ui-lb-row) center / 100% 100% no-repeat;
+  color: #3a1d05;
+}
+
+.lb-row--you,
+.lb-row--pinned {
+  background: var(--ui-lb-row-you) center / 100% 100% no-repeat;
+  color: #fff4dc;
+  border: 0;
+  box-shadow: none;
+}
+
+.lb-row--pinned {
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+}
+
+.lb-row__rank {
+  width: 11%;
+}
+
+.lb-row__rank img {
+  width: 100%;
+  height: auto;
+}
+
+.lb-row__num {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--ui-lb-rank) center / contain no-repeat;
+  color: #f2c14e;
+  font-size: clamp(0.62rem, 3.4cqw, 0.95rem);
+  text-shadow: 0 1px 0 #3a1d05;
+}
+
+.lb-row__avatar {
+  width: 11%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid #8a5a2b;
+  box-shadow: 0 0 0 2px #f2c14e;
+}
+
+.lb-row--you .lb-row__who span,
+.lb-row--pinned .lb-row__who span {
+  opacity: 0.85;
+}
+
+.lb-row__score {
+  position: relative;
+  width: 27%;
+  aspect-ratio: 300 / 121;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--ui-lb-score) center / 100% 100% no-repeat;
+}
+
+.lb-row__score-value {
+  position: absolute;
+  left: 35.7%;
+  top: 19%;
+  width: 55%;
+  height: 58%;
+  display: grid;
+  place-items: center;
+  color: #ffe7a8;
+  font-size: clamp(0.62rem, 3.2cqw, 0.9rem);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Home: leaderboard buttons */
+.hub__trophy-art {
+  width: 64px;
+  height: auto;
+}
+
+.art--leaderboard-wide {
+  width: 170px;
+}

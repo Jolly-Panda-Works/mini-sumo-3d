@@ -54,18 +54,24 @@ Defined once in `ARENA_CONFIG` (`config.ts`) and served to clients by `GET /api/
 
 | Arena | Entry | Players | Unlock | Max prize (4 players) |
 | --- | ---: | :---: | --- | ---: |
+| Private room | free | 2–4 | – | no coins (XP only), friends and bots |
 | Training | free | 2–4 | – | no coins (XP only) |
 | Rookie | 50 | 2–4 | level 1 | 180 |
+| Amateur | 150 | 2–4 | level 3 | 540 |
 | Pro | 500 | 2–4 | level 5 | 1,800 |
+| Veteran | 1,000 | 2–4 | level 8 | 3,600 |
 | Champion | 2,000 | 2–4 | level 10 | 7,200 |
+| Master | 5,000 | 2–4 | level 15 | 18,000 |
+| Legend | 10,000 | 2–4 | level 20 | 36,000 |
+| Godlike | 25,000 | 2–4 | level 30 | 90,000 |
 
 **Level-up rewards:** reaching a level pays `50 + 25 × level` coins (level 2 = 100, level 5 = 175, level 10 = 300); several levels at once add up.
 
 **Daily coins:** the coin shop gives 100 free coins once a day.
 
-**Levels:** every finished bout (at least 20 s, not left early) gives XP: 20, +30 for a win, ×1 / ×1.5 / ×2 / ×3 for Training / Rookie / Pro / Champion. Total XP for a level is `50 × (level − 1) × level` (level 2 = 100, level 5 = 1,000, level 10 = 4,500). Arenas, rewards, prizes and levels are defined once in `packages/shared/src/economy.ts` and used by both the local economy and the server.
+**Levels:** every finished bout (not left early) gives XP: 20, +30 for a win, times the arena's multiplier: Training and private rooms ×1, Rookie ×1.5, Amateur ×1.75, Pro ×2, Veteran ×2.5, Champion ×3, Master ×4, Legend ×5, Godlike ×6. Total XP for a level is `50 × (level − 1) × level` (level 2 = 100, level 5 = 1,000, level 10 = 4,500). Arenas, rewards, prizes and levels are defined once in `packages/shared/src/economy.ts` and used by both the local economy and the server.
 
-**Bots:** on the device, every arena is played against bots. Training uses the difficulty picked on its card; Rookie, Pro and Champion pick one at random for their tier (Rookie easy or normal, Pro mostly normal, Champion mostly hard). Online, paid arenas are humans only.
+**Bots:** on the device, every arena is played against bots. Training uses the difficulty picked on its card; paid arenas pick one at random for their tier (Rookie easy or normal, Amateur mostly normal, Pro and Veteran normal or hard, Champion mostly hard, Master / Legend / Godlike almost always hard). Online, paid arenas are humans only.
 
 The Training Arena is always free and open, so a player with zero coins can always keep playing and earning.
 

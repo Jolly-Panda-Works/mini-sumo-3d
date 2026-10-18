@@ -366,8 +366,13 @@ export interface ArenaDef {
 export const ARENA_DEFS: readonly ArenaDef[] = [
   { id: "training", name: "Training Arena", description: "Free practice bouts.", entryFee: 0, minPlayers: 2, maxPlayers: 4, economyFeePercent: 0, bots: true, requiredLevel: 1, enabled: true },
   { id: "rookie", name: "Rookie Arena", description: "Low-stakes bouts.", entryFee: 50, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 1, enabled: true },
+  { id: "amateur", name: "Amateur Arena", description: "A step up from the rookies.", entryFee: 150, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 3, enabled: true },
   { id: "pro", name: "Pro Arena", description: "Tougher wrestlers, bigger pool.", entryFee: 500, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 5, enabled: true },
+  { id: "veteran", name: "Veteran Arena", description: "Seasoned wrestlers and taiko drums.", entryFee: 1000, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 8, enabled: true },
   { id: "champion", name: "Champion Arena", description: "High stakes for proven winners.", entryFee: 2000, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 10, enabled: true },
+  { id: "master", name: "Master Arena", description: "The palace ring of the masters.", entryFee: 5000, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 15, enabled: true },
+  { id: "legend", name: "Legend Arena", description: "Where legends are made.", entryFee: 10000, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 20, enabled: true },
+  { id: "godlike", name: "Godlike Arena", description: "A ring above the clouds.", entryFee: 25000, minPlayers: 2, maxPlayers: 4, economyFeePercent: 10, bots: true, requiredLevel: 30, enabled: true },
 ];
 
 export function arenaDef(id: unknown): ArenaDef | null {
@@ -423,8 +428,11 @@ export function arenaInfos(): ArenaInfo[] {
 export function botLevelForArena(arenaId: string, random: () => number = Math.random): "easy" | "normal" | "hard" {
   const r = random();
   if (arenaId === "rookie") return r < 0.5 ? "easy" : "normal";
+  if (arenaId === "amateur") return r < 0.25 ? "easy" : "normal";
   if (arenaId === "pro") return r < 0.6 ? "normal" : "hard";
+  if (arenaId === "veteran") return r < 0.45 ? "normal" : "hard";
   if (arenaId === "champion") return r < 0.3 ? "normal" : "hard";
+  if (arenaId === "master" || arenaId === "legend" || arenaId === "godlike") return r < 0.1 ? "normal" : "hard";
   return "normal";
 }
 
@@ -464,7 +472,17 @@ export function levelUpCoins(fromLevel: number, toLevel: number): number {
   return total;
 }
 
-const XP_ARENA_MULTIPLIER: Record<string, number> = { training: 1, rookie: 1.5, pro: 2, champion: 3 };
+const XP_ARENA_MULTIPLIER: Record<string, number> = {
+  training: 1,
+  rookie: 1.5,
+  amateur: 1.75,
+  pro: 2,
+  veteran: 2.5,
+  champion: 3,
+  master: 4,
+  legend: 5,
+  godlike: 6,
+};
 
 /** XP for a finished bout: 20 for taking part, +30 for a win, scaled by arena tier. */
 export function xpForMatch(arenaId: string, won: boolean, completed: boolean): number {

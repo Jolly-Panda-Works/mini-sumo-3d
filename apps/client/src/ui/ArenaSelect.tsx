@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { ArenaInfo } from "@mini-sumo/shared";
+import { arenaInfos, type ArenaInfo } from "@mini-sumo/shared";
 import { arenaImage, themeFor } from "../game/arenaThemes";
 import { economyStore } from "../network/economyClient";
 import { roomManager, sessionStore } from "../network/RoomManager";
@@ -10,37 +10,11 @@ import { BotLevelPicker } from "./BotLevelPicker";
 import { Dialog } from "./Dialog";
 import { FreeLabel } from "./ArtButtons";
 import { Icon } from "./Icon";
-import { pushToast } from "../uiStore";
+import { pushToast, setInviteUiOpen } from "../uiStore";
+import { networkStore } from "../network/networkMode";
 
-/**
- * Display-only preview of the paid arenas for when the server's catalog isn't available.
- * The server (economy/config.ts) is the authority for real fees and prizes.
- */
-function preview(id: string, name: string, entryFee: number, maxPrize: number, level: number): ArenaInfo {
-  return {
-    id,
-    name,
-    description: "",
-    entryFee,
-    currency: "coins",
-    minPlayers: 2,
-    maxPlayers: 4,
-    economyFeePercent: 10,
-    maxPrize,
-    payoutRule: "",
-    drawPolicy: "refund",
-    bots: false,
-    requires: { level },
-    enabled: true,
-  };
-}
-
-const PREVIEW: ArenaInfo[] = [
-  preview("training", "Training Arena", 0, 0, 1),
-  preview("rookie", "Rookie Arena", 100, 360, 1),
-  preview("pro", "Pro Arena", 500, 1800, 5),
-  preview("champion", "Champion Arena", 2000, 7200, 10),
-];
+// Same table as the economy (fees, prizes, levels): shown when the server's catalog isn't loaded.
+const PREVIEW: ArenaInfo[] = arenaInfos();
 
 /** Paid arenas side by side: art, mood, entry fee, prize and an Enter button. */
 export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) {
@@ -115,6 +89,7 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
       )}
 
       <ul className="arena-row" aria-label="Arenas" ref={rowRef}>
+        <PrivateRoomCard busy={busy} />
         {arenas.map((arena) => {
           const theme = themeFor(arena.id);
           const free = arena.entryFee === 0;
@@ -213,5 +188,45 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
         </Dialog>
       )}
     </>
+  );
+}
+
+/** The first card: a private room for you and your friends (bots can join too). */
+function PrivateRoomCard({ busy }: { busy: boolean }) {
+  const theme = themeFor("private");
+  const start = async () => {
+    if (await roomManager.createPrivate(settingsStore.get().name, 4)) {
+      // Online: straight to inviting friends.
+      if (networkStore.get().mode === "online") setInviteUiOpen(true);
+    }
+  };
+  return (
+    <li
+      className="arena-tile arena-tile--private"
+      style={{ ["--accent" as string]: theme.accent, ["--tile-ink" as string]: theme.ink, ["--tile-sky" as string]: theme.sky }}
+    >
+      <img className="arena-tile__art" src={arenaImage("private")} alt="" width={960} height={536} decoding="async" />
+      <span className="arena-tile__label">
+        <FreeLabel className="arena-tile__free" />
+      </span>
+      <div className="arena-tile__body">
+        <h3 className="arena-tile__name">Private Room</h3>
+        <p className="arena-tile__mood">{theme.title}</p>
+        <dl className="arena-tile__facts">
+          <div>
+            <dt>Entry</dt>
+            <dd>Free</dd>
+          </div>
+          <div>
+            <dt>Opponents</dt>
+            <dd>Friends & bots</dd>
+          </div>
+        </dl>
+        <p className="arena-tile__status arena-tile__status--hint">Invite friends, add bots, start when you're ready.</p>
+      </div>
+      <button className="art-btn arena-tile__btn arena-tile__play" disabled={busy} onClick={() => void start()} aria-label="Start a private room">
+        <img src={`${import.meta.env.BASE_URL}ui/btn-play.webp`} alt="" width={287} height={91} draggable={false} />
+      </button>
+    </li>
   );
 }
