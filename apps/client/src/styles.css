@@ -7700,11 +7700,20 @@ button.code-field {
    the part to its right instead of being centred over the coin */
 .art--buy__price {
   box-sizing: border-box;
-  padding-left: 12%;
-  padding-right: 10%;
+  padding-left: 30%;
+  padding-right: 4%;
 }
 
 /* Home: the + on the coin frame sits a little further in */
 .home .coin-frame__plus {
-  right: 17px;
+  right: -22px;
+}
+
+/* Buy window: a profile picture in the middle */
+.buy-confirm__avatar {
+  width: 24cqw;
+  height: 24cqw;
+  border-radius: 12px;
+  border: 3px solid #3a1d05;
+  object-fit: cover;
 }

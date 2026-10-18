@@ -3,9 +3,8 @@ import { NAME_MAX_LENGTH } from "@mini-sumo/shared";
 import { economyStore } from "../network/economyClient";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
-import { pushToast, setProfileOpen, setShopOpen, showWarning } from "../uiStore";
+import { pushToast, setProfileOpen, setShopOpen, showError, showMessage, showWarning } from "../uiStore";
 import { Dialog } from "./Dialog";
-import { BuyButton, NotNowButton } from "./ArtButtons";
 import { avatarSrc } from "./Avatar";
 import { AVATARS, cosmeticItemId, cosmeticPrice } from "@mini-sumo/shared";
 import { buyItem, ownedItems } from "../network/economyClient";
@@ -152,8 +151,6 @@ function AvatarPicker({ onPicked }: { onPicked: () => void }) {
   const economy = useStore(economyStore);
   const owned = ownedItems();
   const balance = economy.profile?.balances.coins ?? 0;
-  const [pending, setPending] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const current = settings.appearance.avatar;
 
   const choose = (index: number) => {
@@ -161,25 +158,56 @@ function AvatarPicker({ onPicked }: { onPicked: () => void }) {
       settingsStore.update({ appearance: { ...settings.appearance, avatar: index } });
       onPicked();
     } else {
-      setError(null);
-      setPending(index);
+      void confirmBuy(index);
     }
   };
 
-  const buy = async () => {
-    if (pending === null) return;
+  /** Same confirmation as in Customise: your coins under the question, the picture, BUY. */
+  const confirmBuy = async (index: number) => {
+    const price = cosmeticPrice(cosmeticItemId("avatar", index));
+    const balanceNow = balance;
+    const choice = await showMessage(
+      "Buy this item?",
+      `A new picture for ${price.toLocaleString("en-US")} Sumo Coins. You have ${balanceNow.toLocaleString("en-US")}.`,
+      [{ id: "buy", label: "Buy", primary: true, price }],
+      {
+        closable: true,
+        titleExtra: (
+          <span className="coin-frame coin-frame--static buy-confirm__coins" aria-label={`Your coins: ${balanceNow}`}>
+            <span className="coin-frame__amount">{compactCoins(balanceNow)}</span>
+          </span>
+        ),
+        body: (
+          <div className="buy-confirm">
+            <div className="buy-confirm__item">
+              <img className="buy-confirm__avatar" src={avatarSrc(index)} alt="" width={160} height={160} />
+            </div>
+          </div>
+        ),
+      },
+    );
+    if (choice !== "buy") return;
+    if (balanceNow < price) {
+      const next = await showWarning("Not enough coins", "You need more Sumo Coins for this. Get some in the coin shop.", [
+        { id: "shop", label: "Coin shop", primary: true },
+        { id: "cancel", label: "Not now" },
+      ]);
+      if (next === "shop") setShopOpen(true);
+      return;
+    }
+    await buy(index);
+  };
+
+  const buy = async (index: number) => {
     try {
-      await buyItem(cosmeticItemId("avatar", pending));
+      await buyItem(cosmeticItemId("avatar", index));
       audio.sample("purchase");
-      settingsStore.update({ appearance: { ...settingsStore.get().appearance, avatar: pending } });
-      setPending(null);
+      settingsStore.update({ appearance: { ...settingsStore.get().appearance, avatar: index } });
       onPicked();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "The purchase failed.");
+      void showError("Couldn't buy", e instanceof Error ? e.message : "The purchase failed.");
     }
   };
-
-  const price = pending === null ? 0 : cosmeticPrice(cosmeticItemId("avatar", pending));
   return (
     <section className="avatars" aria-label="Profile picture">
       <ul className="avatars__grid">
@@ -204,38 +232,6 @@ function AvatarPicker({ onPicked }: { onPicked: () => void }) {
           );
         })}
       </ul>
-      {pending !== null && (
-        <Dialog
-          variant="sub"
-          title="New picture"
-          onClose={() => setPending(null)}
-          className="avatar-buy"
-          hideClose
-          footer={
-            <div className="art-stack">
-              <BuyButton
-                price={price}
-                label={`Buy this picture for ${price} Sumo Coins`}
-                ariaDisabled={balance < price}
-                sfx={balance < price ? undefined : "none"}
-                onClick={() => (balance < price ? void showWarning("Not enough coins", "You need more Sumo Coins for this. Get some in the coin shop.", [
-                    { id: "shop", label: "Coin shop", primary: true },
-                    { id: "cancel", label: "Not now" },
-                  ]).then((choice) => choice === "shop" && setShopOpen(true)) : void buy())}
-              />
-              <NotNowButton label="Not now" onClick={() => setPending(null)} />
-            </div>
-          }
-        >
-          <img className="avatar-buy__img" src={avatarSrc(pending)} alt="" width={160} height={160} />
-          <p className="hint hint--center">You have {compactCoins(balance)} coins.</p>
-          {error && (
-            <p className="notice notice--error" role="alert">
-              {error}
-            </p>
-          )}
-        </Dialog>
-      )}
     </section>
   );
 }

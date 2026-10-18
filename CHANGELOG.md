@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Buying a profile picture uses the same window as Customise: "Buy this item?" with your coins under it, the picture in the middle, BUY with the price and a × instead of NOT NOW.
+
+### Changed
+
 - Your coins show in short form everywhere (home, Customise, the buy window, profile, wallet): 7.9k, 25k, 1.5M; screen readers still hear the exact amount. The + on the home coin frame sits a little further in.
 
 ### Fixed
