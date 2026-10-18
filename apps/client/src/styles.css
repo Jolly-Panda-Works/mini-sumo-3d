@@ -7755,3 +7755,84 @@ button.code-field {
 .home .coin-frame__plus {
   right: 22px;
 }
+
+/* ======================================================================
+   Home on wide screens: profile, customise, shop and friends top left;
+   coins in the top-right corner with settings and the leaderboard under
+   them; the arena row spans the screen, scrolling only when needed with
+   an art-coloured scrollbar
+   ====================================================================== */
+
+.home:not(.home--hub) .home__top {
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+}
+
+.home__left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 2;
+}
+
+.home__right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  z-index: 2;
+}
+
+.home__right .tile-btn {
+  margin-right: 6px;
+}
+
+.home:not(.home--hub) .coin-frame__plus {
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.home:not(.home--hub) .arena-row-wrap {
+  width: calc(100% + 24px + var(--safe-left) + var(--safe-right));
+  max-width: none;
+  margin-left: calc(-12px - var(--safe-left));
+  margin-right: calc(-12px - var(--safe-right));
+}
+
+.home:not(.home--hub) .arena-row {
+  max-width: none;
+  padding-left: 24px;
+  padding-right: 24px;
+  scrollbar-width: thin;
+  scrollbar-color: #b07a3a rgba(90, 56, 26, 0.25);
+}
+
+.home:not(.home--hub) .arena-row::-webkit-scrollbar {
+  height: 10px;
+}
+
+.home:not(.home--hub) .arena-row::-webkit-scrollbar-track {
+  margin: 0 24px;
+  border-radius: 999px;
+  background: rgba(90, 56, 26, 0.25);
+}
+
+.home:not(.home--hub) .arena-row::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: linear-gradient(90deg, #d9a24e, #a8743e);
+  border: 1px solid #6b3f1d;
+}
+
+.home:not(.home--hub) .arena-row::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+}

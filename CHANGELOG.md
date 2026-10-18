@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Home on wide screens: profile, Customise, Shop and Friends top left; coins in the top-right corner with Settings under them and the Leaderboard under that. The arena row spans the whole screen and scrolls only when the cards don't fit, with an art-coloured scrollbar.
+
 ### Fixed
 
 - Customise: the item you wear leads the list when you enter a tab, and the order then stays put (tapping an item no longer jumps it to the top).

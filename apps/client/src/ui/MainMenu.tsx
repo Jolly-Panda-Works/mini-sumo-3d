@@ -68,28 +68,35 @@ export function MainMenu() {
     return (
       <main className="home">
         <header className="home__top">
-          <div className="home__actions">
+          {/* Top left: your profile, then customise, shop and friends */}
+          <div className="home__left">
             <ProfileCard className="home__profile-card" />
-            <button className="tile-btn tile-btn--square" onClick={() => setLeaderboardOpen(true)} aria-label="Leaderboard">
-              <img src={`${import.meta.env.BASE_URL}ui/leaderboard-icon.webp`} alt="" width={216} height={177} />
-            </button>
-            <button className="tile-btn tile-btn--square" onClick={() => setFriendsOpen(true)} aria-label="Friends">
-              <img src={`${import.meta.env.BASE_URL}ui/friends-icon.webp`} alt="" width={216} height={221} />
-            </button>
             <button className="tile-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
               <Icon name="customize" size={48} />
             </button>
-            <button className="tile-btn" onClick={() => setSettingsOpen(true)} aria-label="Settings">
-              <GearIcon />
+            <button className="tile-btn tile-btn--square" onClick={() => setShopOpen(true)} aria-label="Shop">
+              <img src={`${import.meta.env.BASE_URL}ui/shop.webp`} alt="" width={360} height={335} />
             </button>
-            <button className="coin-frame" onClick={() => setShopOpen(true)} aria-label={`Coin shop. Balance: ${balance ?? 0} Sumo Coins`}>
-              <span className="coin-frame__amount" aria-label={`${(balance ?? 0).toLocaleString("en-US")} Sumo Coins`}>{compactCoins(balance ?? 0)}</span>
-              <Icon name="plus" size={26} className="coin-frame__plus" />
+            <button className="tile-btn tile-btn--square" onClick={() => setFriendsOpen(true)} aria-label="Friends">
+              <img src={`${import.meta.env.BASE_URL}ui/friends-icon.webp`} alt="" width={216} height={221} />
             </button>
           </div>
           <h1 className="home__title">
             <img src={`${import.meta.env.BASE_URL}title.webp`} alt={GAME_TITLE} width={1200} height={621} />
           </h1>
+          {/* Top right corner: coins, settings under them, the leaderboard under that */}
+          <div className="home__right">
+            <button className="coin-frame" onClick={() => setShopOpen(true)} aria-label={`Coin shop. Balance: ${balance ?? 0} Sumo Coins`}>
+              <span className="coin-frame__amount" aria-label={`${(balance ?? 0).toLocaleString("en-US")} Sumo Coins`}>{compactCoins(balance ?? 0)}</span>
+              <Icon name="plus" size={26} className="coin-frame__plus" />
+            </button>
+            <button className="tile-btn" onClick={() => setSettingsOpen(true)} aria-label="Settings">
+              <GearIcon />
+            </button>
+            <button className="tile-btn tile-btn--square" onClick={() => setLeaderboardOpen(true)} aria-label="Leaderboard">
+              <img src={`${import.meta.env.BASE_URL}ui/leaderboard-icon.webp`} alt="" width={216} height={177} />
+            </button>
+          </div>
         </header>
         <ArenaRow variant="row" />
         {error}
