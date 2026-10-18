@@ -6,6 +6,16 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Daily coins online: the server grants them once a day (`POST /api/daily-gift`, ledger "daily_gift"); the profile says whether they're available (1 new test, 157 total).
+
+### Changed
+
+- Coin shop: the daily coins card has no FREE label; its button is Claim or Claimed (online and offline; it used to say Coming soon online).
+- Customise: square slots in a grid (picture on top, name and price under it) that fit small screens; a lock on items you don't own; tapping one tries it on and opens the buy window with its price.
+- Friends: no "Start private room" button (private rooms start from their arena card). Friend picker: Add random player sits a little lower.
+
 ### Changed
 
 - Edit name popup in its own frame (EDIT NAME on the plaque): the name field and SAVE on the board, a × in the corner.

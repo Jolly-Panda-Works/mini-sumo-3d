@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { compactCoins } from "./Coins";
+import { Coins, compactCoins } from "./Coins";
 import { Color, Object3D, Vector3, type InstancedMesh } from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
@@ -17,7 +17,6 @@ import {
 } from "@mini-sumo/shared";
 import { buyItem, economyStore, ownedItems, saveAppearanceRemote } from "../network/economyClient";
 import { Dialog } from "./Dialog";
-import { BuyButton } from "./ArtButtons";
 import { ThumbStudio, requestThumb, thumbKey, useThumb } from "./WardrobeThumbs";
 import { PHONE_QUERY, useMediaQuery } from "../useMediaQuery";
 import { audio } from "../audio/AudioManager";
@@ -229,7 +228,7 @@ interface ItemGridProps {
 }
 
 /** One category's items: owned first (in catalog order), then the rest by price. */
-function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick, trying, onBuy, lead }: ItemGridProps) {
+function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick, trying, lead }: ItemGridProps) {
   const items = tab.options
     .map((option, index) => {
       const id = cosmeticItemId(tab.category, index);
@@ -258,13 +257,21 @@ function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick, tryin
           >
             <ItemThumb category={tab.category} look={look} index={index} color={color} />
             {option.hex && <span className="item__swatch" style={{ background: option.hex }} aria-hidden="true" />}
+            {!isOwned && (
+              <span className="item__lock" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18">
+                  <rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="#f2c14e" stroke="#3a1d05" strokeWidth="1.8" />
+                  <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="#3a1d05" strokeWidth="2.2" strokeLinecap="round" />
+                  <circle cx="12" cy="15.5" r="1.6" fill="#3a1d05" />
+                </svg>
+              </span>
+            )}
             <span className="item__text">
               <span className="item__name item__name--plate">{option.label}</span>
               {/* Owned items need no label; items you don't own show their price (or that you're trying them) */}
-              {!isOwned && index === trying && <span className="item__price">Trying on</span>}
+              {!isOwned && <span className="item__price">{index === trying ? "Trying on" : <Coins amount={price} compact />}</span>}
             </span>
           </button>
-          {!isOwned && <BuyButton className="item__buy" price={price} label={`Buy ${option.label} for ${price} Sumo Coins`} sfx="none" onClick={() => onBuy(index)} />}
         </div>
       ))}
     </div>

@@ -185,6 +185,7 @@ export const localEconomy = {
         earned: state.rewardDay === day ? state.rewardDayTotal : 0,
         cap: REWARDS.dailyCap,
         firstMatchBonusAvailable: state.bonusDay !== day,
+        giftAvailable: localEconomy.dailyGiftAvailable(),
       },
     };
   },

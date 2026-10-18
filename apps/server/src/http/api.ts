@@ -22,6 +22,7 @@ import type { PaymentService } from "../economy/payments.js";
  *   POST /api/shop/purchase      { itemId, idempotencyKey }              (Bearer token)
  *   PUT  /api/profile/appearance { hair, hairColor, face, outfit }       (Bearer token)
  *   POST /api/profile/sync { name, appearance, xp, matches, wins, updatedAt } (Bearer token)
+ *   POST /api/daily-gift                    the free daily coins (once a day) (Bearer token)
  *   GET  /api/leaderboard?limit=100         top players by XP + your rank    (Bearer token)
  *   GET  /api/friends                       your code, friends, requests     (Bearer token)
  *   GET  /api/friends/profile?id=…          a friend's profile               (Bearer token)
@@ -180,6 +181,8 @@ export function createApiHandler(economy: Economy | null, payments: PaymentServi
         const body = await readJson(req);
         if (!body) send(res, 400, { error: "bad_request", message: "Invalid request." });
         else send(res, 200, { appearance: economy.saveAppearance(accountId, body) });
+      } else if (route === "POST /api/daily-gift") {
+        send(res, 200, economy.claimDailyGift(accountId));
       } else if (route === "GET /api/leaderboard") {
         const body: LeaderboardResponse = economy.leaderboard(accountId, Number(url.searchParams.get("limit") ?? 100));
         send(res, 200, body);

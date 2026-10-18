@@ -2,7 +2,8 @@ import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { APPEARANCE_LIMITS, NAME_MAX_LENGTH,
+import {
+  DAILY_GIFT_COINS, APPEARANCE_LIMITS, NAME_MAX_LENGTH,
   Currency,
   STARTER_ITEMS,
   restrictToOwned,
@@ -231,6 +232,33 @@ export class Economy {
     if (!columns.some((c) => c.name === "is_bot")) this.db.exec("ALTER TABLE accounts ADD COLUMN is_bot INTEGER NOT NULL DEFAULT 0");
     this.db.exec("CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)");
     if (this.botPlayers) this.ensureBots();
+  }
+
+  // ------------------------------------------------------------ daily gift
+
+  /** The free daily coins: once per UTC day (the ledger key makes it so). */
+  private dailyGiftKey(accountId: string): string {
+    return `daily_gift:${accountId}:${utcDay(this.now())}`;
+  }
+
+  dailyGiftAvailable(accountId: string): boolean {
+    return !row(this.db.prepare("SELECT id FROM transactions WHERE idempotency_key = ?").get(this.dailyGiftKey(accountId)));
+  }
+
+  claimDailyGift(accountId: string): { granted: number; balance: number } {
+    if (!this.flags.economy) throw new EconomyError("disabled", "The economy is disabled.");
+    this.account(accountId);
+    const result = this.apply({
+      accountId,
+      currency: Currency.Coins,
+      amount: DAILY_GIFT_COINS,
+      category: "daily_gift",
+      reason: "Daily coins",
+      key: this.dailyGiftKey(accountId),
+    });
+    if (result.duplicate) throw new EconomyError("bad_request", "Already claimed today. Come back tomorrow.");
+    this.emit("daily_gift", { accountId, amount: DAILY_GIFT_COINS });
+    return { granted: DAILY_GIFT_COINS, balance: result.balance };
   }
 
   // ------------------------------------------------------------ bot players
@@ -486,7 +514,12 @@ export class Economy {
       appearance: this.appearanceOf(accountId),
       stats: { matches: account.matches, wins: account.wins, coinsEarned: this.coinsEarned(accountId) },
       level: levelFromXp(account.xp),
-      daily: { earned, cap: ECONOMY.rewards.dailyCap, firstMatchBonusAvailable: account.bonus_day !== today },
+      daily: {
+        earned,
+        cap: ECONOMY.rewards.dailyCap,
+        firstMatchBonusAvailable: account.bonus_day !== today,
+        giftAvailable: this.dailyGiftAvailable(accountId),
+      },
     };
   }
 

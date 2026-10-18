@@ -30,3 +30,19 @@ describe("bout stats and XP", () => {
     expect(economy.profile(accountId).stats.matches).toBe(0);
   });
 });
+
+describe("daily gift", () => {
+  it("can be claimed once a day", () => {
+    let now = new Date("2026-10-18T10:00:00Z");
+    const economy = new Economy(":memory:", FLAGS, silentEventSink, () => now, false);
+    const { accountId } = economy.createGuest();
+    const before = economy.balance(accountId);
+    expect(economy.profile(accountId).daily.giftAvailable).toBe(true);
+    expect(economy.claimDailyGift(accountId).granted).toBe(100);
+    expect(economy.balance(accountId)).toBe(before + 100);
+    expect(economy.profile(accountId).daily.giftAvailable).toBe(false);
+    expect(() => economy.claimDailyGift(accountId)).toThrow();
+    now = new Date("2026-10-19T00:30:00Z");
+    expect(economy.profile(accountId).daily.giftAvailable).toBe(true);
+  });
+});

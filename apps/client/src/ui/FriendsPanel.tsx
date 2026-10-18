@@ -5,7 +5,7 @@ import { networkStore } from "../network/networkMode";
 import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
-import { pushToast, setFriendsOpen, setInviteUiOpen, showError } from "../uiStore";
+import { pushToast, setFriendsOpen, showError } from "../uiStore";
 import { avatarSrc } from "./Avatar";
 import { Dialog } from "./Dialog";
 import { FriendProfilePopup } from "./FriendProfilePopup";
@@ -29,19 +29,6 @@ export function FriendsPanel() {
     return () => window.clearInterval(timer);
   }, [online]);
 
-  // Opens a private room, then the friend picker to invite friends into it.
-  const [creating, setCreating] = useState(false);
-  const playWithFriends = async () => {
-    setCreating(true);
-    try {
-      if (await roomManager.createPrivate(settingsStore.get().name, 4)) {
-        setFriendsOpen(false);
-        setInviteUiOpen(true);
-      }
-    } finally {
-      setCreating(false);
-    }
-  };
 
   const add = async (event: FormEvent) => {
     event.preventDefault();
@@ -73,9 +60,6 @@ export function FriendsPanel() {
         <p className="friends__offline">Friends need the game server. Connect to the internet and try again.</p>
       ) : (
         <>
-          <button className="plank-btn plank-btn--primary friends__play" disabled={creating} onClick={() => void playWithFriends()}>
-            {creating ? "Opening a room…" : "Start private room"}
-          </button>
 
           <section className="friends__code">
             <span className="field__label">Your friend code</span>

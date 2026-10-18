@@ -214,7 +214,13 @@ export interface ProfileResponse {
   /** Progression: level from total XP. */
   level: LevelInfo;
   /** Free rewards already earned today (UTC) and the daily cap. */
-  daily: { earned: number; cap: number; firstMatchBonusAvailable: boolean };
+  daily: {
+    earned: number;
+    cap: number;
+    firstMatchBonusAvailable: boolean;
+    /** The free daily coins (coin shop) can be claimed today. */
+    giftAvailable: boolean;
+  };
 }
 
 /**
