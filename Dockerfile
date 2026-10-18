@@ -3,7 +3,7 @@
 # Mini Sumo in one container: the game server (Colyseus + economy API, SQLite) also serves
 # the web game, so the page, the API, matchmaking and the game websockets share one port.
 #
-#   docker compose up -d --build        -> http://<host>:5803
+#   docker compose up -d --build        -> http://<host>:6803
 #
 # Built for networks with restricted access (e.g. Iran):
 #   * Base image through a Docker Hub mirror (REGISTRY build arg; Docker Hub refuses

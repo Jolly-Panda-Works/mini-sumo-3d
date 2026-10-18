@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Docker: the game is published on port 6803 (was 5803); `WEB_PORT` still overrides it.
+
+### Changed
+
 - Builds (Android, Cafe Bazaar, GitHub Pages) connect to the game server at `wss://sumo.ryujin.fans` by default, and invite links open `https://sumo.ryujin.fans/`. Repository variables still override both; local development keeps using a local server.
 
 ### Added

@@ -2,14 +2,14 @@
 
 One container (`web`): the Node game server also serves the built web game, so the page,
 the economy API (`/api`), matchmaking (`/matchmake`), `/health` and the game websockets all
-share one port (80 inside the container, 5803 outside by default). The database (SQLite) is
+share one port (80 inside the container, 6803 outside by default). The database (SQLite) is
 in the `mini-sumo-data` volume. The web game is built with `VITE_SERVER_URL=same-origin`, so it
 finds the server on the same address as the page.
 
 ```bash
 cp .env.docker.example .env   # optional
 docker compose up -d --build
-# open http://<server-ip>:5803
+# open http://<server-ip>:6803
 ```
 
 Logs: `docker compose logs -f web`. Update: `git pull && docker compose up -d --build`.
@@ -38,4 +38,4 @@ an `https://` page.
 ## The Android app and this server
 
 The Android app is built by GitHub Actions. To make it use this server, set the repository
-variable `VITE_SERVER_URL` to `wss://your-domain` (or `ws://ip:5803` for testing).
+variable `VITE_SERVER_URL` to `wss://your-domain` (or `ws://ip:6803` for testing).
