@@ -7142,10 +7142,7 @@ button.code-field {
 
 /* Leaderboard: the list fades out at its edges, so a half-cut row never peeks out next to
    the pinned row (or the frame) */
-.board-dialog .leaderboard__list {
-  -webkit-mask-image: linear-gradient(transparent 0, #000 14px, #000 calc(100% - 22px), transparent 100%);
-  mask-image: linear-gradient(transparent 0, #000 14px, #000 calc(100% - 22px), transparent 100%);
-}
+
 
 .board-dialog__body > .lb-row--pinned + .leaderboard__list,
 .board-dialog__body > .leaderboard__list + .lb-row--pinned {
@@ -7205,4 +7202,24 @@ button.code-field {
 .friends__list::-webkit-scrollbar-button {
   display: none;
   height: 0;
+}
+
+/* ======================================================================
+   Soft edges on every scrolling list (classes set by ui/scrollFade.ts):
+   an edge fades only when there's more to scroll beyond it
+   ====================================================================== */
+
+.fade-top {
+  -webkit-mask-image: linear-gradient(transparent 0, #000 22px);
+  mask-image: linear-gradient(transparent 0, #000 22px);
+}
+
+.fade-bottom {
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 26px), transparent 100%);
+  mask-image: linear-gradient(#000 calc(100% - 26px), transparent 100%);
+}
+
+.fade-top.fade-bottom {
+  -webkit-mask-image: linear-gradient(transparent 0, #000 22px, #000 calc(100% - 26px), transparent 100%);
+  mask-image: linear-gradient(transparent 0, #000 22px, #000 calc(100% - 26px), transparent 100%);
 }

@@ -8,6 +8,7 @@ import "@fontsource/baloo-2/700.css";
 import "@fontsource/baloo-2/800.css";
 import "./styles.css";
 import { bootTrack, preloadImage, startBoot } from "./boot";
+import { startScrollFade } from "./ui/scrollFade";
 import { roomManager } from "./network/RoomManager";
 import { music } from "./audio/Music";
 import { initPlayGames } from "./network/playGames";
@@ -62,6 +63,8 @@ window.addEventListener("keydown", unlockAudio);
 // Start the menu music as soon as the loading screen ends (where the device allows sound
 // without a tap: the Android app, or browsers that already trust the site).
 window.addEventListener("boot:done", unlockAudio, { once: true });
+
+startScrollFade();
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Missing #root element");

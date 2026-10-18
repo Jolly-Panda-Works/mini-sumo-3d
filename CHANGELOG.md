@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Every scrolling list (popups, friends, leaderboard, wardrobe, messages) fades out softly at an edge when there's more to scroll beyond it; lists that fit don't fade, and the top/bottom edge returns to normal at the start/end.
+
 ### Fixed
 
 - Friend lists (friend picker, friends panel) and popup bodies: no horizontal scrollbar when a card scales on hover; room around the cards; the scrollbar uses the art's colours, like the leaderboard.
