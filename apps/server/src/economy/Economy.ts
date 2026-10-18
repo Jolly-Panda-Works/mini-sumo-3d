@@ -2,7 +2,7 @@ import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { NAME_MAX_LENGTH,
+import { APPEARANCE_LIMITS, NAME_MAX_LENGTH,
   Currency,
   STARTER_ITEMS,
   restrictToOwned,
@@ -123,9 +123,28 @@ CREATE TABLE IF NOT EXISTS match_results (
 );
 `;
 
+/** Names of the bot players (leaderboard regulars and in-game bots). */
+const BOT_PLAYERS = [
+  "Kenta", "Mika", "Hiro", "Sora", "Yuki", "Aiko", "Ren", "Nina", "Omid", "Sara",
+  "Arash", "Maya", "Luca", "Kai", "Lina", "Babak", "Neda", "Kaveh", "Shirin", "Mateo",
+] as const;
+
+/** Small deterministic PRNG (bot seeding and the daily drift). */
+function seededRandom(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 interface AccountRow {
   id: string;
   xp: number;
+  is_bot?: number;
   name?: string;
   profile_updated_at?: string;
   appearance: string;
@@ -195,6 +214,8 @@ export class Economy {
     readonly flags: EconomyFlags,
     private readonly emit: EconomyEventSink = consoleEventSink,
     private readonly now: () => Date = () => new Date(),
+    /** Seed the bot players (off in tests that count players). */
+    private readonly botPlayers = true,
   ) {
     if (path !== ":memory:") mkdirSync(dirname(path), { recursive: true });
     this.db = new DatabaseSync(path);
@@ -206,6 +227,63 @@ export class Economy {
     // Migration: name and when the name / look last changed (profile sync from devices).
     if (!columns.some((c) => c.name === "name")) this.db.exec("ALTER TABLE accounts ADD COLUMN name TEXT NOT NULL DEFAULT ''");
     if (!columns.some((c) => c.name === "profile_updated_at")) this.db.exec("ALTER TABLE accounts ADD COLUMN profile_updated_at TEXT NOT NULL DEFAULT ''");
+    // Bot players: real accounts for the leaderboard, friends and in-game bots.
+    if (!columns.some((c) => c.name === "is_bot")) this.db.exec("ALTER TABLE accounts ADD COLUMN is_bot INTEGER NOT NULL DEFAULT 0");
+    this.db.exec("CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)");
+    if (this.botPlayers) this.ensureBots();
+  }
+
+  // ------------------------------------------------------------ bot players
+
+  /** Bot player accounts (the leaderboard regulars; in-game bots take their identities). */
+  botAccounts(): { id: string; name: string; xp: number }[] {
+    return rows<{ id: string; name: string; xp: number }>(this.db.prepare("SELECT id, name, xp FROM accounts WHERE is_bot = 1 ORDER BY id").all());
+  }
+
+  isBot(accountId: string): boolean {
+    return Boolean(row<{ is_bot: number }>(this.db.prepare("SELECT is_bot FROM accounts WHERE id = ?").get(accountId))?.is_bot);
+  }
+
+  /** Creates the bot players once (20 of them, spread over the leaderboard). */
+  private ensureBots(): void {
+    const existing = new Set(this.botAccounts().map((b) => b.id));
+    const rng = seededRandom(20261018);
+    const timestamp = this.timestamp();
+    for (let i = 0; i < BOT_PLAYERS.length; i++) {
+      const id = `bot_${String(i + 1).padStart(2, "0")}`;
+      const xp = Math.round(300 + rng() * rng() * 24_000);
+      const appearance = {
+        hair: Math.floor(rng() * APPEARANCE_LIMITS.hair),
+        hairColor: Math.floor(rng() * APPEARANCE_LIMITS.hairColor),
+        face: Math.floor(rng() * APPEARANCE_LIMITS.face),
+        outfit: Math.floor(rng() * APPEARANCE_LIMITS.outfit),
+        avatar: Math.floor(rng() * APPEARANCE_LIMITS.avatar),
+      };
+      if (existing.has(id)) continue;
+      this.db
+        .prepare(
+          "INSERT INTO accounts (id, token_hash, created_at, xp, appearance, matches, wins, name, profile_updated_at, is_bot) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)",
+        )
+        .run(id, `bot:${id}`, timestamp, xp, JSON.stringify(appearance), Math.round(xp / 40), Math.round(xp / 90), BOT_PLAYERS[i]!, timestamp);
+    }
+  }
+
+  /** Once per day (UTC) every bot player gains some XP, so the leaderboard keeps moving. */
+  driftBots(): void {
+    const today = utcDay(this.now());
+    const last = row<{ value: string }>(this.db.prepare("SELECT value FROM meta WHERE key = 'bot_day'").get())?.value;
+    if (last === today) return;
+    const rng = seededRandom(Number(today.replaceAll("-", "")));
+    this.tx(() => {
+      for (const bot of this.botAccounts()) {
+        const gain = Math.round(rng() * rng() * 900);
+        const won = Math.round(gain / 120);
+        this.db
+          .prepare("UPDATE accounts SET xp = xp + ?, matches = matches + ?, wins = wins + ? WHERE id = ?")
+          .run(gain, Math.max(1, Math.round(gain / 40)), won, bot.id);
+      }
+      this.db.prepare("INSERT INTO meta (key, value) VALUES ('bot_day', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(today);
+    });
   }
 
   /**
@@ -213,6 +291,7 @@ export class Economy {
    * first). Includes your own row even when you're not in the top list.
    */
   leaderboard(accountId: string, limit = 100): LeaderboardResponse {
+    this.driftBots();
     const count = Math.max(1, Math.min(200, Math.floor(limit) || 100));
     const top = rows<{ id: string; name: string; xp: number }>(
       this.db
@@ -462,6 +541,8 @@ export class Economy {
     } catch {
       parsed = {};
     }
+    // Bot players wear anything.
+    if (account.is_bot) return sanitizeAppearance(parsed);
     return restrictToOwned(sanitizeAppearance(parsed), this.owned(accountId));
   }
 

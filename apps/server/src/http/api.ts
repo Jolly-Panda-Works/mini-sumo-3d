@@ -25,7 +25,7 @@ import type { PaymentService } from "../economy/payments.js";
  *   GET  /api/leaderboard?limit=100         top players by XP + your rank    (Bearer token)
  *   GET  /api/friends                       your code, friends, requests     (Bearer token)
  *   GET  /api/friends/profile?id=…          a friend's profile               (Bearer token)
- *   POST /api/friends/request { code }      add a friend by code             (Bearer token)
+ *   POST /api/friends/request { code } | { accountId }  add by code, or someone from a bout (Bearer token)
  *   POST /api/friends/respond { accountId, accept }                          (Bearer token)
  *   POST /api/friends/remove { accountId }  remove / cancel                  (Bearer token)
  *   GET  /api/invites                       game invites for you             (Bearer token)
@@ -108,8 +108,7 @@ const STATUS: Record<EconomyError["code"], number> = {
   bad_request: 400,
 };
 
-export function createApiHandler(economy: Economy | null, payments: PaymentService) {
-  const friends = economy ? new Friends(economy) : null;
+export function createApiHandler(economy: Economy | null, payments: PaymentService, friends: Friends | null = economy ? new Friends(economy) : null) {
   return async function handleApi(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
     const url = new URL(req.url ?? "/", "http://localhost");
     if (!url.pathname.startsWith("/api/")) return false;
@@ -195,7 +194,9 @@ export function createApiHandler(economy: Economy | null, payments: PaymentServi
         } else {
           const body = ((await readJson(req)) ?? {}) as Record<string, unknown>;
           const action = url.pathname.slice("/api/friends/".length);
-          if (action === "request") send(res, 200, friends.request(accountId, body.code));
+          if (action === "request") {
+            send(res, 200, typeof body.accountId === "string" ? friends.requestById(accountId, body.accountId) : friends.request(accountId, body.code));
+          }
           else if (action === "respond") send(res, 200, friends.respond(accountId, body.accountId, body.accept));
           else if (action === "remove") send(res, 200, friends.remove(accountId, body.accountId));
           else send(res, 404, { error: "not_found", message: "Unknown endpoint." });

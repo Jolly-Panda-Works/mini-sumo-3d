@@ -32,6 +32,10 @@ export const loadFriends = () => run(() => request<FriendsResponse>("/friends"),
 export const addFriend = (code: string) =>
   run(() => request<FriendsResponse>("/friends/request", { method: "POST", body: JSON.stringify({ code }) }), "Couldn't send the request.");
 
+/** A friend request to someone from a bout (bots included). */
+export const addFriendById = (accountId: string) =>
+  run(() => request<FriendsResponse>("/friends/request", { method: "POST", body: JSON.stringify({ accountId }) }), "Couldn't send the request.");
+
 export const answerFriend = (accountId: string, accept: boolean) =>
   run(() => request<FriendsResponse>("/friends/respond", { method: "POST", body: JSON.stringify({ accountId, accept }) }), "Couldn't answer the request.");
 

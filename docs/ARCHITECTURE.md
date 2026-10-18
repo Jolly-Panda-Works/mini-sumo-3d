@@ -186,3 +186,16 @@ equal XP shares a rank) and your own row with your rank, even when you're outsid
 The panel (`ui/LeaderboardPanel.tsx`) keeps your row in view: in place when it's visible,
 pinned to the bottom when it's further down (or outside the top list), pinned to the top once
 you've scrolled past it.
+
+
+## Bot players
+
+The server keeps 20 bot player accounts (`accounts.is_bot = 1`, created once at start-up)
+so the leaderboard is never empty. Once per UTC day (on the first leaderboard request) each
+bot gains some XP and a few bouts, so the board keeps moving.
+
+In-game bots (online rooms) take a free bot player's identity: name, look and level, and
+the room state carries its account id. That makes them first-class on the results screen:
+you can send a friend request to any wrestler from the bout, bots included. A bot accepts
+by itself after about 20 seconds, is "online" roughly two hours in three, and when you invite
+a bot friend it joins your room as a bot (private rooms and Training; not paid arenas).

@@ -6,10 +6,11 @@ import { WebSocketTransport } from "@colyseus/ws-transport";
 import { CREDITS, ROOM_NAME } from "@mini-sumo/shared";
 import { MiniSumoRoom } from "./rooms/MiniSumoRoom.js";
 import { loadFlags } from "./economy/config.js";
-import { Economy } from "./economy/Economy.js";
+import { Economy, EconomyError } from "./economy/Economy.js";
 import { setEconomy } from "./economy/instance.js";
 import { PaymentService } from "./economy/payments.js";
 import { createApiHandler } from "./http/api.js";
+import { Friends } from "./social/Friends.js";
 import { createStaticHandler } from "./http/static.js";
 
 // Load the repository-level .env (if present) without extra dependencies (Node >= 20.12).
@@ -27,7 +28,16 @@ if (economy) {
   const refunded = economy.recoverOrphanedEntries();
   if (refunded > 0) console.log(`[mini-sumo] refunded ${refunded} arena entries left over from the last run`);
 }
-const handleApi = createApiHandler(economy, new PaymentService(flags));
+// Friends (and inviting bot friends into rooms).
+const friends = economy ? new Friends(economy) : null;
+if (friends) {
+  friends.onBotInvite = (botAccountId, roomId) => {
+    const room = MiniSumoRoom.live.get(roomId);
+    if (!room) throw new EconomyError("unknown_friend", "That room is closed.");
+    room.addFriendBot(botAccountId);
+  };
+}
+const handleApi = createApiHandler(economy, new PaymentService(flags), friends);
 // The built web game, when this server also hosts it (STATIC_DIR, set in the Docker image).
 const handleStatic = createStaticHandler(process.env.STATIC_DIR);
 

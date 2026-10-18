@@ -6,6 +6,12 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- After a bout, ADD next to every other wrestler sends a friend request (shows "Sent" / "Friend" afterwards).
+- Bot players: 20 bot accounts fill the leaderboard and gain XP every day. In-game bots play as them (name, look, level), so you can add a bot as a friend too: it accepts after about 20 seconds, is online most of the time, and joins your room as a bot when you invite it (private rooms and Training).
+- API: `POST /api/friends/request { accountId }` (6 new tests, 153 total).
+
 ### Changed
 
 - Home (phones): Shop moved to the bottom right; the arena carousel sizes itself to the space between the top buttons and the bottom row, so no buttons sit under the cards. The card in the middle is full size and the others shrink by up to 15 % as they move to the side.

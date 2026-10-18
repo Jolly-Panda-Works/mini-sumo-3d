@@ -13,6 +13,14 @@ const CODE_LENGTH = 6;
 const ONLINE_MS = 60_000;
 const INVITE_TTL_MS = 2 * 60_000;
 const MAX_FRIENDS = 100;
+/** Bot players accept a friend request after this long. */
+const BOT_ACCEPT_MS = 20_000;
+
+function hash(text: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS friend_codes (
@@ -40,6 +48,9 @@ export class Friends {
   private readonly seen = new Map<string, number>();
   private readonly invites = new Map<string, GameInvite[]>();
 
+  /** Set by the server: puts an invited bot friend into a room (throws if it can't). */
+  onBotInvite: ((botAccountId: string, roomId: string) => void) | null = null;
+
   constructor(
     private readonly economy: Economy,
     private readonly now: () => number = Date.now,
@@ -56,6 +67,8 @@ export class Friends {
   }
 
   isOnline(accountId: string): boolean {
+    // Bot players come and go: online about two hours in three, varying by the hour.
+    if (this.economy.isBot(accountId)) return hash(`${accountId}:${Math.floor(this.now() / 3_600_000)}`) % 3 !== 0;
     return this.now() - (this.seen.get(accountId) ?? 0) < ONLINE_MS;
   }
 
@@ -95,6 +108,12 @@ export class Friends {
   }
 
   list(accountId: string): FriendsResponse {
+    // Bot players accept requests on their own after a short while.
+    this.db
+      .prepare(
+        "UPDATE friendships SET status = 'accepted' WHERE requester = ? AND status = 'pending' AND created_at <= ? AND addressee IN (SELECT id FROM accounts WHERE is_bot = 1)",
+      )
+      .run(accountId, new Date(this.now() - BOT_ACCEPT_MS).toISOString());
     const rows = this.db
       .prepare("SELECT * FROM friendships WHERE requester = ? OR addressee = ? ORDER BY created_at DESC")
       .all(accountId, accountId) as unknown as FriendshipRow[];
@@ -122,7 +141,16 @@ export class Friends {
     if (code.length !== CODE_LENGTH) throw new EconomyError("bad_request", "That code doesn't look right.");
     const found = this.db.prepare("SELECT account_id FROM friend_codes WHERE code = ?").get(code) as { account_id: string } | undefined;
     if (!found) throw new EconomyError("unknown_friend", "No wrestler has that code.");
-    const other = found.account_id;
+    return this.requestAccount(accountId, found.account_id);
+  }
+
+  /** Sends a request to a player you met in a bout (by account; bots included). */
+  requestById(accountId: string, otherId: unknown): FriendsResponse {
+    if (typeof otherId !== "string" || !this.economy.publicAccount(otherId)) throw new EconomyError("unknown_friend", "That wrestler can't be found.");
+    return this.requestAccount(accountId, otherId);
+  }
+
+  private requestAccount(accountId: string, other: string): FriendsResponse {
     if (other === accountId) throw new EconomyError("bad_request", "That's your own code.");
     const existing = this.relation(accountId, other);
     if (existing?.status === "accepted") return this.list(accountId);
@@ -186,6 +214,13 @@ export class Friends {
     }
     if (!this.areFriends(accountId, otherId)) throw new EconomyError("not_friends", "You can only invite friends.");
     if (!this.isOnline(otherId)) throw new EconomyError("friend_offline", "Your friend isn't online right now.");
+    // A bot friend joins the room as a bot (when the room allows bots).
+    if (this.economy.isBot(otherId)) {
+      if (!this.onBotInvite) throw new EconomyError("bad_request", "Bots can't be invited right now.");
+      this.onBotInvite(otherId, roomId);
+      const bot = this.economy.publicAccount(otherId);
+      return { id: randomBytes(8).toString("hex"), from: { accountId: otherId, name: bot?.name ?? "Bot", avatar: bot?.avatar ?? 0 }, roomId, createdAt: this.now() };
+    }
     const me = this.economy.publicAccount(accountId);
     const invite: GameInvite = {
       id: randomBytes(8).toString("hex"),

@@ -1,4 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { addFriendById, friendsAvailable, friendsStore, loadFriends } from "../network/friendsClient";
+import { pushToast, showError } from "../uiStore";
 import { gameStore, roomManager } from "../network/RoomManager";
 import { useStore } from "../store";
 import { economyStore } from "../network/economyClient";
@@ -53,6 +55,7 @@ export function Results() {
                 <>
                   <img className="results-board__avatar" src={avatarSrc(p.appearance.avatar)} alt="" width={160} height={160} />
                   <span className="results-board__name">{p.isYou ? `${p.name} (you)` : p.name}</span>
+                  {!p.isYou && p.accountId && <AddFriend accountId={p.accountId} name={p.name} />}
                   <span className="results-board__note">
                     {!p.connected || p.elimReason === "left" ? "Left" : p.alive ? "In the ring" : "Out"}
                   </span>
@@ -97,3 +100,35 @@ export function Results() {
 
 /** Top of each place row on the board (% of its height). */
 const ROWS = [19.4, 28.4, 37.7, 46.8];
+
+/** Friend request to someone from this bout (online; bots accept by themselves). */
+function AddFriend({ accountId, name }: { accountId: string; name: string }) {
+  const friends = useStore(friendsStore);
+  const [sent, setSent] = useState(false);
+  useEffect(() => {
+    if (friendsAvailable() && !friendsStore.get().data) void loadFriends().catch(() => undefined);
+  }, []);
+  if (!friendsAvailable()) return null;
+  const data = friends.data;
+  if (data?.friends.some((f) => f.accountId === accountId)) return <span className="results-board__friend">Friend</span>;
+  const pending = sent || data?.outgoing.some((f) => f.accountId === accountId);
+  if (pending) return <span className="results-board__friend">Sent</span>;
+  return (
+    <button
+      type="button"
+      className="art results-board__add"
+      aria-label={`Add ${name} as a friend`}
+      onClick={async () => {
+        try {
+          await addFriendById(accountId);
+          setSent(true);
+          pushToast(`Friend request sent to ${name}`, "info");
+        } catch (error) {
+          void showError("Couldn't add friend", error instanceof Error ? error.message : "Try again.");
+        }
+      }}
+    >
+      <img src={`${BASE}ui/btn-add.webp`} alt="" draggable={false} />
+    </button>
+  );
+}

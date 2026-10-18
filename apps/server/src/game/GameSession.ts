@@ -237,6 +237,16 @@ export class GameSession {
     return OK;
   }
 
+  /** A bot joins on its own (an invited bot friend): no host check. Returns its id. */
+  addInvitedBot(): ActionResult & { id?: string } {
+    if (this.paidArena) return fail("Bots can't join paid arenas.");
+    const check = this.canJoin();
+    if (!check.ok) return check;
+    const bot = this.createBot();
+    this.afterRosterChange();
+    return { ...OK, id: bot.id };
+  }
+
   /** Host of a private room adds a bot while in the lobby. */
   addBot(requesterId: string): ActionResult {
     if (this.paidArena) return fail("Bots can't join paid arenas.");

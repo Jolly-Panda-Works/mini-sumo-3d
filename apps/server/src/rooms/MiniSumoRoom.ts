@@ -43,6 +43,49 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
   private arenaId = "training";
   /** sessionId -> accountId, kept after a player leaves (needed for settlement). */
   private readonly accounts = new Map<string, string>();
+  /** In-game bots and the bot player each one plays as (name, look, level, account). */
+  private readonly botAccounts = new Map<string, string>();
+
+  /** Open rooms in this process, so an invited bot friend can find its room. */
+  static readonly live = new Map<string, MiniSumoRoom>();
+
+  /** An invited bot friend joins as a bot (throws when the room can't take one). */
+  addFriendBot(botAccountId: string): void {
+    const economy = getEconomy();
+    if ([...this.botAccounts.values()].includes(botAccountId)) return; // already here
+    const added = this.session.addInvitedBot();
+    if (!added.ok || !added.id) throw new EconomyError("bad_request", added.ok ? "The room is full." : added.error);
+    this.dressBot(added.id, botAccountId, economy);
+  }
+
+  /** Gives an in-game bot a bot player's identity. */
+  private dressBot(botId: string, botAccountId: string, economy: ReturnType<typeof getEconomy>): void {
+    const bot = this.session.players.get(botId);
+    const account = economy?.publicAccount(botAccountId);
+    if (!bot || !account) return;
+    this.botAccounts.set(botId, botAccountId);
+    bot.name = account.name;
+    bot.appearance = account.appearance;
+    bot.level = account.level;
+  }
+
+  /** Bots that joined on their own take a free bot player's identity. */
+  private dressNewBots(): void {
+    const economy = getEconomy();
+    if (!economy) return;
+    for (const p of this.session.players.values()) {
+      if (!p.isBot || this.botAccounts.has(p.id)) continue;
+      const taken = new Set(this.botAccounts.values());
+      const names = new Set([...this.session.players.values()].map((q) => q.name));
+      const free = economy.botAccounts().filter((b) => !taken.has(b.id) && !names.has(b.name));
+      if (!free.length) {
+        this.botAccounts.set(p.id, "");
+        continue;
+      }
+      const pick = free[Math.floor(Math.random() * free.length)]!;
+      this.dressBot(p.id, pick.id, economy);
+    }
+  }
 
   private get paid(): boolean {
     return (this.arena?.entryFee ?? 0) > 0;
@@ -53,6 +96,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
   }
 
   override onCreate(options: JoinOptions = {}): void {
+    MiniSumoRoom.live.set(this.roomId, this);
     const isPrivate = sanitizeIsPrivate(options.private);
     const arena = isPrivate ? null : getArena(options.arenaId ?? "training");
     if (!isPrivate && (!arena || !arena.enabled)) throw new ServerError(4004, "That arena is not available.");
@@ -185,6 +229,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
   }
 
   override onDispose(): void {
+    MiniSumoRoom.live.delete(this.roomId);
     // Any entry not settled by now belongs to a bout that never finished: refund it.
     const economy = getEconomy();
     if (this.paid && economy) economy.refundRoom(this.roomId, "Match closed before it finished: entry refunded");
@@ -351,6 +396,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
     for (const id of [...state.players.keys()]) {
       if (!s.players.has(id)) state.players.delete(id);
     }
+    this.dressNewBots();
     for (const [id, p] of s.players) {
       let ps = state.players.get(id);
       if (!ps) {
@@ -381,7 +427,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
       ps.face = p.appearance.face;
       ps.outfit = p.appearance.outfit;
       ps.avatar = p.appearance.avatar;
-      ps.accountId = this.accounts.get(id) ?? "";
+      ps.accountId = this.accounts.get(id) || this.botAccounts.get(id) || "";
       ps.level = p.level;
     }
 

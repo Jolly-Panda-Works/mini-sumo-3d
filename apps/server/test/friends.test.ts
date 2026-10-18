@@ -94,3 +94,33 @@ describe("friends", () => {
     expect(friends.pendingInvites(b)).toHaveLength(0);
   });
 });
+
+describe("friends with bot players", () => {
+  it("a bot accepts a request after a short while; requests by account work", () => {
+    let now = Date.parse("2026-10-18T10:00:00Z");
+    const economy = new Economy(":memory:", FLAGS, silentEventSink, () => new Date(now));
+    const friends = new Friends(economy, () => now);
+    const { accountId: me } = economy.createGuest();
+    const bot = economy.botAccounts()[0]!.id;
+    friends.requestById(me, bot);
+    expect(friends.list(me).outgoing.map((f) => f.accountId)).toEqual([bot]);
+    now += 21_000;
+    expect(friends.list(me).friends.map((f) => f.accountId)).toEqual([bot]);
+  });
+
+  it("inviting an online bot friend puts it into the room through the server hook", () => {
+    let now = Date.parse("2026-10-18T10:00:00Z");
+    const economy = new Economy(":memory:", FLAGS, silentEventSink, () => new Date(now));
+    const friends = new Friends(economy, () => now);
+    const calls: string[] = [];
+    friends.onBotInvite = (botId, roomId) => void calls.push(`${botId}@${roomId}`);
+    const { accountId: me } = economy.createGuest();
+    // A bot that is online this hour.
+    const bot = economy.botAccounts().find((b) => friends.isOnline(b.id))!.id;
+    friends.requestById(me, bot);
+    now += 21_000;
+    friends.list(me);
+    friends.invite(me, bot, "room42");
+    expect(calls).toEqual([`${bot}@room42`]);
+  });
+});

@@ -6791,3 +6791,20 @@ button.code-field {
 .hub__side-btn--shop {
   margin-left: auto;
 }
+
+/* Results: add the other wrestlers as friends */
+.results-board__add {
+  flex: none;
+  width: 11cqw;
+  max-width: 48px;
+}
+
+.results-board__friend {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(63, 163, 77, 0.18);
+  color: #2f7d3a;
+  font-size: clamp(0.55rem, 2.6cqw, 0.7rem);
+  font-weight: 900;
+}
