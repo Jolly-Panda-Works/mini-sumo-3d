@@ -336,8 +336,7 @@ export function Wardrobe() {
       wear({ ...appearance, [category]: index } as Appearance);
       react(category);
     } else {
-      setTrying({ category, index });
-      react(category);
+      // Not owned: straight to the buy window; the preview only changes once it's bought.
       void confirmBuy(category, index);
     }
   };

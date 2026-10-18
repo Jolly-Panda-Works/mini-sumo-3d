@@ -26,8 +26,8 @@ export function Countdown() {
     const n = Math.max(1, Math.ceil(game.remainingMs / 1000));
     return (
       <div className="countdown" aria-live="assertive">
-        <span key={n} className="countdown__num">
-          {n}
+        <span key={n} className="countdown__num countdown__num--art">
+          {n <= 3 ? <img src={`${import.meta.env.BASE_URL}hud/count-${n}.webp`} alt={String(n)} draggable={false} /> : n}
         </span>
       </div>
     );
@@ -35,7 +35,9 @@ export function Countdown() {
   if (showGo) {
     return (
       <div className="countdown" aria-live="assertive">
-        <span className="countdown__num countdown__num--go">GO!</span>
+        <span className="countdown__num countdown__num--go countdown__num--art">
+          <img src={`${import.meta.env.BASE_URL}hud/go.webp`} alt="GO!" draggable={false} />
+        </span>
       </div>
     );
   }

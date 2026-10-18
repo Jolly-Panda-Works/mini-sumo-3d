@@ -119,8 +119,8 @@ export function TouchControls() {
       </div>
 
       <button
-        className={`dash-btn${ready ? " dash-btn--ready" : ""}`}
-        style={{ background: `conic-gradient(var(--sun) ${progress * 360}deg, var(--ink-soft) 0deg)` }}
+        className={`dash-btn dash-btn--art${ready ? " dash-btn--ready" : ""}`}
+        style={{ ["--cool" as string]: `${progress * 360}deg` }}
         onPointerDown={(e) => {
           e.preventDefault();
           if (ready) vibrate(18);
@@ -128,7 +128,9 @@ export function TouchControls() {
         }}
         aria-label={ready ? "Dash" : "Dash recharging"}
       >
-        <span>{ready ? "Dash" : (cooldown / 1000).toFixed(1)}</span>
+        {/* The DASH art; while recharging, a dark sweep shows what's left, with the seconds */}
+        {!ready && <span className="dash-btn__cool" aria-hidden="true" />}
+        {!ready && <span className="dash-btn__time">{(cooldown / 1000).toFixed(1)}</span>}
       </button>
     </div>
   );
