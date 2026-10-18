@@ -68,7 +68,7 @@ export function Dialog({
    * "sub": the smaller frame (public/ui/popup-sub.webp) for a popup opened on top of
    * another one (About, buying an item, editing the name…).
    */
-  variant?: "main" | "sub" | "welcome" | "board";
+  variant?: "main" | "sub" | "welcome" | "board" | "editname";
   /** Content attached to the outside of the panel (main popups), e.g. side tabs. */
   aside?: ReactNode;
 }) {
@@ -113,6 +113,20 @@ export function Dialog({
               </button>
             )}
             <div className={`board-dialog__body ${bodyClassName}`}>{children}</div>
+          </section>
+        </div>
+      ) : variant === "editname" ? (
+        <div className={`dialog-wrap dialog-wrap--editname ${wrapClass}`}>
+          <section className="editname-dialog" role={role} aria-modal="true" aria-labelledby={id}>
+            <h2 id={id} className="visually-hidden">
+              {title}
+            </h2>
+            {!hideClose && (
+              <button ref={closeRef} type="button" className="editname-dialog__close" onClick={requestClose} aria-label="Close" data-sfx="none">
+                <img src={`${BASE}ui/close.webp`} alt="" draggable={false} />
+              </button>
+            )}
+            <div className={`editname-dialog__inner ${bodyClassName}`}>{children}</div>
           </section>
         </div>
       ) : variant === "welcome" ? (

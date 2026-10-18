@@ -45,6 +45,7 @@ for (const [name, file] of [
   ["popup-sub", "popup-sub"],
   ["input-field", "input-field"],
   ["welcome-frame", "welcome-frame"],
+  ["edit-name-frame", "edit-name-frame"],
   ["friend-code", "friend-code"],
   ["friend-card", "friend-card"],
   ["lb-panel", "lb-panel"],

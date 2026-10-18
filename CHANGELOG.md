@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Edit name popup in its own frame (EDIT NAME on the plaque): the name field and SAVE on the board, a × in the corner.
+
+### Changed
+
 - Waiting room, offline: empty seats show a muted "+ Invite a friend" that explains inviting needs the game server (bots fill the seats), instead of a silent "Waiting for a wrestler…". Online, every arena (paid ones included) already offers + to invite friends, like the private room.
 
 ### Changed

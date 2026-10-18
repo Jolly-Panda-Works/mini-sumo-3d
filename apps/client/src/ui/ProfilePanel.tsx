@@ -25,7 +25,7 @@ function EditName({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <Dialog title="Your name" onClose={onClose} className="edit-name" variant="sub">
+    <Dialog title="Edit name" onClose={onClose} className="edit-name" variant="editname">
       <form className="edit-name__form" onSubmit={save}>
         <input
           className="input input--art"
