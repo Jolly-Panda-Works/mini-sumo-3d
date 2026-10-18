@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   FACES,
@@ -16,6 +16,7 @@ import {
 import { buyItem, economyStore, ownedItems, saveAppearanceRemote } from "../network/economyClient";
 import { Coins } from "./Coins";
 import { Dialog } from "./Dialog";
+import { ThumbStudio, requestThumb, thumbKey, useThumb } from "./WardrobeThumbs";
 import { PHONE_QUERY, useMediaQuery } from "../useMediaQuery";
 import { BuyButton, ComingSoonButton, NotNowButton } from "./ArtButtons";
 import { audio } from "../audio/AudioManager";
@@ -51,6 +52,9 @@ const TABS: readonly Tab[] = [
 
 interface ItemGridProps {
   tab: Tab;
+  /** Your current look and colour: thumbnails show each item on your wrestler. */
+  look: Appearance;
+  color: string;
   value: number;
   worn: number;
   owned: ReadonlySet<string>;
@@ -59,7 +63,7 @@ interface ItemGridProps {
 }
 
 /** One category's items: owned first (in catalog order), then the rest by price. */
-function ItemGrid({ tab, value, worn, owned, priceOf, onPick }: ItemGridProps) {
+function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick }: ItemGridProps) {
   const items = tab.options
     .map((option, index) => {
       const id = cosmeticItemId(tab.category, index);
@@ -78,6 +82,7 @@ function ItemGrid({ tab, value, worn, owned, priceOf, onPick }: ItemGridProps) {
           aria-label={`${option.label}, ${isOwned ? (index === worn ? "wearing" : "owned") : `${price} Sumo Coins`}`}
           onClick={() => onPick(index)}
         >
+          <ItemThumb category={tab.category} look={look} index={index} color={color} />
           {option.hex && <span className="item__swatch" style={{ background: option.hex }} aria-hidden="true" />}
           <span className="item__name">{option.label}</span>
           <span className="item__price">
@@ -86,6 +91,19 @@ function ItemGrid({ tab, value, worn, owned, priceOf, onPick }: ItemGridProps) {
         </button>
       ))}
     </div>
+  );
+}
+
+/** The item drawn on your wrestler (rendered once, then cached). */
+function ItemThumb({ category, look, index, color }: { category: CosmeticCategory; look: Appearance; index: number; color: string }) {
+  const appearance = { ...look, [category]: index } as Appearance;
+  const key = thumbKey(category, appearance, color);
+  const src = useThumb(key);
+  useEffect(() => requestThumb({ key, appearance, category, color }), [key]);
+  return (
+    <span className="item__thumb" aria-hidden="true">
+      {src ? <img src={src} alt="" width={128} height={128} /> : <span className="item__thumb-wait" />}
+    </span>
   );
 }
 
@@ -160,10 +178,6 @@ function ItemPopup({
           <directionalLight position={[2.5, 4, 3]} intensity={1.6} castShadow />
           <group position-y={-0.85}>
             <PreviewSumo appearance={tryOn} color={color} />
-            <mesh rotation-x={-Math.PI / 2} receiveShadow>
-              <circleGeometry args={[1.4, 40]} />
-              <meshStandardMaterial color="#EFD6A8" roughness={1} />
-            </mesh>
           </group>
         </Canvas>
       </div>
@@ -251,10 +265,6 @@ export function Wardrobe() {
             <directionalLight position={[2.5, 4, 3]} intensity={1.6} castShadow />
             <group position-y={-0.85}>
               <PreviewSumo appearance={appearance} color={color} />
-              <mesh rotation-x={-Math.PI / 2} receiveShadow>
-                <circleGeometry args={[1.4, 40]} />
-                <meshStandardMaterial color="#EFD6A8" roughness={1} />
-              </mesh>
             </group>
           </Canvas>
           <span className="wardrobe__balance coin-frame coin-frame--static" aria-label={`Your coins: ${balance}`}>
@@ -267,6 +277,8 @@ export function Wardrobe() {
         <div className="wardrobe__items">
           <ItemGrid
             tab={tab}
+            look={appearance}
+            color={color}
             value={appearance[tab.category]}
             worn={appearance[tab.category]}
             owned={owned}
@@ -276,6 +288,7 @@ export function Wardrobe() {
         </div>
       </Dialog>
 
+      <ThumbStudio />
       {pendingItem && (
         <ItemPopup
           item={pendingItem}

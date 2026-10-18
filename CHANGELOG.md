@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Customise: every item slot shows a thumbnail of that item on your own wrestler (close-up of the head for hair, colour and face; the belt for outfits), rendered once and cached. The ground disc under the preview is gone, so the preview is smaller. On desktop the category tabs are tucked under the panel's frame, with no gap.
+
+### Changed
+
 - Customise looks the same on the web as on phones: the preview on top and the item list under it. On desktop the category tabs hang on the panel's outer left edge; on phones they stay under the preview.
 
 ### Changed
