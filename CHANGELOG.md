@@ -8,6 +8,11 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Friends: "Play with friends" is now "Start private room".
+- Friend picker: the "no friends" note sits in the middle of the panel.
+
+### Changed
+
 - Friend requests: DECLINE and ACCEPT side by side on one line (ACCEPT on the right).
 - Waiting room: the start button reads "Waiting for others…" until there are at least two wrestlers.
 

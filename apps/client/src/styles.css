@@ -6598,3 +6598,10 @@ button.code-field {
 .friends__requests .art--small {
   width: 64px;
 }
+
+/* Friend picker: the "no friends" note in the middle of the panel */
+.invite-picker__empty {
+  margin: auto 0;
+  align-self: center;
+  max-width: 90%;
+}

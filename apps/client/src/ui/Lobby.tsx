@@ -241,10 +241,11 @@ function InvitePicker({
         </button>
       )}
       {friends.data && list.length === 0 && (
-        <p className="hint hint--center">
+        <p className="hint hint--center invite-picker__empty">
           {friends.data.friends.length === 0 ? "No friends yet. Add friends with their code in Friends." : "All your friends are already here."}
         </p>
       )}
+      {list.length > 0 && (
       <ul className="friends__list">
         {list.map((f) => (
           <FriendRow key={f.accountId} friend={f}>
@@ -258,6 +259,7 @@ function InvitePicker({
           </FriendRow>
         ))}
       </ul>
+      )}
     </Dialog>
   );
 }

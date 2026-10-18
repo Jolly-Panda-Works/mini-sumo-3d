@@ -74,7 +74,7 @@ export function FriendsPanel() {
       ) : (
         <>
           <button className="plank-btn plank-btn--primary friends__play" disabled={creating} onClick={() => void playWithFriends()}>
-            {creating ? "Opening a room…" : "Play with friends"}
+            {creating ? "Opening a room…" : "Start private room"}
           </button>
 
           <section className="friends__code">
