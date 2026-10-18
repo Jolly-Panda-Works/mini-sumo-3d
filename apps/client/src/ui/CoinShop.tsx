@@ -89,8 +89,14 @@ export function CoinShop() {
             <p className="pack__coins">
               <Coins amount={DAILY_GIFT_COINS} />
             </p>
-            <button className="btn btn--primary pack__btn" disabled={!giftReady} onClick={() => void claim()} data-sfx="none">
-              {giftReady ? "Claim" : "Claimed"}
+            <button
+              className="art pack__btn pack__btn--claim"
+              disabled={!giftReady}
+              onClick={() => void claim()}
+              data-sfx="none"
+              aria-label={giftReady ? "Claim the daily coins" : "Daily coins claimed"}
+            >
+              <img src={`${import.meta.env.BASE_URL}ui/${giftReady ? "btn-claim" : "btn-claimed"}.webp`} alt="" width={440} height={147} draggable={false} />
             </button>
           </div>
         </li>

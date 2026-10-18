@@ -8530,3 +8530,50 @@ button.code-field {
   right: -3%;
   width: 12%;
 }
+
+/* P1–P4 shield badges, the YOU ribbon, and CLAIM / CLAIMED */
+.badge.badge--art {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none !important;
+  object-fit: contain;
+  box-shadow: none;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.3));
+}
+
+.badge--art.badge--dim {
+  filter: grayscale(0.7) opacity(0.6);
+}
+
+.tag.tag--you-art {
+  width: auto;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.pack__btn.pack__btn--claim {
+  width: 100%;
+  max-width: 220px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.pack__btn--claim img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pack__btn--claim:disabled {
+  opacity: 1;
+  cursor: default;
+}

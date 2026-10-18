@@ -102,7 +102,7 @@ export function Lobby() {
               <li key={p.id} className={`roster__item${p.isYou ? " roster__item--you" : ""}`}>
                 <PlayerBadge colorIndex={p.colorIndex} />
                 <span className="roster__name">{p.name}</span>
-                {p.isYou && <span className="tag">You</span>}
+                {p.isYou && <img className="tag tag--you-art" src={`${import.meta.env.BASE_URL}ui/label-you.webp`} alt="You" width={220} height={80} draggable={false} />}
                 {p.isHost && <img className="tag-host" src={`${import.meta.env.BASE_URL}ui/label-host.webp`} alt="Host" width={200} height={114} />}
                 {p.isBot && isHost && (
                   <button className="roster__remove" onClick={() => roomManager.removeBot(p.id)} aria-label={`Remove ${p.name}`}>

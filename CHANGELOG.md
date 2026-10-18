@@ -8,6 +8,12 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- New art for the Rookie and Pro arenas.
+- Waiting room: P1–P4 are the coloured shield badges and "You" is the YOU ribbon.
+- Coin shop: the daily coins button is the CLAIM art, and CLAIMED once taken.
+
+### Changed
+
 - Notices (e.g. "Buy this item?"): the × sits on the frame's top-right corner beside the plaque.
 
 ### Changed
