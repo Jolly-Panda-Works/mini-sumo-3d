@@ -7,6 +7,8 @@ import { useStore } from "../store";
 import {
   pushToast,
   setAboutOpen,
+  setFriendsOpen,
+  setLeaderboardOpen,
   setDevOpen,
   setProfileOpen,
   setSettingsOpen,
@@ -119,7 +121,7 @@ export function DevPanel() {
 
   // Back to the dev menu when the panel / popup opened from it is closed.
   const somethingOpen =
-    ui.settingsOpen || ui.profileOpen || ui.wardrobeOpen || ui.shopOpen || ui.walletOpen || ui.aboutOpen || ui.levelUp !== null || ui.notices.length > 0 || preview !== null;
+    ui.settingsOpen || ui.leaderboardOpen || ui.friendsOpen || ui.profileOpen || ui.wardrobeOpen || ui.shopOpen || ui.walletOpen || ui.aboutOpen || ui.levelUp !== null || ui.notices.length > 0 || preview !== null;
   useEffect(() => {
     if (returnToDev && !somethingOpen && !ui.devOpen) {
       returnToDev = false;
@@ -156,6 +158,8 @@ export function DevPanel() {
           <button className="btn" onClick={open(setShopOpen)}>Coin shop</button>
           <button className="btn" onClick={open(setWalletOpen)}>Wallet</button>
           <button className="btn" onClick={open(setAboutOpen)}>About</button>
+          <button className="btn" onClick={open(setLeaderboardOpen)}>Leaderboard</button>
+          <button className="btn" onClick={open(setFriendsOpen)}>Friends</button>
           <button className="btn" onClick={show("welcome")}>Welcome</button>
           <button
             className="btn"

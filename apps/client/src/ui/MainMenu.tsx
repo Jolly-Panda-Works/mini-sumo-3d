@@ -4,7 +4,7 @@ import { economyStore } from "../network/economyClient";
 import { networkStore } from "../network/networkMode";
 import { roomManager, sessionStore } from "../network/RoomManager";
 import { useStore } from "../store";
-import { pushToast, showError, setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
+import { pushToast, showError, setFriendsOpen, setLeaderboardOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
 import { settingsStore } from "../settings";
 import { ArenaRow } from "./ArenaSelect";
 import { Icon } from "./Icon";
@@ -69,6 +69,16 @@ export function MainMenu() {
         <header className="home__top">
           <div className="home__actions">
             <ProfileCard className="home__profile-card" />
+            <button className="tile-btn tile-btn--leaderboard" onClick={() => setLeaderboardOpen(true)} aria-label="Leaderboard">
+              <svg className="hub__trophy-art" viewBox="0 0 64 64" aria-hidden="true">
+                <rect x="2" y="2" width="60" height="60" rx="10" fill="#7a4a24" stroke="#3a1d05" strokeWidth="3" />
+                <rect x="8" y="8" width="48" height="48" rx="6" fill="#5b2a86" />
+                <path d="M20 16h24v8c0 9-5 15-12 15s-12-6-12-15z" fill="#f2b21e" stroke="#3a1d05" strokeWidth="2.5" />
+                <path d="M20 19h-6c0 6 3 10 8 10M44 19h6c0 6-3 10-8 10" fill="none" stroke="#3a1d05" strokeWidth="2.5" />
+                <rect x="29" y="38" width="6" height="7" fill="#f2b21e" stroke="#3a1d05" strokeWidth="2" />
+                <rect x="22" y="45" width="20" height="6" rx="2" fill="#c47f12" stroke="#3a1d05" strokeWidth="2" />
+              </svg>
+            </button>
             <button className="art art--friends-wide" onClick={() => setFriendsOpen(true)} aria-label="Friends">
               <img src={`${import.meta.env.BASE_URL}ui/friends-wide.webp`} alt="" width={360} height={111} />
             </button>
@@ -119,6 +129,17 @@ export function MainMenu() {
         <button className="hub__side-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
           <Icon name="customize" size={56} />
           <span>Customise</span>
+        </button>
+        <button className="hub__side-btn hub__side-btn--leaderboard" onClick={() => setLeaderboardOpen(true)} aria-label="Leaderboard">
+          <svg className="hub__trophy-art" viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="2" y="2" width="60" height="60" rx="10" fill="#7a4a24" stroke="#3a1d05" strokeWidth="3" />
+            <rect x="8" y="8" width="48" height="48" rx="6" fill="#5b2a86" />
+            <path d="M20 16h24v8c0 9-5 15-12 15s-12-6-12-15z" fill="#f2b21e" stroke="#3a1d05" strokeWidth="2.5" />
+            <path d="M20 19h-6c0 6 3 10 8 10M44 19h6c0 6-3 10-8 10" fill="none" stroke="#3a1d05" strokeWidth="2.5" />
+            <rect x="29" y="38" width="6" height="7" fill="#f2b21e" stroke="#3a1d05" strokeWidth="2" />
+            <rect x="22" y="45" width="20" height="6" rx="2" fill="#c47f12" stroke="#3a1d05" strokeWidth="2" />
+          </svg>
+          <span>Leaderboard</span>
         </button>
         <button className="hub__side-btn hub__side-btn--shop" onClick={() => setShopOpen(true)} aria-label="Shop">
           <img className="hub__shop-art" src={`${import.meta.env.BASE_URL}ui/shop.webp`} alt="" width={360} height={335} />

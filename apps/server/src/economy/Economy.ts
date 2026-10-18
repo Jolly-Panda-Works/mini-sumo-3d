@@ -15,6 +15,8 @@ import { NAME_MAX_LENGTH,
   levelFromXp,
   levelUpCoins,
   xpForMatch,
+  type LeaderboardEntry,
+  type LeaderboardResponse,
 } from "@mini-sumo/shared";
 import { ECONOMY, getArena, getItem } from "./config.js";
 import { consoleEventSink, type EconomyEventSink } from "./events.js";
@@ -204,6 +206,36 @@ export class Economy {
     // Migration: name and when the name / look last changed (profile sync from devices).
     if (!columns.some((c) => c.name === "name")) this.db.exec("ALTER TABLE accounts ADD COLUMN name TEXT NOT NULL DEFAULT ''");
     if (!columns.some((c) => c.name === "profile_updated_at")) this.db.exec("ALTER TABLE accounts ADD COLUMN profile_updated_at TEXT NOT NULL DEFAULT ''");
+  }
+
+  /**
+   * Players ranked by total XP (named players only; equal XP shares a rank, earlier accounts
+   * first). Includes your own row even when you're not in the top list.
+   */
+  leaderboard(accountId: string, limit = 100): LeaderboardResponse {
+    const count = Math.max(1, Math.min(200, Math.floor(limit) || 100));
+    const top = rows<{ id: string; name: string; xp: number }>(
+      this.db
+        .prepare("SELECT id, name, xp FROM accounts WHERE name != '' ORDER BY xp DESC, created_at ASC LIMIT ?")
+        .all(count),
+    );
+    const rankOf = (xp: number) =>
+      (row<{ n: number }>(this.db.prepare("SELECT COUNT(*) AS n FROM accounts WHERE name != '' AND xp > ?").get(xp))?.n ?? 0) + 1;
+    const entry = (id: string, name: string, xp: number): LeaderboardEntry => ({
+      rank: rankOf(xp),
+      accountId: id,
+      name,
+      avatar: this.appearanceOf(id).avatar,
+      level: levelFromXp(xp).level,
+      xp,
+    });
+    const me = this.account(accountId);
+    const total = row<{ n: number }>(this.db.prepare("SELECT COUNT(*) AS n FROM accounts WHERE name != ''").get())?.n ?? 0;
+    return {
+      top: top.map((r) => entry(r.id, r.name, r.xp)),
+      you: entry(accountId, me.name || "You", me.xp),
+      total,
+    };
   }
 
   /** The database, for features that keep their own tables (friends). */

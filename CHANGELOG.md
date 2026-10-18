@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Leaderboard: players ranked by total XP (medals for the top three, picture, name, level, XP). Your own row is always in view: in place when visible, pinned to the bottom when you're further down (or outside the top 100), pinned to the top when you've scrolled past it. Opened from the home screen. New `GET /api/leaderboard` (3 new tests, 148 total).
+
 ### Changed
 
 - Friends: "Play with friends" is now "Start private room".

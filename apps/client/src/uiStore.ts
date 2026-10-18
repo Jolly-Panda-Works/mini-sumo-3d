@@ -25,6 +25,7 @@ export interface UIState {
   devOpen: boolean;
   /** The friend picker in the waiting room (from + or right after "Play with friends"). */
   invitePickerOpen: boolean;
+  leaderboardOpen: boolean;
 }
 
 export type NoticeKind = "message" | "warning" | "error";
@@ -59,6 +60,7 @@ export const uiStore = createStore<UIState>({
   notices: [],
   devOpen: false,
   invitePickerOpen: false,
+  leaderboardOpen: false,
 });
 
 let noticeId = 0;
@@ -91,6 +93,7 @@ export const showError = (title: string, message: string, actions?: NoticeAction
 
 export const setDevOpen = (devOpen: boolean) => uiStore.update({ devOpen });
 export const setInviteUiOpen = (invitePickerOpen: boolean) => uiStore.update({ invitePickerOpen });
+export const setLeaderboardOpen = (leaderboardOpen: boolean) => uiStore.update({ leaderboardOpen });
 
 let toastId = 0;
 

@@ -6605,3 +6605,160 @@ button.code-field {
   align-self: center;
   max-width: 90%;
 }
+
+/* ======================================================================
+   Leaderboard: rows with rank (medals for 1–3), picture, name, level and
+   XP; your row pinned to the bottom / top when it's out of view
+   ====================================================================== */
+
+.dlg-leaderboard {
+  width: min(460px, 100%);
+}
+
+.dlg-leaderboard .dialog {
+  height: calc(100dvh - 20px - 23.4cqw);
+}
+
+.leaderboard__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.leaderboard__note {
+  margin: auto;
+  text-align: center;
+  color: #f4ede2;
+}
+
+.leaderboard__list {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 2px 2px 4px;
+  list-style: none;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 14px;
+  background: #fbf6ee;
+  color: #3a1d05;
+  border: 2.5px solid #c9a46c;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
+}
+
+.lb-row--you {
+  background: #fff1cc;
+  border-color: #f2b21e;
+}
+
+.lb-row--pinned {
+  flex: none;
+  background: linear-gradient(#3d7fe0, #2a5cb3);
+  border-color: #ffe7a8;
+  color: #fff;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
+}
+
+.lb-row__rank {
+  flex: none;
+  width: 36px;
+  display: grid;
+  place-items: center;
+}
+
+.lb-row__rank img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.lb-row__num {
+  display: grid;
+  place-items: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #f2b21e;
+  color: #3a1d05;
+  font-weight: 900;
+  font-size: 0.8rem;
+  border: 2px solid #3a1d05;
+}
+
+.lb-row__avatar {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  border: 2px solid #3a1d05;
+  object-fit: cover;
+}
+
+.lb-row__who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.lb-row__who strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lb-row__who span {
+  font-size: 0.72rem;
+  font-weight: 800;
+  opacity: 0.75;
+}
+
+.lb-row__score {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px 3px 4px;
+  border-radius: 999px;
+  background: #c4462b;
+  color: #fff4dc;
+  font-weight: 900;
+  font-size: 0.85rem;
+  border: 2px solid #3a1d05;
+}
+
+.lb-row__star {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #f2b21e;
+  color: #c4462b;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+/* Home: leaderboard button */
+.hub__trophy-art {
+  width: 56px;
+  height: 56px;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+}
+
+.tile-btn--leaderboard svg {
+  width: 48px;
+  height: 48px;
+}

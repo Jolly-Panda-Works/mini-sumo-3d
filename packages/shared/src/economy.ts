@@ -225,6 +225,26 @@ export interface ProfileSyncRequest {
   updatedAt: string;
 }
 
+// ---------------------------------------------------------------- leaderboard
+
+/** One row of the leaderboard: players ranked by total XP. */
+export interface LeaderboardEntry {
+  rank: number;
+  accountId: string;
+  name: string;
+  avatar: number;
+  level: number;
+  xp: number;
+}
+
+export interface LeaderboardResponse {
+  top: LeaderboardEntry[];
+  /** Your own row (also when you're not in the top list). */
+  you: LeaderboardEntry;
+  /** Players on the board. */
+  total: number;
+}
+
 // ---------------------------------------------------------------- friends
 
 /** A friend (or a pending request) as shown in the friends list. */

@@ -1,5 +1,13 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { CatalogResponse, FriendProfile, FriendsResponse, GameInvite, LedgerResponse, ProfileResponse } from "@mini-sumo/shared";
+import type {
+  CatalogResponse,
+  FriendProfile,
+  FriendsResponse,
+  GameInvite,
+  LeaderboardResponse,
+  LedgerResponse,
+  ProfileResponse,
+} from "@mini-sumo/shared";
 import { Friends } from "../social/Friends.js";
 import { CATALOG, listArenas } from "../economy/config.js";
 import { EconomyError, type Economy } from "../economy/Economy.js";
@@ -14,6 +22,7 @@ import type { PaymentService } from "../economy/payments.js";
  *   POST /api/shop/purchase      { itemId, idempotencyKey }              (Bearer token)
  *   PUT  /api/profile/appearance { hair, hairColor, face, outfit }       (Bearer token)
  *   POST /api/profile/sync { name, appearance, xp, matches, wins, updatedAt } (Bearer token)
+ *   GET  /api/leaderboard?limit=100         top players by XP + your rank    (Bearer token)
  *   GET  /api/friends                       your code, friends, requests     (Bearer token)
  *   GET  /api/friends/profile?id=…          a friend's profile               (Bearer token)
  *   POST /api/friends/request { code }      add a friend by code             (Bearer token)
@@ -171,6 +180,9 @@ export function createApiHandler(economy: Economy | null, payments: PaymentServi
         const body = await readJson(req);
         if (!body) send(res, 400, { error: "bad_request", message: "Invalid request." });
         else send(res, 200, { appearance: economy.saveAppearance(accountId, body) });
+      } else if (route === "GET /api/leaderboard") {
+        const body: LeaderboardResponse = economy.leaderboard(accountId, Number(url.searchParams.get("limit") ?? 100));
+        send(res, 200, body);
       } else if (friends && route === "GET /api/friends") {
         const body: FriendsResponse = friends.list(accountId);
         send(res, 200, body);

@@ -15,6 +15,7 @@ import { NameGate } from "./ui/NameGate";
 import { Wardrobe } from "./ui/Wardrobe";
 import { AboutPanel } from "./ui/AboutPanel";
 import { FriendsPanel } from "./ui/FriendsPanel";
+import { LeaderboardPanel } from "./ui/LeaderboardPanel";
 import { CoinShop } from "./ui/CoinShop";
 import { LevelUpPopup } from "./ui/LevelUpPopup";
 import { DevButton, DevPanel } from "./ui/DevPanel";
@@ -157,6 +158,7 @@ export function App() {
         {inRoom && <Toasts />}
         {ui.wardrobeOpen && !needsName && (!inRoom || game.phase === Phase.Waiting || game.phase === Phase.Lobby) && <Wardrobe />}
         {ui.friendsOpen && !inRoom && !needsName && <FriendsPanel />}
+        {ui.leaderboardOpen && !inRoom && !needsName && <LeaderboardPanel />}
         {ui.profileOpen && !needsName && <ProfilePanel />}
         {ui.shopOpen && !needsName && <CoinShop />}
         {ui.walletOpen && !needsName && <Wallet />}

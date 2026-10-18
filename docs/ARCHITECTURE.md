@@ -177,3 +177,12 @@ the room, matched by the `accountId` in the room state, are left out). "Play wit
 opens a private room and the picker; "Play" next to a friend opens one and invites them.
 Rooms are joined by invitation only: there are no room links.
 Friends need the server; offline the panel says so.
+
+
+## Leaderboard
+
+`GET /api/leaderboard?limit=100` returns the top players by total XP (named players only;
+equal XP shares a rank) and your own row with your rank, even when you're outside the top.
+The panel (`ui/LeaderboardPanel.tsx`) keeps your row in view: in place when it's visible,
+pinned to the bottom when it's further down (or outside the top list), pinned to the top once
+you've scrolled past it.
