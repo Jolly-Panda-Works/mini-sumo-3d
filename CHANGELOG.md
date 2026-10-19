@@ -6,6 +6,20 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Screenshots: `tools/screenshots.mjs` now plays the real match (welcome, home on desktop and phone, customise, waiting room, countdown, bout, results) and then takes every screen and popup through dev mode, on a phone and a desktop (`docs/screenshots/phone/`, `docs/screenshots/desktop/`), and writes the gallery page `docs/SCREENSHOTS.md`. The workflow commits all of it. A failed real match no longer stops the rest.
+- README: phone screenshots and a link to every screen; all ten arenas with their current art and figures; friends, the leaderboard, 10 s matchmaking, bot styles, rarity tiers, coin packs and online / offline play described as they are now.
+
+### Added
+
+- Media build (`.github/workflows/media.yml`, run by hand): a separate app, "Mini Sumo Media" (`com.jollypanda.mini_sumo.media`), with everything open (level 1000, every item and picture, 9,999,999 coins, so every arena) for screenshots, videos and testing. It installs next to the store version, plays offline and never touches the server. The APK is attached to the workflow run.
+
+### Changed
+
+- Android: full screen in every build; the phone's status bar is hidden while the game is open (a swipe from the top shows it briefly) and the game uses the area next to a camera notch. The regular build only got its own activity with Play Games before, so this is written in every build now (`scripts/fullscreen.mjs`).
+- The highest level is 1000 (was 999).
+
 ### Added
 
 - Cafe Bazaar purchases online: the app sends the purchase token to `POST /api/purchases/bazaar`; the server checks it with the Cafe Bazaar Developer API (bought, not consumed, right product), credits the coins once per token (to the first account that sends it), and only then does the app consume the purchase. Anything interrupted stays unconsumed and is sent again when the game connects or the shop opens. The catalog says whether the server can verify Bazaar purchases (`stores.bazaar`); without the keys the shop shows COMING SOON online. Product ids moved to the shared package. 5 new tests (162 total).

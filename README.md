@@ -56,13 +56,13 @@ Party games are best when everyone understands them in five seconds. Mini Sumo h
 - **Real 3D** with React Three Fiber: squash-and-stretch wrestlers, ring-out falls, dust and shockwaves.
 - **Fair multiplayer:** the Colyseus server decides every push, ring-out and winner. Clients only send input.
 - **Play on Android** (and in the browser for testing), with touch or keyboard controls.
-- **Invite with a link:** create a private room and share it, or jump into a public quick match.
-- **Never wait long:** *Play now* finds an open room or creates one. If nobody shows up within 30 seconds, computer-controlled wrestlers with ordinary names fill the ring and the bout starts.
-- **Practice with bots:** three difficulty levels (Easy, Normal, Hard) on the Training card or in *Settings → Gameplay*; the host of a private room can add or remove bots in the lobby.
+- **Friends:** add friends with a friend code or straight from a bout's results, see who's online, in a lobby or in a match, and invite them into your room (private rooms also have an invite link). Tap anyone on the **leaderboard** to see their profile.
+- **Never wait long:** every arena finds an open room or creates one. If nobody shows up within 10 seconds, computer-controlled wrestlers fill the ring and the bout starts.
+- **Bots with styles:** three levels (Easy, Normal, Hard); bots press, circle and charge in from a distance, each with its own temper. The host of a private room or Training can add random players with + in an empty seat.
 - **Power-ups:** every 8–12 s a nobori flag pops up on the ring; grab it for 12 s of *Iron Body* (鉄, twice as heavy), *Thunder Dash* (雷, dash recharges in 0.8 s), *Wind Feet* (風, 40 % faster) or *Giant* (巨, bigger and heavier). The flag then rides on your back until it runs out. Bots wait their turn before going for a flag (hard after 1.5 s, normal 3 s, easy 4.5 s), and no new flags appear in the final 30 seconds.
 - **Comeback balance:** in the last 30 seconds of a bout every player's dash recharges faster (down to about half the cooldown) and bots ease off a little, so endings stay exciting.
-- **Arenas and Sumo Coins:** earn free coins in the Training Arena, pay a coin entry fee in the Rookie, Pro or Champion arena, and the server pays the winner the pool minus a small economy fee. Spend coins on cosmetics in the wardrobe. Coins are virtual: no real money in, no cash out. See [docs/ECONOMY.md](docs/ECONOMY.md).
-- **Make it yours:** pick a hair style and colour, a face and an outfit before the bout. Your belt keeps your player colour and number, so everyone can still tell who is who.
+- **Ten arenas and Sumo Coins:** a private room, free Training, then Rookie, Amateur, Pro, Veteran, Champion, Master, Legend and Godlike, each with a bigger entry fee, prize and XP. The server pays the winner the pool minus a small economy fee. Free daily coins in the shop; coin packs are sold through Cafe Bazaar (verified by the server). See [docs/ECONOMY.md](docs/ECONOMY.md).
+- **Make it yours:** hairstyles and hats, hair colours, faces and masks, outfits, and 40 profile pictures, in four rarity tiers (common, rare, epic, legendary). Your belt keeps your player colour and number, so everyone can still tell who is who.
 
 ## How to play
 
@@ -106,37 +106,51 @@ Tuning lives in `apps/server/src/simulation/SimulationConfig.ts` (acceleration 2
 
 ## Screenshots
 
-| Main menu | Private room lobby |
+| Home | Waiting room |
 | --- | --- |
-| <img src="docs/screenshots/menu.png" alt="Main menu" width="440" /> | <img src="docs/screenshots/lobby.png" alt="Lobby with three players" width="440" /> |
-| **First launch** | **Countdown** |
-| <img src="docs/screenshots/welcome.png" alt="Name prompt on first launch" width="440" /> | <img src="docs/screenshots/countdown.png" alt="Countdown" width="440" /> |
-| **Customise your wrestler** | **Results** |
-| <img src="docs/screenshots/wardrobe.png" alt="Wardrobe with hair, face and outfit options" width="440" /> | <img src="docs/screenshots/results.png" alt="Results screen" width="440" /> |
+| <img src="docs/screenshots/menu.png" alt="Home screen with the arena cards" width="440" /> | <img src="docs/screenshots/lobby.png" alt="Waiting room with three players" width="440" /> |
+| **Customise your wrestler** | **Countdown** |
+| <img src="docs/screenshots/wardrobe.png" alt="Customise: hair, colour, face and outfit with rarity frames" width="440" /> | <img src="docs/screenshots/countdown.png" alt="Countdown" width="440" /> |
+| **Bout** | **Results** |
+| <img src="docs/screenshots/bout.png" alt="Three wrestlers colliding in the ring" width="440" /> | <img src="docs/screenshots/results.png" alt="Results screen" width="440" /> |
 
-<p align="center"><img src="docs/screenshots/mobile.png" alt="Mini Sumo on a phone with touch controls" width="260" /><br /><i>Touch controls on a phone.</i></p>
+**On a phone**
 
-Screenshots come from a real three-player match played by the [Screenshots workflow](.github/workflows/screenshots.yml) (*Actions → Screenshots → Run workflow*), which commits fresh images to `docs/screenshots/`.
+| Home | Bout | Leaderboard | Friends | Coin shop |
+| --- | --- | --- | --- | --- |
+| <img src="docs/screenshots/home-phone.png" alt="Home on a phone" width="160" /> | <img src="docs/screenshots/mobile.png" alt="A bout on a phone with touch controls" width="160" /> | <img src="docs/screenshots/phone/leaderboard.png" alt="Leaderboard on a phone" width="160" /> | <img src="docs/screenshots/phone/friends.png" alt="Friends on a phone" width="160" /> | <img src="docs/screenshots/phone/coin-shop.png" alt="Coin shop on a phone" width="160" /> |
+
+**[Every screen and popup, on a phone and a desktop →](docs/SCREENSHOTS.md)**
+
+The [Screenshots workflow](.github/workflows/screenshots.yml) (*Actions → Screenshots → Run workflow*) plays a real three-player match, then opens every screen and popup through dev mode (sample data) on a phone and a desktop screen, and commits the images to `docs/screenshots/` together with the gallery page [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md). To run it yourself: build the game, start the server and `npm run preview -w @mini-sumo/client`, then `node tools/screenshots.mjs`.
 
 ## Arenas and coins
 
 Every arena has its own artwork, colours and mood, in the 3D ring and on its card:
 
-| Training Grounds | Park Festival (Rookie) | Night Stadium (Pro) | Grand Final (Champion) |
-| --- | --- | --- | --- |
-| <img src="docs/arenas/training.jpg" alt="Training Arena artwork: a sumo pushing a straw dummy while an old coach watches" width="220" /> | <img src="docs/arenas/rookie.jpg" alt="Rookie Arena artwork: two young sumo in a park with bunting and cheering kids" width="220" /> | <img src="docs/arenas/pro.jpg" alt="Pro Arena artwork: two sumo locked together in a night stadium with banners" width="220" /> | <img src="docs/arenas/champion.jpg" alt="Champion Arena artwork: two sumo beside a golden trophy with confetti" width="220" /> |
+| Private Room | Training | Rookie | Amateur | Pro |
+| --- | --- | --- | --- | --- |
+| <img src="docs/arenas/private.jpg" alt="Private Room artwork: a lantern-lit room with a ring for friends" width="190" /> | <img src="docs/arenas/training.jpg" alt="Training artwork: a sumo pushing a straw dummy while an old coach watches" width="190" /> | <img src="docs/arenas/rookie.jpg" alt="Rookie artwork: two young sumo under green crown banners" width="190" /> | <img src="docs/arenas/amateur.jpg" alt="Amateur artwork: a stadium with blue banners and a silver medal" width="190" /> | <img src="docs/arenas/pro.jpg" alt="Pro artwork: a packed night stadium with blue banners and taiko drums" width="190" /> |
+| **Veteran** | **Champion** | **Master** | **Legend** | **Godlike** |
+| <img src="docs/arenas/veteran.jpg" alt="Veteran artwork: red banners, taiko drums and a crowned medal" width="190" /> | <img src="docs/arenas/champion.jpg" alt="Champion artwork: the winner celebrating with a gold medal" width="190" /> | <img src="docs/arenas/master.jpg" alt="Master artwork: a palace ring with red pillars and gold crowns" width="190" /> | <img src="docs/arenas/legend.jpg" alt="Legend artwork: golden lions and a huge trophy" width="190" /> | <img src="docs/arenas/godlike.jpg" alt="Godlike artwork: a golden ring above the clouds among dragons" width="190" /> |
 
-The home screen has its own night-stage backdrop with the title in the middle and all four arenas side by side (artwork, entry fee, prize); the free Training Arena is the first card. Each arena's 3D environment appears only once you're in a room. Features that need the online server show *Coming soon* until it is live.
+The home screen has its own night-stage backdrop with the title in the middle and the arenas side by side (artwork, entry fee, prize, unlock level); the Private Room and the free Training Arena come first, and on phones the arenas are a swipeable carousel. Each arena's 3D environment appears only once you're in a room. Online features (friends, the leaderboard, paid arenas against people, coin packs) need the game server; without a connection the game plays against bots on the device and syncs your progress later.
 
-| Arena | Entry | Winner gets (4 players) | Opponents |
-| --- | ---: | ---: | --- |
-| Training | free | small free rewards | players, bots fill in |
-| Rookie | 50 coins | up to 180 | players only |
-| Pro | 500 coins | up to 1,800 | unlocks at level 5 |
-| Champion | 2,000 coins | up to 7,200 | unlocks at level 10 |
+| Arena | Entry | Winner gets (4 players) | Unlocks | XP |
+| --- | ---: | ---: | --- | ---: |
+| Private Room | free | XP only | – | ×1 |
+| Training | free | XP only | – | ×1 |
+| Rookie | 50 | up to 180 | level 1 | ×1.5 |
+| Amateur | 150 | up to 540 | level 3 | ×1.75 |
+| Pro | 500 | up to 1,800 | level 5 | ×2 |
+| Veteran | 1,000 | up to 3,600 | level 8 | ×2.5 |
+| Champion | 2,000 | up to 7,200 | level 10 | ×3 |
+| Master | 5,000 | up to 18,000 | level 15 | ×4 |
+| Legend | 10,000 | up to 36,000 | level 20 | ×5 |
+| Godlike | 25,000 | up to 90,000 | level 30 | ×6 |
 
-- New players get 200 coins (enough for a first Rookie bout) and level up with XP from every bout; Pro unlocks at level 5, Champion at level 10. The *Profile* panel shows level, XP, stats and unlocks.
-- Right now the economy runs on the device against bots; only buying coins is coming soon.
+- New players get 200 coins (enough for a first Rookie bout) and level up with XP from every bout (up to level 1000); higher arenas unlock as you level up and give more XP. The *Profile* panel shows level, XP, stats and unlocks.
+- Online, coins, XP and items live on the server (and sync across devices); offline, the game keeps them on the device and syncs when it's back online.
 - Training is free practice: no coins, but every finished bout earns XP.
 - Prize = pool − 10 % economy fee (integer, `floor`). Draws and bouts that never start are refunded; leaving during a bout is a loss.
 - The **wardrobe is the shop**: priced options can be tried on and bought with coins. Looks never affect gameplay.
