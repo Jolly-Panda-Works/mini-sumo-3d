@@ -190,6 +190,7 @@ jobs:
           name: mini-sumo-web
           path: out/*.zip
           if-no-files-found: error
+          retention-days: 1
 
   # ------------------------------------------------------------------ android
   android:
@@ -301,6 +302,7 @@ jobs:
           name: mini-sumo-android
           path: out/*
           if-no-files-found: error
+          retention-days: 1
 
   # ------------------------------------------------------------------ release
   release:

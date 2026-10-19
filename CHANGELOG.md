@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- CI: builds failed at the last step once the private repository's 500 MB artifact storage was full (each build kept ~50 MB for 90 days). Artifacts that only hand files to the release now expire after 1 day (media build 7 days, screenshot logs 3); the Cafe Bazaar workflow's copy can no longer stop its release. `tools/clean-artifacts.cmd` deletes the stored artifacts (needs the GitHub CLI).
+
 ### Changed
 
 - Verification emails are built on the server (English and Persian, `apps/server/src/account/emailHtml.ts`) and sent into the studio's existing generic EmailJS template ({{email_subject}}, {{{html}}}, {{to_email}}, {{from_name}}, {{reply_to}}), so no new templates are needed. One template id; `EMAIL_REPLY_TO` sets where replies go.

@@ -124,9 +124,12 @@ jobs:
           (cd out && sha256sum * > SHA256SUMS.txt)
           ls -la out
       - uses: actions/upload-artifact@v4
+        # The release below has the files; this copy is optional (it must not stop the release).
+        continue-on-error: true
         with:
           name: mini-sumo-bazaar
           path: out/*
+          retention-days: 1
 
       - name: Publish release
         env:

@@ -68,4 +68,4 @@ jobs:
         with:
           name: MiniSumo-Media
           path: out/MiniSumo-Media.apk
-          retention-days: 30
+          retention-days: 7

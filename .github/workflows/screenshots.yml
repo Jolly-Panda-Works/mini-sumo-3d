@@ -51,6 +51,7 @@ jobs:
             docs/SCREENSHOTS.md
             server.log
             preview.log
+          retention-days: 3
       - name: Commit screenshots
         run: |
           git config user.name "github-actions[bot]"
