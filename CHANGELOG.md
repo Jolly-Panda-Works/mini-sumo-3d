@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Added
 
+- `tools/server-bazaar-setup.sh` (run on the server): asks for the BAZAAR_* values, checks that the server can reach Cafe Bazaar with them, writes them into the server's `.env` (mode 600), restarts the game and confirms the container has them and the server answers.
+
+### Added
+
 - `tools/bazaar-api-setup.cmd`: sets up the Cafe Bazaar Developer API (asks for the Client ID and Secret, opens Authorize, exchanges the code for a refresh token, checks it, and writes BAZAAR_* into the project's `.env`). Docker Compose passes these to the server.
 
 ### Fixed

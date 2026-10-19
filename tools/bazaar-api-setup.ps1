@@ -109,12 +109,14 @@ Write-Host "Saved to $EnvFile" -ForegroundColor Green
 Write-Host "(.env is ignored by git: it never goes to GitHub.)"
 
 Write-Host ""
-Write-Host "Next, on the server:" -ForegroundColor Cyan
-Write-Host "  1. Put these four lines in the .env file next to docker-compose.yml on the server:"
+Write-Host "Next, on the server (in the project folder):" -ForegroundColor Cyan
+Write-Host "  git pull"
+Write-Host "  bash tools/server-bazaar-setup.sh"
+Write-Host "  It asks for these values, checks them from the server and restarts the game."
+Write-Host "  (Or put these four lines in the server's .env yourself and run: docker compose up -d --build)"
 foreach ($key in $values.Keys) {
   $shown = if ($key -eq "BAZAAR_CLIENT_SECRET" -or $key -eq "BAZAAR_REFRESH_TOKEN") { "<in your .env>" } else { $values[$key] }
   Write-Host "     $key=$shown"
 }
-Write-Host "  2. Restart:  docker compose up -d --build"
 Write-Host ""
 Write-Host "Keep the Client Secret and the refresh token private: don't share them or put them in the code."
