@@ -24,6 +24,11 @@ services:
       - "${WEB_PORT:-6803}:80"
     environment:
       ECONOMY_EVENT_LOG: ${ECONOMY_EVENT_LOG:-true}
+      # Cafe Bazaar purchase validation (set by tools/bazaar-api-setup.cmd; empty = off)
+      BAZAAR_CLIENT_ID: ${BAZAAR_CLIENT_ID:-}
+      BAZAAR_CLIENT_SECRET: ${BAZAAR_CLIENT_SECRET:-}
+      BAZAAR_REFRESH_TOKEN: ${BAZAAR_REFRESH_TOKEN:-}
+      BAZAAR_PACKAGE_NAME: ${BAZAAR_PACKAGE_NAME:-com.jollypanda.mini_sumo}
     volumes:
       - mini-sumo-data:/data
     restart: unless-stopped

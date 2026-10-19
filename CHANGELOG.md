@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- `tools/bazaar-api-setup.cmd`: sets up the Cafe Bazaar Developer API (asks for the Client ID and Secret, opens Authorize, exchanges the code for a refresh token, checks it, and writes BAZAAR_* into the project's `.env`). Docker Compose passes these to the server.
+
 ### Fixed
 
 - Release notes said online play was "coming soon": they looked only at the repository variable, not the default server the build uses. They now get the real address and describe online play.
