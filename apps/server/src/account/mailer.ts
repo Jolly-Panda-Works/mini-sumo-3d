@@ -1,13 +1,18 @@
 /**
  * Sends the verification emails through EmailJS's REST API (the service the studio's website
- * already uses), with the templates in docs/email/. Configured through EMAILJS_SERVICE_ID,
- * EMAILJS_TEMPLATE_ID (English), EMAILJS_TEMPLATE_ID_FA (Persian, optional), EMAILJS_PUBLIC_KEY
- * and EMAILJS_PRIVATE_KEY. In EmailJS: Account > Security > "Allow EmailJS API for non-browser
- * applications" must be on.
+ * already uses). The server builds the whole email (emailHtml.ts) and sends it into the
+ * studio's generic template: Subject {{email_subject}}, Content {{{html}}}, To {{to_email}},
+ * From Name {{from_name}}, Reply To {{reply_to}}.
+ *
+ * Configured through EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY,
+ * EMAILJS_PRIVATE_KEY (and EMAIL_REPLY_TO, optional). In EmailJS: Account > Security >
+ * "Allow EmailJS API for non-browser applications" must be on.
  *
  * Without the keys the mailer is off; with EMAIL_DEV_LOG=true it prints the email to the log
  * instead (local testing only).
  */
+import { verificationEmailHtml } from "./emailHtml.js";
+
 export interface VerificationEmail {
   to: string;
   name: string;
@@ -38,9 +43,10 @@ const COPY = {
 export interface EmailJsConfig {
   serviceId: string;
   templateId: string;
-  templateIdFa: string;
   publicKey: string;
   privateKey: string;
+  /** Where replies go (empty: the template's own setting). */
+  replyTo: string;
   /** Public address of the game, for the logo and the link in the email. */
   publicUrl: string;
 }
@@ -54,7 +60,7 @@ export function emailJsConfigFromEnv(env: Record<string, string | undefined> = p
   return {
     serviceId,
     templateId,
-    templateIdFa: env.EMAILJS_TEMPLATE_ID_FA?.trim() || templateId,
+    replyTo: env.EMAIL_REPLY_TO?.trim() || "",
     publicKey,
     privateKey,
     publicUrl: (env.PUBLIC_URL?.trim() || "https://sumo.ryujin.fans/").replace(/\/?$/, "/"),
@@ -69,25 +75,32 @@ export class EmailJsMailer implements Mailer {
 
   async send(email: VerificationEmail): Promise<void> {
     const copy = COPY[email.lang][email.purpose];
+    const html = verificationEmailHtml(email.lang, {
+      subject: copy.subject,
+      heading: copy.heading,
+      message: copy.message,
+      to_name: email.name,
+      code: email.code,
+      expires_minutes: String(email.minutes),
+      verify_link: email.link,
+      game_url: this.config.publicUrl,
+      logo_url: `${this.config.publicUrl}email/jolly-panda-logo.png`,
+    });
     const res = await this.fetchImpl("https://api.emailjs.com/api/v1.0/email/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         service_id: this.config.serviceId,
-        template_id: email.lang === "fa" ? this.config.templateIdFa : this.config.templateId,
+        template_id: this.config.templateId,
         user_id: this.config.publicKey,
         accessToken: this.config.privateKey,
+        // The studio's generic template: {{email_subject}}, {{{html}}}, {{to_email}}, …
         template_params: {
+          email_subject: copy.subject,
+          html,
           to_email: email.to,
-          to_name: email.name,
-          subject: copy.subject,
-          heading: copy.heading,
-          message: copy.message,
-          code: email.code,
-          verify_link: email.link,
-          expires_minutes: String(email.minutes),
-          logo_url: `${this.config.publicUrl}email/jolly-panda-logo.png`,
-          game_url: this.config.publicUrl,
+          from_name: "Jolly Panda Studio",
+          reply_to: this.config.replyTo,
         },
       }),
     });

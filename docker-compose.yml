@@ -32,7 +32,7 @@ services:
       # Saving progress with an email (EmailJS; empty = off). See docs/EMAIL.fa.md.
       EMAILJS_SERVICE_ID: ${EMAILJS_SERVICE_ID:-}
       EMAILJS_TEMPLATE_ID: ${EMAILJS_TEMPLATE_ID:-}
-      EMAILJS_TEMPLATE_ID_FA: ${EMAILJS_TEMPLATE_ID_FA:-}
+      EMAIL_REPLY_TO: ${EMAIL_REPLY_TO:-}
       EMAILJS_PUBLIC_KEY: ${EMAILJS_PUBLIC_KEY:-}
       EMAILJS_PRIVATE_KEY: ${EMAILJS_PRIVATE_KEY:-}
       PUBLIC_URL: ${PUBLIC_URL:-https://sumo.ryujin.fans/}

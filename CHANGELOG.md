@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Verification emails are built on the server (English and Persian, `apps/server/src/account/emailHtml.ts`) and sent into the studio's existing generic EmailJS template ({{email_subject}}, {{{html}}}, {{to_email}}, {{from_name}}, {{reply_to}}), so no new templates are needed. One template id; `EMAIL_REPLY_TO` sets where replies go.
+
 ### Added
 
 - Save your progress with an email (every build): Profile → Save with email sends a 6-digit code (EmailJS, English or Persian template in `docs/email/`); entering it links the email to the account. On a new device, Restore your progress sends a code to that email and brings the same player back; the other devices keep working (each gets its own key). Codes are stored as hashes, last 15 minutes, allow 5 tries, one email a minute and 6 an hour; one email per account; restore doesn't reveal which emails have an account. The email also links to the web game with the code filled in. Setup: `docs/EMAIL.fa.md`. 8 new tests (170 total).

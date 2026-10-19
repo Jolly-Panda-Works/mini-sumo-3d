@@ -13,42 +13,40 @@
 - هر ایمیل فقط مال **یک حساب** است.
 - اگر کسی برای بازگرداندن ایمیلی را بزند که حسابی ندارد، بازی همان پیام همیشگی را نشان می‌دهد تا معلوم نشود کدام ایمیل‌ها حساب دارند.
 
-## راه‌اندازی EmailJS (یک بار)
+## EmailJS
 
-ایمیل‌ها از طریق **EmailJS** فرستاده می‌شوند، همان سرویسی که سایت استودیو استفاده می‌کند.
+ایمیل‌ها از طریق **EmailJS** و با **همان Template عمومی سایت استودیو** فرستاده می‌شوند. **سرور خودش کل ایمیل را می‌سازد** (انگلیسی یا فارسی، با تم و لوگوی استودیو) و آن را در فیلد `html` به Template می‌دهد. پس **هیچ Template جدیدی لازم نیست**.
 
-۱. **Email Service:** همان سرویسی که سایت با آن ایمیل می‌فرستد کافی است. **Service ID** را بردارید.
+فیلدهای Template موجود که سرور پر می‌کند:
 
-۲. **دو Template بسازید** (Email Templates ← Create New Template):
-   - **انگلیسی:** محتوای `docs/email/verify-code.html` را در بخش Content (حالت **Code / HTML**) بگذارید.
-   - **فارسی:** همین کار با `docs/email/verify-code.fa.html`.
+| فیلد Template | مقدار در Template | چیزی که سرور می‌فرستد |
+|---|---|---|
+| Subject | `{{email_subject}}` | «Your Mini Sumo code» یا «کد مینی سومو» |
+| Content | `{{{html}}}` | کل ایمیل (HTML) |
+| To Email | `{{to_email}}` | ایمیل بازیکن |
+| From Name | `{{from_name}}` | `Jolly Panda Studio` |
+| Reply To | `{{reply_to}}` | مقدار `EMAIL_REPLY_TO` (اختیاری) |
 
-   در تنظیمات **هر دو** Template:
-   | فیلد | مقدار |
-   |---|---|
-   | **Subject** | `{{subject}}` |
-   | **To Email** | `{{to_email}}` |
-   | **From Name** | `Jolly Panda Studio` |
-   | **Reply To** | ایمیل استودیو |
+طراحی ایمیل در `apps/server/src/account/emailHtml.ts` است.
 
-   **Template ID** هر دو را بردارید.
-
-۳. **کلیدها:** Account ← General:
-   - **Public Key**
-   - **Private Key**
-
+**کلیدهای لازم:**
+۱. **Service ID:** از Email Services، همان سرویس سایت.
+۲. **Template ID:** شناسه‌ی همین Template (مثلاً `template_7s37ixs`، از آدرس صفحه‌ی Template).
+۳. **Public Key** و **Private Key:** از Account ← General.
 ۴. **مهم:** Account ← **Security** ← گزینه‌ی **«Allow EmailJS API for non-browser applications»** را روشن کنید. بدون آن، EmailJS ایمیل‌های سرور را رد می‌کند.
+
+> هر ایمیل یک درخواست از سهمیه‌ی ماهانه‌ی EmailJS است (در پلن رایگان ۲۰۰ در ماه، که با فرم سایت مشترک است). اگر بازیکن‌ها زیاد شدند، سهمیه را بیشتر کنید.
 
 ## روی سرور
 
 در فایل `.env` کنار `docker-compose.yml`:
 ```env
 EMAILJS_SERVICE_ID=service_xxxxxxx
-EMAILJS_TEMPLATE_ID=template_en_xxxx
-EMAILJS_TEMPLATE_ID_FA=template_fa_xxxx
+EMAILJS_TEMPLATE_ID=template_7s37ixs
 EMAILJS_PUBLIC_KEY=xxxxxxxxxxxxxxx
 EMAILJS_PRIVATE_KEY=xxxxxxxxxxxxxxxxxxxxx
 PUBLIC_URL=https://sumo.ryujin.fans/
+EMAIL_REPLY_TO=ایمیل-استودیو@jollypanda.ir
 ```
 بعد:
 ```bash
@@ -66,4 +64,4 @@ docker-compose logs web | grep email
 
 ## زبان ایمیل
 
-زبان ایمیل از **زبان گوشی یا مرورگر بازیکن** گرفته می‌شود: اگر فارسی باشد، Template فارسی فرستاده می‌شود و در غیر این صورت انگلیسی. اگر `EMAILJS_TEMPLATE_ID_FA` خالی باشد، همه‌ی ایمیل‌ها انگلیسی می‌روند.
+زبان ایمیل از **زبان گوشی یا مرورگر بازیکن** گرفته می‌شود: اگر فارسی باشد، ایمیل فارسی (راست‌به‌چپ) ساخته می‌شود و در غیر این صورت انگلیسی. هر دو با همان یک Template فرستاده می‌شوند.

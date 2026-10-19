@@ -104,17 +104,29 @@ describe("saving progress with an email", () => {
     expect(normalizeEmail("a@b")).toBe(null);
   });
 
-  it("sends through EmailJS with the template parameters", async () => {
+  it("sends the finished email into the studio's generic EmailJS template", async () => {
     let body: Record<string, unknown> = {};
     const mailer = new EmailJsMailer(
-      { serviceId: "svc", templateId: "tpl_en", templateIdFa: "tpl_fa", publicKey: "pub", privateKey: "priv", publicUrl: "https://sumo.ryujin.fans/" },
+      { serviceId: "svc", templateId: "tpl", publicKey: "pub", privateKey: "priv", replyTo: "hi@jollypanda.ir", publicUrl: "https://sumo.ryujin.fans/" },
       async (_url, init) => {
         body = JSON.parse(init.body) as Record<string, unknown>;
         return { ok: true, status: 200, text: async () => "OK" };
       },
     );
-    await mailer.send({ to: "a@example.com", name: "Usef", code: "123456", link: "https://x/?code=123456", purpose: "restore", lang: "fa", minutes: 15 });
-    expect(body).toMatchObject({ service_id: "svc", template_id: "tpl_fa", user_id: "pub", accessToken: "priv" });
-    expect(body.template_params).toMatchObject({ to_email: "a@example.com", code: "123456", logo_url: "https://sumo.ryujin.fans/email/jolly-panda-logo.png" });
+    await mailer.send({ to: "a@example.com", name: "<b>Usef</b>", code: "123456", link: "https://x/?code=123456&email=a", purpose: "restore", lang: "fa", minutes: 15 });
+    expect(body).toMatchObject({ service_id: "svc", template_id: "tpl", user_id: "pub", accessToken: "priv" });
+    const params = body.template_params as Record<string, string>;
+    expect(params.to_email).toBe("a@example.com");
+    expect(params.from_name).toBe("Jolly Panda Studio");
+    expect(params.reply_to).toBe("hi@jollypanda.ir");
+    expect(params.email_subject.length > 0).toBe(true);
+    // The Persian design, the code, the logo; the player's name escaped; no placeholders left
+    expect(params.html.includes('dir="rtl"')).toBe(true);
+    expect(params.html.includes("123456")).toBe(true);
+    expect(params.html.includes("https://sumo.ryujin.fans/email/jolly-panda-logo.png")).toBe(true);
+    expect(params.html.includes("&lt;b&gt;Usef&lt;/b&gt;")).toBe(true);
+    expect(params.html.includes("<b>Usef</b>")).toBe(false);
+    expect(params.html.includes("&amp;email=a")).toBe(true);
+    expect(/\{\{\w+\}\}/.test(params.html)).toBe(false);
   });
 });
