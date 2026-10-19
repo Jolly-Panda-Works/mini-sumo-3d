@@ -394,12 +394,13 @@ function Face({ style, eyesRef }: { style: string; eyesRef: RefObject<Group | nu
     case "wink":
       return (
         <>
-          <group ref={eyesRef} position={[0, 0.05, 0.47]}>
-            {/* The closed eye sits a little forward: the faceted head would swallow it otherwise */}
-            <mesh geometry={GEO.eyeClosed} material={INK} position={[-0.17, 0, 0.035]} rotation-z={0.15} scale={[1.15, 1.4, 1.6]} />
+          {/* Same size and height as the other faces: one eye closed (like Sleepy's), one open,
+              brows level; the closed eye sits a hair forward so the faceted head can't hide it */}
+          <group ref={eyesRef} position={[0, 0.05, 0.48]}>
+            <mesh geometry={GEO.eyeClosed} material={INK} position={[-0.17, 0, 0.012]} />
             <mesh geometry={GEO.eye} material={INK} position-x={0.17} />
           </group>
-          <mesh geometry={GEO.brow} material={INK} position={[-0.17, 0.17, 0.48]} rotation-z={0.05} />
+          <mesh geometry={GEO.brow} material={INK} position={[-0.17, 0.2, 0.46]} rotation-z={0.1} />
           <mesh geometry={GEO.brow} material={INK} position={[0.17, 0.2, 0.46]} rotation-z={-0.1} />
           <mesh geometry={GEO.smile} material={INK} position={[0.03, -0.1, 0.49]} rotation-z={Math.PI} />
           {cheeks}

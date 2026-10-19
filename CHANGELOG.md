@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Wink face: the closed eye is the same size as Sleepy's (it was thicker and longer) and the two brows are level again.
+
 ### Added
 
 - `tools/server-bazaar-setup.sh` (run on the server): asks for the BAZAAR_* values, checks that the server can reach Cafe Bazaar with them, writes them into the server's `.env` (mode 600), restarts the game and confirms the container has them and the server answers.
