@@ -188,7 +188,7 @@ export function App() {
         <ServerWait />
         <InviteWatcher />
         {emailLink && economyStatus === "ready" && (
-          <EmailSavePopup mode={emailLink.purpose} initial={emailLink} onClose={() => setEmailLink(null)} />
+          <EmailSavePopup initial={emailLink} onClose={() => setEmailLink(null)} />
         )}
       </div>
     </div>

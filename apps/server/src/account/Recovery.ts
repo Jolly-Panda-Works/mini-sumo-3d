@@ -119,13 +119,29 @@ export class AccountRecovery {
 
   // ------------------------------------------------------------ link (signed in)
 
-  async startLink(accountId: string, rawEmail: unknown, lang: "en" | "fa"): Promise<void> {
+  /**
+   * Sign in with an email. A new email: the code saves this player with it ("link"). An email
+   * that already saves a player: the code signs this device in as that player ("restore").
+   */
+  async startSignIn(accountId: string, rawEmail: unknown, lang: "en" | "fa"): Promise<"link" | "restore"> {
     const email = normalizeEmail(rawEmail);
     if (!email) throw new EconomyError("bad_request", "That doesn't look like an email address.");
     const owner = this.accountForEmail(email);
-    if (owner === accountId) throw new EconomyError("bad_request", "Your progress is already saved with this email.");
-    if (owner) throw new EconomyError("bad_request", "This email already saves another player's progress. To play as that player here, use Restore.");
+    if (owner === accountId) throw new EconomyError("bad_request", "You're already signed in with this email.");
+    if (owner) {
+      await this.sendCode(email, "restore", owner, lang);
+      return "restore";
+    }
     await this.sendCode(email, "link", accountId, lang);
+    return "link";
+  }
+
+  /** @deprecated kept for older apps: like startSignIn, but never signs in to another player. */
+  async startLink(accountId: string, rawEmail: unknown, lang: "en" | "fa"): Promise<void> {
+    const email = normalizeEmail(rawEmail);
+    const owner = email ? this.accountForEmail(email) : null;
+    if (owner && owner !== accountId) throw new EconomyError("bad_request", "This email already saves another player's progress.");
+    await this.startSignIn(accountId, rawEmail, lang);
   }
 
   verifyLink(accountId: string, rawEmail: unknown, code: unknown): { email: string } {

@@ -1,35 +1,57 @@
-import { adoptAccount, request } from "./economyClient";
+import { request, switchAccount } from "./economyClient";
 
 /**
- * Saving progress with an email (server: apps/server/src/account/Recovery.ts).
- * Link: a code is emailed; entering it saves this account with the email.
- * Restore: on another device, a code is emailed; entering it brings that account here.
+ * Signing in with an email (server: apps/server/src/account/Recovery.ts).
+ *
+ * One flow: the player enters an email and gets a 6-digit code.
+ * - A new email ("link"): the code saves this player with it.
+ * - An email that already saves a player ("restore"): the code signs this device in as that
+ *   player, and the game restarts with their wrestler, coins and items.
+ * Signing out: this device's key stops working and it starts as a new guest; the email signs
+ * back in any time.
  */
+export type SignInPurpose = "link" | "restore";
+
 const lang = (): "en" | "fa" => (navigator.language?.toLowerCase().startsWith("fa") ? "fa" : "en");
 
 export const linkedEmail = () => request<{ email: string | null; available: boolean }>("/account/email");
 
-export const sendLinkCode = (email: string) =>
-  request("/account/email/start", { method: "POST", body: JSON.stringify({ email, lang: lang() }) });
+/** Emails the code; says whether it saves this player or signs in to an existing one. */
+export async function sendSignInCode(email: string): Promise<SignInPurpose> {
+  const result = await request<{ purpose?: SignInPurpose }>("/account/email/start", {
+    method: "POST",
+    body: JSON.stringify({ email, lang: lang() }),
+  });
+  return result.purpose ?? "link";
+}
 
-export const confirmLinkCode = (email: string, code: string) =>
-  request<{ email: string }>("/account/email/verify", { method: "POST", body: JSON.stringify({ email, code }) });
-
-export const sendRestoreCode = (email: string) =>
-  request("/account/restore/start", { method: "POST", body: JSON.stringify({ email, lang: lang() }) }, false);
-
-/** Brings the account saved with this email to this device (the game restarts). */
-export async function confirmRestoreCode(email: string, code: string): Promise<void> {
+/** Checks the code. "restore" switches this device to that player (the game restarts). */
+export async function confirmSignInCode(purpose: SignInPurpose, email: string, code: string): Promise<string> {
+  if (purpose === "link") {
+    const result = await request<{ email: string }>("/account/email/verify", { method: "POST", body: JSON.stringify({ email, code }) });
+    return result.email;
+  }
   const account = await request<{ accountId: string; token: string }>(
     "/account/restore/verify",
     { method: "POST", body: JSON.stringify({ email, code }) },
     false,
   );
-  adoptAccount(account);
+  switchAccount(account);
+  return email;
+}
+
+/** Signs this device out (the game restarts as a new guest). */
+export async function signOut(): Promise<void> {
+  try {
+    await request("/account/logout", { method: "POST" });
+  } catch {
+    // Offline: the key is forgotten on this device anyway.
+  }
+  switchAccount(null);
 }
 
 /** A code from the email's link (?code=…&email=…&purpose=…), taken once and removed from the address. */
-export function codeFromLink(): { code: string; email: string; purpose: "link" | "restore" } | null {
+export function codeFromLink(): { code: string; email: string; purpose: SignInPurpose } | null {
   const url = new URL(window.location.href);
   const code = url.searchParams.get("code");
   const email = url.searchParams.get("email");

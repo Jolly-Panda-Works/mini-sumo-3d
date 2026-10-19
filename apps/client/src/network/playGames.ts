@@ -1,7 +1,7 @@
 import { createStore } from "../store";
 import { settingsStore, type Settings } from "../settings";
 import { pushToast } from "../uiStore";
-import { adoptAccount, economyStore, refreshProfile, storedAccount } from "./economyClient";
+import { economyStore, refreshProfile, storedAccount, switchAccount } from "./economyClient";
 import { localEconomy, type LocalSnapshot } from "./localEconomy";
 
 /**
@@ -92,7 +92,7 @@ async function sync(): Promise<void> {
     const fartherHere = (economyStore.get().profile?.level.xp ?? 0) > (cloud?.economy?.xp ?? 0);
     if (theirs?.accountId && theirs.token && theirs.accountId !== here?.accountId && !fartherHere) {
       pushToast("Progress restored from Google Play", "info", 3500);
-      adoptAccount(theirs); // the game restarts as that player
+      switchAccount(theirs); // the game restarts as that player
       return;
     }
     if (cloud && cloud.v === 1 && cloud.economy && progress(cloud.economy) > progress(local)) {
@@ -123,8 +123,39 @@ async function finishSignIn(result: { authenticated: boolean; name?: string }, q
   await sync();
 }
 
+/** The player logged out of Google Play in the game: no automatic sign-in until they sign in again. */
+const OFF_KEY = "mini-sumo:play-games-off";
+const loggedOut = (): boolean => {
+  try {
+    return window.localStorage.getItem(OFF_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+const setLoggedOut = (off: boolean): void => {
+  try {
+    if (off) window.localStorage.setItem(OFF_KEY, "1");
+    else window.localStorage.removeItem(OFF_KEY);
+  } catch {
+    // nothing to remember
+  }
+};
+
+/**
+ * Log out of Google Play in the game. Play Games (v2) has no sign-out of its own (Google
+ * keeps the account on the phone), so the game disconnects: it stops saving to Google Play
+ * and doesn't sign in automatically until the player taps sign in again.
+ */
+export function logOutOfPlayGames(): void {
+  window.clearTimeout(saveTimer);
+  setLoggedOut(true);
+  playGamesStore.set({ available: plugin !== null, status: "signedOut", name: "" });
+  pushToast("Logged out of Google Play", "info");
+}
+
 export async function signInToPlayGames(): Promise<void> {
   if (!plugin || playGamesStore.get().status === "working") return;
+  setLoggedOut(false);
   playGamesStore.update({ status: "working" });
   try {
     await finishSignIn(await plugin.signIn(), false);
@@ -137,10 +168,12 @@ export async function signInToPlayGames(): Promise<void> {
 /** On start: Google Play signs returning players in automatically. */
 export async function initPlayGames(): Promise<void> {
   if (!plugin) return;
-  try {
-    await finishSignIn(await plugin.isAuthenticated(), true);
-  } catch {
-    // stays signed out
+  if (!loggedOut()) {
+    try {
+      await finishSignIn(await plugin.isAuthenticated(), true);
+    } catch {
+      // stays signed out
+    }
   }
   economyStore.subscribe(scheduleSave);
   settingsStore.subscribe(scheduleSave);

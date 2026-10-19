@@ -6,6 +6,12 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Sign in with email (button art SIGN IN / CONNECTED under Google Play): one flow. A new email saves this player with it; an email that already has a player brings that player to this device, and the game reloads with them (the device's own copy is cleared first, so the previous player's progress isn't merged in). Tapping CONNECTED asks to log out: this device's key stops working and the game starts as a new guest (the email signs back in any time).
+- Google Play: tapping Connected asks to log out; the game stops saving to Google Play and doesn't sign in automatically until the player signs in again (Play Games v2 has no sign-out of its own).
+- Server: `POST /api/account/email/start` answers `purpose: link | restore`; new `POST /api/account/logout`. 2 new tests (171 total).
+
 ### Fixed
 
 - CI: builds failed at the last step once the private repository's 500 MB artifact storage was full (each build kept ~50 MB for 90 days). Artifacts that only hand files to the release now expire after 1 day (media build 7 days, screenshot logs 3); the Cafe Bazaar workflow's copy can no longer stop its release. `tools/clean-artifacts.cmd` deletes the stored artifacts (needs the GitHub CLI).

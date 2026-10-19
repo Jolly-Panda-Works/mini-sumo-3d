@@ -1,4 +1,5 @@
 import {
+  DEFAULT_APPEARANCE,
   STARTER_ITEMS,
   restrictToOwned,
   type CatalogResponse,
@@ -75,11 +76,24 @@ export function storedAccount(): { accountId: string; token: string } | null {
 }
 
 /**
- * Switches this device to another account (restored with an email or from Google Play),
- * then restarts the game so everything loads for that player.
+ * Switches this device to another player, then restarts the game so everything loads for
+ * them: an account (signed in with an email or Google Play), or null to sign out (a new
+ * guest is made on the next start).
+ *
+ * The device's own copy of progress, name and look is cleared first: otherwise the startup
+ * sync would merge the previous player's progress into this account (higher XP wins).
  */
-export function adoptAccount(account: { accountId: string; token: string }): void {
+export function switchAccount(account: { accountId: string; token: string } | null): void {
   writeAccount(account);
+  for (const key of ["mini-sumo:local-economy", "mini-sumo:profile-updated-at", OWNED_CACHE_KEY]) {
+    try {
+      window.localStorage.removeItem(key);
+    } catch {
+      // nothing stored
+    }
+  }
+  // Signed out: the new guest starts fresh (welcome screen, default look).
+  if (!account) settingsStore.update({ name: "", appearance: { ...DEFAULT_APPEARANCE }, onboarded: false });
   window.location.reload();
 }
 

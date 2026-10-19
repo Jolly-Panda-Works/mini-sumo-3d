@@ -28,7 +28,8 @@ import type { PaymentService } from "../economy/payments.js";
  *   PUT  /api/profile/appearance { hair, hairColor, face, outfit }       (Bearer token)
  *   POST /api/profile/sync { name, appearance, xp, matches, wins, updatedAt } (Bearer token)
  *   GET  /api/account/email                 the email saving your progress   (Bearer token)
- *   POST /api/account/email/start { email, lang }   email a code to save with it (Bearer token)
+ *   POST /api/account/email/start { email, lang }   sign in: email a code -> { purpose: link | restore } (Bearer token)
+ *   POST /api/account/logout                this device signs out (its key stops working) (Bearer token)
  *   POST /api/account/email/verify { email, code }  save your progress with it   (Bearer token)
  *   POST /api/account/restore/start { email, lang } email a code to restore      (no token)
  *   POST /api/account/restore/verify { email, code } -> { accountId, token }     (no token)
@@ -242,13 +243,19 @@ export function createApiHandler(
       } else if (recovery && route === "GET /api/account/email") {
         send(res, 200, { email: recovery.linkedEmail(accountId), available: recovery.available });
       } else if (recovery && route === "POST /api/account/email/start") {
+        // Sign in with an email: saves this player with it, or (an email that already saves a
+        // player) sends the code that signs this device in as that player.
         if (!writeLimiter.allow(accountId)) {
           send(res, 429, { error: "rate_limited", message: "Slow down a little." });
         } else {
           const body = ((await readJson(req)) ?? {}) as Record<string, unknown>;
-          await recovery.startLink(accountId, body.email, body.lang === "fa" ? "fa" : "en");
-          send(res, 200, { ok: true });
+          const purpose = await recovery.startSignIn(accountId, body.email, body.lang === "fa" ? "fa" : "en");
+          send(res, 200, { ok: true, purpose });
         }
+      } else if (route === "POST /api/account/logout") {
+        // This device signs out: its key stops working.
+        economy.revokeToken(token!);
+        send(res, 200, { ok: true });
       } else if (recovery && route === "POST /api/account/email/verify") {
         const body = ((await readJson(req)) ?? {}) as Record<string, unknown>;
         send(res, 200, recovery.verifyLink(accountId, body.email, body.code));

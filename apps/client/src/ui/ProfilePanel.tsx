@@ -10,8 +10,8 @@ import { AVATARS, cosmeticItemId, cosmeticPrice } from "@mini-sumo/shared";
 import { buyItem, ownedItems } from "../network/economyClient";
 import { Coins, compactCoins } from "./Coins";
 import { audio } from "../audio/AudioManager";
-import { playGamesStore, signInToPlayGames } from "../network/playGames";
-import { linkedEmail } from "../network/accountEmail";
+import { logOutOfPlayGames, playGamesStore, signInToPlayGames } from "../network/playGames";
+import { linkedEmail, signOut } from "../network/accountEmail";
 import { networkStore } from "../network/networkMode";
 import { EmailSavePopup } from "./EmailSavePopup";
 
@@ -57,7 +57,31 @@ export function ProfilePanel() {
   // Saving with an email: when the server can send the codes (online)
   const emailOn = useStore(networkStore).mode === "online" && Boolean(useStore(economyStore).catalog?.emailRecovery);
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
-  const [emailMode, setEmailMode] = useState<"link" | "restore" | null>(null);
+  const [emailMode, setEmailMode] = useState(false);
+
+  // Tapping "Connected": who you're signed in as, and log out?
+  const askEmailLogOut = async () => {
+    const choice = await showWarning(
+      "Log out?",
+      `You're signed in with ${savedEmail}. Log out on this device? Your progress stays saved with your email: sign in again any time to get it back.`,
+      [
+        { id: "leave", label: "Log out", primary: true },
+        { id: "cancel", label: "Stay signed in" },
+      ],
+    );
+    if (choice === "leave") await signOut(); // the game restarts as a new guest
+  };
+  const askPlayLogOut = async () => {
+    const choice = await showWarning(
+      "Log out of Google Play?",
+      `You're signed in with Google Play${play.name ? ` as ${play.name}` : ""}. Log out? Your progress stops saving to Google Play until you sign in again.`,
+      [
+        { id: "leave", label: "Log out", primary: true },
+        { id: "cancel", label: "Stay signed in" },
+      ],
+    );
+    if (choice === "leave") logOutOfPlayGames();
+  };
   useEffect(() => {
     if (!emailOn) return;
     void linkedEmail()
@@ -129,7 +153,7 @@ export function ProfilePanel() {
         {import.meta.env.VITE_STORE !== "bazaar" && (
         <section className="profile__google" aria-label="Google Play">
           {play.status === "connected" ? (
-            <button className="gplay-btn" onClick={() => pushToast("Your progress is saved to Google Play", "info")} aria-label="Connected to Google Play">
+            <button className="gplay-btn" onClick={() => void askPlayLogOut()} aria-label="Connected to Google Play: log out">
               <img src={`${base}ui/gplay-connected.webp`} alt="" width={480} height={128} draggable={false} />
             </button>
           ) : (
@@ -152,29 +176,27 @@ export function ProfilePanel() {
         </section>
         )}
 
-        {/* Save the account with an email (every build), and bring one back on a new device */}
+        {/* Sign in with email (every build): saves this player, or brings one back */}
         {emailOn && (
-          <section className="profile__save" aria-label="Save your progress">
-            <h3 className="settings__heading">Save your progress</h3>
+          <section className="profile__email" aria-label="Email">
             {savedEmail ? (
-              <p className="profile__saved">✓ Saved with {savedEmail}</p>
+              <button className="gplay-btn" onClick={() => void askEmailLogOut()} aria-label={`Signed in with ${savedEmail}: log out`}>
+                <img src={`${base}ui/btn-email-connected.webp`} alt="" width={480} height={125} draggable={false} />
+              </button>
             ) : (
-              <>
-                <p className="hint">Save with your email to get your wrestler, coins and items back if you change or reset your phone.</p>
-                <button className="plank-btn plank-btn--primary profile__save-btn" onClick={() => setEmailMode("link")}>
-                  Save with email
-                </button>
-              </>
+              <button className="gplay-btn" onClick={() => setEmailMode(true)} aria-label="Sign in with email">
+                <img src={`${base}ui/btn-email-signin.webp`} alt="" width={480} height={135} draggable={false} />
+              </button>
             )}
-            <button className="profile__restore" onClick={() => setEmailMode("restore")}>
-              Playing on a new device? Restore your progress
-            </button>
+            <p className="hint">
+              {savedEmail
+                ? `Signed in as ${savedEmail}. Your progress is saved with your email.`
+                : "Sign in with your email to keep your progress safe, or to get it back on this device."}
+            </p>
           </section>
         )}
       </Dialog>
-      {emailMode && (
-        <EmailSavePopup mode={emailMode} onClose={() => setEmailMode(null)} onLinked={(email) => setSavedEmail(email)} />
-      )}
+      {emailMode && <EmailSavePopup onClose={() => setEmailMode(false)} onLinked={(email) => setSavedEmail(email)} />}
       {editing && <EditName onClose={() => setEditing(false)} />}
       {picking && (
         <Dialog title="Pictures" onClose={() => setPicking(false)} className="avatar-picker" variant="sub">

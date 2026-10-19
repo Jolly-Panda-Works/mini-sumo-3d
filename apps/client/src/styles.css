@@ -8740,3 +8740,12 @@ button.code-field {
   font-weight: 900;
   letter-spacing: 0.35em;
 }
+
+/* Email sign-in button under Google Play (same size) */
+.profile__email {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  text-align: center;
+}

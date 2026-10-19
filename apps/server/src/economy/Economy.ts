@@ -519,6 +519,17 @@ export class Economy {
     return device?.account_id ?? null;
   }
 
+  /**
+   * Signs one device out: its key stops working. A key added by an email sign-in is removed;
+   * the account's first key is replaced by a random one nobody holds (the email still signs in).
+   */
+  revokeToken(token: string): void {
+    const digest = sha256(token);
+    const device = this.db.prepare("DELETE FROM account_tokens WHERE token_hash = ?").run(digest);
+    if (Number(device.changes) > 0) return;
+    this.db.prepare("UPDATE accounts SET token_hash = ? WHERE token_hash = ?").run(sha256(randomBytes(32).toString("base64url")), digest);
+  }
+
   /** A new key for one more device on this account (the other devices keep theirs). */
   issueDeviceToken(accountId: string): string {
     this.account(accountId);

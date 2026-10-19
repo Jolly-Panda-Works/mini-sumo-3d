@@ -80,13 +80,36 @@ describe("saving progress with an email", () => {
     expect(thrown(() => recovery.verifyLink(accountId, "a@example.com", sent[1]!.code)).includes("expired")).toBe(true);
   });
 
-  it("one email per account: another player's email can't be linked", async () => {
+  it("signing in with an email that already saves a player signs this device in as that player", async () => {
     const { economy, recovery, sent } = setup();
     const a = economy.createGuest();
     const b = economy.createGuest();
-    await recovery.startLink(a.accountId, "shared@example.com", "en");
+    expect(await recovery.startSignIn(a.accountId, "shared@example.com", "en")).toBe("link");
     recovery.verifyLink(a.accountId, "shared@example.com", sent[0]!.code);
-    expect((await failure(recovery.startLink(b.accountId, "shared@example.com", "en"))).includes("another player")).toBe(true);
+    // On another device (b), the same email: a code for a's account
+    expect(await recovery.startSignIn(b.accountId, "shared@example.com", "en")).toBe("restore");
+    expect(sent[1]!.purpose).toBe("restore");
+    expect(recovery.verifyRestore("shared@example.com", sent[1]!.code).accountId).toBe(a.accountId);
+    // Already signed in with it
+    expect((await failure(recovery.startSignIn(a.accountId, "shared@example.com", "en"))).includes("already signed in")).toBe(true);
+  });
+
+  it("signing out stops that device's key, and the email signs back in", async () => {
+    const { economy, recovery, sent, advance } = setup();
+    const a = economy.createGuest();
+    await recovery.startSignIn(a.accountId, "me@example.com", "en");
+    recovery.verifyLink(a.accountId, "me@example.com", sent[0]!.code);
+    economy.revokeToken(a.token);
+    expect(economy.authenticate(a.token)).toBe(null);
+    const b = economy.createGuest();
+    advance(61_000);
+    expect(await recovery.startSignIn(b.accountId, "me@example.com", "en")).toBe("restore");
+    const back = recovery.verifyRestore("me@example.com", sent[1]!.code);
+    expect(back.accountId).toBe(a.accountId);
+    expect(economy.authenticate(back.token)).toBe(a.accountId);
+    // An email sign-in key is removed the same way
+    economy.revokeToken(back.token);
+    expect(economy.authenticate(back.token)).toBe(null);
   });
 
   it("waits a minute between codes", async () => {
