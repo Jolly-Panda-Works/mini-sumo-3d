@@ -12,6 +12,8 @@ import { PaymentService } from "./economy/payments.js";
 import { createApiHandler } from "./http/api.js";
 import { Friends } from "./social/Friends.js";
 import { BazaarVerifier, bazaarConfigFromEnv } from "./economy/bazaar.js";
+import { AccountRecovery } from "./account/Recovery.js";
+import { EmailJsMailer, LogMailer, emailJsConfigFromEnv } from "./account/mailer.js";
 import { createStaticHandler } from "./http/static.js";
 
 // Load the repository-level .env (if present) without extra dependencies (Node >= 20.12).
@@ -42,7 +44,12 @@ if (friends) {
 const bazaarConfig = bazaarConfigFromEnv();
 const bazaar = bazaarConfig ? new BazaarVerifier(bazaarConfig) : null;
 console.log(bazaar ? `[bazaar] purchase verification on (${bazaarConfig!.packageName})` : "[bazaar] purchase verification off (no keys)");
-const handleApi = createApiHandler(economy, new PaymentService(flags), friends, bazaar);
+// Saving progress with an email (EmailJS; EMAIL_DEV_LOG=true prints codes instead, for testing)
+const emailConfig = emailJsConfigFromEnv();
+const mailer = emailConfig ? new EmailJsMailer(emailConfig) : process.env.EMAIL_DEV_LOG === "true" ? new LogMailer() : null;
+const recovery = economy ? new AccountRecovery(economy, mailer, emailConfig?.publicUrl ?? process.env.PUBLIC_URL ?? "https://sumo.ryujin.fans/") : null;
+console.log(mailer ? `[email] saving progress with email on (${emailConfig ? "EmailJS" : "log only"})` : "[email] saving progress with email off (no EmailJS keys)");
+const handleApi = createApiHandler(economy, new PaymentService(flags), friends, bazaar, recovery);
 // The built web game, when this server also hosts it (STATIC_DIR, set in the Docker image).
 const handleStatic = createStaticHandler(process.env.STATIC_DIR);
 

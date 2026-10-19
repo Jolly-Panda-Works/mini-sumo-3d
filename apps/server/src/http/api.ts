@@ -13,6 +13,7 @@ import type {
 } from "@mini-sumo/shared";
 import { Friends } from "../social/Friends.js";
 import type { BazaarVerifier } from "../economy/bazaar.js";
+import type { AccountRecovery } from "../account/Recovery.js";
 import { CATALOG, listArenas } from "../economy/config.js";
 import { EconomyError, type Economy } from "../economy/Economy.js";
 import type { PaymentService } from "../economy/payments.js";
@@ -26,6 +27,11 @@ import type { PaymentService } from "../economy/payments.js";
  *   POST /api/shop/purchase      { itemId, idempotencyKey }              (Bearer token)
  *   PUT  /api/profile/appearance { hair, hairColor, face, outfit }       (Bearer token)
  *   POST /api/profile/sync { name, appearance, xp, matches, wins, updatedAt } (Bearer token)
+ *   GET  /api/account/email                 the email saving your progress   (Bearer token)
+ *   POST /api/account/email/start { email, lang }   email a code to save with it (Bearer token)
+ *   POST /api/account/email/verify { email, code }  save your progress with it   (Bearer token)
+ *   POST /api/account/restore/start { email, lang } email a code to restore      (no token)
+ *   POST /api/account/restore/verify { email, code } -> { accountId, token }     (no token)
  *   POST /api/purchases/bazaar { productId, purchaseToken }  a Cafe Bazaar coin pack (Bearer token)
  *   POST /api/daily-gift                    the free daily coins (once a day) (Bearer token)
  *   GET  /api/leaderboard?limit=100         top players by XP + your rank    (Bearer token)
@@ -63,7 +69,17 @@ class Limiter {
 }
 
 const guestLimiter = new Limiter(10, 60 * 60 * 1000);
+/** The same error answer as the main handler (friendly message, or a generic 500). */
+function sendError(res: ServerResponse, error: unknown): void {
+  if (error instanceof EconomyError) send(res, STATUS[error.code], { error: error.code, message: error.message });
+  else {
+    console.error("[mini-sumo] api error", error);
+    send(res, 500, { error: "internal", message: "Something went wrong." });
+  }
+}
+
 const writeLimiter = new Limiter(60, 60 * 1000);
+const restoreLimiter = new Limiter(20, 60 * 60 * 1000);
 
 function send(res: ServerResponse, status: number, body: unknown): void {
   res.writeHead(status, {
@@ -123,6 +139,8 @@ export function createApiHandler(
   friends: Friends | null = economy ? new Friends(economy) : null,
   /** Cafe Bazaar purchase verification; null when its keys aren't set. */
   bazaar: BazaarVerifier | null = null,
+  /** Saving progress with an email; null when there's no database. */
+  recovery: AccountRecovery | null = null,
 ) {
   return async function handleApi(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
     const url = new URL(req.url ?? "/", "http://localhost");
@@ -148,6 +166,7 @@ export function createApiHandler(
         arenas: listArenas(),
         items: CATALOG.map((item) => ({ ...item })),
         stores: { bazaar: Boolean(economy && bazaar) },
+        emailRecovery: Boolean(economy && recovery?.available),
       };
       send(res, 200, body);
       return true;
@@ -164,6 +183,31 @@ export function createApiHandler(
         return true;
       }
       send(res, 201, economy.createGuest());
+      return true;
+    }
+
+    // Restoring progress on a new device: not signed in yet. Per-address limit on top of the
+    // per-email limits in AccountRecovery.
+    if (route === "POST /api/account/restore/start" || route === "POST /api/account/restore/verify") {
+      if (!recovery) {
+        send(res, 503, { error: "store_unavailable", message: "Restoring progress isn't available right now." });
+        return true;
+      }
+      if (!restoreLimiter.allow(ip)) {
+        send(res, 429, { error: "rate_limited", message: "Too many tries from this address. Try again later." });
+        return true;
+      }
+      try {
+        const body = ((await readJson(req)) ?? {}) as Record<string, unknown>;
+        if (route === "POST /api/account/restore/start") {
+          await recovery.startRestore(body.email, body.lang === "fa" ? "fa" : "en");
+          send(res, 200, { ok: true });
+        } else {
+          send(res, 200, recovery.verifyRestore(body.email, body.code));
+        }
+      } catch (error) {
+        sendError(res, error);
+      }
       return true;
     }
 
@@ -195,6 +239,19 @@ export function createApiHandler(
         const body = await readJson(req);
         if (!body) send(res, 400, { error: "bad_request", message: "Invalid request." });
         else send(res, 200, { appearance: economy.saveAppearance(accountId, body) });
+      } else if (recovery && route === "GET /api/account/email") {
+        send(res, 200, { email: recovery.linkedEmail(accountId), available: recovery.available });
+      } else if (recovery && route === "POST /api/account/email/start") {
+        if (!writeLimiter.allow(accountId)) {
+          send(res, 429, { error: "rate_limited", message: "Slow down a little." });
+        } else {
+          const body = ((await readJson(req)) ?? {}) as Record<string, unknown>;
+          await recovery.startLink(accountId, body.email, body.lang === "fa" ? "fa" : "en");
+          send(res, 200, { ok: true });
+        }
+      } else if (recovery && route === "POST /api/account/email/verify") {
+        const body = ((await readJson(req)) ?? {}) as Record<string, unknown>;
+        send(res, 200, recovery.verifyLink(accountId, body.email, body.code));
       } else if (route === "POST /api/purchases/bazaar") {
         // A coin pack bought in Cafe Bazaar: verified with Bazaar, then credited once per token.
         if (!bazaar) throw new EconomyError("store_unavailable", "Buying coins isn't available right now.");

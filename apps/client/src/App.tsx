@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { LATE_GAME_MS, Phase } from "@mini-sumo/shared";
 import { GameCanvas } from "./game/GameCanvas";
 import { HomeBackground } from "./ui/HomeBackground";
@@ -23,6 +23,8 @@ import { DevButton, DevPanel } from "./ui/DevPanel";
 import { NoticePopup } from "./ui/NoticePopup";
 import { ServerWait } from "./ui/ServerWait";
 import { restoreBazaarPurchases } from "./network/bazaar";
+import { codeFromLink } from "./network/accountEmail";
+import { EmailSavePopup } from "./ui/EmailSavePopup";
 import { InviteWatcher } from "./ui/InviteWatcher";
 import { audio } from "./audio/AudioManager";
 import { ProfilePanel } from "./ui/ProfilePanel";
@@ -44,6 +46,9 @@ export function App() {
       if (coins > 0) pushToast(`+${coins.toLocaleString("en-US")} Sumo Coins`, "info");
     });
   }, [economyStatus]);
+
+  // A link from a verification email (?code=…&email=…&purpose=…): the popup, with both filled in
+  const [emailLink, setEmailLink] = useState(() => codeFromLink());
 
   const session = useStore(sessionStore);
   const game = useStore(gameStore);
@@ -182,6 +187,9 @@ export function App() {
         <NoticePopup />
         <ServerWait />
         <InviteWatcher />
+        {emailLink && economyStatus === "ready" && (
+          <EmailSavePopup mode={emailLink.purpose} initial={emailLink} onClose={() => setEmailLink(null)} />
+        )}
       </div>
     </div>
   );

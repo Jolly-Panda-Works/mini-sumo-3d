@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { NAME_MAX_LENGTH } from "@mini-sumo/shared";
 import { economyStore } from "../network/economyClient";
 import { settingsStore } from "../settings";
@@ -11,6 +11,9 @@ import { buyItem, ownedItems } from "../network/economyClient";
 import { Coins, compactCoins } from "./Coins";
 import { audio } from "../audio/AudioManager";
 import { playGamesStore, signInToPlayGames } from "../network/playGames";
+import { linkedEmail } from "../network/accountEmail";
+import { networkStore } from "../network/networkMode";
+import { EmailSavePopup } from "./EmailSavePopup";
 
 function EditName({ onClose }: { onClose: () => void }) {
   const settings = useStore(settingsStore);
@@ -51,6 +54,16 @@ export function ProfilePanel() {
   const [editing, setEditing] = useState(false);
   const [picking, setPicking] = useState(false);
   const play = useStore(playGamesStore);
+  // Saving with an email: when the server can send the codes (online)
+  const emailOn = useStore(networkStore).mode === "online" && Boolean(useStore(economyStore).catalog?.emailRecovery);
+  const [savedEmail, setSavedEmail] = useState<string | null>(null);
+  const [emailMode, setEmailMode] = useState<"link" | "restore" | null>(null);
+  useEffect(() => {
+    if (!emailOn) return;
+    void linkedEmail()
+      .then((r) => setSavedEmail(r.email))
+      .catch(() => undefined);
+  }, [emailOn]);
   const base = import.meta.env.BASE_URL;
   const profile = economy.profile;
   const level = profile?.level ?? { level: 1, xp: 0, levelStartXp: 0, nextLevelXp: 100 };
@@ -138,7 +151,30 @@ export function ProfilePanel() {
           </p>
         </section>
         )}
+
+        {/* Save the account with an email (every build), and bring one back on a new device */}
+        {emailOn && (
+          <section className="profile__save" aria-label="Save your progress">
+            <h3 className="settings__heading">Save your progress</h3>
+            {savedEmail ? (
+              <p className="profile__saved">✓ Saved with {savedEmail}</p>
+            ) : (
+              <>
+                <p className="hint">Save with your email to get your wrestler, coins and items back if you change or reset your phone.</p>
+                <button className="plank-btn plank-btn--primary profile__save-btn" onClick={() => setEmailMode("link")}>
+                  Save with email
+                </button>
+              </>
+            )}
+            <button className="profile__restore" onClick={() => setEmailMode("restore")}>
+              Playing on a new device? Restore your progress
+            </button>
+          </section>
+        )}
       </Dialog>
+      {emailMode && (
+        <EmailSavePopup mode={emailMode} onClose={() => setEmailMode(null)} onLinked={(email) => setSavedEmail(email)} />
+      )}
       {editing && <EditName onClose={() => setEditing(false)} />}
       {picking && (
         <Dialog title="Pictures" onClose={() => setPicking(false)} className="avatar-picker" variant="sub">

@@ -233,6 +233,10 @@ export class Economy {
     // Bot players: real accounts for the leaderboard, friends and in-game bots.
     if (!columns.some((c) => c.name === "is_bot")) this.db.exec("ALTER TABLE accounts ADD COLUMN is_bot INTEGER NOT NULL DEFAULT 0");
     this.db.exec("CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)");
+    // Keys for extra devices on an account (restored with an email)
+    this.db.exec(
+      "CREATE TABLE IF NOT EXISTS account_tokens (token_hash TEXT PRIMARY KEY, account_id TEXT NOT NULL REFERENCES accounts(id), created_at TEXT NOT NULL)",
+    );
     if (this.botPlayers) this.ensureBots();
   }
 
@@ -507,8 +511,20 @@ export class Economy {
   /** Resolves a bearer token to an account id, or null. Never trusts a client-sent id. */
   authenticate(token: unknown): string | null {
     if (typeof token !== "string" || token.length < 20 || token.length > 200) return null;
-    const found = row<{ id: string }>(this.db.prepare("SELECT id FROM accounts WHERE token_hash = ?").get(sha256(token)));
-    return found?.id ?? null;
+    const digest = sha256(token);
+    const found = row<{ id: string }>(this.db.prepare("SELECT id FROM accounts WHERE token_hash = ?").get(digest));
+    if (found) return found.id;
+    // Extra devices (added by restoring with an email)
+    const device = row<{ account_id: string }>(this.db.prepare("SELECT account_id FROM account_tokens WHERE token_hash = ?").get(digest));
+    return device?.account_id ?? null;
+  }
+
+  /** A new key for one more device on this account (the other devices keep theirs). */
+  issueDeviceToken(accountId: string): string {
+    this.account(accountId);
+    const token = randomBytes(32).toString("base64url");
+    this.db.prepare("INSERT INTO account_tokens (token_hash, account_id, created_at) VALUES (?, ?, ?)").run(sha256(token), accountId, this.timestamp());
+    return token;
   }
 
   private account(accountId: string): AccountRow {

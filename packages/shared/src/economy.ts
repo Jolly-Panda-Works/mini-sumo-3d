@@ -213,6 +213,8 @@ export interface CatalogResponse {
   items: ShopItemInfo[];
   /** Stores whose purchases this server can verify (and credit) right now. */
   stores?: { bazaar: boolean };
+  /** Progress can be saved with an email (and restored on another device). */
+  emailRecovery?: boolean;
 }
 
 /** Cafe Bazaar product ids (Bazaar developer panel) for each coin pack. */

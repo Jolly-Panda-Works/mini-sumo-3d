@@ -29,6 +29,13 @@ services:
       BAZAAR_CLIENT_SECRET: ${BAZAAR_CLIENT_SECRET:-}
       BAZAAR_REFRESH_TOKEN: ${BAZAAR_REFRESH_TOKEN:-}
       BAZAAR_PACKAGE_NAME: ${BAZAAR_PACKAGE_NAME:-com.jollypanda.mini_sumo}
+      # Saving progress with an email (EmailJS; empty = off). See docs/EMAIL.fa.md.
+      EMAILJS_SERVICE_ID: ${EMAILJS_SERVICE_ID:-}
+      EMAILJS_TEMPLATE_ID: ${EMAILJS_TEMPLATE_ID:-}
+      EMAILJS_TEMPLATE_ID_FA: ${EMAILJS_TEMPLATE_ID_FA:-}
+      EMAILJS_PUBLIC_KEY: ${EMAILJS_PUBLIC_KEY:-}
+      EMAILJS_PRIVATE_KEY: ${EMAILJS_PRIVATE_KEY:-}
+      PUBLIC_URL: ${PUBLIC_URL:-https://sumo.ryujin.fans/}
     volumes:
       - mini-sumo-data:/data
     restart: unless-stopped

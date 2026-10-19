@@ -1,7 +1,7 @@
 import { createStore } from "../store";
 import { settingsStore, type Settings } from "../settings";
 import { pushToast } from "../uiStore";
-import { economyStore, refreshProfile } from "./economyClient";
+import { adoptAccount, economyStore, refreshProfile, storedAccount } from "./economyClient";
 import { localEconomy, type LocalSnapshot } from "./localEconomy";
 
 /**
@@ -30,6 +30,8 @@ interface CloudSave {
   savedAt: string;
   economy: LocalSnapshot;
   profile: Pick<Settings, "name" | "appearance" | "botLevel">;
+  /** The game server account (id and key), so a new phone signs in as the same player. */
+  account?: { accountId: string; token: string };
 }
 
 function findPlugin(): PlayGamesPlugin | null {
@@ -51,7 +53,8 @@ const progress = (s: LocalSnapshot) => s.xp * 1000 + s.matches * 10 + s.owned.le
 
 function snapshot(): CloudSave {
   const { name, appearance, botLevel } = settingsStore.get();
-  return { v: 1, savedAt: new Date().toISOString(), economy: localEconomy.exportState(), profile: { name, appearance, botLevel } };
+  const account = storedAccount() ?? undefined;
+  return { v: 1, savedAt: new Date().toISOString(), economy: localEconomy.exportState(), profile: { name, appearance, botLevel }, account };
 }
 
 let saveTimer = 0;
@@ -82,6 +85,16 @@ async function sync(): Promise<void> {
     const { data } = await plugin.load();
     const cloud = data ? (JSON.parse(data) as CloudSave) : null;
     const local = localEconomy.exportState();
+    // The Google Play save belongs to another server account (a new or reset phone): play as it,
+    // unless this device's player is further along (then this one is saved over it below).
+    const here = storedAccount();
+    const theirs = cloud?.account;
+    const fartherHere = (economyStore.get().profile?.level.xp ?? 0) > (cloud?.economy?.xp ?? 0);
+    if (theirs?.accountId && theirs.token && theirs.accountId !== here?.accountId && !fartherHere) {
+      pushToast("Progress restored from Google Play", "info", 3500);
+      adoptAccount(theirs); // the game restarts as that player
+      return;
+    }
     if (cloud && cloud.v === 1 && cloud.economy && progress(cloud.economy) > progress(local)) {
       if (localEconomy.importState(cloud.economy)) {
         settingsStore.update({ ...cloud.profile, onboarded: true });

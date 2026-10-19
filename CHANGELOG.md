@@ -6,6 +6,11 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Save your progress with an email (every build): Profile → Save with email sends a 6-digit code (EmailJS, English or Persian template in `docs/email/`); entering it links the email to the account. On a new device, Restore your progress sends a code to that email and brings the same player back; the other devices keep working (each gets its own key). Codes are stored as hashes, last 15 minutes, allow 5 tries, one email a minute and 6 an hour; one email per account; restore doesn't reveal which emails have an account. The email also links to the web game with the code filled in. Setup: `docs/EMAIL.fa.md`. 8 new tests (170 total).
+- Google Play (main build): the Google Play Games cloud save now carries the account, so signing in on a new phone plays as the same player.
+
 ### Changed
 
 - No more GitHub Pages (the repository can be private). Every Release now includes `MiniSumo-X.Y.Z-Web.zip`: the whole game for the browser (WebGL), built with relative paths so it works at any address and in any folder, with `HOSTING.txt` (HTTPS, caching, an nginx example). It connects to the game server at `wss://sumo.ryujin.fans` by default.

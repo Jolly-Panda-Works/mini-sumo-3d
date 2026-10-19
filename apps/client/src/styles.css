@@ -8679,3 +8679,64 @@ button.code-field {
   background: rgba(58, 29, 5, 0.12);
   color: #6b3f1d;
 }
+
+/* ======================================================================
+   Save your progress (profile) and the email popup
+   ====================================================================== */
+
+.profile__save {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 2px dashed rgba(58, 29, 5, 0.18);
+  text-align: center;
+}
+
+.profile__saved {
+  margin: 0;
+  font-weight: 900;
+  color: #2f7d3a;
+  word-break: break-all;
+}
+
+.profile__save-btn {
+  min-width: 200px;
+}
+
+.profile__restore,
+.email-save__again {
+  border: 0;
+  background: none;
+  padding: 4px 6px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #be5a29;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.email-save__again:disabled {
+  opacity: 0.5;
+}
+
+.email-save__form {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  width: min(100%, 360px);
+  margin: 0 auto;
+}
+
+.email-save__form .input {
+  width: 100%;
+  text-align: center;
+}
+
+.email-save__code {
+  font-size: 1.6rem !important;
+  font-weight: 900;
+  letter-spacing: 0.35em;
+}

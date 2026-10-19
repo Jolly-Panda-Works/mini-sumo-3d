@@ -69,6 +69,20 @@ function writeAccount(account: { accountId: string; token: string } | null): voi
   }
 }
 
+/** This device's account (id and key), if it has one. */
+export function storedAccount(): { accountId: string; token: string } | null {
+  return readAccount();
+}
+
+/**
+ * Switches this device to another account (restored with an email or from Google Play),
+ * then restarts the game so everything loads for that player.
+ */
+export function adoptAccount(account: { accountId: string; token: string }): void {
+  writeAccount(account);
+  window.location.reload();
+}
+
 /** Display cache of owned items, used only to dress up offline. Never used by the server. */
 export function cachedOwnedItems(): Set<string> {
   try {
