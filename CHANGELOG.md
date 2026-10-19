@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- No more GitHub Pages (the repository can be private). Every Release now includes `MiniSumo-X.Y.Z-Web.zip`: the whole game for the browser (WebGL), built with relative paths so it works at any address and in any folder, with `HOSTING.txt` (HTTPS, caching, an nginx example). It connects to the game server at `wss://sumo.ryujin.fans` by default.
+
+### Changed
+
 - Screenshots: `tools/screenshots.mjs` now plays the real match (welcome, home on desktop and phone, customise, waiting room, countdown, bout, results) and then takes every screen and popup through dev mode, on a phone and a desktop (`docs/screenshots/phone/`, `docs/screenshots/desktop/`), and writes the gallery page `docs/SCREENSHOTS.md`. The workflow commits all of it. A failed real match no longer stops the rest.
 - README: phone screenshots and a link to every screen; all ten arenas with their current art and figures; friends, the leaderboard, 10 s matchmaking, bot styles, rarity tiers, coin packs and online / offline play described as they are now.
 

@@ -1,0 +1,31 @@
+Mini Sumo - web build
+=====================
+
+These files are the whole game for the browser (WebGL). Put them on any web host:
+a static host, your own nginx/Apache, a CDN, or a folder of an existing website.
+Paths are relative, so it works at https://example.com/ or https://example.com/games/sumo/.
+
+1. Upload everything in this folder (index.html next to the "assets" folder).
+2. Serve it over HTTPS. The game talks to the game server over wss:// (secure websockets),
+   which browsers only allow from an https:// page.
+3. Open index.html's address in a browser. That's it.
+
+The game server
+- This build connects to the game server it was built for (shown in the release notes,
+  wss://sumo.ryujin.fans by default). That server accepts players from any website.
+- Without a connection, the game still plays against bots in the browser.
+
+Caching (optional, for a faster game)
+- Files in "assets/" have their version in the name: cache them for a long time
+  (e.g. Cache-Control: public, max-age=31536000, immutable).
+- index.html: no caching (Cache-Control: no-cache), so players get updates at once.
+
+nginx example
+    location /sumo/ {
+        alias /var/www/mini-sumo/;
+        try_files $uri $uri/ /sumo/index.html;
+    }
+    location /sumo/assets/ {
+        alias /var/www/mini-sumo/assets/;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }

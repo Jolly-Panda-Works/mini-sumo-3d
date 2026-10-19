@@ -9,9 +9,9 @@
     <link rel="author" href="https://www.useffarahmand.com" />
     <meta property="og:url" content="https://www.useffarahmand.com/en/projects/mini-sumo" />
     <title>Mini Sumo</title>
-    <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="./favicon.png" type="image/png" sizes="64x64" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
     <meta property="og:title" content="Mini Sumo" />
     <meta property="og:image" content="/icon-512.png" />
         <style>
@@ -44,7 +44,7 @@
       @media (orientation: landscape) {
         #boot {
           background-color: #1a2147;
-          background-image: radial-gradient(ellipse at 50% 42%, rgba(120, 150, 230, 0.28), transparent 62%), url("/ui/bg-tile.webp");
+          background-image: radial-gradient(ellipse at 50% 42%, rgba(120, 150, 230, 0.28), transparent 62%), url("./ui/bg-tile.webp");
           background-repeat: no-repeat, repeat;
           background-size: 100% 100%, min(70vw, 420px) auto;
         }
@@ -184,23 +184,23 @@
   <body>
     <div id="boot" role="progressbar" aria-label="Loading Mini Sumo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="1">
       <!-- Portrait (the Android app): the tall illustration. Landscape screens: the square one. -->
-      <img class="boot__bg" src="/boot/loading-bg.webp" alt="" />
-      <img class="boot__logo" src="/boot/game-logo.webp" alt="" />
+      <img class="boot__bg" src="./boot/loading-bg.webp" alt="" />
+      <img class="boot__logo" src="./boot/game-logo.webp" alt="" />
       <div class="boot__ui">
         <div class="boot__bar">
-          <img class="boot__frame" src="/boot/bar-frame.webp" alt="" />
+          <img class="boot__frame" src="./boot/bar-frame.webp" alt="" />
           <div class="boot__track">
-            <img class="boot__fill" src="/boot/bar-fill.webp" alt="" />
-            <div class="boot__runner"><img class="boot__run" src="/boot/run.webp" alt="" /></div>
+            <img class="boot__fill" src="./boot/bar-fill.webp" alt="" />
+            <div class="boot__runner"><img class="boot__run" src="./boot/run.webp" alt="" /></div>
           </div>
         </div>
         <div class="boot__label">
-          <img src="/boot/loading.webp" alt="Loading" width="319" height="57" />
+          <img src="./boot/loading.webp" alt="Loading" width="319" height="57" />
           <span class="boot__pct">1%</span>
         </div>
       </div>
       <div id="studio">
-        <img src="/boot/jolly-panda.webp" alt="Jolly Panda Studio" width="720" height="568" />
+        <img src="./boot/jolly-panda.webp" alt="Jolly Panda Studio" width="720" height="568" />
       </div>
     </div>
     <div id="root"></div>

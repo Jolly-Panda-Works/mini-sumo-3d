@@ -1,5 +1,5 @@
-# Builds Mini Sumo for Android (released) and the web (published to GitHub Pages for
-# testing), and publishes a GitHub Release with the Android files.
+# Builds Mini Sumo for Android and the web, and publishes a GitHub Release with both: the
+# Android app (APK/AAB) and a ready-to-host web build (MiniSumo-X.Y.Z-Web.zip).
 #
 # Versions (automatic): every push to main that changes the game is released.
 #   The commits since the last release decide the bump (Conventional Commits):
@@ -17,7 +17,6 @@
 #     VITE_SERVER_URL   public Colyseus endpoint (default: wss://sumo.ryujin.fans)
 #                       (optional until the server is live; releases then show a warning)
 #     VITE_PUBLIC_URL   (optional) public web address for invite links (default: https://sumo.ryujin.fans/)
-#     DEPLOY_PAGES      (optional) "true" to publish the web build to GitHub Pages from main
 #   Secrets (optional, for a signed Android release APK/AAB)
 #     ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
 
@@ -163,8 +162,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VITE_APP_VERSION: ${{ needs.version.outputs.version }}
-      # GitHub Pages serves the site from /<repo>/
-      VITE_BASE: /${{ github.event.repository.name }}/
+      # Relative paths: the zip works at any address and in any folder of a website.
+      VITE_BASE: ./
     steps:
       - uses: actions/checkout@v5
         with:
@@ -180,31 +179,17 @@ jobs:
       - name: Install dependencies
         run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
       - run: npm run build:web
+      - name: Package the web build
+        run: |
+          cp tools/web-hosting.txt apps/client/dist/HOSTING.txt
+          mkdir -p out
+          (cd apps/client/dist && zip -qr "../../../out/MiniSumo-${VITE_APP_VERSION}-Web.zip" .)
+          ls -la out
       - uses: actions/upload-artifact@v4
         with:
           name: mini-sumo-web
-          path: apps/client/dist
+          path: out/*.zip
           if-no-files-found: error
-      - name: Upload Pages artifact
-        if: vars.DEPLOY_PAGES == 'true' && github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: apps/client/dist
-
-  pages:
-    name: Deploy to GitHub Pages
-    needs: web
-    if: vars.DEPLOY_PAGES == 'true' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    steps:
-      - id: deploy
-        uses: actions/deploy-pages@v4
 
   # ------------------------------------------------------------------ android
   android:
@@ -249,8 +234,9 @@ jobs:
           npx cap add android
           npx capacitor-assets generate --android --iconBackgroundColor "#11276F" --splashBackgroundColor "#2F5C8A" || echo "::warning::Icon generation failed; using default icons."
           npx cap sync android
-          # Portrait only.
+          # Portrait only, full screen (status bar hidden).
           node scripts/orientation.mjs
+          node scripts/fullscreen.mjs
           # Google Play Games sign-in + cloud save (repository variable PLAY_GAMES_APP_ID).
           PLAY_GAMES_APP_ID="${{ vars.PLAY_GAMES_APP_ID }}" node scripts/play-games.mjs
 
@@ -339,8 +325,9 @@ jobs:
       - name: Collect files and checksums
         run: |
           mkdir -p release
-          # Releases ship the Android app only; the web build is for testing on GitHub Pages.
+          # The Android app and the ready-to-host web build.
           cp artifacts/mini-sumo-android/* release/
+          cp artifacts/mini-sumo-web/* release/
           (cd release && sha256sum * > SHA256SUMS.txt)
           ls -la release
       - name: Write release notes

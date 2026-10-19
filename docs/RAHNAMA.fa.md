@@ -39,13 +39,12 @@ npm start
 
 ## خروجی وب، دسکتاپ و اندروید با GitHub Actions
 فایل `.github/workflows/build.yml` با هر push به `main`، هر تگ `v*` یا اجرای دستی، این خروجی‌ها را می‌سازد:
-- وب (و در صورت فعال‌بودن، انتشار روی GitHub Pages)
+- نسخه‌ی وب آماده‌ی میزبانی (`MiniSumo-X.Y.Z-Web.zip` در هر Release)
 - دسکتاپ: Windows (`.exe`)، macOS (`.dmg`)، Linux (`.AppImage` و `.deb`)
 - اندروید: `.apk` دیباگ، و در صورت تعریف keystore نسخه‌ی امضاشده‌ی `.apk` و `.aab`
 
 تنظیمات لازم در Settings → Secrets and variables → Actions:
 - متغیر `VITE_SERVER_URL` (ضروری)، مثلاً `wss://sumo-api.example.com`
-- متغیر `DEPLOY_PAGES=true` (اختیاری، برای GitHub Pages)
 - سکرت‌های `ANDROID_KEYSTORE_BASE64`، `ANDROID_KEYSTORE_PASSWORD`، `ANDROID_KEY_ALIAS`، `ANDROID_KEY_PASSWORD` (اختیاری)
 
 برای ساخت Release: `git tag v1.0.0 && git push origin v1.0.0`

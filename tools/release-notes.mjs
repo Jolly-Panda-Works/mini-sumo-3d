@@ -20,6 +20,7 @@ ${serverNote}
 | --- | --- |
 | Android (install on a phone) | \`${f("Android.apk")}\` (signed; if missing, use \`${f("Android-debug.apk")}\`) |
 | Android (Google Play upload) | \`${f("Android.aab")}\` |
+| Web (WebGL, ready to host) | \`${f("Web.zip")}\`: unzip onto any HTTPS web host; see \`HOSTING.txt\` inside |
 
-Play the web version for testing on [GitHub Pages](https://${repo.split("/")[0].toLowerCase()}.github.io/${repo.split("/")[1]}/). Verify a download with \`SHA256SUMS.txt\`.
+Verify a download with \`SHA256SUMS.txt\`.
 `);

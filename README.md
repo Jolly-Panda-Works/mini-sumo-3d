@@ -166,7 +166,7 @@ Mini Sumo runs the **same authoritative game session** the server uses directly 
 
 | Situation | What happens |
 | --- | --- |
-| Build without `VITE_SERVER_URL` (current releases, GitHub Pages) | Offline from the start. |
+| Build without a server address (`VITE_NETWORK_MODE=offline`, e.g. the media build) | Offline from the start. |
 | `VITE_SERVER_URL` set, server reachable | Online: real rooms, invite links, quick match with other players. |
 | Server set but unreachable (down, no internet) | Falls back to offline when you press *Play now* or create a room. |
 
@@ -175,11 +175,11 @@ Offline, *Play now* searches for a few seconds and fills the ring with bots; *Cr
 ## Download and install
 
 - **Android:** open the [**latest release**](https://github.com/Jolly-Panda-Works/mini-sumo-3d/releases/latest) and install `MiniSumo-<version>-Android.apk` (signed; the `.aab` is for Google Play). Every release ships `SHA256SUMS.txt` to verify the download.
-- **Web (for testing):** play the latest build on [GitHub Pages](https://jolly-panda-works.github.io/mini-sumo-3d/).
+- **Web:** play at [sumo.ryujin.fans](https://sumo.ryujin.fans/), or host it yourself: every Release has `MiniSumo-X.Y.Z-Web.zip`, the whole game for the browser (WebGL). Unzip it onto any HTTPS web host, in any folder; `HOSTING.txt` inside explains caching and gives an nginx example.
 
 The desktop app (`apps/desktop`, Electron) is still in the repository but is no longer built by CI.
 
-**Game server:** `https://sumo.ryujin.fans` (web game, API and websockets on one address). Android, Cafe Bazaar and GitHub Pages builds connect to `wss://sumo.ryujin.fans` by default; the repository variables `VITE_SERVER_URL` / `VITE_PUBLIC_URL` override it. `npm run dev` still uses a local server.
+**Game server:** `https://sumo.ryujin.fans` (web game, API and websockets on one address). Android, Cafe Bazaar and web builds connect to `wss://sumo.ryujin.fans` by default; the repository variables `VITE_SERVER_URL` / `VITE_PUBLIC_URL` override it. `npm run dev` still uses a local server.
 
 **Self-hosting (Docker):** `docker compose up -d --build` runs the game server and the web game on one port; it builds in Iran through registry and npm mirrors. See [docker/README.md](docker/README.md).
 
@@ -223,7 +223,7 @@ One `.env` file at the repository root serves both apps. Only variables prefixed
 | `VITE_SERVER_URL` | client (build time) | empty | Public WebSocket endpoint, e.g. `wss://sumo-api.example.com`. **Set this in production.** |
 | `VITE_SERVER_PORT` | client (build time) | `2567` | Port for the fallback URL when `VITE_SERVER_URL` is empty |
 | `VITE_PUBLIC_URL` | client (build time) | empty | Public web address for invite links (needed by desktop/Android builds) |
-| `VITE_BASE` | client (build time) | `/` | Base path, e.g. `/<repo>/` for GitHub Pages |
+| `VITE_BASE` | client (build time) | `/` | Base path; `./` (relative, as in the release web zip) works in any folder |
 
 If `VITE_SERVER_URL` is empty, the client connects to `ws(s)://<page hostname>:<VITE_SERVER_PORT>`. That makes local and LAN development work with no configuration and never hard-codes `localhost`.
 
@@ -265,8 +265,7 @@ Configure under *Settings → Secrets and variables → Actions*:
 | Name | Kind | Purpose |
 | --- | --- | --- |
 | `VITE_SERVER_URL` | variable | Public server, e.g. `wss://sumo-api.example.com`. Android requires `wss://`. Until it's set, releases carry a "server not live" warning. |
-| `VITE_PUBLIC_URL` | variable | Web address used in invite links from the apps. Defaults to `https://<owner>.github.io/<repo>/`. |
-| `DEPLOY_PAGES` | variable | `true` to publish the web build to GitHub Pages from `main` (also set *Settings → Pages → Source: GitHub Actions*). |
+| `VITE_PUBLIC_URL` | variable | Web address used in invite links from the apps. Defaults to `https://sumo.ryujin.fans/`. |
 | `ANDROID_KEYSTORE_BASE64` | secret | `base64 -w0 release.keystore`, for a signed APK/AAB |
 | `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | secrets | Keystore credentials |
 
@@ -274,7 +273,7 @@ Configure under *Settings → Secrets and variables → Actions*:
 
 ## Releases and versions
 
-Releases are automatic: **every push to `main` that changes the game becomes a GitHub Release** with the final Android builds (signed APK and the Play Store AAB). The web build is published to GitHub Pages for testing (set the `DEPLOY_PAGES` variable to `true`); desktop builds are no longer made. The version comes from the commit messages since the last release ([Conventional Commits](https://www.conventionalcommits.org/)):
+Releases are automatic: **every push to `main` that changes the game becomes a GitHub Release** with the final Android builds (signed APK and the Play Store AAB) and a ready-to-host web build (`MiniSumo-X.Y.Z-Web.zip`). Desktop builds are no longer made. The version comes from the commit messages since the last release ([Conventional Commits](https://www.conventionalcommits.org/)):
 
 | Commit messages since the last release | Next version (from 1.4.2) |
 | --- | --- |
@@ -323,7 +322,7 @@ server {
 
 Colyseus uses HTTP for matchmaking (`/matchmake/*`, CORS handled by Colyseus) and WebSockets for the room, both on the same port. Run **one** server process: rooms live in memory, so multiple instances need Colyseus presence/driver (Redis), which this MVP does not configure.
 
-### 2. Client (Netlify, Vercel, Cloudflare Pages, GitHub Pages, S3…)
+### 2. Client (any static host: your own server, Netlify, Vercel, Cloudflare Pages, S3…)
 
 ```bash
 VITE_SERVER_URL=wss://sumo-api.example.com npm run build
