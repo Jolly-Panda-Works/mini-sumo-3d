@@ -9,6 +9,12 @@ export const GAME_TITLE = "Mini Sumo";
  */
 export function resolveServerUrl(): string {
   const configured = (import.meta.env.VITE_SERVER_URL as string | undefined)?.trim();
+  // "same-origin": the server sits behind the same host as the page (the Docker setup:
+  // nginx serves the game and forwards /api, /matchmake, /health and websockets).
+  if (configured === "same-origin") {
+    const secure = window.location.protocol === "https:";
+    return `${secure ? "wss" : "ws"}://${window.location.host}`;
+  }
   if (configured) return configured.replace(/\/+$/, "");
   const protocol = window.location.protocol === "https:" ? "wss" : "ws";
   const port = (import.meta.env.VITE_SERVER_PORT as string | undefined)?.trim() || "2567";

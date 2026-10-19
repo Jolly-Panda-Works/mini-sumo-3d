@@ -516,6 +516,9 @@ export interface LevelInfo {
 }
 
 /** Total XP needed to reach a level: 50 * (level - 1) * level  (L2 = 100, L5 = 1000, L10 = 4500). */
+/** The highest level. */
+export const MAX_LEVEL = 1000;
+
 export function xpForLevel(level: number): number {
   const l = Math.max(1, Math.floor(level));
   return 50 * (l - 1) * l;
@@ -524,7 +527,7 @@ export function xpForLevel(level: number): number {
 export function levelFromXp(xp: number): LevelInfo {
   const total = Math.max(0, Math.floor(xp));
   let level = 1;
-  while (xpForLevel(level + 1) <= total && level < 999) level++;
+  while (xpForLevel(level + 1) <= total && level < MAX_LEVEL) level++;
   return { level, xp: total, levelStartXp: xpForLevel(level), nextLevelXp: xpForLevel(level + 1) };
 }
 

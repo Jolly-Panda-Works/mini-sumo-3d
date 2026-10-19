@@ -17,6 +17,8 @@ import {
   type LedgerCategory,
   type LedgerEntry,
   type ProfileResponse,
+  MAX_LEVEL,
+  xpForLevel,
 } from "@mini-sumo/shared";
 import { settingsStore } from "../settings";
 
@@ -107,6 +109,20 @@ function load(): LocalState {
 }
 
 let state = load();
+
+/**
+ * Media build (VITE_MEDIA=1, for screenshots, videos and testing): everything is open. Level
+ * 1000, every item and picture owned, plenty of coins. Applied on every start, on this
+ * device only (the media build plays offline, so nothing reaches the server).
+ */
+if (import.meta.env.VITE_MEDIA === "1") {
+  state = {
+    ...state,
+    xp: Math.max(state.xp, xpForLevel(MAX_LEVEL)),
+    coins: Math.max(state.coins, 9_999_999),
+    owned: [...new Set([...state.owned, ...allCosmeticItemIds().map((item) => item.id)])],
+  };
+}
 
 function save(): void {
   try {

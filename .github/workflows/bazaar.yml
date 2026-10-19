@@ -76,6 +76,7 @@ jobs:
           npx capacitor-assets generate --android --iconBackgroundColor "#11276F" --splashBackgroundColor "#2F5C8A" || echo "::warning::Icon generation failed; using default icons."
           npx cap sync android
           node scripts/orientation.mjs
+          node scripts/fullscreen.mjs
           # Cafe Bazaar billing (no Google Play Games in this build).
           BAZAAR_RSA_KEY="${{ vars.BAZAAR_RSA_KEY }}" node scripts/bazaar.mjs
 

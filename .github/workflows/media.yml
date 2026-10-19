@@ -1,0 +1,71 @@
+# Media build: everything open (all arenas, every item, level 1000) for screenshots, videos and
+# testing on a phone. A separate app ("Mini Sumo Media", com.jollypanda.mini_sumo.media) that
+# installs next to the store version, plays offline against bots and never touches the server.
+#
+# Run it by hand: Actions > Media build > Run workflow. The APK is attached to the run
+# (Artifacts > MiniSumo-Media). Not released, not versioned, not for the stores.
+name: Media build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  media:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      VITE_MEDIA: "1"
+      VITE_NETWORK_MODE: offline
+      VITE_APP_VERSION: media
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: "**/package.json"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Install dependencies
+        run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - name: Build the game (media)
+        run: npm run build:web
+      - name: Install mobile dependencies
+        run: npm install --prefix apps/mobile
+
+      - name: Create Android project
+        working-directory: apps/mobile
+        run: |
+          # Its own app id and name, so it installs next to the store version.
+          node scripts/media.mjs
+          npx cap add android
+          npx capacitor-assets generate --android --iconBackgroundColor "#11276F" --splashBackgroundColor "#2F5C8A" || echo "::warning::Icon generation failed; using default icons."
+          npx cap sync android
+          node scripts/orientation.mjs
+          node scripts/fullscreen.mjs
+
+      - name: Build APK
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Collect
+        run: |
+          mkdir -p out
+          cp apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk out/MiniSumo-Media.apk
+          ls -la out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MiniSumo-Media
+          path: out/MiniSumo-Media.apk
+          retention-days: 30
