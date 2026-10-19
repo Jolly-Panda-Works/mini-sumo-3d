@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { COIN_PACKS, DAILY_GIFT_COINS, type CoinPack } from "@mini-sumo/shared";
-import { bazaarEnabled, buyCoinPack, restoreBazaarPurchases } from "../network/bazaar";
+import { bazaarBuyable, buyCoinPack, restoreBazaarPurchases } from "../network/bazaar";
 import { economyStore, refreshProfile, request } from "../network/economyClient";
 import { localEconomy } from "../network/localEconomy";
 import { networkStore } from "../network/networkMode";
@@ -23,7 +23,9 @@ export function CoinShop() {
   const [claimedNow, setClaimedNow] = useState(false);
   const giftReady = !claimedNow && (local ? localEconomy.dailyGiftAvailable() : Boolean(economy.profile?.daily.giftAvailable));
   // Cafe Bazaar build: packs are bought with real money through Bazaar.
-  const store = local && bazaarEnabled();
+  // Cafe Bazaar build: offline the coins go to this device; online the server verifies the
+  // purchase and credits your account (COMING SOON until the server has its Bazaar keys).
+  const store = bazaarBuyable() && (local || Boolean(economy.catalog?.stores?.bazaar));
   const [buying, setBuying] = useState<string | null>(null);
 
   // Finish any purchase that was paid but not credited (e.g. the app closed mid-purchase).

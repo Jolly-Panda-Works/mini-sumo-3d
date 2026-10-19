@@ -4,9 +4,10 @@ import { GameCanvas } from "./game/GameCanvas";
 import { HomeBackground } from "./ui/HomeBackground";
 import { inputController } from "./input/InputController";
 import { gameStore, sessionStore } from "./network/RoomManager";
+import { economyStore } from "./network/economyClient";
 import { settingsStore, touchControlsEnabled } from "./settings";
 import { useStore } from "./store";
-import { setAboutOpen, setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWalletOpen, setWardrobeOpen, uiStore } from "./uiStore";
+import { pushToast, setAboutOpen, setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWalletOpen, setWardrobeOpen, uiStore } from "./uiStore";
 import { Countdown } from "./ui/Countdown";
 import { HUD } from "./ui/HUD";
 import { Lobby } from "./ui/Lobby";
@@ -21,6 +22,7 @@ import { LevelUpPopup } from "./ui/LevelUpPopup";
 import { DevButton, DevPanel } from "./ui/DevPanel";
 import { NoticePopup } from "./ui/NoticePopup";
 import { ServerWait } from "./ui/ServerWait";
+import { restoreBazaarPurchases } from "./network/bazaar";
 import { InviteWatcher } from "./ui/InviteWatcher";
 import { audio } from "./audio/AudioManager";
 import { ProfilePanel } from "./ui/ProfilePanel";
@@ -33,6 +35,16 @@ import { TouchControls } from "./ui/TouchControls";
 import { OutActions } from "./ui/OutActions";
 
 export function App() {
+  // Cafe Bazaar: purchases paid but not credited yet (the app closed mid-way, or the server was
+  // unreachable) are finished once the game is connected.
+  const economyStatus = useStore(economyStore).status;
+  useEffect(() => {
+    if (economyStatus !== "ready") return;
+    void restoreBazaarPurchases().then((coins) => {
+      if (coins > 0) pushToast(`+${coins.toLocaleString("en-US")} Sumo Coins`, "info");
+    });
+  }, [economyStatus]);
+
   const session = useStore(sessionStore);
   const game = useStore(gameStore);
   const ui = useStore(uiStore);

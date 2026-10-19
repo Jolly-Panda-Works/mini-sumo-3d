@@ -211,6 +211,37 @@ export interface CatalogResponse {
   flags: EconomyFlags;
   arenas: ArenaInfo[];
   items: ShopItemInfo[];
+  /** Stores whose purchases this server can verify (and credit) right now. */
+  stores?: { bazaar: boolean };
+}
+
+/** Cafe Bazaar product ids (Bazaar developer panel) for each coin pack. */
+export const BAZAAR_PRODUCTS: Readonly<Record<string, string>> = {
+  coins_500: "coin-lucky",
+  coins_1200: "coin-stack",
+  coins_2600: "coin-lucky-pouch",
+  coins_5500: "coin-wooden-chest",
+  coins_12000: "coin-silver-chest",
+  coins_30000: "coin-golden-chest",
+  coins_70000: "coin-grand-festival",
+};
+
+/** The coin pack sold as this Cafe Bazaar product, if any. */
+export function packForBazaarProduct(productId: string): CoinPack | undefined {
+  return COIN_PACKS.find((pack) => BAZAAR_PRODUCTS[pack.id] === productId);
+}
+
+/** POST /api/purchases/bazaar */
+export interface BazaarPurchaseRequest {
+  productId: string;
+  purchaseToken: string;
+}
+
+export interface BazaarPurchaseResponse {
+  /** false when this purchase was already credited (safe to consume either way). */
+  credited: boolean;
+  coins: number;
+  balance: number;
 }
 
 export interface ProfileResponse {

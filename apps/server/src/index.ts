@@ -11,6 +11,7 @@ import { setEconomy } from "./economy/instance.js";
 import { PaymentService } from "./economy/payments.js";
 import { createApiHandler } from "./http/api.js";
 import { Friends } from "./social/Friends.js";
+import { BazaarVerifier, bazaarConfigFromEnv } from "./economy/bazaar.js";
 import { createStaticHandler } from "./http/static.js";
 
 // Load the repository-level .env (if present) without extra dependencies (Node >= 20.12).
@@ -37,7 +38,11 @@ if (friends) {
     room.addFriendBot(botAccountId);
   };
 }
-const handleApi = createApiHandler(economy, new PaymentService(flags), friends);
+// Cafe Bazaar purchases: on when its keys are set (tools/server-bazaar-setup.sh)
+const bazaarConfig = bazaarConfigFromEnv();
+const bazaar = bazaarConfig ? new BazaarVerifier(bazaarConfig) : null;
+console.log(bazaar ? `[bazaar] purchase verification on (${bazaarConfig!.packageName})` : "[bazaar] purchase verification off (no keys)");
+const handleApi = createApiHandler(economy, new PaymentService(flags), friends, bazaar);
 // The built web game, when this server also hosts it (STATIC_DIR, set in the Docker image).
 const handleStatic = createStaticHandler(process.env.STATIC_DIR);
 

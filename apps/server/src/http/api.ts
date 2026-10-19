@@ -1,5 +1,8 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { packForBazaarProduct } from "@mini-sumo/shared";
 import type {
+  BazaarPurchaseRequest,
+  BazaarPurchaseResponse,
   CatalogResponse,
   FriendProfile,
   FriendsResponse,
@@ -9,6 +12,7 @@ import type {
   ProfileResponse,
 } from "@mini-sumo/shared";
 import { Friends } from "../social/Friends.js";
+import type { BazaarVerifier } from "../economy/bazaar.js";
 import { CATALOG, listArenas } from "../economy/config.js";
 import { EconomyError, type Economy } from "../economy/Economy.js";
 import type { PaymentService } from "../economy/payments.js";
@@ -22,6 +26,7 @@ import type { PaymentService } from "../economy/payments.js";
  *   POST /api/shop/purchase      { itemId, idempotencyKey }              (Bearer token)
  *   PUT  /api/profile/appearance { hair, hairColor, face, outfit }       (Bearer token)
  *   POST /api/profile/sync { name, appearance, xp, matches, wins, updatedAt } (Bearer token)
+ *   POST /api/purchases/bazaar { productId, purchaseToken }  a Cafe Bazaar coin pack (Bearer token)
  *   POST /api/daily-gift                    the free daily coins (once a day) (Bearer token)
  *   GET  /api/leaderboard?limit=100         top players by XP + your rank    (Bearer token)
  *   GET  /api/friends                       your code, friends, requests     (Bearer token)
@@ -105,12 +110,20 @@ const STATUS: Record<EconomyError["code"], number> = {
   already_entered: 409,
   currency_disabled: 403,
   unknown_friend: 404,
+  store_unavailable: 503,
+  purchase_invalid: 402,
   not_friends: 403,
   friend_offline: 409,
   bad_request: 400,
 };
 
-export function createApiHandler(economy: Economy | null, payments: PaymentService, friends: Friends | null = economy ? new Friends(economy) : null) {
+export function createApiHandler(
+  economy: Economy | null,
+  payments: PaymentService,
+  friends: Friends | null = economy ? new Friends(economy) : null,
+  /** Cafe Bazaar purchase verification; null when its keys aren't set. */
+  bazaar: BazaarVerifier | null = null,
+) {
   return async function handleApi(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
     const url = new URL(req.url ?? "/", "http://localhost");
     if (!url.pathname.startsWith("/api/")) return false;
@@ -134,6 +147,7 @@ export function createApiHandler(economy: Economy | null, payments: PaymentServi
         flags: economy?.flags ?? { economy: false, shop: false, premiumCurrency: false, realMoneyPurchases: false },
         arenas: listArenas(),
         items: CATALOG.map((item) => ({ ...item })),
+        stores: { bazaar: Boolean(economy && bazaar) },
       };
       send(res, 200, body);
       return true;
@@ -181,6 +195,32 @@ export function createApiHandler(economy: Economy | null, payments: PaymentServi
         const body = await readJson(req);
         if (!body) send(res, 400, { error: "bad_request", message: "Invalid request." });
         else send(res, 200, { appearance: economy.saveAppearance(accountId, body) });
+      } else if (route === "POST /api/purchases/bazaar") {
+        // A coin pack bought in Cafe Bazaar: verified with Bazaar, then credited once per token.
+        if (!bazaar) throw new EconomyError("store_unavailable", "Buying coins isn't available right now.");
+        if (!writeLimiter.allow(accountId)) {
+          send(res, 429, { error: "rate_limited", message: "Slow down a little." });
+        } else {
+          const body = ((await readJson(req)) ?? {}) as Partial<BazaarPurchaseRequest>;
+          const productId = typeof body.productId === "string" ? body.productId : "";
+          const purchaseToken = typeof body.purchaseToken === "string" ? body.purchaseToken.trim() : "";
+          const pack = packForBazaarProduct(productId);
+          if (!pack || !purchaseToken || purchaseToken.length > 512) throw new EconomyError("bad_request", "Unknown purchase.");
+          const already = economy.creditedStorePurchase("bazaar", purchaseToken);
+          if (!already) {
+            const check = await bazaar.check(productId, purchaseToken);
+            if (!check.ok) {
+              if (check.reason === "unavailable") {
+                console.error("[bazaar] check failed:", check.detail);
+                throw new EconomyError("store_unavailable", "Couldn't reach Cafe Bazaar. Your purchase is kept and will be added later.");
+              }
+              throw new EconomyError("purchase_invalid", "Cafe Bazaar didn't confirm this purchase.");
+            }
+          }
+          const result = economy.creditStorePurchase(accountId, "bazaar", purchaseToken, pack.coins, pack.name);
+          const out: BazaarPurchaseResponse = { credited: result.credited, coins: pack.coins, balance: result.balance };
+          send(res, 200, out);
+        }
       } else if (route === "POST /api/daily-gift") {
         send(res, 200, economy.claimDailyGift(accountId));
       } else if (route === "GET /api/leaderboard") {

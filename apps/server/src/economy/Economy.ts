@@ -36,6 +36,8 @@ export class EconomyError extends Error {
       | "not_friends"
       | "friend_offline"
       | "bad_request"
+      | "store_unavailable"
+      | "purchase_invalid"
       | "unknown_arena"
       | "arena_locked"
       | "already_entered"
@@ -232,6 +234,32 @@ export class Economy {
     if (!columns.some((c) => c.name === "is_bot")) this.db.exec("ALTER TABLE accounts ADD COLUMN is_bot INTEGER NOT NULL DEFAULT 0");
     this.db.exec("CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)");
     if (this.botPlayers) this.ensureBots();
+  }
+
+  // ------------------------------------------------------------ store purchases
+
+  /** Whether this store purchase was credited already (to anyone). */
+  creditedStorePurchase(store: "bazaar", purchaseToken: string): boolean {
+    return Boolean(row(this.db.prepare("SELECT id FROM transactions WHERE idempotency_key = ?").get(`purchase:${store}:${purchaseToken}`)));
+  }
+
+  /**
+   * Credits a coin pack bought in a store, once per purchase token (whichever account sends it
+   * first). Call only after the store has confirmed the purchase.
+   */
+  creditStorePurchase(accountId: string, store: "bazaar", purchaseToken: string, coins: number, label: string): { credited: boolean; balance: number } {
+    if (!this.flags.economy) throw new EconomyError("disabled", "The economy is disabled.");
+    this.account(accountId);
+    const result = this.apply({
+      accountId,
+      currency: Currency.Coins,
+      amount: coins,
+      category: "coin_purchase",
+      reason: `Bought ${label} (${store})`,
+      key: `purchase:${store}:${purchaseToken}`,
+    });
+    if (!result.duplicate) this.emit("coins_purchased", { accountId, store, coins });
+    return { credited: !result.duplicate, balance: result.duplicate ? this.balance(accountId) : result.balance };
   }
 
   // ------------------------------------------------------------ daily gift

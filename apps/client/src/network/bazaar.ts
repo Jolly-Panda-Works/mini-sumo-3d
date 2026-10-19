@@ -1,13 +1,17 @@
-import { COIN_PACKS, type CoinPack } from "@mini-sumo/shared";
-import { refreshProfile } from "./economyClient";
+import { BAZAAR_PRODUCTS, packForBazaarProduct, type BazaarPurchaseRequest, type BazaarPurchaseResponse, type CoinPack } from "@mini-sumo/shared";
+import { economyStore, refreshProfile, request } from "./economyClient";
 import { localEconomy } from "./localEconomy";
-import { BAZAAR_PRODUCTS } from "./bazaarProducts";
+import { networkStore } from "./networkMode";
 
 /**
  * Cafe Bazaar in-app billing (the Bazaar build only: VITE_STORE=bazaar plus the native
- * Bazaar plugin). A coin pack is bought, credited to the on-device wallet once per purchase
- * token, then consumed so it can be bought again. Purchases that were paid but not finished
- * (the app closed in between) are credited the next time the shop connects.
+ * Bazaar plugin).
+ *
+ * Online, the purchase token goes to the game server, which checks it with Cafe Bazaar and
+ * credits the coins to your account once; only then is the purchase consumed in Bazaar (so
+ * it can be bought again). If anything fails in between, the purchase stays unconsumed and
+ * is sent again the next time the shop opens: nothing paid is lost.
+ * Offline, the coins go to the wallet on this device, as before.
  */
 interface Purchase {
   orderId: string;
@@ -33,8 +37,16 @@ function native(): BazaarNative | null {
 /** True in the Cafe Bazaar build on a device. */
 export const bazaarEnabled = (): boolean => import.meta.env.VITE_STORE === "bazaar" && native() !== null;
 
-const packForProduct = (productId: string): CoinPack | undefined =>
-  COIN_PACKS.find((pack) => BAZAAR_PRODUCTS[pack.id] === productId);
+/**
+ * Coin packs can be bought right now: the Bazaar build on a device, and either offline (the
+ * coins go to this device) or online with a server that can verify Bazaar purchases.
+ */
+export function bazaarBuyable(): boolean {
+  if (!bazaarEnabled()) return false;
+  if (networkStore.get().mode !== "online") return true;
+  return Boolean(economyStore.get().catalog?.stores?.bazaar);
+}
+
 
 let connecting: Promise<void> | null = null;
 async function connect(): Promise<BazaarNative> {
@@ -51,14 +63,25 @@ async function connect(): Promise<BazaarNative> {
 }
 
 /** Credits (once) and consumes a paid purchase. */
+/** Credits one paid purchase (server online, device offline), then consumes it. */
 async function finish(plugin: BazaarNative, purchase: Purchase): Promise<boolean> {
-  const pack = packForProduct(purchase.productId);
+  const pack = packForBazaarProduct(purchase.productId);
   if (!pack) return false;
-  const credited = localEconomy.creditCoinPurchase(purchase.purchaseToken, pack.coins, pack.name);
+  let credited: boolean;
+  if (networkStore.get().mode === "online") {
+    // Throws when the server can't confirm it yet: the purchase then stays unconsumed.
+    const result = await request<BazaarPurchaseResponse>("/purchases/bazaar", {
+      method: "POST",
+      body: JSON.stringify({ productId: purchase.productId, purchaseToken: purchase.purchaseToken } satisfies BazaarPurchaseRequest),
+    });
+    credited = result.credited;
+  } else {
+    credited = localEconomy.creditCoinPurchase(purchase.purchaseToken, pack.coins, pack.name);
+  }
   try {
     await plugin.consume({ purchaseToken: purchase.purchaseToken });
   } catch {
-    // Credited already; consuming is retried on the next restore.
+    // Credited already; consuming is retried on the next restore (crediting is once per token).
   }
   if (credited) await refreshProfile();
   return credited;
@@ -88,7 +111,11 @@ export async function restoreBazaarPurchases(): Promise<number> {
     const { purchases } = await plugin.purchases();
     let coins = 0;
     for (const purchase of purchases) {
-      if (await finish(plugin, purchase)) coins += packForProduct(purchase.productId)?.coins ?? 0;
+      try {
+        if (await finish(plugin, purchase)) coins += packForBazaarProduct(purchase.productId)?.coins ?? 0;
+      } catch {
+        // This one couldn't be confirmed yet: it stays unconsumed and is tried again later.
+      }
     }
     return coins;
   } catch {

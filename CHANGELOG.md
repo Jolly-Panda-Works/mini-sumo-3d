@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Cafe Bazaar purchases online: the app sends the purchase token to `POST /api/purchases/bazaar`; the server checks it with the Cafe Bazaar Developer API (bought, not consumed, right product), credits the coins once per token (to the first account that sends it), and only then does the app consume the purchase. Anything interrupted stays unconsumed and is sent again when the game connects or the shop opens. The catalog says whether the server can verify Bazaar purchases (`stores.bazaar`); without the keys the shop shows COMING SOON online. Product ids moved to the shared package. 5 new tests (162 total).
+
 ### Fixed
 
 - Faces: after switching faces (as Customise does), an eye could end up in the middle of the face. Switching reused the old 3D objects and kept stale properties (a removed `position-x` was reset to 0 after the new position). Faces, hairstyles and outfits are now rebuilt whenever they change. Laughing's closed eyes are back to normal size.

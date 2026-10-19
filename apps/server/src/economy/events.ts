@@ -15,7 +15,8 @@ export type EconomyEventName =
   | "cosmetic_purchased"
   | "cosmetic_purchase_rejected"
   | "payment_rejected"
-  | "daily_gift";
+  | "daily_gift"
+  | "coins_purchased";
 
 export type EconomyEventSink = (name: EconomyEventName, data: Record<string, unknown>) => void;
 
