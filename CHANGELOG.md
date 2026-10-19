@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Fixed
 
+- Faces: after switching faces (as Customise does), an eye could end up in the middle of the face. Switching reused the old 3D objects and kept stale properties (a removed `position-x` was reset to 0 after the new position). Faces, hairstyles and outfits are now rebuilt whenever they change. Laughing's closed eyes are back to normal size.
+
+### Fixed
+
 - Wink face: the closed eye is the same size as Sleepy's (it was thicker and longer) and the two brows are level again.
 
 ### Added

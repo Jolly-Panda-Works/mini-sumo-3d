@@ -268,8 +268,8 @@ function Face({ style, eyesRef }: { style: string; eyesRef: RefObject<Group | nu
       return (
         <>
           <group ref={eyesRef} position={[0, 0.06, 0.47]}>
-            <mesh geometry={GEO.eyeClosed} material={INK} position={[-0.17, 0, 0.035]} rotation-z={0.25} scale={[1.15, 1.4, 1.6]} />
-            <mesh geometry={GEO.eyeClosed} material={INK} position={[0.17, 0, 0.035]} rotation-z={-0.25} scale={[1.15, 1.4, 1.6]} />
+            <mesh geometry={GEO.eyeClosed} material={INK} position={[-0.17, 0, 0.01]} rotation-z={0.25} />
+            <mesh geometry={GEO.eyeClosed} material={INK} position={[0.17, 0, 0.01]} rotation-z={-0.25} />
           </group>
           <mesh geometry={GEO.mouth} material={INK} position={[0, -0.15, 0.49]} scale={[1.7, 1.5, 1]} />
           <mesh geometry={GEO.cheek} material={CHEEK} position={[-0.3, -0.06, 0.4]} />
@@ -618,7 +618,7 @@ export function SumoModel({
 
       <group ref={parts.torso} position-y={0.3}>
         <mesh geometry={GEO.body} material={SKIN} position-y={0.42} scale={[1, 0.88, 0.92]} castShadow />
-        <Outfit style={outfit} color={color} />
+        <Outfit key={outfit} style={outfit} color={color} />
 
         <group ref={parts.armL} position={[-0.7, 0.62, 0.05]} rotation-z={0.7}>
           <mesh geometry={GEO.arm} material={SKIN} position-y={-0.22} castShadow />
@@ -631,8 +631,11 @@ export function SumoModel({
 
         <group ref={parts.head} position-y={1.12}>
           <mesh geometry={GEO.head} material={SKIN} castShadow />
-          <Hair style={hairStyle} color={hairColor} />
-          <Face style={face} eyesRef={parts.eyes} />
+          <Hair key={hairStyle} style={hairStyle} color={hairColor} />
+          {/* key: switching faces rebuilds them. Reusing the old meshes kept stale props: a
+              removed position-x was reset to 0 after the new position, so an eye could land
+              in the middle of the face. Same for hair and outfits. */}
+          <Face key={face} style={face} eyesRef={parts.eyes} />
         </group>
       </group>
     </group>
