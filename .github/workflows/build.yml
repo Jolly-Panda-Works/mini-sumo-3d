@@ -342,7 +342,7 @@ jobs:
           # The changes since the previous release, from the commit messages.
           git fetch --quiet --tags origin
           node tools/changes.mjs "$PREVIOUS" --notes >> release-notes.md
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ env.VERSION }}
           target_commitish: ${{ needs.version.outputs.sha }}
