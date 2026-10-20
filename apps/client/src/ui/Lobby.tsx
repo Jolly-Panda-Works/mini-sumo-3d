@@ -60,7 +60,12 @@ export function Lobby() {
   const inRoomIds = new Set(game.players.map((p) => p.accountId).filter(Boolean));
 
   // The start button sits in the fixed footer, so the waiting room never scrolls.
-  const startArea = autoStart ? null : isHost ? (
+  const startArea = autoStart ? (
+    // Paid arenas start on their own: the same button as Training, counting down (no tap needed).
+    <button className="start-btn lobby__start" disabled aria-live="polite">
+      <span className="start-btn__text">{searchSeconds > 1 ? `Start match in ${searchSeconds}…` : "Starting…"}</span>
+    </button>
+  ) : isHost ? (
           <>
             <button
               className="start-btn lobby__start"
@@ -156,12 +161,10 @@ export function Lobby() {
             <span className="search__spinner" aria-hidden="true" />
             <div>
               <p className="search__title">
-                {connected.length >= 2
-                  ? `Bout starts in ${searchSeconds}s`
-                  : `Looking for opponents… ${searchSeconds}s`}
+                {searchSeconds <= 1 ? "Wrestlers are joining…" : `Looking for opponents… ${searchSeconds}s`}
               </p>
               <p className="hint">
-                Entry paid: <Coins amount={arena.entryFee} />. Refunded if the bout doesn't start or you leave before it does.
+                Entry paid: <Coins amount={arena.entryFee} />. Invite friends with +; if the ring isn't full in time, random wrestlers join and the bout starts.
               </p>
             </div>
           </div>

@@ -170,7 +170,7 @@ interface EntryRow {
 
 interface SettlementRow {
   match_id: string;
-  outcome: "won" | "draw" | "void" | "empty";
+  outcome: "won" | "draw" | "void" | "empty" | "bot_won";
   winner_account_id: string | null;
   players: number;
   pool: number;
@@ -180,7 +180,7 @@ interface SettlementRow {
 
 export interface Settlement {
   matchId: string;
-  outcome: "won" | "draw" | "void" | "empty";
+  outcome: "won" | "draw" | "void" | "empty" | "bot_won";
   winnerAccountId: string | null;
   players: number;
   pool: number;
@@ -827,7 +827,16 @@ export class Economy {
    * - Winner without a paid entry or any inconsistency: void, every entry refunded.
    * A repeated call returns the stored settlement and changes nothing, even with another winner.
    */
-  settleMatch(input: { matchId: string; roomId: string; arenaId: string; winnerAccountId: string | null }): Settlement {
+  settleMatch(input: {
+    matchId: string;
+    roomId: string;
+    arenaId: string;
+    winnerAccountId: string | null;
+    /** Seats filled by bots (the house pays their share, so a win against bots pays like one against people). */
+    botSeats?: number;
+    /** A bot won: the entries are spent (like losing to a person), nobody is refunded. */
+    botWon?: boolean;
+  }): Settlement {
     return this.tx(() => {
       const existing = row<SettlementRow>(this.db.prepare("SELECT * FROM settlements WHERE match_id = ?").get(input.matchId));
       if (existing) {
@@ -853,8 +862,16 @@ export class Economy {
       let outcome: Settlement["outcome"];
       let prize = 0;
       let sink = 0;
+      const botSeats = Math.max(0, Math.min(8, Math.floor(input.botSeats ?? 0)));
       if (entries.length === 0) {
         outcome = "empty";
+      } else if (!input.winnerAccountId && input.botWon) {
+        // A bot won: every entry is spent, like losing to a person.
+        outcome = "bot_won";
+        sink = pool;
+        this.db
+          .prepare("UPDATE arena_entries SET status = 'settled', updated_at = ? WHERE match_id = ? AND status = 'locked'")
+          .run(this.timestamp(), input.matchId);
       } else if (!input.winnerAccountId) {
         outcome = "draw";
         for (const entry of entries) this.refundEntry(entry, "Draw: entry refunded");
@@ -863,7 +880,7 @@ export class Economy {
         for (const entry of entries) this.refundEntry(entry, "Match could not be settled: entry refunded");
       } else {
         outcome = "won";
-        const result = computePrize(winnerEntry.fee, entries.length, arena.economyFeePercent);
+        const result = computePrize(winnerEntry.fee, entries.length + botSeats, arena.economyFeePercent);
         prize = result.prize;
         sink = result.sink;
         if (prize > 0) {

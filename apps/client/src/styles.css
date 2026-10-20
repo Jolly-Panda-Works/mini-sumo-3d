@@ -8930,3 +8930,8 @@ button.code-field {
   direction: rtl;
   unicode-bidi: isolate;
 }
+
+/* Friend picker: Add random player the same size as the share button (COPY INVITE LINK) */
+.invite-picker__share .art.art--add-random {
+  width: 150px;
+}

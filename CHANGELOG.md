@@ -8,6 +8,13 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Paid arenas: if the ring isn't full when the 10 s wait ends, random bots fill the empty seats one by one and the bout starts by itself (it used to be cancelled and refunded). Players can't add bots there themselves; they can invite friends with + (no share link). The house pays the bots' share of the pool, so beating bots pays like beating people; losing to a bot spends the entry (new settlement outcome `bot_won`, no refund).
+- Waiting room in paid arenas: the same start button as Training, counting down ("Start match in N…", then "Starting…"); the search text says random wrestlers join if the ring isn't full.
+- Friend picker: Add random player is the same size as the share button.
+- 2 new tests, 4 rewritten (177 total).
+
+### Changed
+
 - Coin shop (Cafe Bazaar): each pack's BUY shows its price as Cafe Bazaar shows it (no coin amount, no coin icon), from the new `skuDetails` in the Bazaar plugin (Poolakey `getInAppSkuDetails`); BUY elsewhere keeps the coin price.
 - Home: the Training button uses the new training icon (phone and wide screens); the Private Room button in Friends shows the Royal Dojo picture (its card keeps the arena art). The upgrade and achievements icons are in the project for later.
 

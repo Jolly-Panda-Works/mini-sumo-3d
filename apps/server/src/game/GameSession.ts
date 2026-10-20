@@ -156,6 +156,8 @@ export class GameSession {
   private autoStartAt = -1;
   private cancelAt = -1;
   private cancelled = false;
+  /** Paid arena: bots are filling the empty seats before the bout starts. */
+  private paidFilling = false;
   private playStartedAt = 0;
   /** Simulation time when the quick-match wait started, -1 when not searching. */
   private searchStartedAt = -1;
@@ -201,6 +203,7 @@ export class GameSession {
 
   get searchRemainingMs(): number {
     if (this.paidArena) {
+      if (this.paidFilling) return 1; // bots are joining: the bout starts in a moment
       const at = this.autoStartAt >= 0 ? this.autoStartAt : this.cancelAt;
       return at >= 0 ? Math.max(0, at - this.time) : 0;
     }
@@ -692,8 +695,10 @@ export class GameSession {
     if (!this.paidArena || !lobby || this.cancelled) {
       this.autoStartAt = -1;
       this.cancelAt = -1;
+      this.paidFilling = false;
       return;
     }
+    if (this.paidFilling) return; // bots are filling the seats: the start is on its way
     if (humans >= 2) {
       this.cancelAt = -1;
       if (humans >= this.maxPlayers) this.autoStartAt = this.time;
@@ -705,16 +710,36 @@ export class GameSession {
     }
   }
 
+  /**
+   * Paid arenas: when the wait ends, bots fill the empty seats one by one (nobody else came,
+   * or not enough people), then the bout starts by itself. Players can't add bots here.
+   */
   private tickPaidArena(): void {
-    if (this.autoStartAt >= 0 && this.time >= this.autoStartAt) {
+    const due = (this.autoStartAt >= 0 && this.time >= this.autoStartAt) || (this.cancelAt >= 0 && this.time >= this.cancelAt);
+    if (due && !this.paidFilling) {
+      this.paidFilling = true;
       this.autoStartAt = -1;
-      this.refreshLobbyPhase();
-      this.startCountdown();
-    } else if (this.cancelAt >= 0 && this.time >= this.cancelAt) {
       this.cancelAt = -1;
-      this.cancelled = true;
-      this.events.push({ type: "cancelled" });
+      this.nextBotAt = this.time;
     }
+    if (!this.paidFilling) return;
+    if (this.humans.length === 0) {
+      this.paidFilling = false;
+      return;
+    }
+    if (this.connectedPlayers.length < this.maxPlayers) {
+      if (this.time < this.nextBotAt) return;
+      this.createBot();
+      this.nextBotAt = this.time + this.cfg.botJoinIntervalMs;
+      this.refreshLobbyPhase();
+      this.layoutLobby();
+      if (this.connectedPlayers.length < this.maxPlayers) return;
+    }
+    // Full: a short moment to see everyone, then the countdown.
+    if (this.time < this.nextBotAt) return;
+    this.paidFilling = false;
+    this.refreshLobbyPhase();
+    this.startCountdown();
   }
 
   private updateSearch(): void {

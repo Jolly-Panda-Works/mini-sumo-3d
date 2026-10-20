@@ -328,7 +328,18 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
     const winnerAccountId = winnerId ? (this.accounts.get(winnerId) ?? null) : null;
 
     // Private rooms (friends) count for stats and XP like Training, with no coins.
-    const settlement = this.paid ? economy.settleMatch({ matchId, roomId: this.roomId, arenaId: this.arenaId, winnerAccountId }) : null;
+    // Paid arenas can be filled with bots (nobody else came): the house pays their share.
+    const winner = winnerId ? this.session.players.get(winnerId) : undefined;
+    const settlement = this.paid
+      ? economy.settleMatch({
+          matchId,
+          roomId: this.roomId,
+          arenaId: this.arenaId,
+          winnerAccountId,
+          botSeats: this.session.bots.length,
+          botWon: Boolean(winner?.isBot),
+        })
+      : null;
     const participants = [...this.session.players.values()]
       .filter((p) => !p.isBot && this.accounts.has(p.id))
       .map((p) => ({ accountId: this.accounts.get(p.id)!, won: p.id === winnerId, completed: p.connected && p.elimReason !== "left" }));
