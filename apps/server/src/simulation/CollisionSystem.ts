@@ -9,6 +9,8 @@ export interface ImpactEvent {
   y: number;
   /** Approach speed along the collision normal (m/s). */
   strength: number;
+  /** The wrestler stunned by this hit (a dash into someone who wasn't dashing), if any. */
+  stunned?: string;
 }
 
 function massOf(body: SimBody, timeMs: number, cfg: SimulationConfig): number {
@@ -82,8 +84,20 @@ export function resolveCollisions(bodies: readonly SimBody[], cfg: SimulationCon
         clampVelocity(a, cfg.maxVelocity);
         clampVelocity(b, cfg.maxVelocity);
 
+        // A dash into someone who isn't dashing stuns them for a moment.
+        let stunned: string | undefined;
+        if (approach >= cfg.stunThreshold) {
+          const aDash = isDashing(a, timeMs);
+          const bDash = isDashing(b, timeMs);
+          if (aDash !== bDash) {
+            const victim = aDash ? b : a;
+            victim.stunnedUntil = timeMs + cfg.stunMs;
+            victim.dashEndsAt = Math.min(victim.dashEndsAt, timeMs);
+            stunned = victim.id;
+          }
+        }
         if (approach >= cfg.impactEventThreshold) {
-          events.push({ a: a.id, b: b.id, x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, strength: approach });
+          events.push({ a: a.id, b: b.id, x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, strength: approach, ...(stunned ? { stunned } : {}) });
         }
       }
     }

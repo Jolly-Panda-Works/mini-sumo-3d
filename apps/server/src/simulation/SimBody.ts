@@ -17,6 +17,8 @@ export interface SimBody {
   dashReadyAt: number;
   /** Simulation time (ms) of elimination, -1 while alive. */
   eliminatedAt: number;
+  /** Simulation time (ms) until which the body is stunned (hit by a dash): no steering, no dash. */
+  stunnedUntil?: number;
   /** Power-up modifiers (1 = normal). */
   massScale?: number;
   radiusScale?: number;

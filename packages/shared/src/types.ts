@@ -13,6 +13,8 @@ export interface SyncedPlayer {
   alive: boolean;
   connected: boolean;
   dashing: boolean;
+  /** Stunned by a dash hit (no steering for a moment): drawn dizzy. Older servers: absent. */
+  stunned?: boolean;
   dashCooldownMs: number;
   /** Length of the current cooldown (shorter late in the bout), for the recharge meter. */
   dashCooldownTotalMs: number;

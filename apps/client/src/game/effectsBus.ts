@@ -20,3 +20,6 @@ export const shakeBus = new Emitter<number>();
 
 /** performance.now() of the latest impact per player, used for squash-and-stretch. */
 export const lastHitAt = new Map<string, number>();
+
+/** The latest hit per player: when, how hard (m/s) and where (gameplay x, y), for the recoil. */
+export const lastHit = new Map<string, { at: number; strength: number; x: number; y: number }>();

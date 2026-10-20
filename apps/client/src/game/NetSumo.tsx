@@ -1,9 +1,9 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import type { CanvasTexture, Sprite } from "three";
+import type { CanvasTexture, Group, Sprite } from "three";
 import { PLAYER_COLORS, Phase, lerpAngle, type Appearance } from "@mini-sumo/shared";
 import { roomManager } from "../network/RoomManager";
-import { dustBus, lastHitAt } from "./effectsBus";
+import { dustBus, lastHit, lastHitAt } from "./effectsBus";
 import { createNameTagTexture } from "./nameTag";
 import { SumoModel, useSumoParts } from "./SumoModel";
 import { BackBanner } from "./PowerUpFlags";
@@ -35,6 +35,7 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
   const color = PLAYER_COLORS[colorIndex % PLAYER_COLORS.length]!.hex;
   const parts = useSumoParts();
   const tagRef = useRef<Sprite>(null);
+  const starsRef = useRef<Group>(null);
   const [texture, setTexture] = useState<CanvasTexture | null>(null);
   useEffect(() => {
     const created = createNameTagTexture(colorIndex + 1, name, color, isYou);
@@ -101,7 +102,13 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
     }
 
     const sinceHit = (performance.now() - (lastHitAt.get(id) ?? -1e9)) / 1000;
-    const hitSquash = sinceHit < 0.35 ? Math.sin((sinceHit / 0.35) * Math.PI) * 0.28 : 0;
+    // Exaggerated hits: a squash that grows with the hit, then wobbles out like jelly.
+    const hit = lastHit.get(id);
+    const hitPower = hit ? Math.min(1, 0.35 + hit.strength / 9) : 0.5;
+    const hitSquash = sinceHit < 0.7 ? Math.exp(-5.5 * sinceHit) * Math.cos(sinceHit * 24) * 0.55 * hitPower : 0;
+    // …and the body is knocked back, leaning away from the hit, then springs upright.
+    const recoil = sinceHit < 0.8 ? Math.exp(-4.5 * sinceHit) * Math.sin(Math.min(1, sinceHit / 0.08) * Math.PI * 0.5) * 0.75 * hitPower : 0;
+    const stunned = Boolean((p as { stunned?: boolean }).stunned);
     const blink = (t + seed * 4) % 3.7 < 0.12;
 
     if (p.alive) {
@@ -128,8 +135,27 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
       root.scale.setScalar((pop < 1 ? Math.max(0.01, 1 + (c1 + 1) * (pop - 1) ** 3 + c1 * (pop - 1) ** 2) : 1) * s.size);
 
       const bob = Math.sin(t * 3 + seed * 6) * 0.02;
-      const stretch = p.dashing ? 0.12 : 0;
+      const stretch = p.dashing ? 0.18 : 0;
       torso.scale.set(1 + hitSquash + stretch * 0.3, 1 - hitSquash * 0.8 + bob - stretch * 0.4, 1 + hitSquash * 0.5 + stretch);
+
+      // Lean away from where the hit came from (in the wrestler's own frame).
+      let tiltX = 0;
+      let tiltZ = 0;
+      if (recoil > 0.001 && hit) {
+        const ax = s.x - hit.x;
+        const az = s.z - hit.y;
+        const len = Math.hypot(ax, az) || 1;
+        const fwd = (ax * Math.sin(s.yaw) + az * Math.cos(s.yaw)) / len;
+        const side = (ax * Math.cos(s.yaw) - az * Math.sin(s.yaw)) / len;
+        tiltX = fwd * recoil;
+        tiltZ = -side * recoil;
+      }
+      // Stunned (hit by a dash): a dizzy sway.
+      if (stunned) {
+        tiltX += Math.sin(t * 9) * 0.12;
+        tiltZ += Math.cos(t * 7) * 0.16;
+      }
+      torso.rotation.set(tiltX, stunned ? Math.sin(t * 5) * 0.35 : 0, tiltZ);
 
       // Particles: a little dust at each footstep, a trail while dashing.
       const foot = Math.sin(s.walk) >= 0 ? 1 : -1;
@@ -143,11 +169,13 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
       }
 
       const swing = Math.sin(s.walk) * 0.7 * moving;
-      if (parts.armL.current) parts.armL.current.rotation.set(isWinner ? 0 : swing, 0, isWinner ? 2.6 : 0.7);
-      if (parts.armR.current) parts.armR.current.rotation.set(isWinner ? 0 : -swing, 0, isWinner ? -2.6 : -0.7);
+      // Hit or stunned: arms fly up and flail.
+      const flail = stunned ? 1.6 + Math.sin(t * 14) * 0.5 : recoil * 2.2;
+      if (parts.armL.current) parts.armL.current.rotation.set(isWinner ? 0 : swing, 0, isWinner ? 2.6 : 0.7 + flail);
+      if (parts.armR.current) parts.armR.current.rotation.set(isWinner ? 0 : -swing, 0, isWinner ? -2.6 : -0.7 - flail);
       if (parts.legL.current) parts.legL.current.position.y = 0.17 + Math.max(0, Math.sin(s.walk)) * 0.12 * moving;
       if (parts.legR.current) parts.legR.current.position.y = 0.17 + Math.max(0, -Math.sin(s.walk)) * 0.12 * moving;
-      if (parts.eyes.current) parts.eyes.current.scale.y = sinceHit < 0.3 || blink ? 0.2 : 1;
+      if (parts.eyes.current) parts.eyes.current.scale.y = sinceHit < 0.3 || blink ? 0.2 : stunned ? 0.45 + Math.sin(t * 12) * 0.25 : 1;
       if (parts.ring.current) parts.ring.current.visible = true;
     } else {
       if (!s.falling) {
@@ -170,10 +198,21 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
       root.position.set(s.x, s.y, s.z);
       root.rotation.set(-s.tumble, s.yaw + Math.sin(t * 2) * 0.1, 0);
       torso.scale.set(1, 1, 1);
+      torso.rotation.set(0, 0, 0);
       if (parts.eyes.current) parts.eyes.current.scale.y = 0.15;
       if (parts.armL.current) parts.armL.current.rotation.set(0, 0, 2.2);
       if (parts.armR.current) parts.armR.current.rotation.set(0, 0, -2.2);
       if (parts.ring.current) parts.ring.current.visible = false;
+    }
+
+    const stars = starsRef.current;
+    if (stars) {
+      stars.visible = p.alive && stunned;
+      if (stars.visible) {
+        stars.position.set(s.x, s.y + 2.05 * s.size, s.z);
+        stars.rotation.y = t * 6;
+        stars.scale.setScalar(s.size);
+      }
     }
 
     const tag = tagRef.current;
@@ -188,6 +227,15 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
     <>
       <SumoModel parts={parts} color={color} appearance={appearance} />
       <BackBanner id={id} root={parts.root} />
+      {/* Stunned: little stars circling over the head */}
+      <group ref={starsRef} visible={false}>
+        {[0, 1, 2].map((i) => (
+          <mesh key={i} position={[Math.cos((i / 3) * Math.PI * 2) * 0.42, Math.sin(i * 2.1) * 0.06, Math.sin((i / 3) * Math.PI * 2) * 0.42]} rotation={[0.4, i, 0.3]}>
+            <octahedronGeometry args={[0.11, 0]} />
+            <meshBasicMaterial color="#FFD84D" toneMapped={false} />
+          </mesh>
+        ))}
+      </group>
       <sprite ref={tagRef} scale={[2.3, 0.52, 1]} renderOrder={10} visible={false}>
         {texture && <spriteMaterial key={texture.uuid} map={texture} depthTest={false} transparent />}
       </sprite>

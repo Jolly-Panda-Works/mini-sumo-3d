@@ -6,7 +6,7 @@ import {
   type SyncedPlayer,
   type SyncedState,
 } from "@mini-sumo/shared";
-import { GameSession, createConfig, isDashing, type ActionResult } from "@mini-sumo/sim";
+import { GameSession, createConfig, isDashing, isStunned, type ActionResult } from "@mini-sumo/sim";
 import type { GameConnection } from "./connection";
 import { localEconomy, type LocalEntry } from "./localEconomy";
 
@@ -207,6 +207,7 @@ export class LocalConnection implements GameConnection {
             x: event.x,
             y: event.y,
             strength: Math.round(event.strength * 10) / 10,
+            ...(event.stunned ? { stunned: event.stunned } : {}),
           });
           break;
         case "eliminated":
@@ -293,6 +294,7 @@ export class LocalConnection implements GameConnection {
       ps.alive = p.alive;
       ps.connected = p.connected;
       ps.dashing = isDashing(p, s.time);
+      ps.stunned = isStunned(p, s.time);
       ps.dashCooldownMs = roundUp100(Math.max(0, p.dashReadyAt - s.time));
       ps.dashCooldownTotalMs = p.dashCooldownTotal;
       ps.powerUp = p.powerUp;

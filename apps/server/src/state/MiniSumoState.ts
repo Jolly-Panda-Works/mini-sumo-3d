@@ -13,6 +13,8 @@ export class PlayerState extends Schema {
   @type("boolean") alive = true;
   @type("boolean") connected = true;
   @type("boolean") dashing = false;
+  /** Stunned by a dash hit (no steering for a moment): drawn dizzy. */
+  @type("boolean") stunned = false;
   /** Remaining dash cooldown, rounded up to 100 ms to limit patch traffic. */
   @type("uint16") dashCooldownMs = 0;
   @type("uint16") dashCooldownTotalMs = 3000;

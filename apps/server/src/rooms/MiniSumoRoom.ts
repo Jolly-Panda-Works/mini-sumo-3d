@@ -14,7 +14,7 @@ import { EconomyError } from "../economy/Economy.js";
 import { presence } from "../social/presence.js";
 import { getEconomy } from "../economy/instance.js";
 import { GameSession, type ActionResult } from "../game/GameSession.js";
-import { isDashing } from "../simulation/MovementSystem.js";
+import { isDashing, isStunned } from "../simulation/MovementSystem.js";
 import { DEFAULT_CONFIG } from "../simulation/SimulationConfig.js";
 import { sanitizeIsPrivate, sanitizeMaxPlayers } from "../validation/InputValidator.js";
 import { MiniSumoState, PlayerState } from "../state/MiniSumoState.js";
@@ -271,6 +271,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
             x: event.x,
             y: event.y,
             strength: Math.round(event.strength * 10) / 10,
+            ...(event.stunned ? { stunned: event.stunned } : {}),
           });
           break;
         case "eliminated":
@@ -433,6 +434,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
       ps.connected = p.connected;
       ps.dashing = isDashing(p, s.time);
       ps.dashCooldownMs = Math.min(65_000, roundUp100(Math.max(0, p.dashReadyAt - s.time)));
+      ps.stunned = isStunned(p, s.time);
       ps.dashCooldownTotalMs = Math.min(65_000, p.dashCooldownTotal);
       ps.powerUp = p.powerUp;
       ps.powerUpMs = p.powerUp ? Math.min(65_000, roundUp100(Math.max(0, p.powerUpUntil - s.time))) : 0;

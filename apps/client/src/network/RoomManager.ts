@@ -29,7 +29,7 @@ const myLevel = () => economyStore.get().profile?.level.level ?? 1;
 import { botLevelForArena } from "@mini-sumo/shared";
 import { audio } from "../audio/AudioManager";
 import { resolveServerUrl } from "../config";
-import { dustBus, impactBus, lastHitAt, shakeBus } from "../game/effectsBus";
+import { dustBus, impactBus, lastHit, lastHitAt, shakeBus } from "../game/effectsBus";
 import { createStore } from "../store";
 import { showError, showLevelUp, showMessage, showWarning, pushToast } from "../uiStore";
 import { vibrate } from "../haptics";
@@ -411,11 +411,16 @@ class RoomManager {
       const now = performance.now();
       lastHitAt.set(msg.a, now);
       lastHitAt.set(msg.b, now);
+      const hit = { at: now, strength: msg.strength, x: msg.x, y: msg.y };
+      lastHit.set(msg.a, hit);
+      lastHit.set(msg.b, hit);
       impactBus.emit({ x: msg.x, y: msg.y, strength: msg.strength });
-      dustBus.emit({ x: msg.x, y: msg.y, count: Math.min(14, 4 + Math.round(msg.strength)), speed: 1 + msg.strength * 0.25 });
-      if (msg.strength > 6) shakeBus.emit(Math.min(1, msg.strength / 14));
+      dustBus.emit({ x: msg.x, y: msg.y, count: Math.min(20, 6 + Math.round(msg.strength * 1.4)), speed: 1.2 + msg.strength * 0.3 });
+      // Big hits shake the camera (more than before: hits should feel heavy).
+      if (msg.strength > 3.5) shakeBus.emit(Math.min(1, msg.strength / 9));
       audio.impact(msg.strength);
-      if (msg.a === this.sessionId || msg.b === this.sessionId) vibrate(Math.min(60, 15 + Math.round(msg.strength * 4)));
+      if (msg.stunned === this.sessionId) vibrate(90);
+      else if (msg.a === this.sessionId || msg.b === this.sessionId) vibrate(Math.min(60, 15 + Math.round(msg.strength * 4)));
     });
 
     room.onMessage(ServerMessage.Dash, (msg: DashPayload) => {

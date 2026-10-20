@@ -19,7 +19,7 @@ import { stepMovement, tryDash } from "../simulation/MovementSystem.js";
 import { createBody, type SimBody } from "../simulation/SimBody.js";
 import { DEFAULT_CONFIG, type SimulationConfig } from "../simulation/SimulationConfig.js";
 import { sanitizeName, validateMoveInput } from "../validation/InputValidator.js";
-import { decideBot, easedTuning, forgetBot, type BotTuning } from "./BotBrain.js";
+import { botRecoil, decideBot, easedTuning, forgetBot, type BotTuning } from "./BotBrain.js";
 
 /** Bots go for a power-up flag only once it's their turn (players get the first chance). */
 export function botSeeksItem(cfg: SimulationConfig, level: BotLevel, sinceSpawnMs: number): boolean {
@@ -103,7 +103,7 @@ export interface SessionOptions {
 
 export type SessionEvent =
   | { type: "phase"; from: Phase; to: Phase }
-  | { type: "impact"; a: string; b: string; x: number; y: number; strength: number }
+  | { type: "impact"; a: string; b: string; x: number; y: number; strength: number; stunned?: string }
   | { type: "eliminated"; id: string; name: string; reason: EliminationReason; by: string | null }
   | { type: "dash"; id: string }
   | { type: "item"; kind: PowerUpKind; x: number; y: number; state: "spawned" | "expired" | "taken"; by?: string }
@@ -477,6 +477,11 @@ export class GameSession {
 
     for (const impact of resolveCollisions(bodies, this.cfg, this.time)) {
       this.events.push({ type: "impact", ...impact });
+      // Bots in a hard hit back off for a moment instead of sticking to each other.
+      // (Not in a bots-only finish: the winner presses on.)
+      if (impact.strength >= this.cfg.stunThreshold && this.weakBotId === "") {
+        for (const id of [impact.a, impact.b]) if (this.players.get(id)?.isBot) botRecoil(id, this.time + this.cfg.botRecoilMs);
+      }
     }
 
     this.recordContacts(bodies);
@@ -850,7 +855,14 @@ export class GameSession {
     }
     for (const bot of alive) {
       if (!bot.isBot || this.time < bot.nextThinkAt) continue;
-      const decision = decideBot(bot, alive, this.cfg, this.rng, bot.id === this.weakBotId ? WEAK_BOT : tuning);
+      // Bots-only finish: one bot gives up, and the other goes straight for the win (no circling).
+      const finishing = this.weakBotId !== "" && bot.id !== this.weakBotId;
+      const botTuning = bot.id === this.weakBotId ? WEAK_BOT : finishing ? { ...tuning, style: { press: 1, stalk: 0, charge: 0 } } : tuning;
+      const decision = decideBot(bot, alive, this.cfg, this.rng, botTuning, {
+        now: this.time,
+        boutMs: this.cfg.matchDurationMs - Math.max(0, this.phaseEndsAt - this.time),
+        openingMs: finishing ? 0 : this.cfg.botOpeningMs,
+      });
       // Go for the power-up flag once it's this bot level's turn (players get the first chance).
       const item = this.item;
       if (item && bot.id !== this.weakBotId && botSeeksItem(this.cfg, this.botLevel, this.time - item.spawnedAt)) {

@@ -47,6 +47,8 @@ export interface ImpactPayload {
   x: number;
   y: number;
   strength: number;
+  /** The wrestler stunned by this hit (a dash into someone who wasn't dashing). */
+  stunned?: string;
 }
 
 export interface EliminatedPayload {

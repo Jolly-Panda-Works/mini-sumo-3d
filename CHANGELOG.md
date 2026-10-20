@@ -6,6 +6,17 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Hit stun: a dash into a wrestler who isn't dashing stuns them for 0.65 s (no steering, no dash; they slide with the hit), drawn with spinning stars over the head, a dizzy sway and flailing arms; the stunned player's phone buzzes.
+- Rope resistance (like the straw bales): near the rope the outward slide is braked, so a light shove doesn't win a bout but a real hit still does.
+
+### Changed
+
+- Hits are exaggerated: a squash-and-stretch that grows with the hit and wobbles out, the body knocked back leaning away from the hit, arms flying up, more dust and a stronger screen shake.
+- Bots play fairer: a calm 2.5 s opening (circling, no dash), they back off for a moment after a hard hit instead of sticking to their target, two bots rarely go after the same wrestler, and they press less overall. Measured over 50 bouts, the first ring-out went from a median of 7.7 s to 14.8 s. In a bots-only finish the winning bot goes straight for it.
+- 4 new tests (175 total).
+
 ### Changed
 
 - Sign in with email (button art SIGN IN / CONNECTED under Google Play): one flow. A new email saves this player with it; an email that already has a player brings that player to this device, and the game reloads with them (the device's own copy is cleared first, so the previous player's progress isn't merged in). Tapping CONNECTED asks to log out: this device's key stops working and the game starts as a new guest (the email signs back in any time).

@@ -43,7 +43,7 @@ export const BOT_TUNING: Readonly<Record<BotLevel, BotTuning>> = Object.freeze({
     dashChance: 0.15,
     inputScale: 0.72,
     edgeStart: 0.66,
-    style: { press: 0.4, stalk: 0.4, charge: 0.2 },
+    style: { press: 0.3, stalk: 0.5, charge: 0.2 },
     stalkDistance: 5,
     chargeDashRange: 6,
   },
@@ -55,7 +55,7 @@ export const BOT_TUNING: Readonly<Record<BotLevel, BotTuning>> = Object.freeze({
     dashChance: 0.35,
     inputScale: 0.9,
     edgeStart: 0.72,
-    style: { press: 0.52, stalk: 0.2, charge: 0.28 },
+    style: { press: 0.36, stalk: 0.36, charge: 0.28 },
     stalkDistance: 4.2,
     chargeDashRange: 4.6,
   },
@@ -67,7 +67,7 @@ export const BOT_TUNING: Readonly<Record<BotLevel, BotTuning>> = Object.freeze({
     dashChance: 0.55,
     inputScale: 1,
     edgeStart: 0.76,
-    style: { press: 0.5, stalk: 0.15, charge: 0.35 },
+    style: { press: 0.38, stalk: 0.27, charge: 0.35 },
     stalkDistance: 3.6,
     chargeDashRange: 4.4,
   },
@@ -112,12 +112,36 @@ interface BotMemory {
 const memory = new Map<string, BotMemory>();
 
 /** Forget a bot (when it leaves); the memory is also rebuilt on demand. */
+/** Who each bot is going after, so two bots rarely gang up on the same wrestler. */
+const targets = new Map<string, string>();
+/** Until when (session time, ms) a bot backs off after a hard hit. */
+const recoilUntil = new Map<string, number>();
+
+/** A bot was in a hard hit: it backs off for a moment instead of sticking to its target. */
+export function botRecoil(id: string, untilMs: number): void {
+  recoilUntil.set(id, untilMs);
+}
+
+/** What the bout looks like right now (for pacing). */
+export interface BotContext {
+  /** Session time (ms). */
+  now: number;
+  /** Time since the bout started (ms). */
+  boutMs: number;
+  /** Opening length (ms): circling, no dash. */
+  openingMs: number;
+}
+
 export function forgetBot(id: string): void {
+  targets.delete(id);
+  recoilUntil.delete(id);
   memory.delete(id);
 }
 
 /** Forget every bot (tests). */
 export function resetBotMemory(): void {
+  targets.clear();
+  recoilUntil.clear();
   memory.clear();
 }
 
@@ -154,6 +178,7 @@ export function decideBot(
   cfg: SimulationConfig,
   rng: () => number,
   tuning: BotTuning = BOT_TUNING.normal,
+  ctx?: BotContext,
 ): BotDecision {
   const R = cfg.arenaRadius;
   const botDist = Math.hypot(bot.x, bot.y);
@@ -182,12 +207,30 @@ export function decideBot(
   let bestScore = Number.POSITIVE_INFINITY;
   for (const o of opponents) {
     if (!o.alive || o.id === bot.id) continue;
-    const score = Math.hypot(o.x - bot.x, o.y - bot.y) - 0.8 * Math.hypot(o.x, o.y);
+    let score = Math.hypot(o.x - bot.x, o.y - bot.y) - 0.8 * Math.hypot(o.x, o.y);
+    // Another bot is already on them: look for someone else (no ganging up).
+    for (const [other, t] of targets) if (other !== bot.id && t === o.id) score += 2.5;
+    // A little loyalty to the current target, so bots don't flicker between wrestlers.
+    if (targets.get(bot.id) === o.id) score -= 0.6;
     if (score < bestScore) {
       bestScore = score;
       target = o;
     }
   }
+
+  if (target) targets.set(bot.id, target.id);
+
+  // Just hit someone (or got hit): back off toward the middle for a moment.
+  if (target && ctx && ctx.now < (recoilUntil.get(bot.id) ?? 0)) {
+    const awayX = bot.x - target.x;
+    const awayY = bot.y - target.y;
+    const len = Math.hypot(awayX, awayY) || 1;
+    dx = (awayX / len) * 0.7 - (bot.x / R) * 0.9;
+    dy = (awayY / len) * 0.7 - (bot.y / R) * 0.9;
+    target = null; // no attack this decision
+  }
+  // The opening of the bout: size each other up (circle, no dash, no rush to the rope).
+  const opening = Boolean(ctx && ctx.boutMs < ctx.openingMs);
 
   if (target) {
     const tDist = Math.hypot(target.x, target.y);
@@ -199,8 +242,8 @@ export function decideBot(
     const inside = botDist < tDist - 0.3;
 
     const r = cfg.playerRadius;
-    // Near the rope the target is easy prey: always press then.
-    const move: Move = tDist > R * 0.72 ? "press" : mem.move;
+    // Near the rope the target is easy prey: always press then (not during the opening).
+    const move: Move = opening ? "stalk" : tDist > R * 0.72 ? "press" : mem.move;
 
     if (move === "stalk") {
       // Keep some distance and circle the target, staying on the centre side.
@@ -248,6 +291,8 @@ export function decideBot(
     dx /= len;
     dy /= len;
   }
+
+  if (opening) dash = false;
 
   // Edge safety: blend toward the centre as the bot nears the rope.
   const span = Math.max(0.1, 0.96 - tuning.edgeStart);
