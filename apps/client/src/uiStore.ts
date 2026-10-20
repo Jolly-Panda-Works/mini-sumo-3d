@@ -13,6 +13,8 @@ export interface UIState {
   wardrobeOpen: boolean;
   walletOpen: boolean;
   friendsOpen: boolean;
+  /** The Training or Private Room card, opened from its own button (not in the arena row). */
+  modeCard: "training" | "private" | null;
   shopOpen: boolean;
   profileOpen: boolean;
   /** Level-up celebration after a bout. */
@@ -61,6 +63,7 @@ export const uiStore = createStore<UIState>({
   wardrobeOpen: false,
   walletOpen: false,
   friendsOpen: false,
+  modeCard: null,
   shopOpen: false,
   profileOpen: false,
   levelUp: null,
@@ -150,6 +153,10 @@ export function setShopOpen(open: boolean): void {
 
 export function setFriendsOpen(open: boolean): void {
   uiStore.update({ friendsOpen: open });
+}
+
+export function setModeCard(mode: "training" | "private" | null): void {
+  uiStore.update({ modeCard: mode });
 }
 
 export function setHomeArena(arenaId: string): void {

@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import { arenaInfos, type ArenaInfo } from "@mini-sumo/shared";
 import { arenaImage, themeFor } from "../game/arenaThemes";
@@ -7,7 +8,7 @@ import { settingsStore } from "../settings";
 import { useStore } from "../store";
 import { Coins } from "./Coins";
 import { BotLevelPicker } from "./BotLevelPicker";
-import { Dialog } from "./Dialog";
+import { Dialog, popupLayer, useStackLevel } from "./Dialog";
 import { Icon } from "./Icon";
 import { pushToast, setInviteUiOpen } from "../uiStore";
 import { networkStore } from "../network/networkMode";
@@ -29,7 +30,9 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
   // the server doesn't offer yet (an older server) shows as coming soon instead of missing.
   const serverArenas = live ? economy.catalog?.arenas.filter((a) => a.enabled) : undefined;
   const onServer = new Set(serverArenas?.map((a) => a.id));
-  const arenas = PREVIEW.map((local) => serverArenas?.find((a) => a.id === local.id) ?? local);
+  // The row is the paid arenas, from Rookie. Training and the Private Room have their own
+  // buttons (home and Friends) that open their card in a popup.
+  const arenas = PREVIEW.filter((a) => a.entryFee > 0).map((local) => serverArenas?.find((a) => a.id === local.id) ?? local);
   // Phones: the card nearest the middle is full size, the others shrink by up to 15 %.
   // Card positions are measured once (and on resize); scrolling only reads scrollLeft and
   // writes transforms, so it stays smooth.
@@ -171,7 +174,6 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
       )}
 
       <ul className="arena-row" aria-label="Arenas" ref={rowRef}>
-        <PrivateRoomCard busy={busy} />
         {arenas.map((arena) => {
           const theme = themeFor(arena.id);
           const free = arena.entryFee === 0;
@@ -272,9 +274,49 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
 }
 
 /** The first card: a private room for you and your friends (bots can join too). */
-function PrivateRoomCard({ busy }: { busy: boolean }) {
+/** The free Training Arena card: bots and players, a bot level picker, PLAY. */
+function TrainingCard({ busy, onPlay }: { busy: boolean; onPlay?: () => void }) {
+  const theme = themeFor("training");
+  return (
+    <li
+      className="arena-tile arena-tile--training"
+      style={{ ["--accent" as string]: theme.accent, ["--tile-ink" as string]: theme.ink, ["--tile-sky" as string]: theme.sky }}
+    >
+      <img className="arena-tile__art" src={arenaImage("training")} alt="" width={960} height={536} decoding="async" />
+      <div className="arena-tile__body">
+        <h3 className="arena-tile__name">Training Arena</h3>
+        <p className="arena-tile__mood">{theme.title}</p>
+        <dl className="arena-tile__facts">
+          <div>
+            <dt>Entry</dt>
+            <dd>Free</dd>
+          </div>
+          <div>
+            <dt>Opponents</dt>
+            <dd>Bots & players</dd>
+          </div>
+        </dl>
+        <BotLevelPicker />
+      </div>
+      <button
+        className="art-btn arena-tile__btn arena-tile__play"
+        disabled={busy}
+        onClick={() => {
+          onPlay?.();
+          void roomManager.quickPlay(settingsStore.get().name);
+        }}
+        aria-label="Play the Training Arena for free"
+      >
+        <img src={`${import.meta.env.BASE_URL}ui/btn-play.webp`} alt="" width={287} height={91} draggable={false} />
+      </button>
+    </li>
+  );
+}
+
+function PrivateRoomCard({ busy, onPlay }: { busy: boolean; onPlay?: () => void }) {
   const theme = themeFor("private");
   const start = async () => {
+    onPlay?.();
     if (await roomManager.createPrivate(settingsStore.get().name, 4)) {
       // Online: straight to inviting friends.
       if (networkStore.get().mode === "online") setInviteUiOpen(true);
@@ -305,5 +347,36 @@ function PrivateRoomCard({ busy }: { busy: boolean }) {
         <img src={`${import.meta.env.BASE_URL}ui/btn-play.webp`} alt="" width={287} height={91} draggable={false} />
       </button>
     </li>
+  );
+}
+
+/**
+ * Training or the Private Room, opened from its own button: the same card as the arenas,
+ * with its picture, over a dimmed screen. PLAY starts it (and closes the popup).
+ */
+export function ModeCardPopup({ mode, onClose }: { mode: "training" | "private"; onClose: () => void }) {
+  const session = useStore(sessionStore);
+  const busy = session.status === "connecting";
+  const z = useStackLevel();
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [onClose]);
+  return createPortal(
+    <div className="mode-card" style={{ zIndex: z }} role="dialog" aria-modal="true" aria-label={mode === "training" ? "Training Arena" : "Private Room"}>
+      <button className="mode-card__backdrop" aria-label="Close" onClick={onClose} />
+      <div className="mode-card__box">
+        <button className="mode-card__close" onClick={onClose} aria-label="Close">
+          <img src={`${import.meta.env.BASE_URL}ui/close.webp`} alt="" draggable={false} />
+        </button>
+        <ul className="mode-card__list">
+          {mode === "training" ? <TrainingCard busy={busy} onPlay={onClose} /> : <PrivateRoomCard busy={busy} onPlay={onClose} />}
+        </ul>
+      </div>
+    </div>,
+    popupLayer(),
   );
 }

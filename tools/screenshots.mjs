@@ -221,7 +221,11 @@ try {
   await host.page.getByRole("button", { name: "Close" }).click();
 
   // The host opens a Training room; the others join the same public room.
-  const playTraining = (page) => page.getByRole("button", { name: /^Play Training Arena/ }).click();
+  // Training has its own button on the home screen: it opens the Training card, then PLAY.
+  const playTraining = async (page) => {
+    await page.getByRole("button", { name: "Training Arena", exact: true }).first().click();
+    await page.getByRole("button", { name: /^Play the Training Arena/ }).click();
+  };
   await playTraining(host.page);
   await host.page.waitForSelector(".roster");
 

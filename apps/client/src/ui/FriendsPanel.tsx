@@ -5,7 +5,7 @@ import { networkStore } from "../network/networkMode";
 import { roomManager, sessionStore } from "../network/RoomManager";
 import { settingsStore } from "../settings";
 import { useStore } from "../store";
-import { pushToast, setFriendsOpen, showError } from "../uiStore";
+import { pushToast, setFriendsOpen, setModeCard, showError } from "../uiStore";
 import { avatarSrc } from "./Avatar";
 import { Dialog } from "./Dialog";
 import { FriendProfilePopup } from "./FriendProfilePopup";
@@ -61,6 +61,14 @@ export function FriendsPanel() {
       ) : (
         <>
 
+          {/* Private Room: play with friends (opens its card; it's not in the arena row) */}
+          <button className="friends__private" onClick={() => setModeCard("private")} aria-label="Private Room">
+            <img src={`${import.meta.env.BASE_URL}arenas/private.webp`} alt="" width={960} height={536} draggable={false} />
+            <span className="friends__private-text">
+              <strong>Private Room</strong>
+              <span>Play with your friends</span>
+            </span>
+          </button>
           <section className="friends__code">
             <span className="field__label">Your friend code</span>
             <button className="code-field friends__code-value" onClick={() => void copyCode()} aria-label="Copy your friend code">

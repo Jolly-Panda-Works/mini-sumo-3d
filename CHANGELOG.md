@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Home: the arena row starts at Rookie; Training and the Private Room are no longer in it. Training has its own button (above Customise, with its arena picture) and the Private Room has one at the top of Friends; each opens its card (the same card as the arenas, with its picture, details and PLAY; Training with the bot level) in a popup.
+
 ### Added
 
 - Hit stun: a dash into a wrestler who isn't dashing stuns them for 0.65 s (no steering, no dash; they slide with the hit), drawn with spinning stars over the head, a dizzy sway and flailing arms; the stunned player's phone buzzes.

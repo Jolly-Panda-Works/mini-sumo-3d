@@ -7,7 +7,7 @@ import { gameStore, sessionStore } from "./network/RoomManager";
 import { economyStore } from "./network/economyClient";
 import { settingsStore, touchControlsEnabled } from "./settings";
 import { useStore } from "./store";
-import { pushToast, setAboutOpen, setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWalletOpen, setWardrobeOpen, uiStore } from "./uiStore";
+import { pushToast, setModeCard, setAboutOpen, setFriendsOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWalletOpen, setWardrobeOpen, uiStore } from "./uiStore";
 import { Countdown } from "./ui/Countdown";
 import { HUD } from "./ui/HUD";
 import { Lobby } from "./ui/Lobby";
@@ -25,6 +25,7 @@ import { ServerWait } from "./ui/ServerWait";
 import { restoreBazaarPurchases } from "./network/bazaar";
 import { codeFromLink } from "./network/accountEmail";
 import { EmailSavePopup } from "./ui/EmailSavePopup";
+import { ModeCardPopup } from "./ui/ArenaSelect";
 import { InviteWatcher } from "./ui/InviteWatcher";
 import { audio } from "./audio/AudioManager";
 import { ProfilePanel } from "./ui/ProfilePanel";
@@ -175,6 +176,7 @@ export function App() {
         {inRoom && <Toasts />}
         {ui.wardrobeOpen && !needsName && (!inRoom || game.phase === Phase.Waiting || game.phase === Phase.Lobby) && <Wardrobe />}
         {ui.friendsOpen && !inRoom && !needsName && <FriendsPanel />}
+        {ui.modeCard && !inRoom && !needsName && <ModeCardPopup mode={ui.modeCard} onClose={() => setModeCard(null)} />}
         {ui.leaderboardOpen && !inRoom && !needsName && <LeaderboardPanel />}
         {ui.profileOpen && !needsName && <ProfilePanel />}
         {ui.shopOpen && !needsName && <CoinShop />}

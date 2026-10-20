@@ -5,7 +5,7 @@ import { economyStore } from "../network/economyClient";
 import { networkStore } from "../network/networkMode";
 import { roomManager, sessionStore } from "../network/RoomManager";
 import { useStore } from "../store";
-import { pushToast, showError, setFriendsOpen, setLeaderboardOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
+import { setModeCard, pushToast, showError, setFriendsOpen, setLeaderboardOpen, setProfileOpen, setSettingsOpen, setShopOpen, setWardrobeOpen } from "../uiStore";
 import { settingsStore } from "../settings";
 import { ArenaRow } from "./ArenaSelect";
 import { Icon } from "./Icon";
@@ -71,6 +71,11 @@ export function MainMenu() {
           {/* Top left: your profile, then customise, shop and friends */}
           <div className="home__left">
             <ProfileCard className="home__profile-card" />
+            {/* Training has its own button (it's not in the arena row) */}
+            <button className="mode-btn" onClick={() => setModeCard("training")} aria-label="Training Arena">
+              <img src={`${import.meta.env.BASE_URL}ui/btn-training-art.webp`} alt="" width={200} height={200} draggable={false} />
+              <span className="mode-btn__label">Training</span>
+            </button>
             <button className="tile-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
               <Icon name="customize" size={48} />
             </button>
@@ -130,6 +135,11 @@ export function MainMenu() {
 
       {/* Bottom left: customise and shop */}
       <nav className="hub__side" aria-label="More">
+        {/* Training: above Customise (it's not in the arena row) */}
+        <button className="mode-btn mode-btn--hub" onClick={() => setModeCard("training")} aria-label="Training Arena">
+          <img src={`${import.meta.env.BASE_URL}ui/btn-training-art.webp`} alt="" width={200} height={200} draggable={false} />
+          <span className="mode-btn__label">Training</span>
+        </button>
         <button className="hub__side-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
           <Icon name="customize" size={56} />
         </button>
