@@ -3,7 +3,6 @@ import { MIN_PLAYERS, Phase } from "@mini-sumo/shared";
 import { networkStore } from "../network/networkMode";
 import { gameStore, roomManager, sessionStore } from "../network/RoomManager";
 import { economyStore } from "../network/economyClient";
-import { Coins } from "./Coins";
 import { Icon } from "./Icon";
 import { Dialog } from "./Dialog";
 import { FriendRow } from "./FriendsPanel";
@@ -156,19 +155,7 @@ export function Lobby() {
           )}
         </ul>
 
-        {autoStart && arena && (
-          <div className="search" role="status" aria-live="polite">
-            <span className="search__spinner" aria-hidden="true" />
-            <div>
-              <p className="search__title">
-                {searchSeconds <= 1 ? "Wrestlers are joining…" : `Looking for opponents… ${searchSeconds}s`}
-              </p>
-              <p className="hint">
-                Entry paid: <Coins amount={arena.entryFee} />. Invite friends with +; if the ring isn't full in time, random wrestlers join and the bout starts.
-              </p>
-            </div>
-          </div>
-        )}
+        {/* Paid arenas: the countdown is on the start button (no separate search box) */}
 
 
         {inviting && !offline && (

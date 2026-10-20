@@ -8,6 +8,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Paid arena waiting room: no separate "Looking for opponents…" box; the countdown is on the start button only.
+
+### Changed
+
 - Paid arenas: if the ring isn't full when the 10 s wait ends, random bots fill the empty seats one by one and the bout starts by itself (it used to be cancelled and refunded). Players can't add bots there themselves; they can invite friends with + (no share link). The house pays the bots' share of the pool, so beating bots pays like beating people; losing to a bot spends the entry (new settlement outcome `bot_won`, no refund).
 - Waiting room in paid arenas: the same start button as Training, counting down ("Start match in N…", then "Starting…"); the search text says random wrestlers join if the ring isn't full.
 - Friend picker: Add random player is the same size as the share button.
