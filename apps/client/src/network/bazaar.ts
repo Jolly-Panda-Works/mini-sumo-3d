@@ -24,6 +24,8 @@ interface BazaarNative {
   purchase(options: { productId: string; payload?: string }): Promise<Purchase>;
   consume(options: { purchaseToken: string }): Promise<void>;
   purchases(): Promise<{ purchases: Purchase[] }>;
+  /** Prices and titles as Bazaar shows them (builds from before this method don't have it). */
+  skuDetails?(options: { productIds: string[] }): Promise<{ products: { productId: string; price: string; title: string }[] }>;
 }
 
 export type BuyResult = "bought" | "cancelled";
@@ -35,6 +37,30 @@ function native(): BazaarNative | null {
 }
 
 /** True in the Cafe Bazaar build on a device. */
+/**
+ * Each coin pack's price as Cafe Bazaar shows it (e.g. "۵۰٬۰۰۰ تومان"), by pack id; empty
+ * when Bazaar can't be asked (then the shop shows BUY without a price).
+ */
+let pricesCache: Record<string, string> | null = null;
+export async function bazaarPrices(): Promise<Record<string, string>> {
+  if (pricesCache) return pricesCache;
+  const plugin = native();
+  if (!plugin?.skuDetails) return {};
+  try {
+    await plugin.connect();
+    const { products } = await plugin.skuDetails({ productIds: Object.values(BAZAAR_PRODUCTS) });
+    const prices: Record<string, string> = {};
+    for (const [packId, productId] of Object.entries(BAZAAR_PRODUCTS)) {
+      const found = products.find((p) => p.productId === productId);
+      if (found?.price) prices[packId] = found.price;
+    }
+    pricesCache = prices;
+    return prices;
+  } catch {
+    return {};
+  }
+}
+
 export const bazaarEnabled = (): boolean => import.meta.env.VITE_STORE === "bazaar" && native() !== null;
 
 /**

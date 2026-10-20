@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { COIN_PACKS, DAILY_GIFT_COINS, type CoinPack } from "@mini-sumo/shared";
-import { bazaarBuyable, buyCoinPack, restoreBazaarPurchases } from "../network/bazaar";
+import { bazaarBuyable, bazaarPrices, buyCoinPack, restoreBazaarPurchases } from "../network/bazaar";
 import { economyStore, refreshProfile, request } from "../network/economyClient";
 import { localEconomy } from "../network/localEconomy";
 import { networkStore } from "../network/networkMode";
@@ -27,6 +27,12 @@ export function CoinShop() {
   // purchase and credits your account (COMING SOON until the server has its Bazaar keys).
   const store = bazaarBuyable() && (local || Boolean(economy.catalog?.stores?.bazaar));
   const [buying, setBuying] = useState<string | null>(null);
+  // The packs' prices as Cafe Bazaar shows them (shown on BUY instead of a coin amount).
+  const [prices, setPrices] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (!store) return;
+    void bazaarPrices().then(setPrices);
+  }, [store]);
 
   // Finish any purchase that was paid but not credited (e.g. the app closed mid-purchase).
   useEffect(() => {
@@ -121,8 +127,8 @@ export function CoinShop() {
             {store ? (
               <BuyButton
                 className="pack__buy"
-                price={pack.coins}
-                label={`Buy ${pack.name}, ${pack.coins} Sumo Coins, in Cafe Bazaar`}
+                priceText={prices[pack.id] ?? ""}
+                label={`Buy ${pack.name}, ${pack.coins} Sumo Coins, in Cafe Bazaar${prices[pack.id] ? ` for ${prices[pack.id]}` : ""}`}
                 disabled={buying !== null}
                 sfx="none"
                 onClick={() => void buy(pack)}

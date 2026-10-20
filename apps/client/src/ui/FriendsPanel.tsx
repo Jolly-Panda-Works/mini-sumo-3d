@@ -63,7 +63,7 @@ export function FriendsPanel() {
 
           {/* Private Room: play with friends (opens its card; it's not in the arena row) */}
           <button className="friends__private" onClick={() => setModeCard("private")} aria-label="Private Room">
-            <img src={`${import.meta.env.BASE_URL}arenas/private.webp`} alt="" width={960} height={536} draggable={false} />
+            <img src={`${import.meta.env.BASE_URL}ui/private-room-button.webp`} alt="" width={960} height={536} draggable={false} />
             <span className="friends__private-text">
               <strong>Private Room</strong>
               <span>Play with your friends</span>

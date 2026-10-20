@@ -110,6 +110,31 @@ class BazaarPlugin : Plugin() {
         }
     }
 
+    /** Each product's price and title as Cafe Bazaar shows them (in the player's currency). */
+    @PluginMethod
+    fun skuDetails(call: PluginCall) {
+        val p = payment
+        if (p == null || !connected) return call.reject("Not connected to Cafe Bazaar.", "NOT_CONNECTED")
+        val ids = call.getArray("productIds")?.toList<String>() ?: emptyList()
+        if (ids.isEmpty()) return call.reject("productIds is required.")
+        p.getInAppSkuDetails(skuIds = ids) {
+            getSkuDetailsSucceed { list ->
+                val items = JSArray()
+                list.forEach { sku ->
+                    val o = JSObject()
+                    o.put("productId", sku.sku)
+                    o.put("price", sku.price)
+                    o.put("title", sku.title)
+                    items.put(o)
+                }
+                val result = JSObject()
+                result.put("products", items)
+                call.resolve(result)
+            }
+            getSkuDetailsFailed { error -> call.reject(error.message ?: "Couldn't load the prices.", "FAILED") }
+        }
+    }
+
     /** Purchases that were paid but not consumed yet (e.g. the app closed mid-purchase). */
     @PluginMethod
     fun purchases(call: PluginCall) {

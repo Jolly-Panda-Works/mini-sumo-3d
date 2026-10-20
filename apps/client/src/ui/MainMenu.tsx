@@ -72,9 +72,8 @@ export function MainMenu() {
           <div className="home__left">
             <ProfileCard className="home__profile-card" />
             {/* Training has its own button (it's not in the arena row) */}
-            <button className="mode-btn" onClick={() => setModeCard("training")} aria-label="Training Arena">
-              <img src={`${import.meta.env.BASE_URL}ui/btn-training-art.webp`} alt="" width={200} height={200} draggable={false} />
-              <span className="mode-btn__label">Training</span>
+            <button className="tile-btn tile-btn--square" onClick={() => setModeCard("training")} aria-label="Training Arena">
+              <img src={`${import.meta.env.BASE_URL}ui/icon-training.webp`} alt="" width={256} height={255} />
             </button>
             <button className="tile-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
               <Icon name="customize" size={48} />
@@ -136,9 +135,8 @@ export function MainMenu() {
       {/* Bottom left: customise and shop */}
       <nav className="hub__side" aria-label="More">
         {/* Training: above Customise (it's not in the arena row) */}
-        <button className="mode-btn mode-btn--hub" onClick={() => setModeCard("training")} aria-label="Training Arena">
-          <img src={`${import.meta.env.BASE_URL}ui/btn-training-art.webp`} alt="" width={200} height={200} draggable={false} />
-          <span className="mode-btn__label">Training</span>
+        <button className="hub__side-btn" onClick={() => setModeCard("training")} aria-label="Training Arena">
+          <img className="hub__shop-art" src={`${import.meta.env.BASE_URL}ui/icon-training.webp`} alt="" width={256} height={255} />
         </button>
         <button className="hub__side-btn" onClick={() => setWardrobeOpen(true)} aria-label="Customise your wrestler">
           <Icon name="customize" size={56} />

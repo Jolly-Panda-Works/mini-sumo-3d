@@ -8915,3 +8915,18 @@ button.code-field {
     opacity: 0;
   }
 }
+
+/* BUY with a store price (Cafe Bazaar packs): the price as text, no coin icon; Persian digits
+   and long prices shrink to fit the button's field */
+.art--buy--store .art--buy__store-price {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: "Vazirmatn", Tahoma, "Segoe UI", sans-serif;
+  font-size: clamp(0.62rem, 3.2cqw, 0.85rem);
+  font-weight: 800;
+  direction: rtl;
+  unicode-bidi: isolate;
+}

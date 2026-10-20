@@ -8,6 +8,11 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Changed
 
+- Coin shop (Cafe Bazaar): each pack's BUY shows its price as Cafe Bazaar shows it (no coin amount, no coin icon), from the new `skuDetails` in the Bazaar plugin (Poolakey `getInAppSkuDetails`); BUY elsewhere keeps the coin price.
+- Home: the Training button uses the new training icon (phone and wide screens); the Private Room button in Friends shows the Royal Dojo picture (its card keeps the arena art). The upgrade and achievements icons are in the project for later.
+
+### Changed
+
 - Home: the arena row starts at Rookie; Training and the Private Room are no longer in it. Training has its own button (above Customise, with its arena picture) and the Private Room has one at the top of Friends; each opens its card (the same card as the arenas, with its picture, details and PLAY; Training with the bot level) in a popup.
 
 ### Added

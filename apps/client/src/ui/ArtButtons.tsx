@@ -34,12 +34,16 @@ function ArtButton({ art, onClick, label, disabled, ariaDisabled, sfx, className
 }
 
 /** BUY with the price in its dark field. */
-export function BuyButton({ price, ...props }: Props & { price: number }) {
+/**
+ * BUY with a price in coins (the coin icon, short form: 1k, 1.2k…), or with a store price
+ * as text (priceText, e.g. Cafe Bazaar's own "۵۰٬۰۰۰ تومان"; no coin icon). An empty
+ * priceText leaves the field empty (the price is still loading).
+ */
+export function BuyButton({ price, priceText, ...props }: Props & { price?: number; priceText?: string }) {
   return (
-    <ArtButton art="btn-buy" {...props} className={`art--buy ${props.className ?? ""}`}>
+    <ArtButton art="btn-buy" {...props} className={`art--buy ${priceText !== undefined ? "art--buy--store " : ""}${props.className ?? ""}`}>
       <span className="art--buy__price">
-        {/* Short form (1k, 1.2k…) so the price always fits the button's field */}
-        <Coins amount={price} compact />
+        {priceText !== undefined ? <span className="art--buy__store-price">{priceText}</span> : <Coins amount={price ?? 0} compact />}
       </span>
     </ArtButton>
   );
