@@ -8935,3 +8935,16 @@ button.code-field {
 .invite-picker__share .art.art--add-random {
   width: 150px;
 }
+
+/* During a match, notices sit low on the screen (above Return home / the controls), not at the
+   top where the player frames, timer and settings are; and above everything else */
+html.in-match .toasts {
+  top: auto;
+  bottom: calc(120px + var(--safe-bottom, 0px));
+  z-index: 300;
+  width: min(80vw, 380px);
+}
+
+html.in-match .toast {
+  text-align: center;
+}

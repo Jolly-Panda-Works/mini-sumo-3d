@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Match: notices sat under the player frames at the top; during a match they now show low on the screen, above Return home and the controls, over everything.
+
 ### Changed
 
 - Paid arena waiting room: no separate "Looking for opponents…" box; the countdown is on the start button only.
