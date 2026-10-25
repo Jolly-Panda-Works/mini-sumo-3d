@@ -6,6 +6,14 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Bots move more naturally: no more hit-then-back-away. After a hard hit a bot circles sideways back toward the middle for 0.7 s, staying near its opponent; half the time it follows up on a stunned opponent with a push (never a second dash); in the clinch the push sways side to side like wrestlers fighting for position; turns are smooth instead of snapping. Tuned with a 3 s opening and rope resistance 6: over 100 bouts the first ring-out median is 9.5 s, none within 3 s, with more hits per bout (16 instead of 13).
+
+### Changed
+
+- Match, once you're out: no "You're out. Watching the rest of the bout." text (it sat under the player frames); Return home is the HOME art button, like the results screen.
+
 ### Fixed
 
 - Match: notices sat under the player frames at the top; during a match they now show low on the screen, above Return home and the controls, over everything.

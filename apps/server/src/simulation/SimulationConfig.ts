@@ -148,7 +148,7 @@ export const DEFAULT_CONFIG: Readonly<SimulationConfig> = Object.freeze({
   stunThreshold: 5,
   stunMs: 650,
   ropeStart: 0.8,
-  ropeDrag: 5,
+  ropeDrag: 6,
   maxSeparationPerStep: 0.6,
 
   entranceMs: 1600,
@@ -163,8 +163,8 @@ export const DEFAULT_CONFIG: Readonly<SimulationConfig> = Object.freeze({
   quickMatchWaitMs: QUICK_MATCH_WAIT_MS,
   botJoinIntervalMs: 650,
   ringOutCreditMs: 2500,
-  botOpeningMs: 2_500,
-  botRecoilMs: 900,
+  botOpeningMs: 3_000,
+  botRecoilMs: 700,
   botThinkMinMs: 120,
   botThinkMaxMs: 280,
 

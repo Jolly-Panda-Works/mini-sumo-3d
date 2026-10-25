@@ -107,6 +107,12 @@ interface BotMemory {
   backSteps: number;
   /** A little personality per bot: shifts its weights. */
   temper: number;
+  /** The last steering direction, so turns are smooth instead of snapping. */
+  lastX: number;
+  lastY: number;
+  /** Following up on the target's current stun (decided once per stun). */
+  follow: boolean;
+  followUntil: number;
 }
 
 const memory = new Map<string, BotMemory>();
@@ -114,10 +120,10 @@ const memory = new Map<string, BotMemory>();
 /** Forget a bot (when it leaves); the memory is also rebuilt on demand. */
 /** Who each bot is going after, so two bots rarely gang up on the same wrestler. */
 const targets = new Map<string, string>();
-/** Until when (session time, ms) a bot backs off after a hard hit. */
+/** Until when (session time, ms) a bot sidesteps after a hard hit. */
 const recoilUntil = new Map<string, number>();
 
-/** A bot was in a hard hit: it backs off for a moment instead of sticking to its target. */
+/** A bot was in a hard hit: it sidesteps for a moment (staying close) instead of leaning straight in. */
 export function botRecoil(id: string, untilMs: number): void {
   recoilUntil.set(id, untilMs);
 }
@@ -191,7 +197,7 @@ export function decideBot(
   let mem = memory.get(bot.id);
   if (!mem) {
     // A fresh bot opens by closing in; it mixes things up after that.
-    mem = { move: "press", left: movesFor("press", rng), side: rng() < 0.5 ? 1 : -1, phase: "back", backSteps: 0, temper: (rng() - 0.5) * 0.8 };
+    mem = { move: "press", left: movesFor("press", rng), side: rng() < 0.5 ? 1 : -1, phase: "back", backSteps: 0, temper: (rng() - 0.5) * 0.8, lastX: 0, lastY: 0, follow: false, followUntil: 0 };
     memory.set(bot.id, mem);
   }
   if (mem.left <= 0) {
@@ -220,13 +226,22 @@ export function decideBot(
 
   if (target) targets.set(bot.id, target.id);
 
-  // Just hit someone (or got hit): back off toward the middle for a moment.
-  if (target && ctx && ctx.now < (recoilUntil.get(bot.id) ?? 0)) {
-    const awayX = bot.x - target.x;
-    const awayY = bot.y - target.y;
-    const len = Math.hypot(awayX, awayY) || 1;
-    dx = (awayX / len) * 0.7 - (bot.x / R) * 0.9;
-    dy = (awayY / len) * 0.7 - (bot.y / R) * 0.9;
+  const now = ctx?.now ?? 0;
+  // The target is stunned (hit by a dash): follow up and push them out while they can't resist.
+  // (Half the time, and with a push, not a second dash: a stunned wrestler can't resist anyway.)
+  if (target && now < (target.stunnedUntil ?? 0) && mem.followUntil !== target.stunnedUntil) {
+    mem.followUntil = target.stunnedUntil ?? 0;
+    mem.follow = rng() < 0.5;
+  }
+  const followUp = Boolean(target && now < (target.stunnedUntil ?? 0) && mem.follow);
+  // Just in a hard hit (and no follow-up): circle sideways back toward the middle (regaining
+  // ground, like real wrestlers), staying near the opponent, then back at it.
+  if (target && !followUp && now < (recoilUntil.get(bot.id) ?? 0)) {
+    const toX = target.x - bot.x;
+    const toY = target.y - bot.y;
+    const len = Math.hypot(toX, toY) || 1;
+    dx = (-toY / len) * mem.side * 0.8 - (toX / len) * 0.1 - (bot.x / R) * 1.1;
+    dy = (toX / len) * mem.side * 0.8 - (toY / len) * 0.1 - (bot.y / R) * 1.1;
     target = null; // no attack this decision
   }
   // The opening of the bout: size each other up (circle, no dash, no rush to the rope).
@@ -242,8 +257,9 @@ export function decideBot(
     const inside = botDist < tDist - 0.3;
 
     const r = cfg.playerRadius;
-    // Near the rope the target is easy prey: always press then (not during the opening).
-    const move: Move = opening ? "stalk" : tDist > R * 0.72 ? "press" : mem.move;
+    // Near the rope the target is easy prey, and a stunned one can't resist: press then
+    // (not during the opening).
+    const move: Move = opening ? "stalk" : followUp || tDist > R * 0.72 ? "press" : mem.move;
 
     if (move === "stalk") {
       // Keep some distance and circle the target, staying on the centre side.
@@ -292,7 +308,19 @@ export function decideBot(
     dy /= len;
   }
 
-  if (opening) dash = false;
+  if (opening || followUp) dash = false;
+
+  // In the clinch: the push sways side to side (fighting for position) instead of a straight shove.
+  if (target && !opening) {
+    const toX = target.x - bot.x;
+    const toY = target.y - bot.y;
+    const gap = Math.hypot(toX, toY);
+    if (gap < cfg.playerRadius * 2.6 && gap > 1e-6) {
+      const sway = Math.sin(now / (230 + mem.temper * 90) + mem.temper * 7) * (0.3 + mem.temper * 0.25);
+      dx += (-toY / gap) * sway;
+      dy += (toX / gap) * sway;
+    }
+  }
 
   // Edge safety: blend toward the centre as the bot nears the rope.
   const span = Math.max(0.1, 0.96 - tuning.edgeStart);
@@ -312,6 +340,18 @@ export function decideBot(
 
   len = Math.hypot(nx, ny);
   if (len < 1e-6) return { x: 0, y: 0, dash: false };
-  const scale = Math.max(0, Math.min(1, tuning.inputScale)) / len;
-  return { x: nx * scale, y: ny * scale, dash };
+  // Smooth turns: blend with the last direction (a dash turns at once).
+  let sx = nx / len;
+  let sy = ny / len;
+  if (!dash && (mem.lastX !== 0 || mem.lastY !== 0)) {
+    sx = mem.lastX * 0.42 + sx * 0.58;
+    sy = mem.lastY * 0.42 + sy * 0.58;
+    const sl = Math.hypot(sx, sy) || 1;
+    sx /= sl;
+    sy /= sl;
+  }
+  mem.lastX = sx;
+  mem.lastY = sy;
+  const scale = Math.max(0, Math.min(1, tuning.inputScale));
+  return { x: sx * scale, y: sy * scale, dash };
 }

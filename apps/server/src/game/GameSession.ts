@@ -483,7 +483,12 @@ export class GameSession {
       // Bots in a hard hit back off for a moment instead of sticking to each other.
       // (Not in a bots-only finish: the winner presses on.)
       if (impact.strength >= this.cfg.stunThreshold && this.weakBotId === "") {
-        for (const id of [impact.a, impact.b]) if (this.players.get(id)?.isBot) botRecoil(id, this.time + this.cfg.botRecoilMs);
+        // Not the stunned one, and not a bot whose target was just stunned (it may follow up).
+        for (const id of [impact.a, impact.b]) {
+          if (!this.players.get(id)?.isBot || id === impact.stunned) continue;
+          const other = id === impact.a ? impact.b : impact.a;
+          if (other !== impact.stunned) botRecoil(id, this.time + this.cfg.botRecoilMs);
+        }
       }
     }
 
