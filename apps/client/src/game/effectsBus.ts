@@ -21,5 +21,14 @@ export const shakeBus = new Emitter<number>();
 /** performance.now() of the latest impact per player, used for squash-and-stretch. */
 export const lastHitAt = new Map<string, number>();
 
+/** Camera punch on strong hits (0–1): the camera dips toward the ring for a moment. */
+export const punchBus = new Emitter<number>();
+
+/**
+ * Hit-stop: on a strong hit the wrestlers freeze for a split second (performance.now() until
+ * which they're frozen). A classic trick to make a hit feel heavy.
+ */
+export const hitStop = { until: 0 };
+
 /** The latest hit per player: when, how hard (m/s) and where (gameplay x, y), for the recoil. */
 export const lastHit = new Map<string, { at: number; strength: number; x: number; y: number }>();

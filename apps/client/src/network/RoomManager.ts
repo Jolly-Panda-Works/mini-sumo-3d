@@ -29,7 +29,7 @@ const myLevel = () => economyStore.get().profile?.level.level ?? 1;
 import { botLevelForArena } from "@mini-sumo/shared";
 import { audio } from "../audio/AudioManager";
 import { resolveServerUrl } from "../config";
-import { dustBus, impactBus, lastHit, lastHitAt, shakeBus } from "../game/effectsBus";
+import { dustBus, hitStop, impactBus, lastHit, lastHitAt, punchBus, shakeBus } from "../game/effectsBus";
 import { createStore } from "../store";
 import { showError, showLevelUp, showMessage, showWarning, pushToast } from "../uiStore";
 import { vibrate } from "../haptics";
@@ -431,6 +431,11 @@ class RoomManager {
       dustBus.emit({ x: msg.x, y: msg.y, count: Math.min(20, 6 + Math.round(msg.strength * 1.4)), speed: 1.2 + msg.strength * 0.3 });
       // Big hits shake the camera (more than before: hits should feel heavy).
       if (msg.strength > 3.5) shakeBus.emit(Math.min(1, msg.strength / 9));
+      // Strong hits: a split-second freeze (hit-stop) and a camera punch.
+      if (msg.strength >= 6) {
+        hitStop.until = Math.max(hitStop.until, now + Math.min(110, 40 + msg.strength * 5));
+        punchBus.emit(Math.min(1, (msg.strength - 4) / 8));
+      }
       audio.impact(msg.strength);
       if (msg.stunned === this.sessionId) vibrate(90);
       else if (msg.a === this.sessionId || msg.b === this.sessionId) vibrate(Math.min(60, 15 + Math.round(msg.strength * 4)));

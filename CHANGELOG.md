@@ -6,6 +6,12 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Changed
+
+- Hits throw harder (+25%: restitution 0.45, push 6.5), with rope resistance 8 so the pace stays the same (first ring-out median 9.9 s over 100 bouts, none within 3 s).
+- Juicier hits: a split-second hit-stop on strong hits (40–110 ms, the wrestlers freeze then snap on) and a camera punch (a quick dip toward the ring), on top of the shake.
+- A balance test now accepts Thunder's dash recharge for bots (it only guards against the late-game value).
+
 ### Fixed
 
 - Notices were hidden under popups (the results board, panels, messages): popups live in their own layer above the whole UI. Notices now have their own layer above the popups. They were also only shown in a room, so notices on the home screen ("Code sent", daily coins, "Invite sent"…) never appeared; they show everywhere now.

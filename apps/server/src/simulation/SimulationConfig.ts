@@ -141,14 +141,14 @@ export const DEFAULT_CONFIG: Readonly<SimulationConfig> = Object.freeze({
 
   baseMass: 1,
   dashMass: 2.5,
-  restitution: 0.35,
-  pushStrength: 5,
+  restitution: 0.45,
+  pushStrength: 6.5,
   impactEventThreshold: 1.5,
   collisionIterations: 3,
   stunThreshold: 5,
   stunMs: 650,
   ropeStart: 0.8,
-  ropeDrag: 6,
+  ropeDrag: 8,
   maxSeparationPerStep: 0.6,
 
   entranceMs: 1600,

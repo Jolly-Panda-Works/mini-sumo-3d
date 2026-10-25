@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Fog, Vector3, type PerspectiveCamera } from "three";
 import { ARENA_RADIUS } from "@mini-sumo/shared";
-import { shakeBus } from "./effectsBus";
+import { punchBus, shakeBus } from "./effectsBus";
 
 const ELEVATION = (54 * Math.PI) / 180;
 const FOV_LANDSCAPE = 40;
@@ -26,6 +26,9 @@ export function CameraRig({ orbit }: { orbit: boolean }) {
   const orbitAngle = useRef(0);
 
   useEffect(() => shakeBus.on((amount) => (shake.current = Math.min(1, shake.current + amount))), []);
+  // Camera punch: a quick dip toward the ring on strong hits.
+  const punch = useRef(0);
+  useEffect(() => punchBus.on((amount) => (punch.current = Math.min(1, punch.current + amount))), []);
 
   useFrame((frame, delta) => {
     const dt = Math.min(delta, 0.1);
@@ -58,7 +61,14 @@ export function CameraRig({ orbit }: { orbit: boolean }) {
 
     const amp = shake.current * 0.35;
     const t = frame.clock.elapsedTime;
-    camera.position.set(base.x + Math.sin(t * 61) * amp, base.y + Math.sin(t * 47) * amp, base.z + Math.cos(t * 53) * amp);
+    // The punch pulls the camera up to ~7 % closer, then eases back.
+    const dip = 1 - punch.current * 0.07;
+    camera.position.set(
+      base.x * dip + Math.sin(t * 61) * amp,
+      base.y * dip + Math.sin(t * 47) * amp,
+      look.current + (base.z - look.current) * dip + Math.cos(t * 53) * amp,
+    );
+    punch.current *= Math.exp(-9 * dt);
     camera.lookAt(0, -0.6, look.current);
     shake.current *= Math.exp(-7 * dt);
 

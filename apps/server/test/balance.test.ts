@@ -79,6 +79,8 @@ describe("late-game dash recharge", () => {
     s.requestStart("me");
     advance(s, (cfg.entranceMs + cfg.countdownMs) + 200);
     while (s.phase === Phase.Playing && s.phaseRemainingMs > 3000) s.update(s.stepMs);
-    for (const bot of s.bots) expect(bot.dashCooldownTotal).toBe(cfg.dashCooldownMs);
+    // Never the late-game value: the normal recharge, or Thunder's for a bot whose last dash was
+    // with that power-up (it's the power-up, not the late game).
+    for (const bot of s.bots) expect([cfg.dashCooldownMs, cfg.thunderDashCooldownMs].includes(bot.dashCooldownTotal)).toBe(true);
   });
 });

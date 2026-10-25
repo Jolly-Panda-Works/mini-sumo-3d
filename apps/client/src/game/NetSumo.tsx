@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import type { CanvasTexture, Group, Sprite } from "three";
 import { PLAYER_COLORS, Phase, lerpAngle, type Appearance } from "@mini-sumo/shared";
 import { roomManager } from "../network/RoomManager";
-import { dustBus, lastHit, lastHitAt } from "./effectsBus";
+import { dustBus, hitStop, lastHit, lastHitAt } from "./effectsBus";
 import { DEFAULT_CONFIG as SIM, createBody, stepMovement, tryDash, type SimBody } from "@mini-sumo/sim";
 import { createNameTagTexture } from "./nameTag";
 import { SumoModel, useSumoParts } from "./SumoModel";
@@ -83,7 +83,9 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
     if (!state || !p || !root || !torso) return;
 
     const s = v.current;
-    const dt = Math.min(delta, 0.1);
+    // Hit-stop: frozen for a split second after a strong hit (the server keeps going; the
+    // wrestlers catch up right after, which reads as a snap of force).
+    const dt = performance.now() < hitStop.until ? 0 : Math.min(delta, 0.1);
     const t = frame.clock.elapsedTime;
     root.rotation.order = "YXZ";
 
