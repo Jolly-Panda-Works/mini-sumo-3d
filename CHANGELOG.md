@@ -14,6 +14,7 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Fixed
 
+- Pushed out of a bout: "You're out" was hidden under the player frames. It now sits at the bottom on the red plank label, above HOME (the results board's art button instead of the plain Return home button). Notices use the same plank label everywhere (stretched as a 9-slice so its gold corners keep their shape; errors a shade darker) and, in a match, stack above the note and HOME.
 - Notices were hidden under popups (the results board, panels, messages): popups live in their own layer above the whole UI. Notices now have their own layer above the popups. They were also only shown in a room, so notices on the home screen ("Code sent", daily coins, "Invite sent"…) never appeared; they show everywhere now.
 
 ### Added

@@ -9063,3 +9063,56 @@ html.in-match .toast {
     display: none;
   }
 }
+
+/* ======================================================================
+   Plank labels: the red label art (public/ui/label-empty.webp, 240×54) as a
+   9-slice frame, so it stretches to any text without bending its gold
+   corners. Notices (toasts) and the "you're out" note use it.
+   ====================================================================== */
+
+.plank-label,
+.toast-layer .toast {
+  margin: 0;
+  max-width: 100%;
+  padding: 2px 14px 4px;
+  border-style: solid;
+  border-width: 10px 18px;
+  border-image: var(--ui-label-empty) 12 22 fill / 10px 18px / 0 stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: #fff4dc;
+  font-weight: 900;
+  font-size: 0.95rem;
+  line-height: 1.25;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(58, 14, 10, 0.75);
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.35));
+}
+
+/* Errors: the same plank, darker */
+.toast-layer .toast--error {
+  border-color: transparent;
+  filter: brightness(0.78) saturate(1.25) drop-shadow(0 4px 0 rgba(0, 0, 0, 0.35));
+}
+
+/* Out of the bout: the note above HOME, both above the bottom edge (notices sit above them) */
+.out-actions {
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+}
+
+.out-actions__note {
+  font-size: 0.9rem;
+}
+
+.out-actions .art.art--out-home {
+  width: calc(360px * var(--art-scale) * 1.35);
+}
+
+/* While you're out, notices stack above the note and HOME */
+html.in-match .toast-layer .toasts {
+  bottom: calc(150px + var(--safe-bottom, 0px));
+}

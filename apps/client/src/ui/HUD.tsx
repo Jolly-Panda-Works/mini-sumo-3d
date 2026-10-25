@@ -48,8 +48,6 @@ export function HUD({ touch }: { touch: boolean }) {
       {you?.alive && isPowerUpKind(you.powerUp) && <PowerUpBadge kind={you.powerUp} ms={you.powerUpMs} />}
       {finalStretch && you?.alive && <FinalVignette remainingMs={game.remainingMs} />}
 
-      {you && !you.alive && playing && <p className="hud__spectate">You're out. Watching the rest of the bout.</p>}
-
       {!touch && you?.alive !== false && (
         <div className="hud__bottom">
           <div className={`dash-meter${dashReady ? " dash-meter--ready" : ""}`} aria-label={dashReady ? "Dash ready" : "Dash recharging"}>
