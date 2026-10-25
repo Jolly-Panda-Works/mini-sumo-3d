@@ -8948,3 +8948,37 @@ html.in-match .toasts {
 html.in-match .toast {
   text-align: center;
 }
+
+/* Out of the bout: Return home is the HOME art button (like the results screen) */
+.art.art--out-home {
+  width: calc(360px * var(--art-scale));
+  max-width: 70vw;
+  padding: 0;
+  border: 0;
+  background: none;
+  pointer-events: auto;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.35));
+}
+
+.art--out-home img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.art--out-home:active {
+  transform: translateY(3px);
+}
+
+/* Notices: their own layer above the popups (the popup layer is z-index 60) */
+.toast-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+}
+
+.toast-layer .toasts {
+  position: absolute;
+  z-index: auto;
+}

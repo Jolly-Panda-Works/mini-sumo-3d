@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Notices were hidden under popups (the results board, panels, messages): popups live in their own layer above the whole UI. Notices now have their own layer above the popups. They were also only shown in a room, so notices on the home screen ("Code sent", daily coins, "Invite sent"…) never appeared; they show everywhere now.
+
 ### Added
 
 - Update check at startup: the server answers `GET /api/version` with the latest version (its own, from the root package.json the release bumps) and an optional minimum (`CLIENT_MIN_VERSION`). An older app shows "Update available" (Update / Later, remembered per version), or "Update required" below the minimum (it can't be skipped); Update opens the game's page in Cafe Bazaar or Google Play. The web game reloads instead (the server always serves the latest). Dev and media builds don't check. 1 new test (178 total).

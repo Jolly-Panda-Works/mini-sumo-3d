@@ -181,7 +181,7 @@ export function App() {
       <div className="stage">{inRoom ? <GameCanvas /> : <HomeBackground />}</div>
       <div className="ui">
         {screen}
-        {inRoom && <Toasts />}
+        <Toasts />
         {ui.wardrobeOpen && !needsName && (!inRoom || game.phase === Phase.Waiting || game.phase === Phase.Lobby) && <Wardrobe />}
         {ui.friendsOpen && !inRoom && !needsName && <FriendsPanel />}
         {ui.modeCard && !inRoom && !needsName && <ModeCardPopup mode={ui.modeCard} onClose={() => setModeCard(null)} />}
