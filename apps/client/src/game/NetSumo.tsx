@@ -4,6 +4,7 @@ import type { CanvasTexture, Group, Sprite } from "three";
 import { PLAYER_COLORS, Phase, lerpAngle, type Appearance } from "@mini-sumo/shared";
 import { roomManager } from "../network/RoomManager";
 import { dustBus, lastHit, lastHitAt } from "./effectsBus";
+import { DEFAULT_CONFIG as SIM, createBody, stepMovement, tryDash, type SimBody } from "@mini-sumo/sim";
 import { createNameTagTexture } from "./nameTag";
 import { SumoModel, useSumoParts } from "./SumoModel";
 import { BackBanner } from "./PowerUpFlags";
@@ -36,6 +37,8 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
   const parts = useSumoParts();
   const tagRef = useRef<Sprite>(null);
   const starsRef = useRef<Group>(null);
+  /** Your own wrestler, moved at once on this device (prediction); null for everyone else. */
+  const predicted = useRef<SimBody | null>(null);
   const [texture, setTexture] = useState<CanvasTexture | null>(null);
   useEffect(() => {
     const created = createNameTagTexture(colorIndex + 1, name, color, isYou);
@@ -112,13 +115,55 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
     const blink = (t + seed * 4) % 3.7 < 0.12;
 
     if (p.alive) {
-      const k = 1 - Math.exp(-18 * dt);
+      // Your own wrestler moves at once (prediction): the same movement rules as the server,
+      // run here with your stick input, then gently pulled toward where the server says you
+      // are (collisions and hits come from the server). Everyone else follows the server.
+      let targetX = p.x;
+      let targetZ = p.y;
+      const me = id === roomManager.sessionId && state.phase === Phase.Playing;
+      if (me) {
+        const b = (predicted.current ??= createBody(id, p.x, p.y));
+        const nowMs = performance.now();
+        b.speedScale = p.powerUp === "wind" ? SIM.windSpeedScale : 1;
+        if (stunned) {
+          b.inputX = 0;
+          b.inputY = 0;
+        } else {
+          b.inputX = roomManager.localInput.x;
+          b.inputY = roomManager.localInput.y;
+          // Only a dash the server will accept (ready, not already dashing): no snapping back.
+          if (roomManager.takeDashPress() && !p.dashing && p.dashCooldownMs <= 0) tryDash(b, nowMs, SIM, 0);
+        }
+        stepMovement(b, dt, SIM, nowMs);
+        const ex = p.x - b.x;
+        const ey = p.y - b.y;
+        if (Math.hypot(ex, ey) > 2.2) {
+          // Far off (a big hit, a respawn): jump to the server's position.
+          b.x = p.x;
+          b.y = p.y;
+          b.vx = p.vx;
+          b.vy = p.vy;
+        } else {
+          const c = 1 - Math.exp(-7 * dt);
+          b.x += ex * c;
+          b.y += ey * c;
+          b.vx += (p.vx - b.vx) * c;
+          b.vy += (p.vy - b.vy) * c;
+        }
+        targetX = b.x;
+        targetZ = b.y;
+      } else {
+        predicted.current = null;
+      }
+      const k = 1 - Math.exp(-(me ? 45 : 18) * dt);
       const px = s.x;
       const pz = s.z;
-      s.x += (p.x - s.x) * k;
-      s.z += (p.y - s.z) * k;
+      s.x += (targetX - s.x) * k;
+      s.z += (targetZ - s.z) * k;
       s.speed += (Math.hypot(s.x - px, s.z - pz) / Math.max(dt, 1e-4) - s.speed) * 0.25;
-      s.yaw = lerpAngle(s.yaw, yawFromAngle(p.angle), 1 - Math.exp(-12 * dt));
+      // Your own wrestler turns with your stick at once; others follow the server.
+      const facing = predicted.current ? predicted.current.angle : p.angle;
+      s.yaw = lerpAngle(s.yaw, yawFromAngle(facing), 1 - Math.exp(-(predicted.current ? 20 : 12) * dt));
 
       const isWinner = state.phase === Phase.RoundOver && state.winnerId === id;
       s.y = isWinner ? Math.abs(Math.sin(t * 6)) * 0.45 : s.y + (0 - s.y) * k;

@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Fixed
+
+- Your own wrestler responds at once: client-side prediction runs the same movement rules as the server with your stick input (and dash, and the Wind speed-up), then is gently pulled toward the server's position (jumping there after a big hit). Facing follows your stick at once too. Before, every move waited for a round trip to the server plus smoothing (about 150–300 ms online). Other wrestlers still follow the server.
+
 ### Changed
 
 - Bots move more naturally: no more hit-then-back-away. After a hard hit a bot circles sideways back toward the middle for 0.7 s, staying near its opponent; half the time it follows up on a stunned opponent with a push (never a second dash); in the clinch the push sways side to side like wrestlers fighting for position; turns are smooth instead of snapping. Tuned with a 3 s opening and rope resistance 6: over 100 bouts the first ring-out median is 9.5 s, none within 3 s, with more hits per bout (16 instead of 13).

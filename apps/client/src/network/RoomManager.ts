@@ -311,12 +311,25 @@ class RoomManager {
     }
   }
 
+  /** Your latest stick input, for moving your own wrestler at once (prediction). */
+  localInput = { x: 0, y: 0 };
+  private dashPressed = false;
+
   sendInput(x: number, y: number): void {
+    this.localInput = { x, y };
     this._room?.send(ClientMessage.Input, { x, y });
   }
 
   dash(): void {
+    this.dashPressed = true;
     this._room?.send(ClientMessage.Dash);
+  }
+
+  /** A dash press not yet shown on your own wrestler (taken once). */
+  takeDashPress(): boolean {
+    const pressed = this.dashPressed;
+    this.dashPressed = false;
+    return pressed;
   }
 
   startMatch(): void {
