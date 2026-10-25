@@ -1,4 +1,5 @@
 import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
+import { ARENA_RADIUS } from "@mini-sumo/shared";
 
 /** Synchronized per-player data. Only what clients need for rendering and UI. */
 export class PlayerState extends Schema {
@@ -58,6 +59,8 @@ export class MiniSumoState extends Schema {
   @type("string") itemKind = "";
   @type("float32") itemX = 0;
   @type("float32") itemY = 0;
+  /** The ring's radius right now: it closes in over the final seconds of a bout. */
+  @type("float32") ringRadius = ARENA_RADIUS;
   /** Session ids ordered by final placement (filled when a round ends). */
   @type(["string"]) standings = new ArraySchema<string>();
 }

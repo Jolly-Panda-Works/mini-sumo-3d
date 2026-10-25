@@ -103,7 +103,7 @@ export interface SessionOptions {
 
 export type SessionEvent =
   | { type: "phase"; from: Phase; to: Phase }
-  | { type: "impact"; a: string; b: string; x: number; y: number; strength: number; stunned?: string }
+  | { type: "impact"; a: string; b: string; x: number; y: number; strength: number; stunned?: string; counter?: string; clash?: boolean }
   | { type: "eliminated"; id: string; name: string; reason: EliminationReason; by: string | null }
   | { type: "dash"; id: string }
   | { type: "item"; kind: PowerUpKind; x: number; y: number; state: "spawned" | "expired" | "taken"; by?: string }
@@ -148,6 +148,8 @@ export class GameSession {
   isDraw = false;
   round = 0;
   standings: string[] = [];
+  /** The ring's radius right now: it closes in over the final seconds of a bout (cfg.shrinkMs). */
+  ringRadius: number;
 
   readonly quickMatch: boolean;
   readonly botLevel: BotLevel;
@@ -179,6 +181,7 @@ export class GameSession {
     this.rng = createRng(options.seed ?? Math.floor(Math.random() * 2 ** 32));
     this.maxPlayers = Math.max(MIN_PLAYERS, Math.min(MAX_PLAYERS, Math.floor(maxPlayers)));
     this.stepMs = 1000 / cfg.tickRate;
+    this.ringRadius = cfg.arenaRadius;
   }
 
   // ---------------------------------------------------------------- queries
@@ -474,9 +477,13 @@ export class GameSession {
    */
   private simulate(dt: number): void {
     const bodies = this.alivePlayers.sort((a, b) => a.joinOrder - b.joinOrder);
+    // The ring closes in over the final seconds: movement (the rope), ring-outs and the bots'
+    // sense of the edge all use the ring as it is now.
+    this.ringRadius = this.currentRingRadius();
+    const cfg = this.ringRadius === this.cfg.arenaRadius ? this.cfg : { ...this.cfg, arenaRadius: this.ringRadius };
     this.tickPowerUps(bodies);
-    this.driveBots(bodies);
-    for (const body of bodies) stepMovement(body, dt, this.cfg, this.time);
+    this.driveBots(bodies, cfg);
+    for (const body of bodies) stepMovement(body, dt, cfg, this.time);
 
     for (const impact of resolveCollisions(bodies, this.cfg, this.time)) {
       this.events.push({ type: "impact", ...impact });
@@ -494,7 +501,7 @@ export class GameSession {
 
     this.recordContacts(bodies);
     this.collectItem(bodies);
-    for (const id of applyArenaEliminations(bodies, this.cfg, this.time)) {
+    for (const id of applyArenaEliminations(bodies, cfg, this.time)) {
       const player = this.players.get(id)!;
       player.elimReason = "ringOut";
       const credited = player.lastTouchBy && this.time - player.lastTouchAt <= this.cfg.ringOutCreditMs ? player.lastTouchBy : null;
@@ -503,6 +510,17 @@ export class GameSession {
 
     if (this.checkLastStanding()) return;
     if (this.time >= this.phaseEndsAt) this.endRound();
+  }
+
+  /** Full size for most of the bout, then eased down to cfg.shrinkTo over the final cfg.shrinkMs. */
+  private currentRingRadius(): number {
+    const R = this.cfg.arenaRadius;
+    if (this.cfg.shrinkMs <= 0 || this.cfg.shrinkTo >= 1) return R;
+    const remaining = Math.max(0, this.phaseEndsAt - this.time);
+    if (remaining >= this.cfg.shrinkMs) return R;
+    const t = 1 - remaining / this.cfg.shrinkMs;
+    const eased = t * t * (3 - 2 * t);
+    return R * (1 - (1 - this.cfg.shrinkTo) * eased);
   }
 
   private checkLastStanding(): boolean {
@@ -585,6 +603,7 @@ export class GameSession {
       player.entrance = { fromX: from.x, fromY: from.y, toX: spot.x, toY: spot.y, angle: spot.angle };
     });
     this.countdownStartedAt = this.time;
+    this.ringRadius = this.cfg.arenaRadius;
     this.phaseEndsAt = this.time + this.cfg.entranceMs + this.cfg.countdownMs;
     return true;
   }
@@ -640,6 +659,7 @@ export class GameSession {
     const target = this.connectedPlayers.length >= MIN_PLAYERS ? Phase.Lobby : Phase.Waiting;
     if (!this.transition(target)) return;
     this.phaseEndsAt = 0;
+    this.ringRadius = this.cfg.arenaRadius;
     for (const player of this.players.values()) player.placement = 0;
     this.layoutLobby();
     this.updateSearch();
@@ -873,7 +893,7 @@ export class GameSession {
    */
   private weakBotId = "";
 
-  private driveBots(alive: readonly SessionPlayer[]): void {
+  private driveBots(alive: readonly SessionPlayer[], cfg: SimulationConfig = this.cfg): void {
     const tuning = easedTuning(this.botLevel, this.lateness * this.cfg.lateBotEase);
     if (alive.length === 2 && alive.every((p) => p.isBot)) {
       if (!alive.some((p) => p.id === this.weakBotId)) {
@@ -888,7 +908,7 @@ export class GameSession {
       // Bots-only finish: one bot gives up, and the other goes straight for the win (no circling).
       const finishing = this.weakBotId !== "" && bot.id !== this.weakBotId;
       const botTuning = bot.id === this.weakBotId ? WEAK_BOT : finishing ? { ...tuning, style: { press: 1, stalk: 0, charge: 0 } } : tuning;
-      const decision = decideBot(bot, alive, this.cfg, this.rng, botTuning, {
+      const decision = decideBot(bot, alive, cfg, this.rng, botTuning, {
         now: this.time,
         boutMs: this.cfg.matchDurationMs - Math.max(0, this.phaseEndsAt - this.time),
         openingMs: finishing ? 0 : this.cfg.botOpeningMs,

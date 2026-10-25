@@ -64,5 +64,7 @@ export interface SyncedState {
   itemKind: string;
   itemX: number;
   itemY: number;
+  /** The ring's radius right now: it closes in over the final seconds of a bout. */
+  ringRadius: number;
   standings: Iterable<string>;
 }

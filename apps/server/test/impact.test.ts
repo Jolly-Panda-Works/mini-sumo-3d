@@ -33,7 +33,32 @@ describe("hit stun", () => {
     b.inputX = -1;
     tryDash(a, 0, cfg);
     tryDash(b, 0, cfg);
-    expect(resolveCollisions([a, b], cfg, 10)[0]?.stunned).toBe(undefined);
+    const event = resolveCollisions([a, b], cfg, 10)[0];
+    expect(event?.stunned).toBe(undefined);
+    expect(event?.clash).toBe(true);
+  });
+
+  it("a dash in answer to theirs counters it: the earlier dasher is stunned and thrown back", () => {
+    const a = createBody("a", 0, 0);
+    const b = createBody("b", cfg.playerRadius * 1.9, 0);
+    a.inputX = 1;
+    b.inputX = -1;
+    tryDash(a, 0, cfg);
+    tryDash(b, cfg.counterLeadMs + 20, cfg);
+    const plain = createBody("p", 0, 0);
+    plain.inputX = 1;
+    tryDash(plain, 0, cfg);
+    const plainB = createBody("q", cfg.playerRadius * 1.9, 0);
+    plainB.inputX = -1;
+    tryDash(plainB, 0, cfg);
+    resolveCollisions([plain, plainB], cfg, cfg.counterLeadMs + 30);
+
+    const event = resolveCollisions([a, b], cfg, cfg.counterLeadMs + 30)[0];
+    expect(event?.counter).toBe("b");
+    expect(event?.stunned).toBe("a");
+    expect(event?.clash).toBe(undefined);
+    expect(isStunned(a, cfg.counterLeadMs + 31)).toBe(true);
+    expect(a.vx).toBeLessThan(plain.vx);
   });
 });
 

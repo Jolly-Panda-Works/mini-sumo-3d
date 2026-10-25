@@ -32,3 +32,42 @@ export const hitStop = { until: 0 };
 
 /** The latest hit per player: when, how hard (m/s) and where (gameplay x, y), for the recoil. */
 export const lastHit = new Map<string, { at: number; strength: number; x: number; y: number }>();
+
+/**
+ * Slow motion (display only, for the bout-deciding ring-out): from `from` until `until`
+ * (performance.now()) the scene runs at `factor` speed, easing back to normal at the end.
+ */
+export const slowMo = { from: 0, until: 0, factor: 1 };
+
+/** Display time scale right now (1 = normal). */
+export function timeScale(now = performance.now()): number {
+  if (now >= slowMo.until || now < slowMo.from) return 1;
+  // The last 30 % eases back to full speed.
+  const t = (now - slowMo.from) / Math.max(1, slowMo.until - slowMo.from);
+  const ease = t < 0.7 ? 0 : (t - 0.7) / 0.3;
+  return slowMo.factor + (1 - slowMo.factor) * ease * ease;
+}
+
+/** Camera focus: zoom toward a spot (gameplay x, y) for `ms`, `zoom` 0–1 of the way in. */
+export const focusBus = new Emitter<{ x: number; y: number; ms: number; zoom: number }>();
+
+/** Floating words over the ring ("COUNTER!", "x3", "SAVED!"). `follow` keeps it over a wrestler. */
+export interface Callout {
+  text: string;
+  x: number;
+  y: number;
+  color: string;
+  /** World height of the text (default 0.7). */
+  size?: number;
+  follow?: string;
+}
+export const calloutBus = new Emitter<Callout>();
+
+/** A big word across the screen ("OSHIDASHI!"), with an optional white flash. */
+export const bannerBus = new Emitter<{ text: string; tone: "out" | "warn"; flash?: boolean }>();
+
+/** A coloured ring that spreads over the floor (dash ready, a counter). */
+export const pulseBus = new Emitter<{ x: number; y: number; color: string; size: number }>();
+
+/** performance.now() of each wrestler's latest dash (the squash before the stretch). */
+export const lastDashAt = new Map<string, number>();

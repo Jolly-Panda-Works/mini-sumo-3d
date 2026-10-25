@@ -1,4 +1,5 @@
 import {
+  ARENA_RADIUS,
   ClientMessage,
   ServerMessage,
   sanitizeBotLevel,
@@ -90,6 +91,7 @@ export class LocalConnection implements GameConnection {
       itemKind: "",
       itemX: 0,
       itemY: 0,
+      ringRadius: ARENA_RADIUS,
       standings: [],
     };
     this.session.addPlayer(this.sessionId, options.name, options.appearance, options.level);
@@ -208,6 +210,8 @@ export class LocalConnection implements GameConnection {
             y: event.y,
             strength: Math.round(event.strength * 10) / 10,
             ...(event.stunned ? { stunned: event.stunned } : {}),
+            ...(event.counter ? { counter: event.counter } : {}),
+            ...(event.clash ? { clash: true } : {}),
           });
           break;
         case "eliminated":
@@ -268,6 +272,7 @@ export class LocalConnection implements GameConnection {
     state.itemKind = s.item?.kind ?? "";
     state.itemX = s.item?.x ?? 0;
     state.itemY = s.item?.y ?? 0;
+    state.ringRadius = s.ringRadius;
     state.phaseRemainingMs = roundUp100(s.phaseRemainingMs);
     state.hostId = s.hostId;
     state.winnerId = s.winnerId;

@@ -18,6 +18,15 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Added
 
+- Counter-dash and clash: when two dashes meet, the one that started at least 60 ms later (a dash in answer to theirs) counters it: the earlier dasher is stunned and thrown back 4 m/s harder ("COUNTER!"). Closer together it's a clash: both bounce, nobody is stunned ("CLASH!", a longer hit-stop and a white ring).
+- Shrinking ring: over the final 20 s of a bout the ring closes in to 72 % of its size (eased). The rope moves with it, the floor it leaves behind turns red, and "RING SHRINKING!" shows when it starts. Ring-outs, the rope resistance, the bots' sense of the edge and your own prediction all use the current size (`ringRadius` in the synced state). It's full size again for the next bout.
+- The bout-deciding ring-out: slow motion (25 % for 1.2 s, easing back), the camera swings in on the spot, "OSHIDASHI!" (or "RING OUT!" with nobody to credit) across the screen with a white flash. The results board now waits 1.6 s so the finish can land. Other ring-outs show "OUT!" and, when you're in it, a short freeze and camera punch.
+- Falling out: wrestlers fly further the faster they were going, spin as they fly, land with a thud of dust and lie dizzy with stars circling.
+- Teetering on the rope: lean out, wobble and windmill the arms, with a "!" overhead; the rope glows red while anyone is on it; your phone buzzes lightly. Pushed to the rope and made it back to the middle: "SAVED!".
+- Combos: hits in a row by the same wrestler (each within 1.8 s, the stunner or the one dashing) show "x2 COMBO", "x3 COMBO"…; getting hit ends your streak.
+- Dash feel: a quick crouch before the stretch, and a ring in your colour when your dash is ready again.
+- Shiko before GO: in the last moment of the countdown everyone lifts a leg and arms out, then stamps down at GO with dust and a ring.
+- 4 new tests (182 total).
 - Update check at startup: the server answers `GET /api/version` with the latest version (its own, from the root package.json the release bumps) and an optional minimum (`CLIENT_MIN_VERSION`). An older app shows "Update available" (Update / Later, remembered per version), or "Update required" below the minimum (it can't be skipped); Update opens the game's page in Cafe Bazaar or Google Play. The web game reloads instead (the server always serves the latest). Dev and media builds don't check. 1 new test (178 total).
 
 ### Fixed

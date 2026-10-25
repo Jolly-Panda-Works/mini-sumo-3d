@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { applyArenaEliminations, isOutsideArena, ringPositions } from "../src/simulation/ArenaSystem.js";
-import { body, cfg } from "./helpers.js";
+import { Phase } from "@mini-sumo/shared";
+import { body, cfg, playingSession } from "./helpers.js";
 
 const limit = cfg.arenaRadius + cfg.eliminationTolerance;
 
@@ -42,5 +43,39 @@ describe("arena", () => {
         }
       }
     }
+  });
+});
+
+describe("shrinking ring", () => {
+  it("is full size for most of the bout, then closes in over the final seconds", () => {
+    const s = playingSession(["a", "b"]);
+    expect(s.ringRadius).toBe(cfg.arenaRadius);
+    while (s.phase === Phase.Playing && s.phaseRemainingMs > cfg.shrinkMs + 500) s.update(s.stepMs);
+    expect(s.ringRadius).toBe(cfg.arenaRadius);
+    while (s.phase === Phase.Playing && s.phaseRemainingMs > cfg.shrinkMs / 2) s.update(s.stepMs);
+    expect(s.ringRadius).toBeLessThan(cfg.arenaRadius);
+    expect(s.ringRadius).toBeGreaterThan(cfg.arenaRadius * cfg.shrinkTo);
+  });
+
+  it("pushes out a wrestler the ring closes past", () => {
+    const s = playingSession(["a", "b"]);
+    while (s.phase === Phase.Playing && s.phaseRemainingMs > 1000) {
+      // a stands still near the edge; b stays in the middle
+      const a = s.players.get("a")!;
+      const b = s.players.get("b")!;
+      if (a.alive) Object.assign(a, { x: cfg.arenaRadius * 0.85, y: 0, vx: 0, vy: 0 });
+      Object.assign(b, { x: 0, y: 0, vx: 0, vy: 0 });
+      s.update(s.stepMs);
+    }
+    expect(s.players.get("a")!.alive).toBe(false);
+    expect(s.winnerId).toBe("b");
+  });
+
+  it("is full size again for the next bout", () => {
+    const s = playingSession(["a", "b"]);
+    while (s.phase === Phase.Playing) s.update(s.stepMs);
+    expect(s.ringRadius).toBeLessThan(cfg.arenaRadius);
+    s.requestRematch("a");
+    expect(s.ringRadius).toBe(cfg.arenaRadius);
   });
 });

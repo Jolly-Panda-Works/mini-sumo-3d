@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Fog, Vector3, type PerspectiveCamera } from "three";
 import { ARENA_RADIUS } from "@mini-sumo/shared";
-import { punchBus, shakeBus } from "./effectsBus";
+import { focusBus, punchBus, shakeBus } from "./effectsBus";
 
 const ELEVATION = (54 * Math.PI) / 180;
 const FOV_LANDSCAPE = 40;
@@ -29,6 +29,16 @@ export function CameraRig({ orbit }: { orbit: boolean }) {
   // Camera punch: a quick dip toward the ring on strong hits.
   const punch = useRef(0);
   useEffect(() => punchBus.on((amount) => (punch.current = Math.min(1, punch.current + amount))), []);
+  // Focus: on the bout-deciding ring-out the camera swings in on the spot for a moment.
+  const focus = useRef({ x: 0, z: 0, from: 0, until: 0, zoom: 0, weight: 0 });
+  useEffect(
+    () =>
+      focusBus.on(({ x, y, ms, zoom }) => {
+        const now = performance.now();
+        Object.assign(focus.current, { x, z: y, from: now, until: now + ms, zoom });
+      }),
+    [],
+  );
 
   useFrame((frame, delta) => {
     const dt = Math.min(delta, 0.1);
@@ -69,7 +79,27 @@ export function CameraRig({ orbit }: { orbit: boolean }) {
       look.current + (base.z - look.current) * dip + Math.cos(t * 53) * amp,
     );
     punch.current *= Math.exp(-9 * dt);
-    camera.lookAt(0, -0.6, look.current);
+
+    // Focus: in quickly, hold, and ease back out over the last part.
+    const f = focus.current;
+    const now = performance.now();
+    const span = Math.max(1, f.until - f.from);
+    const goalWeight = now < f.until ? Math.min(1, (f.until - now) / (span * 0.35)) : 0;
+    f.weight += (goalWeight - f.weight) * (1 - Math.exp(-(goalWeight > f.weight ? 9 : 4) * dt));
+    const w = f.weight;
+    const lookX = f.x * w;
+    const lookY = -0.6 + 0.9 * w;
+    const lookAtZ = look.current + (f.z - look.current) * w;
+    if (w > 0.001) {
+      // Slide with the look point, then dolly in toward it.
+      camera.position.x += lookX;
+      camera.position.z += lookAtZ - look.current;
+      const k = 1 - f.zoom * w;
+      camera.position.x = lookX + (camera.position.x - lookX) * k;
+      camera.position.y = lookY + (camera.position.y - lookY) * k;
+      camera.position.z = lookAtZ + (camera.position.z - lookAtZ) * k;
+    }
+    camera.lookAt(lookX, lookY, lookAtZ);
     shake.current *= Math.exp(-7 * dt);
 
     // Keep the fog behind the arena whatever the distance.

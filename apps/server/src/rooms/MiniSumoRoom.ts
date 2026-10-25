@@ -272,6 +272,8 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
             y: event.y,
             strength: Math.round(event.strength * 10) / 10,
             ...(event.stunned ? { stunned: event.stunned } : {}),
+            ...(event.counter ? { counter: event.counter } : {}),
+            ...(event.clash ? { clash: true } : {}),
           });
           break;
         case "eliminated":
@@ -414,6 +416,7 @@ export class MiniSumoRoom extends Room<MiniSumoState> {
     state.itemKind = s.item?.kind ?? "";
     state.itemX = s.item?.x ?? 0;
     state.itemY = s.item?.y ?? 0;
+    state.ringRadius = s.ringRadius;
     state.phaseRemainingMs = roundUp100(s.phaseRemainingMs);
     state.hostId = s.hostId;
     state.winnerId = s.winnerId;

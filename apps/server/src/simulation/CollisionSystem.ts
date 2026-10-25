@@ -11,6 +11,10 @@ export interface ImpactEvent {
   strength: number;
   /** The wrestler stunned by this hit (a dash into someone who wasn't dashing), if any. */
   stunned?: string;
+  /** Two dashes met head-on at about the same moment: both bounce, nobody is stunned. */
+  clash?: boolean;
+  /** Two dashes met and this wrestler's came later (a counter-dash): the other one is stunned. */
+  counter?: string;
 }
 
 function massOf(body: SimBody, timeMs: number, cfg: SimulationConfig): number {
@@ -84,20 +88,49 @@ export function resolveCollisions(bodies: readonly SimBody[], cfg: SimulationCon
         clampVelocity(a, cfg.maxVelocity);
         clampVelocity(b, cfg.maxVelocity);
 
-        // A dash into someone who isn't dashing stuns them for a moment.
+        // A dash into someone who isn't dashing stuns them for a moment. Two dashes: the later
+        // one (an answer to the other's dash) counters it; at about the same moment, a clash.
         let stunned: string | undefined;
+        let counter: string | undefined;
+        let clash = false;
         if (approach >= cfg.stunThreshold) {
           const aDash = isDashing(a, timeMs);
           const bDash = isDashing(b, timeMs);
+          let victim: SimBody | null = null;
           if (aDash !== bDash) {
-            const victim = aDash ? b : a;
+            victim = aDash ? b : a;
+          } else if (aDash && bDash) {
+            // Dashes all last the same, so the one that ends later started later.
+            const lead = a.dashEndsAt - b.dashEndsAt;
+            if (Math.abs(lead) < cfg.counterLeadMs) {
+              clash = true;
+            } else {
+              const winner = lead > 0 ? a : b;
+              victim = winner === a ? b : a;
+              counter = winner.id;
+              const sign = victim === b ? 1 : -1;
+              victim.vx += nx * sign * cfg.counterPush;
+              victim.vy += ny * sign * cfg.counterPush;
+              clampVelocity(victim, cfg.maxVelocity);
+            }
+          }
+          if (victim) {
             victim.stunnedUntil = timeMs + cfg.stunMs;
             victim.dashEndsAt = Math.min(victim.dashEndsAt, timeMs);
             stunned = victim.id;
           }
         }
         if (approach >= cfg.impactEventThreshold) {
-          events.push({ a: a.id, b: b.id, x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, strength: approach, ...(stunned ? { stunned } : {}) });
+          events.push({
+            a: a.id,
+            b: b.id,
+            x: (a.x + b.x) / 2,
+            y: (a.y + b.y) / 2,
+            strength: approach,
+            ...(stunned ? { stunned } : {}),
+            ...(counter ? { counter } : {}),
+            ...(clash ? { clash } : {}),
+          });
         }
       }
     }

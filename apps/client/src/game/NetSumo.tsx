@@ -1,15 +1,21 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { CanvasTexture, Group, Sprite } from "three";
-import { PLAYER_COLORS, Phase, lerpAngle, type Appearance } from "@mini-sumo/shared";
+import { ARENA_RADIUS, PLAYER_COLORS, Phase, lerpAngle, type Appearance } from "@mini-sumo/shared";
 import { roomManager } from "../network/RoomManager";
-import { dustBus, hitStop, lastHit, lastHitAt } from "./effectsBus";
+import { calloutBus, dustBus, hitStop, lastDashAt, lastHit, lastHitAt, pulseBus, shakeBus, timeScale } from "./effectsBus";
+import { textureFor } from "./Callouts";
+import { vibrate } from "../haptics";
 import { DEFAULT_CONFIG as SIM, createBody, stepMovement, tryDash, type SimBody } from "@mini-sumo/sim";
 import { createNameTagTexture } from "./nameTag";
 import { SumoModel, useSumoParts } from "./SumoModel";
 import { BackBanner } from "./PowerUpFlags";
 
 const OUTER_FLOOR_Y = -1.4;
+/** Closer to the rope than this (m) the wrestler starts to teeter. */
+const EDGE_ZONE = 1.3;
+/** The last stretch of the countdown (ms): everyone lifts a leg for the shiko stomp at GO. */
+const STOMP_MS = 650;
 
 interface Props {
   id: string;
@@ -37,6 +43,9 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
   const parts = useSumoParts();
   const tagRef = useRef<Sprite>(null);
   const starsRef = useRef<Group>(null);
+  /** "!" over the head while teetering on the rope. */
+  const alertRef = useRef<Sprite>(null);
+  const alertTexture = useMemo(() => textureFor("!", "#FFC23C"), []);
   /** Your own wrestler, moved at once on this device (prediction); null for everyone else. */
   const predicted = useRef<SimBody | null>(null);
   const [texture, setTexture] = useState<CanvasTexture | null>(null);
@@ -73,6 +82,15 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
     /** Which foot last touched down (footstep dust), and the last dash puff. */
     step: 0,
     trailAt: 0,
+    /** Ring-out fall: spin speed (rad/s) and whether they've hit the floor yet. */
+    spin: 0,
+    landed: false,
+    /** Edge: how close to falling (0-1), when a pushed teeter last happened (for "SAVED!"), the last buzz. */
+    danger: 0,
+    edgeAt: -1,
+    buzzAt: -1,
+    phase: "" as string,
+    cooling: false,
   });
 
   useFrame((frame, delta) => {
@@ -85,7 +103,7 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
     const s = v.current;
     // Hit-stop: frozen for a split second after a strong hit (the server keeps going; the
     // wrestlers catch up right after, which reads as a snap of force).
-    const dt = performance.now() < hitStop.until ? 0 : Math.min(delta, 0.1);
+    const dt = performance.now() < hitStop.until ? 0 : Math.min(delta, 0.1) * timeScale();
     const t = frame.clock.elapsedTime;
     root.rotation.order = "YXZ";
 
@@ -104,7 +122,24 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
       s.yaw = yawFromAngle(p.angle);
       s.falling = false;
       s.tumble = 0;
+      s.landed = false;
+      s.edgeAt = -1;
     }
+
+    // GO: everyone stamps down the lifted leg (shiko) with a puff of dust.
+    if (s.phase === Phase.Countdown && state.phase === Phase.Playing && p.alive) {
+      dustBus.emit({ x: s.x, y: s.z, count: 12, speed: 1.6 });
+      pulseBus.emit({ x: s.x, y: s.z, color, size: 1.1 });
+      shakeBus.emit(0.12);
+    }
+    s.phase = state.phase;
+    const stomp =
+      state.phase === Phase.Countdown && state.phaseRemainingMs > 0 && state.phaseRemainingMs <= STOMP_MS ? 1 - state.phaseRemainingMs / STOMP_MS : 0;
+
+    // Your dash is ready again: a ring in your colour.
+    const cooling = p.dashCooldownMs > 0;
+    if (isYou && s.cooling && !cooling && p.alive && state.phase === Phase.Playing) pulseBus.emit({ x: s.x, y: s.z, color, size: 1.3 });
+    s.cooling = cooling;
 
     const sinceHit = (performance.now() - (lastHitAt.get(id) ?? -1e9)) / 1000;
     // Exaggerated hits: a squash that grows with the hit, then wobbles out like jelly.
@@ -126,6 +161,8 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
       if (me) {
         const b = (predicted.current ??= createBody(id, p.x, p.y));
         const nowMs = performance.now();
+        // The ring closes in near the end: the rope moves with it.
+        const sim = state.ringRadius < SIM.arenaRadius ? { ...SIM, arenaRadius: state.ringRadius } : SIM;
         b.speedScale = p.powerUp === "wind" ? SIM.windSpeedScale : 1;
         if (stunned) {
           b.inputX = 0;
@@ -134,9 +171,9 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
           b.inputX = roomManager.localInput.x;
           b.inputY = roomManager.localInput.y;
           // Only a dash the server will accept (ready, not already dashing): no snapping back.
-          if (roomManager.takeDashPress() && !p.dashing && p.dashCooldownMs <= 0) tryDash(b, nowMs, SIM, 0);
+          if (roomManager.takeDashPress() && !p.dashing && p.dashCooldownMs <= 0 && tryDash(b, nowMs, sim, 0)) lastDashAt.set(id, nowMs);
         }
-        stepMovement(b, dt, SIM, nowMs);
+        stepMovement(b, dt, sim, nowMs);
         const ex = p.x - b.x;
         const ey = p.y - b.y;
         if (Math.hypot(ex, ey) > 2.2) {
@@ -182,8 +219,32 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
       root.scale.setScalar((pop < 1 ? Math.max(0.01, 1 + (c1 + 1) * (pop - 1) ** 3 + c1 * (pop - 1) ** 2) : 1) * s.size);
 
       const bob = Math.sin(t * 3 + seed * 6) * 0.02;
-      const stretch = p.dashing ? 0.18 : 0;
-      torso.scale.set(1 + hitSquash + stretch * 0.3, 1 - hitSquash * 0.8 + bob - stretch * 0.4, 1 + hitSquash * 0.5 + stretch);
+      // A dash: a quick crouch first, then the stretch forward.
+      const sinceDash = (performance.now() - (lastDashAt.get(id) ?? -1e9)) / 1000;
+      const windup = sinceDash < 0.09 ? Math.sin((sinceDash / 0.09) * Math.PI) * 0.24 : 0;
+      const stretch = p.dashing && windup === 0 ? 0.18 : 0;
+      torso.scale.set(
+        1 + hitSquash + stretch * 0.3 + windup * 0.6,
+        1 - hitSquash * 0.8 + bob - stretch * 0.4 - windup,
+        1 + hitSquash * 0.5 + stretch + windup * 0.4,
+      );
+
+      // On the rope: teeter (lean out, wobble, windmill the arms) with a "!" overhead.
+      const ringR = state.ringRadius || ARENA_RADIUS;
+      const dist = Math.hypot(s.x, s.z);
+      const onRope = state.phase === Phase.Playing ? Math.min(1, Math.max(0, (dist - (ringR - EDGE_ZONE)) / (EDGE_ZONE * 0.8))) : 0;
+      s.danger += (onRope - s.danger) * (1 - Math.exp(-10 * dt));
+      if (s.danger > 0.7) {
+        // Pushed there (a recent hit): it's a save if they make it back to the middle.
+        if (sinceHit < 1.5 || stunned) s.edgeAt = t;
+        if (isYou && t - s.buzzAt > 1.2) {
+          s.buzzAt = t;
+          vibrate(12);
+        }
+      } else if (s.edgeAt >= 0 && dist < ringR - EDGE_ZONE - 1.2) {
+        if (t - s.edgeAt < 1.8) calloutBus.emit({ text: "SAVED!", x: s.x, y: s.z, color: "#7CE38B", size: 0.65, follow: id });
+        s.edgeAt = -1;
+      }
 
       // Lean away from where the hit came from (in the wrestler's own frame).
       let tiltX = 0;
@@ -196,6 +257,13 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
         const side = (ax * Math.cos(s.yaw) - az * Math.sin(s.yaw)) / len;
         tiltX = fwd * recoil;
         tiltZ = -side * recoil;
+      }
+      if (s.danger > 0.05 && dist > 0.01) {
+        const fwd = (s.x * Math.sin(s.yaw) + s.z * Math.cos(s.yaw)) / dist;
+        const side = (s.x * Math.cos(s.yaw) - s.z * Math.sin(s.yaw)) / dist;
+        const sway = 0.22 + Math.sin(t * 11 + seed * 5) * 0.14;
+        tiltX += fwd * sway * s.danger;
+        tiltZ -= side * sway * s.danger;
       }
       // Stunned (hit by a dash): a dizzy sway.
       if (stunned) {
@@ -218,21 +286,32 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
       const swing = Math.sin(s.walk) * 0.7 * moving;
       // Hit or stunned: arms fly up and flail.
       const flail = stunned ? 1.6 + Math.sin(t * 14) * 0.5 : recoil * 2.2;
-      if (parts.armL.current) parts.armL.current.rotation.set(isWinner ? 0 : swing, 0, isWinner ? 2.6 : 0.7 + flail);
-      if (parts.armR.current) parts.armR.current.rotation.set(isWinner ? 0 : -swing, 0, isWinner ? -2.6 : -0.7 - flail);
+      // Teetering: the arms windmill to keep balance.
+      const mill = s.danger > 0.25 ? Math.min(1, (s.danger - 0.25) / 0.4) : 0;
+      const millX = Math.sin(t * 17 + seed * 3) * 1.7 * mill;
+      const millZ = (1.2 + Math.cos(t * 17 + seed * 3) * 0.6) * mill;
+      // Shiko before GO: arms out, one leg lifted high.
+      const lift = Math.sin(stomp * Math.PI * 0.5);
+      if (parts.armL.current) parts.armL.current.rotation.set(isWinner ? 0 : swing + millX, 0, isWinner ? 2.6 : 0.7 + flail + millZ + lift * 0.9);
+      if (parts.armR.current) parts.armR.current.rotation.set(isWinner ? 0 : -swing - millX, 0, isWinner ? -2.6 : -0.7 - flail - millZ - lift * 0.9);
       if (parts.legL.current) parts.legL.current.position.y = 0.17 + Math.max(0, Math.sin(s.walk)) * 0.12 * moving;
-      if (parts.legR.current) parts.legR.current.position.y = 0.17 + Math.max(0, -Math.sin(s.walk)) * 0.12 * moving;
+      if (parts.legR.current) parts.legR.current.position.y = 0.17 + Math.max(0, -Math.sin(s.walk)) * 0.12 * moving + lift * 0.42;
+      if (lift > 0) torso.rotation.z += lift * 0.22;
       if (parts.eyes.current) parts.eyes.current.scale.y = sinceHit < 0.3 || blink ? 0.2 : stunned ? 0.45 + Math.sin(t * 12) * 0.25 : 1;
       if (parts.ring.current) parts.ring.current.visible = true;
     } else {
       if (!s.falling) {
         // Launch outward from where they left the ring.
+        // Harder the faster they were going, and spinning as they fly.
         s.falling = true;
+        s.landed = false;
         const len = Math.hypot(s.x, s.z) || 1;
-        s.fvx = (s.x / len) * 3.2;
-        s.fvz = (s.z / len) * 3.2;
-        s.fvy = 3.8;
+        const out = 3.2 + Math.min(4, s.speed * 0.45);
+        s.fvx = (s.x / len) * out;
+        s.fvz = (s.z / len) * out;
+        s.fvy = 4.6;
         s.tumble = 0;
+        s.spin = (seed < 0.5 ? -1 : 1) * (7 + Math.min(6, s.speed));
       }
       if (s.y > OUTER_FLOOR_Y + 0.01 || s.fvy > 0) {
         s.fvy -= 20 * dt;
@@ -240,7 +319,16 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
         s.z += s.fvz * dt;
         s.y = Math.max(OUTER_FLOOR_Y, s.y + s.fvy * dt);
         s.tumble = Math.min(1.45, s.tumble + 5 * dt);
-        if (s.y <= OUTER_FLOOR_Y) s.fvy = 0;
+        s.yaw += s.spin * dt;
+        if (s.y <= OUTER_FLOOR_Y) {
+          s.fvy = 0;
+          if (!s.landed) {
+            // Thud: a big puff where they land.
+            s.landed = true;
+            dustBus.emit({ x: s.x, y: s.z, count: 18, speed: 2 });
+            shakeBus.emit(0.3);
+          }
+        }
       }
       root.position.set(s.x, s.y, s.z);
       root.rotation.set(-s.tumble, s.yaw + Math.sin(t * 2) * 0.1, 0);
@@ -254,11 +342,23 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
 
     const stars = starsRef.current;
     if (stars) {
-      stars.visible = p.alive && stunned;
+      // Dizzy stars: stunned, or lying on the floor after a ring-out.
+      const knockedOut = !p.alive && s.landed;
+      stars.visible = (p.alive && stunned) || knockedOut;
       if (stars.visible) {
-        stars.position.set(s.x, s.y + 2.05 * s.size, s.z);
+        stars.position.set(s.x, s.y + (knockedOut ? 0.9 : 2.05 * s.size), s.z);
         stars.rotation.y = t * 6;
         stars.scale.setScalar(s.size);
+      }
+    }
+
+    const alert = alertRef.current;
+    if (alert) {
+      alert.visible = p.alive && s.danger > 0.45;
+      if (alert.visible) {
+        const h = 0.75 + Math.sin(t * 18) * 0.12;
+        alert.position.set(s.x, s.y + 3.15 * s.size, s.z);
+        alert.scale.set(h * 3.2, h, 1);
       }
     }
 
@@ -283,6 +383,9 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
           </mesh>
         ))}
       </group>
+      <sprite ref={alertRef} renderOrder={11} visible={false}>
+        <spriteMaterial map={alertTexture} depthTest={false} transparent />
+      </sprite>
       <sprite ref={tagRef} scale={[2.3, 0.52, 1]} renderOrder={10} visible={false}>
         {texture && <spriteMaterial key={texture.uuid} map={texture} depthTest={false} transparent />}
       </sprite>

@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { ARENA_RADIUS } from "@mini-sumo/shared";
 import type { ArenaTheme } from "./arenaThemes";
+import { RingEdge } from "./RingEdge";
 
 const R = ARENA_RADIUS;
 const PLATFORM_HEIGHT = 1.4;
@@ -41,11 +42,8 @@ export const Arena = memo(function Arena({ theme }: { theme: ArenaTheme }) {
         <meshStandardMaterial color={theme.ring} roughness={1} />
       </mesh>
 
-      {/* Tawara: straw rope on the boundary */}
-      <mesh rotation-x={-Math.PI / 2} position-y={0.1} castShadow receiveShadow>
-        <torusGeometry args={[R, 0.17, 6, 64]} />
-        <meshStandardMaterial color={theme.rope} roughness={0.9} flatShading />
-      </mesh>
+      {/* Tawara: the rope on the boundary (it closes in near the end of a bout) */}
+      <RingEdge theme={theme} />
 
       {/* Shikiri-sen starting lines */}
       {[-1, 1].map((side) => (

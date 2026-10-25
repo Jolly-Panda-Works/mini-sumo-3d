@@ -34,10 +34,14 @@ import { ProfilePanel } from "./ui/ProfilePanel";
 import { music } from "./audio/Music";
 import { Wallet } from "./ui/Wallet";
 import { Results } from "./ui/Results";
+import { MatchFx } from "./ui/MatchFx";
 import { SettingsPanel } from "./ui/SettingsPanel";
 import { Toasts } from "./ui/Toasts";
 import { TouchControls } from "./ui/TouchControls";
 import { OutActions } from "./ui/OutActions";
+
+/** How long the finish plays before the results board comes up (ms). */
+const RESULTS_DELAY_MS = 1600;
 
 export function App() {
   // Update check, once the game server answers.
@@ -68,6 +72,16 @@ export function App() {
   const inBout = game.phase === Phase.Countdown || game.phase === Phase.Playing;
   const inLobby = inRoom && (game.phase === Phase.Waiting || game.phase === Phase.Lobby);
   const youOut = game.phase === Phase.Playing && game.players.some((p) => p.isYou && !p.alive);
+  // The results board waits a moment so the finish (slow motion, the big word) can land.
+  const [showResults, setShowResults] = useState(false);
+  useEffect(() => {
+    if (game.phase !== Phase.RoundOver) {
+      setShowResults(false);
+      return;
+    }
+    const id = window.setTimeout(() => setShowResults(true), RESULTS_DELAY_MS);
+    return () => window.clearTimeout(id);
+  }, [game.phase]);
 
   useEffect(() => {
     if (!inRoom) return;
@@ -169,7 +183,8 @@ export function App() {
       <>
         <HUD touch={touch} />
         <Countdown />
-        {game.phase === Phase.RoundOver && <Results />}
+        <MatchFx />
+        {game.phase === Phase.RoundOver && showResults && <Results />}
         {inBout && youOut ? <OutActions /> : touch && inBout && <TouchControls />}
       </>
     );

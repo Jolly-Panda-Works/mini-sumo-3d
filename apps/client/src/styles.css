@@ -2048,10 +2048,85 @@ body {
   }
 }
 
+/* ---------- Match finish: the big word across the screen and the white flash ---------- */
+
+.match-banner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.match-banner__text {
+  font-size: clamp(2.6rem, 13vw, 6.5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-align: center;
+  padding: 0 16px;
+  color: var(--sun);
+  -webkit-text-stroke: 4px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 0 8px 0 var(--ink);
+  animation: banner-slam 1.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.match-banner__text--out {
+  color: var(--coral);
+}
+
+.match-banner__text--warn {
+  font-size: clamp(1.8rem, 9vw, 4rem);
+  transform-origin: center;
+  margin-top: -28vh;
+}
+
+@keyframes banner-slam {
+  0% {
+    transform: scale(2.4) rotate(-6deg);
+    opacity: 0;
+  }
+  14% {
+    transform: scale(0.92) rotate(1deg);
+    opacity: 1;
+  }
+  24% {
+    transform: scale(1.04) rotate(-1deg);
+  }
+  32%,
+  80% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.1);
+    opacity: 0;
+  }
+}
+
+.screen-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: #fff;
+  animation: screen-flash 0.32s ease-out both;
+}
+
+@keyframes screen-flash {
+  0% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hud__boost,
   .home-bg__star,
   .countdown__num,
+  .match-banner__text,
   .toast,
   .search__spinner {
     animation: none;
@@ -8981,4 +9056,10 @@ html.in-match .toast {
 .toast-layer .toasts {
   position: absolute;
   z-index: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-flash {
+    display: none;
+  }
 }

@@ -61,6 +61,19 @@ export interface SimulationConfig {
   ropeDrag: number;
   /** Max positional correction per pair per iteration (m). */
   maxSeparationPerStep: number;
+  /**
+   * Counter-dash: when two dashes meet, the one that started at least this much later (ms) is
+   * the counter (a dash in answer to theirs): the earlier dasher is stunned and thrown back.
+   * Closer than this, it's a clash: both bounce, nobody is stunned.
+   */
+  counterLeadMs: number;
+  /** Extra throw (m/s) on the wrestler who was countered. */
+  counterPush: number;
+
+  /** Shrinking ring: over the final this-many ms of a bout the ring closes in… */
+  shrinkMs: number;
+  /** …down to this fraction of its radius. */
+  shrinkTo: number;
 
   /** Walk from the ring side to the start marks before the 3-2-1 (ms). */
   entranceMs: number;
@@ -150,6 +163,11 @@ export const DEFAULT_CONFIG: Readonly<SimulationConfig> = Object.freeze({
   ropeStart: 0.8,
   ropeDrag: 8,
   maxSeparationPerStep: 0.6,
+  counterLeadMs: 60,
+  counterPush: 4,
+
+  shrinkMs: 20_000,
+  shrinkTo: 0.72,
 
   entranceMs: 1600,
   countdownMs: COUNTDOWN_MS,

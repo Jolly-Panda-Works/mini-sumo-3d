@@ -49,6 +49,10 @@ export interface ImpactPayload {
   strength: number;
   /** The wrestler stunned by this hit (a dash into someone who wasn't dashing). */
   stunned?: string;
+  /** Two dashes met at about the same moment: both bounce, nobody is stunned. */
+  clash?: boolean;
+  /** Two dashes met and this wrestler's came later: a counter-dash (the other is stunned). */
+  counter?: string;
 }
 
 export interface EliminatedPayload {

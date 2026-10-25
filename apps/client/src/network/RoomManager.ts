@@ -2,6 +2,7 @@ import { Client } from "colyseus.js";
 import {
   COUNTDOWN_MS,
   ClientMessage,
+  PLAYER_COLORS,
   Phase,
   ROOM_NAME,
   ServerMessage,
@@ -24,12 +25,29 @@ import { syncProfile } from "./profileSync";
 import { accountToken, economyStore, ensureAccount, initLocalEconomy, loadEconomy, refreshProfile, setLastResult } from "./economyClient";
 import { localEconomy } from "./localEconomy";
 
+/** Hits closer together than this (ms) by the same wrestler count as a combo. */
+const COMBO_GAP_MS = 1800;
+
 /** Your level, shown to everyone in the match. */
 const myLevel = () => economyStore.get().profile?.level.level ?? 1;
 import { botLevelForArena } from "@mini-sumo/shared";
 import { audio } from "../audio/AudioManager";
 import { resolveServerUrl } from "../config";
-import { dustBus, hitStop, impactBus, lastHit, lastHitAt, punchBus, shakeBus } from "../game/effectsBus";
+import {
+  bannerBus,
+  calloutBus,
+  dustBus,
+  focusBus,
+  hitStop,
+  impactBus,
+  lastDashAt,
+  lastHit,
+  lastHitAt,
+  pulseBus,
+  punchBus,
+  shakeBus,
+  slowMo,
+} from "../game/effectsBus";
 import { createStore } from "../store";
 import { showError, showLevelUp, showMessage, showWarning, pushToast } from "../uiStore";
 import { vibrate } from "../haptics";
@@ -378,6 +396,33 @@ class RoomManager {
     return url.toString();
   }
 
+  /** Hits in a row by one wrestler (each within COMBO_GAP_MS of the last): "x2", "x3"… */
+  private combos = new Map<string, { count: number; at: number }>();
+
+  private countCombo(msg: ImpactPayload, now: number): void {
+    if (msg.strength < 3 || msg.clash) return;
+    // The hitter: whoever stunned the other, else the one dashing.
+    let hitter: string | null = null;
+    if (msg.stunned) hitter = msg.stunned === msg.a ? msg.b : msg.a;
+    else {
+      const a = this.state?.players.get(msg.a);
+      const b = this.state?.players.get(msg.b);
+      if (a?.dashing && !b?.dashing) hitter = msg.a;
+      else if (b?.dashing && !a?.dashing) hitter = msg.b;
+    }
+    if (!hitter) return;
+    // Getting hit breaks your own streak.
+    this.combos.delete(hitter === msg.a ? msg.b : msg.a);
+    const last = this.combos.get(hitter);
+    const count = last && now - last.at <= COMBO_GAP_MS ? last.count + 1 : 1;
+    this.combos.set(hitter, { count, at: now });
+    if (count >= 2) {
+      const p = this.state?.players.get(hitter);
+      calloutBus.emit({ text: `x${count} COMBO`, x: p?.x ?? msg.x, y: p?.y ?? msg.y, color: "#FF5D73", size: Math.min(1, 0.5 + count * 0.08), follow: hitter });
+      if (hitter === this.sessionId) vibrate(20 + count * 8);
+    }
+  }
+
   private async connect(join: () => Promise<GameConnection>, offlineRoom?: LocalRoomOptions): Promise<boolean> {
     if (sessionStore.get().status === "connecting") return false;
     if (this._room) await this.leave();
@@ -436,12 +481,30 @@ class RoomManager {
         hitStop.until = Math.max(hitStop.until, now + Math.min(110, 40 + msg.strength * 5));
         punchBus.emit(Math.min(1, (msg.strength - 4) / 8));
       }
+      // Two dashes meeting: a clash (both bounce) or a counter (the later dash wins).
+      if (msg.clash) {
+        hitStop.until = Math.max(hitStop.until, now + 150);
+        punchBus.emit(0.8);
+        shakeBus.emit(0.8);
+        pulseBus.emit({ x: msg.x, y: msg.y, color: "#FFFFFF", size: 2.2 });
+        calloutBus.emit({ text: "CLASH!", x: msg.x, y: msg.y, color: "#FFFFFF", size: 0.8 });
+      } else if (msg.counter) {
+        const counter = this.state?.players.get(msg.counter);
+        hitStop.until = Math.max(hitStop.until, now + 130);
+        punchBus.emit(0.7);
+        pulseBus.emit({ x: msg.x, y: msg.y, color: PLAYER_COLORS[(counter?.colorIndex ?? 0) % PLAYER_COLORS.length]!.hex, size: 2 });
+        calloutBus.emit({ text: "COUNTER!", x: msg.x, y: msg.y, color: "#FFC23C", size: 0.75, follow: msg.counter });
+      }
+      this.countCombo(msg, now);
       audio.impact(msg.strength);
       if (msg.stunned === this.sessionId) vibrate(90);
       else if (msg.a === this.sessionId || msg.b === this.sessionId) vibrate(Math.min(60, 15 + Math.round(msg.strength * 4)));
     });
 
     room.onMessage(ServerMessage.Dash, (msg: DashPayload) => {
+      // Your own dash already squashed when you pressed it (prediction).
+      const now = performance.now();
+      if (now - (lastDashAt.get(msg.sessionId) ?? -1e9) > 300) lastDashAt.set(msg.sessionId, now);
       const player = this.state?.players.get(msg.sessionId);
       if (player) dustBus.emit({ x: player.x, y: player.y, count: 6, speed: 1.2 });
       audio.dash();
@@ -462,6 +525,24 @@ class RoomManager {
       if (player && msg.reason === "ringOut") {
         dustBus.emit({ x: player.x, y: player.y, count: 16, speed: 2.4 });
         shakeBus.emit(0.7);
+        // The ring-out that decides the bout: slow motion, the camera swings in, a big word
+        // and a flash. Any other: a split-second freeze when you're in it, and "OUT!".
+        let othersAlive = 0;
+        this.state?.players.forEach((p, id) => {
+          if (id !== msg.sessionId && p.alive && p.connected) othersAlive++;
+        });
+        const now = performance.now();
+        if (othersAlive <= 1) {
+          Object.assign(slowMo, { from: now, until: now + 1200, factor: 0.25 });
+          focusBus.emit({ x: player.x, y: player.y, ms: 1700, zoom: 0.42 });
+          bannerBus.emit({ text: msg.by ? "OSHIDASHI!" : "RING OUT!", tone: "out", flash: true });
+        } else {
+          if (isYou || msg.by === this.sessionId) {
+            hitStop.until = Math.max(hitStop.until, now + 90);
+            punchBus.emit(0.6);
+          }
+          calloutBus.emit({ text: "OUT!", x: player.x, y: player.y, color: "#FF5D73", size: 0.9 });
+        }
       }
       // You: the knocked-out sting and the crowd groaning. Others: the usual drop sound,
       // and the crowd cheers if you pushed them.

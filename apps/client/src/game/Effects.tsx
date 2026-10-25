@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Object3D, type InstancedMesh, type Mesh, type MeshBasicMaterial } from "three";
-import { dustBus, impactBus } from "./effectsBus";
+import { dustBus, impactBus, pulseBus, timeScale } from "./effectsBus";
 
 const DUST_COUNT = 160;
 const SPARK_COUNT = 90;
 const RING_COUNT = 6;
+const PULSE_COUNT = 6;
 
 interface Particle {
   x: number;
@@ -35,7 +36,9 @@ export function Effects() {
     [],
   );
   const rings = useMemo(() => Array.from({ length: RING_COUNT }, () => ({ life: 0, strength: 0 })), []);
-  const cursor = useRef({ dust: 0, ring: 0 });
+  const cursor = useRef({ dust: 0, ring: 0, pulse: 0 });
+  const pulseRefs = useRef<(Mesh | null)[]>([]);
+  const pulses = useMemo(() => Array.from({ length: PULSE_COUNT }, () => ({ life: 0, size: 1 })), []);
 
   useEffect(() => {
     const offDust = dustBus.on(({ x, y, count, speed }) => {
@@ -81,14 +84,28 @@ export function Effects() {
         sp.size = 0.05 + Math.random() * 0.07;
       }
     });
+    // A coloured ring spreading over the floor (dash ready, a counter).
+    const offPulse = pulseBus.on(({ x, y, color, size }) => {
+      const index = cursor.current.pulse;
+      cursor.current.pulse = (cursor.current.pulse + 1) % PULSE_COUNT;
+      const pulse = pulses[index]!;
+      pulse.life = 1;
+      pulse.size = size;
+      const mesh = pulseRefs.current[index];
+      if (mesh) {
+        mesh.position.set(x, 0.07, y);
+        (mesh.material as MeshBasicMaterial).color.set(color);
+      }
+    });
     return () => {
       offDust();
       offImpact();
+      offPulse();
     };
-  }, [particles, rings, sparks]);
+  }, [particles, rings, sparks, pulses]);
 
   useFrame((_, delta) => {
-    const dt = Math.min(delta, 0.1);
+    const dt = Math.min(delta, 0.1) * timeScale();
     const mesh = dustRef.current;
     if (mesh) {
       for (let i = 0; i < DUST_COUNT; i++) {
@@ -155,6 +172,21 @@ export function Effects() {
         ringMesh.visible = false;
       }
     }
+
+    for (let i = 0; i < PULSE_COUNT; i++) {
+      const pulse = pulses[i]!;
+      const pulseMesh = pulseRefs.current[i];
+      if (!pulseMesh) continue;
+      if (pulse.life > 0) {
+        pulse.life = Math.max(0, pulse.life - dt * 2.2);
+        const grow = pulse.size * (0.6 + (1 - pulse.life) * 1.4);
+        pulseMesh.visible = true;
+        pulseMesh.scale.set(grow, grow, grow);
+        (pulseMesh.material as MeshBasicMaterial).opacity = pulse.life * 0.9;
+      } else {
+        pulseMesh.visible = false;
+      }
+    }
   });
 
   return (
@@ -179,6 +211,20 @@ export function Effects() {
         >
           <ringGeometry args={[0.55, 0.8, 32]} />
           <meshBasicMaterial color="#FFFFFF" transparent opacity={0} depthWrite={false} />
+        </mesh>
+      ))}
+      {pulses.map((_, i) => (
+        <mesh
+          key={`pulse-${i}`}
+          ref={(el) => {
+            pulseRefs.current[i] = el;
+          }}
+          rotation-x={-Math.PI / 2}
+          visible={false}
+          renderOrder={2}
+        >
+          <ringGeometry args={[0.8, 0.95, 40]} />
+          <meshBasicMaterial color="#FFFFFF" transparent opacity={0} depthWrite={false} toneMapped={false} />
         </mesh>
       ))}
     </>

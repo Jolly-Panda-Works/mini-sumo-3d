@@ -3,6 +3,7 @@ import { useStore } from "../store";
 import { gameStore, sessionStore } from "../network/RoomManager";
 import { Arena } from "./Arena";
 import { CameraRig } from "./CameraRig";
+import { Callouts } from "./Callouts";
 import { Effects } from "./Effects";
 import { MenuSumos } from "./MenuSumos";
 import { NetSumo } from "./NetSumo";
@@ -62,6 +63,7 @@ export function GameCanvas() {
         : <MenuSumos />}
       <ItemFlag />
       <Effects />
+      {inRoom && <Callouts />}
       <CameraRig orbit={!inRoom} />
     </Canvas>
   );
