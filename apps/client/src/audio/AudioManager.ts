@@ -15,8 +15,20 @@ export const SAMPLES = {
   "level-up": 0.9,
   "powerup-on": 0.85,
   "powerup-off": 0.75,
+  // Match moments (trimmed from the studio's sound packs; WAV, see WAV_SAMPLES).
+  "ringout-final": 0.9,
+  "fly-out": 0.45,
+  thud: 0.55,
+  counter: 0.75,
+  clash: 0.7,
+  combo: 0.4,
+  saved: 0.55,
+  "ring-shrink": 0.6,
+  "edge-alert": 0.3,
 } as const;
 export type SampleName = keyof typeof SAMPLES;
+/** Samples stored as WAV (short, mono 24 kHz); the rest are MP3. */
+const WAV_SAMPLES: ReadonlySet<SampleName> = new Set(["ringout-final", "fly-out", "thud", "counter", "clash", "combo", "saved", "ring-shrink", "edge-alert"]);
 
 class AudioManager {
   private sampleFiles = new Map<SampleName, Promise<ArrayBuffer | null>>();
@@ -94,7 +106,7 @@ class AudioManager {
   private sampleFile(name: SampleName): Promise<ArrayBuffer | null> {
     let pending = this.sampleFiles.get(name);
     if (!pending) {
-      pending = fetch(`${import.meta.env.BASE_URL}sfx/${name}.mp3`)
+      pending = fetch(`${import.meta.env.BASE_URL}sfx/${name}.${WAV_SAMPLES.has(name) ? "wav" : "mp3"}`)
         .then((r) => (r.ok ? r.arrayBuffer() : null))
         .catch(() => null);
       this.sampleFiles.set(name, pending);
@@ -102,8 +114,8 @@ class AudioManager {
     return pending;
   }
 
-  /** Plays a sound file (decoded once, then reused). */
-  sample(name: SampleName): void {
+  /** Plays a sound file (decoded once, then reused). `rate` above 1 plays it faster and higher. */
+  sample(name: SampleName, rate = 1): void {
     const ctx = this.ready;
     if (!ctx || !this.sfxBus) return;
     let decoded = this.sampleBuffers.get(name);
@@ -122,6 +134,7 @@ class AudioManager {
       if (!buffer || !this.sfxBus || ctx.state !== "running") return;
       const src = ctx.createBufferSource();
       src.buffer = buffer;
+      src.playbackRate.value = rate;
       const gain = ctx.createGain();
       gain.gain.value = SAMPLES[name];
       src.connect(gain).connect(this.sfxBus);

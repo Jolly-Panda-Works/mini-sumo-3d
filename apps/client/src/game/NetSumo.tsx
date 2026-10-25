@@ -6,6 +6,7 @@ import { roomManager } from "../network/RoomManager";
 import { calloutBus, dustBus, hitStop, lastDashAt, lastHit, lastHitAt, pulseBus, shakeBus, timeScale } from "./effectsBus";
 import { textureFor } from "./Callouts";
 import { vibrate } from "../haptics";
+import { audio } from "../audio/AudioManager";
 import { DEFAULT_CONFIG as SIM, createBody, stepMovement, tryDash, type SimBody } from "@mini-sumo/sim";
 import { createNameTagTexture } from "./nameTag";
 import { SumoModel, useSumoParts } from "./SumoModel";
@@ -131,6 +132,7 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
       dustBus.emit({ x: s.x, y: s.z, count: 12, speed: 1.6 });
       pulseBus.emit({ x: s.x, y: s.z, color, size: 1.1 });
       shakeBus.emit(0.12);
+      if (isYou) audio.sample("thud", 1.15);
     }
     s.phase = state.phase;
     const stomp =
@@ -240,9 +242,13 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
         if (isYou && t - s.buzzAt > 1.2) {
           s.buzzAt = t;
           vibrate(12);
+          audio.sample("edge-alert");
         }
       } else if (s.edgeAt >= 0 && dist < ringR - EDGE_ZONE - 1.2) {
-        if (t - s.edgeAt < 1.8) calloutBus.emit({ text: "SAVED!", x: s.x, y: s.z, color: "#7CE38B", size: 0.65, follow: id });
+        if (t - s.edgeAt < 1.8) {
+          calloutBus.emit({ text: "SAVED!", x: s.x, y: s.z, color: "#7CE38B", size: 0.65, follow: id });
+          audio.sample("saved");
+        }
         s.edgeAt = -1;
       }
 
@@ -327,6 +333,7 @@ export const NetSumo = memo(function NetSumo({ id, name, colorIndex, isYou, hair
             s.landed = true;
             dustBus.emit({ x: s.x, y: s.z, count: 18, speed: 2 });
             shakeBus.emit(0.3);
+            audio.sample("thud");
           }
         }
       }

@@ -419,6 +419,8 @@ class RoomManager {
     if (count >= 2) {
       const p = this.state?.players.get(hitter);
       calloutBus.emit({ text: `x${count} COMBO`, x: p?.x ?? msg.x, y: p?.y ?? msg.y, color: "#FF5D73", size: Math.min(1, 0.5 + count * 0.08), follow: hitter });
+      // Each hit in the streak rings a little higher.
+      audio.sample("combo", Math.min(1.8, 1 + (count - 2) * 0.12));
       if (hitter === this.sessionId) vibrate(20 + count * 8);
     }
   }
@@ -488,12 +490,14 @@ class RoomManager {
         shakeBus.emit(0.8);
         pulseBus.emit({ x: msg.x, y: msg.y, color: "#FFFFFF", size: 2.2 });
         calloutBus.emit({ text: "CLASH!", x: msg.x, y: msg.y, color: "#FFFFFF", size: 0.8 });
+        audio.sample("clash");
       } else if (msg.counter) {
         const counter = this.state?.players.get(msg.counter);
         hitStop.until = Math.max(hitStop.until, now + 130);
         punchBus.emit(0.7);
         pulseBus.emit({ x: msg.x, y: msg.y, color: PLAYER_COLORS[(counter?.colorIndex ?? 0) % PLAYER_COLORS.length]!.hex, size: 2 });
         calloutBus.emit({ text: "COUNTER!", x: msg.x, y: msg.y, color: "#FFC23C", size: 0.75, follow: msg.counter });
+        audio.sample("counter");
       }
       this.countCombo(msg, now);
       audio.impact(msg.strength);
@@ -525,6 +529,7 @@ class RoomManager {
       if (player && msg.reason === "ringOut") {
         dustBus.emit({ x: player.x, y: player.y, count: 16, speed: 2.4 });
         shakeBus.emit(0.7);
+        audio.sample("fly-out");
         // The ring-out that decides the bout: slow motion, the camera swings in, a big word
         // and a flash. Any other: a split-second freeze when you're in it, and "OUT!".
         let othersAlive = 0;
@@ -536,6 +541,7 @@ class RoomManager {
           Object.assign(slowMo, { from: now, until: now + 1200, factor: 0.25 });
           focusBus.emit({ x: player.x, y: player.y, ms: 1700, zoom: 0.42 });
           bannerBus.emit({ text: msg.by ? "OSHIDASHI!" : "RING OUT!", tone: "out", flash: true });
+          audio.sample("ringout-final");
         } else {
           if (isYou || msg.by === this.sessionId) {
             hitStop.until = Math.max(hitStop.until, now + 90);

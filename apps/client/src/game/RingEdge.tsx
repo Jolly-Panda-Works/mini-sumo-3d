@@ -5,6 +5,7 @@ import { ARENA_RADIUS, Phase } from "@mini-sumo/shared";
 import { roomManager } from "../network/RoomManager";
 import type { ArenaTheme } from "./arenaThemes";
 import { bannerBus } from "./effectsBus";
+import { audio } from "../audio/AudioManager";
 
 const R = ARENA_RADIUS;
 /** Matches NetSumo's teeter zone: closer to the rope than this (m) is "on the edge". */
@@ -30,6 +31,7 @@ export function RingEdge({ theme }: { theme: ArenaTheme }) {
     if (state?.phase === Phase.Playing && shrinking && !announced.current) {
       announced.current = true;
       bannerBus.emit({ text: "RING SHRINKING!", tone: "warn" });
+      audio.sample("ring-shrink");
     }
     if (!shrinking) announced.current = false;
 

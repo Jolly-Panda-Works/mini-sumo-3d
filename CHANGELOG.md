@@ -26,6 +26,7 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 - Combos: hits in a row by the same wrestler (each within 1.8 s, the stunner or the one dashing) show "x2 COMBO", "x3 COMBO"…; getting hit ends your streak.
 - Dash feel: a quick crouch before the stretch, and a ring in your colour when your dash is ready again.
 - Shiko before GO: in the last moment of the countdown everyone lifts a leg and arms out, then stamps down at GO with dust and a ring.
+- Sounds for the new moments, trimmed from the studio's sound packs (mono 24 kHz WAV, 388 KB in all, in `public/sfx`): the bout-deciding ring-out (`ringout-final`), flying out (`fly-out`), landing and the GO stomp (`thud`), counter, clash, combos (each hit a little higher), "SAVED!", the ring starting to shrink and, for you only, teetering on the rope (`edge-alert`). `audio.sample()` takes a playback rate.
 - 4 new tests (182 total).
 - Update check at startup: the server answers `GET /api/version` with the latest version (its own, from the root package.json the release bumps) and an optional minimum (`CLIENT_MIN_VERSION`). An older app shows "Update available" (Update / Later, remembered per version), or "Update required" below the minimum (it can't be skipped); Update opens the game's page in Cafe Bazaar or Google Play. The web game reloads instead (the server always serves the latest). Dev and media builds don't check. 1 new test (178 total).
 
