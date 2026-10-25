@@ -14,6 +14,7 @@ import type {
 import { Friends } from "../social/Friends.js";
 import type { BazaarVerifier } from "../economy/bazaar.js";
 import type { AccountRecovery } from "../account/Recovery.js";
+import { versionInfo } from "./version.js";
 import { CATALOG, listArenas } from "../economy/config.js";
 import { EconomyError, type Economy } from "../economy/Economy.js";
 import type { PaymentService } from "../economy/payments.js";
@@ -35,6 +36,7 @@ import type { PaymentService } from "../economy/payments.js";
  *   POST /api/account/restore/verify { email, code } -> { accountId, token }     (no token)
  *   POST /api/purchases/bazaar { productId, purchaseToken }  a Cafe Bazaar coin pack (Bearer token)
  *   POST /api/daily-gift                    the free daily coins (once a day) (Bearer token)
+ *   GET  /api/version                       latest app version, minimum to play (no token)
  *   GET  /api/leaderboard?limit=100         top players by XP + your rank    (Bearer token)
  *   GET  /api/friends                       your code, friends, requests     (Bearer token)
  *   GET  /api/friends/profile?id=…          a friend's profile               (Bearer token)
@@ -80,6 +82,8 @@ function sendError(res: ServerResponse, error: unknown): void {
 }
 
 const writeLimiter = new Limiter(60, 60 * 1000);
+/** Read once at startup (it only changes with a new server build). */
+const gameVersion = versionInfo();
 const restoreLimiter = new Limiter(20, 60 * 60 * 1000);
 
 function send(res: ServerResponse, status: number, body: unknown): void {
@@ -160,6 +164,12 @@ export function createApiHandler(
 
     const route = `${req.method} ${url.pathname}`;
     const ip = (req.headers["x-forwarded-for"]?.toString().split(",")[0] ?? req.socket.remoteAddress ?? "?").trim();
+
+    // Update check (no token): the latest version and the oldest one that may still play.
+    if (route === "GET /api/version") {
+      send(res, 200, gameVersion);
+      return true;
+    }
 
     if (route === "GET /api/catalog") {
       const body: CatalogResponse = {

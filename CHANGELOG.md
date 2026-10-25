@@ -6,6 +6,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Update check at startup: the server answers `GET /api/version` with the latest version (its own, from the root package.json the release bumps) and an optional minimum (`CLIENT_MIN_VERSION`). An older app shows "Update available" (Update / Later, remembered per version), or "Update required" below the minimum (it can't be skipped); Update opens the game's page in Cafe Bazaar or Google Play. The web game reloads instead (the server always serves the latest). Dev and media builds don't check. 1 new test (178 total).
+
 ### Fixed
 
 - Your own wrestler responds at once: client-side prediction runs the same movement rules as the server with your stick input (and dash, and the Wind speed-up), then is gently pulled toward the server's position (jumping there after a big hit). Facing follows your stick at once too. Before, every move waited for a round trip to the server plus smoothing (about 150–300 ms online). Other wrestlers still follow the server.

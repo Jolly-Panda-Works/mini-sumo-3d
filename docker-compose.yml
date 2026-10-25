@@ -36,6 +36,8 @@ services:
       EMAILJS_PUBLIC_KEY: ${EMAILJS_PUBLIC_KEY:-}
       EMAILJS_PRIVATE_KEY: ${EMAILJS_PRIVATE_KEY:-}
       PUBLIC_URL: ${PUBLIC_URL:-https://sumo.ryujin.fans/}
+      # Update checks: apps older than this must update before they can play (empty = none).
+      CLIENT_MIN_VERSION: ${CLIENT_MIN_VERSION:-}
     volumes:
       - mini-sumo-data:/data
     restart: unless-stopped

@@ -24,6 +24,8 @@ import { NoticePopup } from "./ui/NoticePopup";
 import { ServerWait } from "./ui/ServerWait";
 import { restoreBazaarPurchases } from "./network/bazaar";
 import { codeFromLink } from "./network/accountEmail";
+import { checkForUpdate } from "./network/updateCheck";
+import { networkStore } from "./network/networkMode";
 import { EmailSavePopup } from "./ui/EmailSavePopup";
 import { ModeCardPopup } from "./ui/ArenaSelect";
 import { InviteWatcher } from "./ui/InviteWatcher";
@@ -38,6 +40,12 @@ import { TouchControls } from "./ui/TouchControls";
 import { OutActions } from "./ui/OutActions";
 
 export function App() {
+  // Update check, once the game server answers.
+  const networkMode = useStore(networkStore).mode;
+  useEffect(() => {
+    if (networkMode === "online") void checkForUpdate();
+  }, [networkMode]);
+
   // Cafe Bazaar: purchases paid but not credited yet (the app closed mid-way, or the server was
   // unreachable) are finished once the game is connected.
   const economyStatus = useStore(economyStore).status;
