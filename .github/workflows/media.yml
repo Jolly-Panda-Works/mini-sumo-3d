@@ -64,7 +64,7 @@ jobs:
           cp apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk out/MiniSumo-Media.apk
           ls -la out
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: MiniSumo-Media
           path: out/MiniSumo-Media.apk

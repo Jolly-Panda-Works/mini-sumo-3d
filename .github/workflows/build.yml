@@ -188,7 +188,7 @@ jobs:
           mkdir -p out
           (cd apps/client/dist && zip -qr "../../../out/MiniSumo-${VITE_APP_VERSION}-Web.zip" .)
           ls -la out
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: mini-sumo-web
           path: out/*.zip
@@ -272,7 +272,7 @@ jobs:
           cp apps/desktop/release/*.exe apps/desktop/release/*.AppImage apps/desktop/release/*.deb out/ 2>/dev/null || true
           ls -la out
           [ -n "$(ls -A out)" ] || { echo "::error::No desktop files were built."; exit 1; }
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: mini-sumo-desktop-${{ matrix.name }}
           path: out/*
@@ -384,7 +384,7 @@ jobs:
             cp "$OUTPUTS/bundle/release/app-release.aab" "out/MiniSumo-$VERSION-Android.aab"
           fi
           ls -la out
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: mini-sumo-android
           path: out/*
