@@ -1,8 +1,8 @@
 import { createStore } from "../store";
-import { settingsStore, type Settings } from "../settings";
+import { settingsStore } from "../settings";
 import { pushToast } from "../uiStore";
-import { economyStore, refreshProfile, storedAccount, switchAccount } from "./economyClient";
-import { localEconomy, type LocalSnapshot } from "./localEconomy";
+import { economyStore } from "./economyClient";
+import { cloudSnapshot, restoreCloudSave } from "./cloudSave";
 
 /**
  * Google Play Games Services (Android app only): sign-in and one cloud save kept by Google
@@ -25,15 +25,6 @@ interface CapacitorGlobal {
   registerPlugin?: <T>(name: string) => T;
 }
 
-interface CloudSave {
-  v: 1;
-  savedAt: string;
-  economy: LocalSnapshot;
-  profile: Pick<Settings, "name" | "appearance" | "botLevel">;
-  /** The game server account (id and key), so a new phone signs in as the same player. */
-  account?: { accountId: string; token: string };
-}
-
 function findPlugin(): PlayGamesPlugin | null {
   const cap = (window as unknown as { Capacitor?: CapacitorGlobal }).Capacitor;
   if (!cap?.isNativePlatform?.() || !cap.isPluginAvailable?.("PlayGames") || !cap.registerPlugin) return null;
@@ -48,23 +39,13 @@ export const playGamesStore = createStore<{
   name: string;
 }>({ available: plugin !== null, status: "signedOut", name: "" });
 
-/** Rough measure of how far a save has got, to keep the more advanced one. */
-const progress = (s: LocalSnapshot) => s.xp * 1000 + s.matches * 10 + s.owned.length;
-
-function snapshot(): CloudSave {
-  const { name, appearance, botLevel } = settingsStore.get();
-  const account = storedAccount() ?? undefined;
-  return { v: 1, savedAt: new Date().toISOString(), economy: localEconomy.exportState(), profile: { name, appearance, botLevel }, account };
-}
-
 let saveTimer = 0;
 let syncing = false;
 
 async function saveNow(): Promise<void> {
   if (!plugin || playGamesStore.get().status !== "connected") return;
   try {
-    const data = snapshot();
-    await plugin.save({ data: JSON.stringify(data), description: `Level ${economyStore.get().profile?.level.level ?? 1}` });
+    await plugin.save({ data: cloudSnapshot(), description: `Level ${economyStore.get().profile?.level.level ?? 1}` });
   } catch {
     // Offline or Google Play busy: the next change saves again.
   }
@@ -83,25 +64,7 @@ async function sync(): Promise<void> {
   syncing = true;
   try {
     const { data } = await plugin.load();
-    const cloud = data ? (JSON.parse(data) as CloudSave) : null;
-    const local = localEconomy.exportState();
-    // The Google Play save belongs to another server account (a new or reset phone): play as it,
-    // unless this device's player is further along (then this one is saved over it below).
-    const here = storedAccount();
-    const theirs = cloud?.account;
-    const fartherHere = (economyStore.get().profile?.level.xp ?? 0) > (cloud?.economy?.xp ?? 0);
-    if (theirs?.accountId && theirs.token && theirs.accountId !== here?.accountId && !fartherHere) {
-      pushToast("Progress restored from Google Play", "info", 3500);
-      switchAccount(theirs); // the game restarts as that player
-      return;
-    }
-    if (cloud && cloud.v === 1 && cloud.economy && progress(cloud.economy) > progress(local)) {
-      if (localEconomy.importState(cloud.economy)) {
-        settingsStore.update({ ...cloud.profile, onboarded: true });
-        await refreshProfile();
-        pushToast("Progress restored from Google Play", "info", 3500);
-      }
-    } else {
+    if ((await restoreCloudSave(data, "Google Play")) === "kept") {
       syncing = false;
       await saveNow();
     }

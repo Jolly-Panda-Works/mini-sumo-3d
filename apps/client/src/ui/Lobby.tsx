@@ -67,7 +67,7 @@ export function Lobby() {
   ) : isHost ? (
           <>
             <button
-              className="start-btn lobby__start"
+              className={`start-btn lobby__start${canStart && !searching ? " start-btn--ready" : ""}`}
               disabled={!canStart || !armed}
               onClick={() => roomManager.startMatch()}
               aria-live="polite"

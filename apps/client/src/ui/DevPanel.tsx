@@ -22,6 +22,7 @@ import {
   showWarning,
   uiStore,
 } from "../uiStore";
+import { devSamples, sampleFriends, sampleLeaderboard, sampleStorePrices } from "./devSamples";
 import { Dialog } from "./Dialog";
 import { HUD } from "./HUD";
 import { Countdown } from "./Countdown";
@@ -149,6 +150,7 @@ export function DevPanel() {
   useEffect(() => {
     if (returnToDev && !somethingOpen && !ui.devOpen) {
       returnToDev = false;
+      devSamples.set({ leaderboard: null, friends: null, storePrices: null });
       setDevOpen(true);
     }
   }, [somethingOpen, ui.devOpen]);
@@ -184,6 +186,33 @@ export function DevPanel() {
           <button className="btn" onClick={open(setAboutOpen)}>About</button>
           <button className="btn" onClick={open(setLeaderboardOpen)}>Leaderboard</button>
           <button className="btn" onClick={open(setFriendsOpen)}>Friends</button>
+          <button
+            className="btn"
+            onClick={() => {
+              devSamples.update({ leaderboard: sampleLeaderboard() });
+              open(setLeaderboardOpen)();
+            }}
+          >
+            Leaderboard (sample)
+          </button>
+          <button
+            className="btn"
+            onClick={() => {
+              devSamples.update({ friends: sampleFriends() });
+              open(setFriendsOpen)();
+            }}
+          >
+            Friends (sample)
+          </button>
+          <button
+            className="btn"
+            onClick={() => {
+              devSamples.update({ storePrices: sampleStorePrices() });
+              open(setShopOpen)();
+            }}
+          >
+            Coin shop (store)
+          </button>
           <button className="btn" onClick={show("welcome")}>Welcome</button>
           <button
             className="btn"
@@ -300,7 +329,7 @@ export function DevPanel() {
           <button
             className="btn"
             onClick={() =>
-              void showMessage("Buy this item?", "Samurai helmet for 1,500 Sumo Coins.", [{ id: "buy", label: "Buy", primary: true, price: 1500 }], {
+              void showMessage("Buy this item?", "Kabuto for 1,500 Sumo Coins.", [{ id: "buy", label: "Buy", primary: true, price: 1500 }], {
                 closable: true,
                 titleExtra: (
                   <span className="coin-frame coin-frame--static buy-confirm__coins">
@@ -311,7 +340,7 @@ export function DevPanel() {
                   <div className="buy-confirm">
                     <div className="buy-confirm__item">
                       <img className="buy-confirm__avatar" src={`${import.meta.env.BASE_URL}avatars/5.webp`} alt="" width={160} height={160} />
-                      <span className="buy-confirm__name">Samurai helmet</span>
+                      <span className="buy-confirm__name">Kabuto</span>
                     </div>
                   </div>
                 ),

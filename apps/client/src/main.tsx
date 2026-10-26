@@ -12,6 +12,7 @@ import { startScrollFade } from "./ui/scrollFade";
 import { roomManager } from "./network/RoomManager";
 import { music } from "./audio/Music";
 import { initPlayGames } from "./network/playGames";
+import { initBazaarApp } from "./network/bazaarApp";
 
 // Loading screen: artwork, fonts, the server check and the first 3D frame.
 // Absolute, because the --ui-* CSS variables below are resolved against the stylesheet
@@ -25,7 +26,10 @@ bootTrack("network", 2, roomManager.ready);
 bootTrack("music", 2, music.preload("menu"));
 bootTrack("sfx", 1, audio.preloadSamples());
 // Google Play Games (Android app): automatic sign-in and cloud save, once the economy is ready.
-void roomManager.ready.then(() => initPlayGames());
+void roomManager.ready.then(() => {
+  void initPlayGames();
+  void initBazaarApp();
+});
 startBoot();
 
 // Art used from CSS (set here so the URLs follow the app's base path).
@@ -75,6 +79,11 @@ for (const [name, file] of [
   ["lb-row-you", "lb-row-you"],
   ["lb-rank", "lb-rank"],
   ["lb-score", "lb-score"],
+  ["toast-plank", "toast-plank"],
+  ["coin-frame-static", "coin-frame-static"],
+  ["btn-start-blank", "btn-start-blank"],
+  ["arena-panel-over", "arena-panel-over"],
+  ["popup-sub-over", "popup-sub-over"],
 ] as const) {
   document.documentElement.style.setProperty(`--ui-${name}`, `url("${base}ui/${file}.webp")`);
 }

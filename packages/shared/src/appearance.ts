@@ -12,10 +12,10 @@ export const HAIR_STYLES = [
   { id: "ponytail", label: "Ponytail" },
   { id: "afro", label: "Afro" },
   { id: "buns", label: "Twin buns" },
-  { id: "samurai", label: "Samurai band" },
+  { id: "samurai", label: "Headband" },
   // Hats
   { id: "kasa", label: "Straw hat" },
-  { id: "kabuto", label: "Samurai helmet" },
+  { id: "kabuto", label: "Kabuto" },
   { id: "crown", label: "Crown" },
 ] as const;
 
@@ -37,7 +37,7 @@ export const HAIR_COLORS = [
 ] as const;
 
 export const FACES = [
-  { id: "determined", label: "Determined" },
+  { id: "determined", label: "Focused" },
   { id: "happy", label: "Happy" },
   { id: "cool", label: "Cool" },
   { id: "sleepy", label: "Sleepy" },
@@ -45,13 +45,13 @@ export const FACES = [
   { id: "wink", label: "Wink" },
   { id: "surprised", label: "Surprised" },
   { id: "grumpy", label: "Grumpy" },
-  { id: "sparkly", label: "Sparkly eyes" },
+  { id: "sparkly", label: "Sparkly" },
   { id: "laughing", label: "Laughing" },
   { id: "smug", label: "Smug" },
   // Masks
-  { id: "kitsune", label: "Kitsune mask" },
-  { id: "oni", label: "Oni mask" },
-  { id: "tengu", label: "Tengu mask" },
+  { id: "kitsune", label: "Kitsune" },
+  { id: "oni", label: "Oni" },
+  { id: "tengu", label: "Tengu" },
 ] as const;
 
 export const OUTFITS = [
@@ -59,14 +59,14 @@ export const OUTFITS = [
   { id: "striped", label: "Striped" },
   { id: "apron", label: "Apron" },
   { id: "champion", label: "Champion" },
-  { id: "polka", label: "Polka dots" },
-  { id: "sagari", label: "Sagari fringe" },
+  { id: "polka", label: "Polka" },
+  { id: "sagari", label: "Sagari" },
   { id: "cape", label: "Hero cape" },
   { id: "armbands", label: "Armbands" },
   { id: "sakura", label: "Sakura" },
-  { id: "dragon", label: "Dragon belt" },
-  { id: "kesho", label: "Ceremonial apron" },
-  { id: "golden", label: "Golden belt" },
+  { id: "dragon", label: "Dragon" },
+  { id: "kesho", label: "Kesho" },
+  { id: "golden", label: "Golden" },
 ] as const;
 
 /** Profile pictures (public/avatars/<index>.webp). The first four are free. */

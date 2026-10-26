@@ -1,5 +1,6 @@
 import { CREDITS } from "@mini-sumo/shared";
 import { request } from "./economyClient";
+import { bazaarAppAvailable, bazaarHasUpdate, updateFromBazaar } from "./bazaarApp";
 import { showMessage, showWarning } from "../uiStore";
 
 /**
@@ -37,6 +38,11 @@ function updateTarget(): { kind: "store"; url: string; name: string } | { kind: 
 }
 
 function openUpdate(): void {
+  // The Bazaar build: Bazaar's own update page (the new version installs from there).
+  if (bazaarAppAvailable()) {
+    void updateFromBazaar();
+    return;
+  }
   const target = updateTarget();
   if (target.kind === "reload") window.location.reload();
   // The app hands store links to Android, which opens the store app (or the browser).
@@ -44,6 +50,39 @@ function openUpdate(): void {
 }
 
 let checked = false;
+let bazaarChecked = false;
+
+/** "Later" for this update (remembered per version). */
+function later(version: string): boolean {
+  try {
+    return localStorage.getItem(LATER_KEY) === version;
+  } catch {
+    return false; // no storage: ask every time
+  }
+}
+function setLater(version: string): void {
+  try {
+    localStorage.setItem(LATER_KEY, version);
+  } catch {
+    // nothing to remember
+  }
+}
+
+/**
+ * The Bazaar build: asks Bazaar whether it has a newer version of the game (no game server
+ * needed). "Update" opens Bazaar's update page in the game.
+ */
+export async function checkBazaarUpdate(): Promise<void> {
+  if (bazaarChecked || !bazaarAppAvailable()) return;
+  bazaarChecked = true;
+  if (!(await bazaarHasUpdate()) || later("bazaar")) return;
+  const choice = await showMessage("Update available", "A new version of Mini Sumo is out in Cafe Bazaar, with new things to try. Update now?", [
+    { id: "ok", label: "Update", primary: true },
+    { id: "cancel", label: "Later" },
+  ]);
+  if (choice === "ok") void updateFromBazaar();
+  else setLater("bazaar");
+}
 
 export async function checkForUpdate(): Promise<void> {
   if (checked) return;
@@ -81,23 +120,14 @@ export async function checkForUpdate(): Promise<void> {
     }
   }
 
-  if (latest && older(mine, latest)) {
-    try {
-      if (localStorage.getItem(LATER_KEY) === info.latest) return; // "Later" for this version
-    } catch {
-      // no storage: ask every time
-    }
+  // The Bazaar build asks Bazaar itself (checkBazaarUpdate), which knows when the update is live.
+  if (latest && older(mine, latest) && !bazaarAppAvailable()) {
+    if (later(info.latest)) return;
     const choice = await showMessage("Update available", `Mini Sumo ${info.latest} is out, with new things to try. Update in ${target.name}?`, [
       { id: "ok", label: "Update", primary: true },
       { id: "cancel", label: "Later" },
     ]);
     if (choice === "ok") openUpdate();
-    else {
-      try {
-        localStorage.setItem(LATER_KEY, info.latest);
-      } catch {
-        // nothing to remember
-      }
-    }
+    else setLater(info.latest);
   }
 }

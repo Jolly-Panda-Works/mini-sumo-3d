@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { bannerBus } from "../game/effectsBus";
 
 const BANNER_MS = 1500;
+const BASE = import.meta.env.BASE_URL;
+/** Banners drawn as art (public/hud/banner-*.webp). */
+const BANNER_ART: Record<string, string> = {
+  "OSHIDASHI!": "banner-oshidashi",
+  "RING OUT!": "banner-ring-out",
+  "RING SHRINKING!": "banner-shrinking",
+};
 
 /** Big words across the screen ("OSHIDASHI!", "RING SHRINKING!") and the white flash with them. */
 export function MatchFx() {
@@ -28,9 +35,19 @@ export function MatchFx() {
       {flash > 0 && <div key={flash} className="screen-flash" aria-hidden="true" onAnimationEnd={() => setFlash(0)} />}
       {banner && (
         <div className="match-banner" aria-live="assertive">
-          <span key={banner.id} className={`match-banner__text match-banner__text--${banner.tone}`}>
-            {banner.text}
-          </span>
+          {BANNER_ART[banner.text] ? (
+            <img
+              key={banner.id}
+              className={`match-banner__art match-banner__art--${banner.tone}`}
+              src={`${BASE}hud/${BANNER_ART[banner.text]}.webp`}
+              alt={banner.text}
+              draggable={false}
+            />
+          ) : (
+            <span key={banner.id} className={`match-banner__text match-banner__text--${banner.tone}`}>
+              {banner.text}
+            </span>
+          )}
         </div>
       )}
     </>

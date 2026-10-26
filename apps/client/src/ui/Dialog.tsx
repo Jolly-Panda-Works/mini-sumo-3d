@@ -104,7 +104,7 @@ export function Dialog({
       {variant === "board" ? (
         <div className={`dialog-wrap dialog-wrap--board ${wrapClass}`}>
           <section className="board-dialog" role={role} aria-modal="true" aria-labelledby={id}>
-            <h2 id={id} className="visually-hidden">
+            <h2 id={id} className="art-title art-title--board">
               {title}
             </h2>
             {!hideClose && (
@@ -118,7 +118,7 @@ export function Dialog({
       ) : variant === "editname" ? (
         <div className={`dialog-wrap dialog-wrap--editname ${wrapClass}`}>
           <section className="editname-dialog" role={role} aria-modal="true" aria-labelledby={id}>
-            <h2 id={id} className="visually-hidden">
+            <h2 id={id} className="art-title art-title--editname">
               {title}
             </h2>
             {!hideClose && (
@@ -132,7 +132,7 @@ export function Dialog({
       ) : variant === "welcome" ? (
         <div className={`dialog-wrap dialog-wrap--welcome ${wrapClass}`}>
           <section className="welcome-dialog" role={role} aria-modal="true" aria-labelledby={id}>
-            <h2 id={id} className="visually-hidden">
+            <h2 id={id} className="art-title art-title--welcome">
               {title}
             </h2>
             <div className={`welcome-dialog__inner ${bodyClassName}`}>{children}</div>

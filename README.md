@@ -183,7 +183,7 @@ Offline, *Play now* searches for a few seconds and fills the ring with bots; *Cr
 
 **Self-hosting (Docker):** `docker compose up -d --build` runs the game server and the web game on one port; it builds in Iran through registry and npm mirrors. See [docker/README.md](docker/README.md).
 
-**Cafe Bazaar:** the `bazaar` branch builds the Bazaar version (coin packs through Bazaar in-app billing, no Google Play Games) and publishes `bazaar-vX.Y.Z` releases. See [docs/BAZAAR.fa.md](docs/BAZAAR.fa.md).
+**Cafe Bazaar:** the `bazaar` branch builds the Bazaar version (coin packs through Bazaar in-app billing, no Google Play Games) and publishes `bazaar-vX.Y.Z` releases; it signs in with Bazaar, checks for updates through Bazaar and, with `BAZAAR_PISHKHAN_TOKEN`, sends each build to Cafe Bazaar for review automatically. See [docs/BAZAAR.fa.md](docs/BAZAAR.fa.md).
 
 ## Run from source
 

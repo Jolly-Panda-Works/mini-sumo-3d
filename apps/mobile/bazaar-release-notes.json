@@ -1,0 +1,6 @@
+{
+  "$comment": "What's new in Cafe Bazaar for the next version (required: a Bazaar build fails without it). Set version to the version being released (package.json) and write fa and en, on the bazaar branch. Emptied after each release.",
+  "version": "",
+  "fa": "",
+  "en": ""
+}

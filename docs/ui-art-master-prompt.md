@@ -219,6 +219,23 @@ courtyard with cherry trees · `legend` hall of legends with banners of past cha
 
 ---
 
+### 4.9 Cafe Bazaar build **new**
+
+Used only in the Cafe Bazaar version. Until they exist, the game draws plain buttons for them.
+Bazaar's sign-in colours are green **#0EA960** with a **#09663A** border; keep them for the
+sign-in buttons so players recognise them. Leave the **logo square empty**: the game puts the official Cafe Bazaar logo there
+(`public/icons/bazaar.png`); don't let the generator draw a logo.
+
+| File (px) | What to draw | Text |
+|---|---|---|
+| `btn-bazaar-signin` (480×135) | the wood-button family, but the face is Bazaar green #0EA960 with a #09663A rim; an EMPTY rounded square on the left for the Bazaar logo | SIGN IN WITH BAZAAR |
+| `btn-bazaar-connected` (480×125) | same shape, cream face with a green check mark in a small round seal on the left | SIGNED IN WITH BAZAAR |
+| `btn-rate-review` (360×114) | green button, a gold star on the left | RATE & REVIEW |
+| `btn-more-games` (360×114) | wood button, a small stack of game cards (or three tiny dohyo) on the left | MORE GAMES |
+| `btn-auto-update` (360×114) | wood button, two circular arrows around a small down-arrow on the left | AUTO-UPDATE |
+| `btn-update` (360×98) | green notice-family button, a down-arrow in a circle on the left | UPDATE |
+| `icon-review` (256×256) | a paper scroll with a brush and a gold star stamp (for the About panel) | no text |
+
 ## 5. Full screens (layout mock-ups)
 
 These are for direction only: the game builds its screens in code from the elements above.

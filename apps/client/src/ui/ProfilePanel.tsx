@@ -14,6 +14,8 @@ import { logOutOfPlayGames, playGamesStore, signInToPlayGames } from "../network
 import { linkedEmail, signOut } from "../network/accountEmail";
 import { networkStore } from "../network/networkMode";
 import { EmailSavePopup } from "./EmailSavePopup";
+import { bazaarAppAvailable, bazaarLoginStore, logOutOfBazaar, signInWithBazaar } from "../network/bazaarApp";
+import { bazaarWebLinked, bazaarWebPossible, startBazaarWebLogin } from "../network/bazaarWeb";
 
 function EditName({ onClose }: { onClose: () => void }) {
   const settings = useStore(settingsStore);
@@ -54,8 +56,33 @@ export function ProfilePanel() {
   const [editing, setEditing] = useState(false);
   const [picking, setPicking] = useState(false);
   const play = useStore(playGamesStore);
-  // Saving with an email: when the server can send the codes (online)
-  const emailOn = useStore(networkStore).mode === "online" && Boolean(useStore(economyStore).catalog?.emailRecovery);
+  // Saving with an email: when the server can send the codes (online). The Bazaar build signs in
+  // with Bazaar instead.
+  const bazaarLogin = useStore(bazaarLoginStore);
+  const bazaar = import.meta.env.VITE_STORE === "bazaar";
+  const online = useStore(networkStore).mode === "online";
+  const emailRecovery = Boolean(economy.catalog?.emailRecovery);
+  const emailOn = !bazaar && online && emailRecovery;
+  // Sign in with Bazaar in the browser (web game), next to Google Play and email.
+  const bazaarWebOn = bazaarWebPossible() && online && Boolean(economy.catalog?.bazaarLogin);
+  const [bazaarWeb, setBazaarWeb] = useState<"unknown" | "linked" | "signedOut" | "working">("unknown");
+  useEffect(() => {
+    if (!bazaarWebOn) return;
+    void bazaarWebLinked()
+      .then((r) => setBazaarWeb(r.linked ? "linked" : "signedOut"))
+      .catch(() => setBazaarWeb("signedOut"));
+  }, [bazaarWebOn]);
+  const askBazaarWebLogOut = async () => {
+    const choice = await showWarning(
+      "Log out?",
+      "You're signed in with Cafe Bazaar. Log out on this device? Your progress stays saved with your Bazaar account: sign in again any time to get it back.",
+      [
+        { id: "leave", label: "Log out", primary: true },
+        { id: "cancel", label: "Stay signed in" },
+      ],
+    );
+    if (choice === "leave") await signOut(); // the game restarts as a new guest
+  };
   const [savedEmail, setSavedEmail] = useState<string | null>(null);
   const [emailMode, setEmailMode] = useState(false);
 
@@ -81,6 +108,17 @@ export function ProfilePanel() {
       ],
     );
     if (choice === "leave") logOutOfPlayGames();
+  };
+  const askBazaarLogOut = async () => {
+    const choice = await showWarning(
+      "Log out of Bazaar?",
+      "You're signed in with Cafe Bazaar. Log out? Your progress stops saving to Bazaar until you sign in again.",
+      [
+        { id: "leave", label: "Log out", primary: true },
+        { id: "cancel", label: "Stay signed in" },
+      ],
+    );
+    if (choice === "leave") logOutOfBazaar();
   };
   useEffect(() => {
     if (!emailOn) return;
@@ -176,7 +214,65 @@ export function ProfilePanel() {
         </section>
         )}
 
-        {/* Sign in with email (every build): saves this player, or brings one back */}
+        {/* Sign in with Bazaar (the Bazaar build): the save lives in the player's Bazaar account */}
+        {bazaar && (
+          <section className="profile__bazaar" aria-label="Cafe Bazaar">
+            {bazaarLogin.status === "connected" ? (
+              <button className="art bazaar-art" onClick={() => void askBazaarLogOut()} aria-label="Signed in with Bazaar: log out">
+                <img src={`${base}ui/btn-bazaar-connected.webp`} alt="" width={480} height={125} draggable={false} />
+              </button>
+            ) : (
+              <button
+                className="art bazaar-art"
+                aria-disabled={!bazaarAppAvailable() || bazaarLogin.status === "working"}
+                aria-label={bazaarLogin.status === "working" ? "Signing in with Bazaar…" : "Sign in with Bazaar"}
+                onClick={() => (bazaarAppAvailable() ? void signInWithBazaar() : pushToast("Sign in with Bazaar works in the Cafe Bazaar app", "info"))}
+              >
+                <img src={`${base}ui/btn-bazaar-signin.webp`} alt="" width={480} height={135} draggable={false} />
+                <img className="bazaar-art__logo" src={`${base}icons/bazaar.png`} alt="" width={256} height={256} draggable={false} />
+              </button>
+            )}
+            <p className="hint">
+              {bazaarLogin.status === "connected"
+                ? "Your progress is saved to your Cafe Bazaar account."
+                : "Sign in with Bazaar to keep your progress safe, and to get it back on a new phone."}
+            </p>
+          </section>
+        )}
+
+        {/* Sign in with Bazaar in the browser (the web game; the server does the OAuth) */}
+        {bazaarWebOn && bazaarWeb !== "unknown" && (
+          <section className="profile__bazaar" aria-label="Cafe Bazaar">
+            {bazaarWeb === "linked" ? (
+              <button className="art bazaar-art" onClick={() => void askBazaarWebLogOut()} aria-label="Signed in with Bazaar: log out">
+                <img src={`${base}ui/btn-bazaar-connected.webp`} alt="" width={480} height={125} draggable={false} />
+              </button>
+            ) : (
+              <button
+                className="art bazaar-art"
+                aria-disabled={bazaarWeb === "working"}
+                aria-label={bazaarWeb === "working" ? "Opening Bazaar…" : "Sign in with Bazaar"}
+                onClick={() => {
+                  setBazaarWeb("working");
+                  void startBazaarWebLogin().catch(() => {
+                    setBazaarWeb("signedOut");
+                    pushToast("Couldn't reach Cafe Bazaar. Try again later.", "error");
+                  });
+                }}
+              >
+                <img src={`${base}ui/btn-bazaar-signin.webp`} alt="" width={480} height={135} draggable={false} />
+                <img className="bazaar-art__logo" src={`${base}icons/bazaar.png`} alt="" width={256} height={256} draggable={false} />
+              </button>
+            )}
+            <p className="hint">
+              {bazaarWeb === "linked"
+                ? "Your progress is saved with your Cafe Bazaar account."
+                : "Sign in with your Cafe Bazaar account to keep your progress safe, or to get it back here."}
+            </p>
+          </section>
+        )}
+
+        {/* Sign in with email (web, desktop and Google Play builds): saves this player, or brings one back */}
         {emailOn && (
           <section className="profile__email" aria-label="Email">
             {savedEmail ? (

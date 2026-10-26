@@ -1,6 +1,7 @@
 // Turns the generated Android project into the Cafe Bazaar build:
-// Poolakey (Bazaar in-app billing) + the Bazaar plugin, Kotlin for the plugin, the RSA key
-// as a string resource and the <queries> entry for the Bazaar app (Android 11+).
+// Poolakey (Bazaar in-app billing), CafeBazaarAuth (sign in with Bazaar + in-app storage),
+// BazaarUpdater (in-app update), the login-check AIDL and the Bazaar plugin, Kotlin for the
+// plugin, the RSA key as a string resource and the <queries> entry for the Bazaar app (Android 11+).
 // Settings in bazaar.config.json; BAZAAR_RSA_KEY (env) overrides the key.
 // Run after `cap add/sync android`. Don't combine with play-games.mjs.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -28,6 +29,10 @@ mkdirSync(new URL(javaDir, root), { recursive: true });
 write(`${javaDir}BazaarPlugin.kt`, read("native/BazaarPlugin.kt").replace("__PACKAGE__", pkg));
 write(`${javaDir}MainActivity.java`, read("native/MainActivity.bazaar.java").replace("__PACKAGE__", pkg));
 
+// Bazaar's login-check service interface
+mkdirSync(new URL("android/app/src/main/aidl/com/farsitel/bazaar/", root), { recursive: true });
+write("android/app/src/main/aidl/com/farsitel/bazaar/ILoginCheckService.aidl", read("native/ILoginCheckService.aidl"));
+
 // Kotlin Gradle plugin + JitPack (Poolakey is published there)
 let rootGradle = read("android/build.gradle");
 if (!rootGradle.includes("kotlin-gradle-plugin")) {
@@ -37,7 +42,7 @@ if (!rootGradle.includes("kotlin-gradle-plugin")) {
   );
 }
 if (!rootGradle.includes("jitpack.io")) {
-  // After the standard repositories, so only Poolakey is looked up there.
+  // After the standard repositories, so only Bazaar's libraries are looked up there.
   rootGradle = rootGradle.replace(
     /(allprojects\s*\{\s*repositories\s*\{[\s\S]*?)(\n\s*\})/,
     `$1\n        maven { url "https://jitpack.io"; content { includeGroupByRegex "com\\\\.github\\\\.cafebazaar.*" } }$2`,
@@ -54,6 +59,16 @@ if (!appGradle.includes("cafebazaar.Poolakey")) {
     /dependencies\s*\{/,
     (m) => `${m}\n    implementation "com.github.cafebazaar.Poolakey:poolakey:${settings.poolakeyVersion}"\n    implementation "org.jetbrains.kotlin:kotlin-stdlib:${settings.kotlinVersion}"`,
   );
+}
+if (!appGradle.includes("CafeBazaarAuth")) {
+  appGradle = appGradle.replace(
+    /dependencies\s*\{/,
+    (m) =>
+      `${m}\n    implementation "com.github.cafebazaar.CafeBazaarAuth:auth:${settings.authVersion}"\n    implementation "com.github.cafebazaar:bazaarUpdater:${settings.updaterVersion}"`,
+  );
+}
+if (!/buildFeatures\s*\{[^}]*aidl/.test(appGradle)) {
+  appGradle = appGradle.replace(/android\s*\{/, (m) => `${m}\n    buildFeatures { aidl true }`);
 }
 if (!appGradle.includes("kotlinOptions")) {
   appGradle = appGradle.replace(/android\s*\{/, (m) => `${m}\n    kotlinOptions { jvmTarget = '21' }`);
@@ -84,4 +99,6 @@ if (!manifest.includes("com.farsitel.bazaar")) {
   write("android/app/src/main/AndroidManifest.xml", manifest);
 }
 
-console.log(`Cafe Bazaar billing added (Poolakey ${settings.poolakeyVersion}, package ${pkg}).`);
+console.log(
+  `Cafe Bazaar added (Poolakey ${settings.poolakeyVersion}, auth ${settings.authVersion}, updater ${settings.updaterVersion}, package ${pkg}).`,
+);

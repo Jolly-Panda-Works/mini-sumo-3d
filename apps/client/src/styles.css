@@ -9247,3 +9247,1453 @@ html.in-match .toast-layer .toasts {
     animation: none;
   }
 }
+
+/* ======================================================================
+   Cafe Bazaar build: Sign in with Bazaar (Bazaar's own button colours:
+   #0EA960 with a #09663A border) and the About buttons
+   ====================================================================== */
+
+.profile__bazaar {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.bazaar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 220px;
+  min-height: 48px;
+  padding: 8px 20px;
+  border: 1px solid #09663a;
+  border-radius: 8px;
+  background: #0ea960;
+  color: #fff;
+  font: inherit;
+  font-weight: 900;
+  font-size: 1rem;
+  box-shadow: 0 4px 0 #09663a;
+  cursor: pointer;
+}
+
+.bazaar-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #09663a;
+}
+
+.bazaar-btn[aria-disabled="true"] {
+  filter: grayscale(0.6) brightness(0.9);
+}
+
+.bazaar-btn--connected {
+  background: #fff4dc;
+  color: #09663a;
+  border-color: #09663a;
+}
+
+.about-panel__bazaar {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  container-type: inline-size;
+}
+
+.about-panel__bazaar .plank-btn {
+  max-width: 240px;
+}
+
+/* The Cafe Bazaar logo on its sign-in button (30 px, as Bazaar's guide asks) */
+.bazaar-btn__logo {
+  width: 30px;
+  height: 30px;
+  flex: none;
+}
+
+.bazaar-btn:not(.bazaar-btn--connected) .bazaar-btn__logo {
+  /* The green bag on Bazaar green: a white disc behind it keeps it visible */
+  padding: 2px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* ======================================================================
+   Japanese UI art v1 (public/ui, hud, icons, boot, arenas): the same
+   layouts, fitted to the new art's windows and its cream parchment
+   (dark ink instead of light text). Measurements are % of each image.
+   ====================================================================== */
+
+:root {
+  --ink-brown: #3a1d05;
+  --ink-soft-brown: #6b4a2e;
+  --ink-red: #8e1f1f;
+}
+
+/* Arena card (456×706): picture window 13–87 % × 16–52 %, info 10–90 % × 57–89 % */
+.arena-tile {
+  color: var(--ink-brown);
+}
+
+.arena-tile .arena-tile__art {
+  left: 13.4%;
+  top: 16.2%;
+  width: 73.2%;
+  height: 35.6%;
+  border-radius: 6px;
+  border: 0;
+}
+
+.arena-tile__label {
+  left: 69%;
+  top: 17.6%;
+}
+
+.arena-tile .arena-tile__body {
+  left: 13%;
+  top: 57.6%;
+  width: 74%;
+  height: 26.4%;
+  padding-top: 1.2cqw;
+  gap: 0.6cqw;
+}
+
+.arena-tile .arena-tile__name {
+  color: var(--ink-red);
+}
+
+.arena-tile .arena-tile__mood,
+.arena-tile .arena-tile__facts dt {
+  color: var(--ink-soft-brown);
+}
+
+.arena-tile .arena-tile__facts dd,
+.arena-tile .arena-tile__status {
+  color: var(--ink-brown);
+}
+
+.arena-tile .arena-tile__play {
+  top: 82.5%;
+}
+
+/* Profile card (516×192): round avatar socket 7–33 % across, name bar 39–92 % × 28–52 %,
+   level bar 41–91 % × 60–75 % (the new art has no "Lvl" painted on it) */
+.profile-card__avatar {
+  left: 8.2%;
+  top: 18%;
+  width: 24%;
+  height: 64.5%;
+  border-radius: 50%;
+}
+
+.profile-card__name {
+  left: 41%;
+  top: 28.5%;
+  width: 49%;
+  height: 23%;
+  color: var(--ink-brown);
+}
+
+.profile-card__level {
+  left: 43.5%;
+  top: 60%;
+  height: 15%;
+  color: var(--ink-brown);
+  font-size: 0.72rem;
+}
+
+.profile-card__level::before {
+  content: "★ Lvl ";
+  margin-right: 3px;
+  color: var(--ink-red);
+  white-space: pre;
+}
+
+/* Coin counter (469×143): the amount sits in the dark field (30–78 % across); the + is painted
+   on the art (80–90 % × 29–62 %), so the game's own + becomes an invisible tap area over it */
+.coin-frame,
+.hub__coins.coin-frame {
+  padding: 0 22% 0 30%;
+}
+
+.home .coin-frame {
+  padding-right: 22%;
+}
+
+.coin-frame .coin-frame__plus,
+.home .coin-frame__plus {
+  left: 79.5%;
+  right: auto;
+  top: 29%;
+  width: 10.5%;
+  height: 34%;
+  transform: none;
+  opacity: 0;
+}
+
+/* Dialogs: the new frame (1094×1422) has a cream parchment inside (143 px wood at the sides,
+   ~232 px with the rope at the top, 167 px at the bottom): no dark board any more, dark ink.
+   The header's red sign board is 25–77 % across × 52–78 % down (1152×674). */
+.dialog {
+  color: var(--ink-brown);
+}
+
+.dialog::after {
+  display: none;
+}
+
+.dialog::before {
+  border-image-slice: 290 150 175 150 fill;
+  border-image-width: 26.5cqw 13.7cqw 16cqw 13.7cqw;
+}
+
+.dialog__title {
+  left: 23.5cqw;
+  top: 9.2cqw;
+  width: 54.5cqw;
+  height: 15.6cqw;
+}
+
+.dialog__body {
+  margin-left: 13.6cqw;
+  margin-right: 13.6cqw;
+  scrollbar-color: rgba(58, 29, 5, 0.4) transparent;
+}
+
+.dialog__body:last-child {
+  margin-bottom: 15.6cqw;
+}
+
+.dialog__foot {
+  margin-left: 13.6cqw;
+  margin-right: 13.6cqw;
+  margin-bottom: 15.6cqw;
+  border-top-color: rgba(58, 29, 5, 0.25);
+}
+
+.dialog .hint,
+.dialog .field__label,
+.dialog .settings__version,
+.dialog .slider__value,
+.dialog .arena-tile__mood {
+  color: var(--ink-soft-brown);
+}
+
+.dialog .settings__heading,
+.dialog h3 {
+  color: var(--ink-red);
+}
+
+.dialog .settings__section,
+.dialog .profile__stats div {
+  border-color: rgba(58, 29, 5, 0.22);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.dialog a {
+  color: var(--ink-red);
+}
+
+/* Shop packs on the parchment: a light card and dark ink */
+.pack,
+.dialog .pack {
+  background: rgba(255, 255, 255, 0.45);
+  border-color: rgba(58, 29, 5, 0.22);
+  color: var(--ink-brown);
+}
+
+/* Sub panel (485×827): a big title plank 3–97 % × 12–23 % under a thin beam, parchment
+   11–88 % × 33–91 % (the rope's tassels hang to ~38 %) */
+.sub-dialog__title {
+  left: 14%;
+  top: 12.6%;
+  width: 72%;
+  height: 10%;
+}
+
+.sub-dialog__close {
+  right: 1.5%;
+  top: 12.2%;
+}
+
+.sub-dialog__inner {
+  left: 12.5%;
+  top: 35.5%;
+  width: 75%;
+  height: 54.5%;
+  padding-top: 3cqw;
+}
+
+/* Panels whose old art had the title painted on it (leaderboard, edit name, welcome): the new
+   art doesn't, so the title sits on the red plank across the top of the frame */
+.art-title {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  max-width: 74%;
+  padding: 1px 18px 3px;
+  border-style: solid;
+  border-width: 10px 18px;
+  border-image: var(--ui-label-empty) 12 22 fill / 10px 18px / 0 stretch;
+  color: #fff4dc;
+  font-size: clamp(0.95rem, 5.4cqw, 1.35rem);
+  font-weight: 900;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 0 rgba(58, 14, 10, 0.75);
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.35));
+  pointer-events: none;
+}
+
+/* Leaderboard frame (700×597): parchment 71–628 px × 130–497 px; no plaque on top any more */
+.board-dialog {
+  border-width: calc(100cqw * 175 / 700) calc(100cqw * 72 / 700) calc(100cqw * 140 / 700);
+  border-image-slice: 175 72 140 fill;
+  border-image-width: calc(100cqw * 175 / 700) calc(100cqw * 72 / 700) calc(100cqw * 140 / 700);
+}
+
+.art-title--board {
+  top: calc(-100cqw * 175 / 700 - 14px);
+}
+
+.board-dialog__close {
+  top: calc(-100cqw * 175 / 700 - 10px);
+  right: -6px;
+}
+
+.board-dialog__body {
+  margin-top: 0;
+}
+
+/* Text that sat on the old dark boards and now sits on parchment or a cream field */
+.friends__offline,
+.leaderboard__note,
+.buy-confirm__name,
+.notice-popup__message,
+.welcome-dialog__inner,
+.dlg-result,
+.results-board__info,
+.reward-frame__value,
+.hud__timer.timer-frame,
+.lb-row__score,
+.lb-row__score-value,
+.lb-row--you,
+.lb-row--pinned {
+  color: var(--ink-brown);
+}
+
+.dlg-lobby .lobby__sub,
+.dlg-lobby .room-code,
+.dlg-lobby .roster__item--empty,
+.settings__about--row .settings__version,
+.welcome-dialog .field__label,
+.dlg-results .economy-result .hint {
+  color: var(--ink-soft-brown);
+}
+
+.dlg-lobby .roster__invite {
+  color: var(--ink-red);
+}
+
+/* Text field (554×116): the writing area is 12.5–87.4 % across, between the end caps */
+.input.input--art {
+  padding: 0 14%;
+}
+
+.name-gate__title {
+  color: var(--ink-red);
+}
+
+.welcome-dialog .name-gate__title {
+  color: var(--ink-red);
+}
+
+/* Level up (700×538): the new art has no "LEVEL UP!" on it; it sits on the red plank over the rays */
+.levelup-frame::before {
+  content: "LEVEL UP!";
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 14%;
+  transform: translateX(-50%);
+  padding: 1px 22px 3px;
+  border-style: solid;
+  border-width: 10px 18px;
+  border-image: var(--ui-label-empty) 12 22 fill / 10px 18px / 0 stretch;
+  color: #fff4dc;
+  font-size: clamp(1.1rem, 6cqw, 1.6rem);
+  font-weight: 900;
+  line-height: 1.15;
+  white-space: nowrap;
+  text-shadow: 0 2px 0 rgba(58, 14, 10, 0.75);
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.35));
+  pointer-events: none;
+}
+
+/* Message / warning / error popups (480×803): the plaque (12–89 % × 14–26 %) is blank in the new
+   art, so the kind is written on it; titles in darker colours that read on the parchment */
+.notice-popup::before {
+  position: absolute;
+  z-index: 1;
+  left: 14%;
+  top: 14.2%;
+  width: 72%;
+  height: 11.4%;
+  display: grid;
+  place-items: center;
+  color: #fff4dc;
+  font-size: max(1rem, 7.4cqw);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  -webkit-text-stroke: 0.9cqw #3a1d05;
+  paint-order: stroke fill;
+  text-shadow: 0 0.8cqw 0 rgba(58, 29, 5, 0.6);
+  pointer-events: none;
+}
+
+.notice-popup--message::before {
+  content: "MESSAGE";
+}
+
+.notice-popup--warning::before {
+  content: "WARNING";
+}
+
+.notice-popup--error::before {
+  content: "ERROR";
+}
+
+.notice-popup--message .notice-popup__title {
+  color: #2f5c8a;
+}
+
+.notice-popup--warning .notice-popup__title {
+  color: #b5651d;
+}
+
+.notice-popup--error .notice-popup__title {
+  color: #b8344a;
+}
+
+/* START (720×201) has START painted on it: ready, that word is the label; otherwise ("Start match
+   in 6…", "Waiting for others…") the text sits on a patch of the button's green (9–91 % × 24–71 %) */
+.start-btn__text {
+  left: 9.5%;
+  top: 25%;
+  width: 81%;
+  height: 45%;
+  border-radius: 999px;
+  background: linear-gradient(#62c94f, #1f8a45);
+  font-size: 1.05rem;
+}
+
+.start-btn--ready .start-btn__text {
+  opacity: 0;
+}
+
+/* Player frames (700×164): name on the cream bar (35–93 % × 31–51 %), level on the coloured bar
+   below it (38–89 %) */
+.frame__name,
+.frame--you .frame__name {
+  left: 37.5%;
+  top: 30%;
+  width: 53%;
+  height: 22%;
+  color: var(--ink-brown);
+}
+
+.frame--you .frame__name {
+  color: var(--ink-red);
+}
+
+.frame__level {
+  left: 40%;
+  top: 57%;
+  width: auto;
+  height: 22%;
+  color: #fff4dc;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
+}
+
+.frame__level::before {
+  content: "Lvl ";
+  white-space: pre;
+  opacity: 0.85;
+}
+
+/* Each colour's frame has its bars at its own height */
+.frame--red .frame__name {
+  top: 30%;
+  height: 21%;
+}
+
+.frame--red .frame__level {
+  top: 62%;
+  height: 15%;
+}
+
+.frame--blue .frame__name {
+  top: 21%;
+  height: 27%;
+}
+
+.frame--blue .frame__level {
+  top: 56%;
+  height: 19%;
+}
+
+.frame--green .frame__name {
+  top: 28.5%;
+  height: 21%;
+}
+
+.frame--green .frame__level {
+  top: 58%;
+  height: 10%;
+  color: var(--ink-brown);
+  text-shadow: none;
+}
+
+.frame--yellow .frame__name {
+  top: 23.5%;
+  height: 22%;
+}
+
+.frame--yellow .frame__level {
+  top: 53.5%;
+  height: 12.5%;
+}
+
+.frame--green .frame__level,
+.frame--yellow .frame__level {
+  font-size: clamp(0.5rem, 2vw, 0.72rem);
+}
+
+/* The dash drum: the generic ".dash-btn span" (a white disc) must not paint over the art's sweep */
+.dash-btn--art span.dash-btn__cool {
+  position: absolute;
+  inset: 14%;
+  width: auto;
+  height: auto;
+  border: 0;
+  background: conic-gradient(transparent var(--cool), rgba(20, 10, 4, 0.55) 0);
+}
+
+.dash-btn--art span.dash-btn__time {
+  width: auto;
+  height: auto;
+  border: 0;
+  background: none;
+}
+
+/* Power-up lantern: name and seconds on the cream face */
+.pu-frame__name {
+  color: var(--ink-brown);
+}
+
+.pu-frame__seconds {
+  color: var(--ink-red);
+}
+
+/* New art: notices on their long plank (toast-plank, 720×80, gold caps ~60 px) */
+.plank-label,
+.toast-layer .toast {
+  border-width: 10px 26px;
+  border-image: var(--ui-toast-plank) 20 64 fill / 10px 26px / 0 stretch;
+}
+
+/* The finish banners as art */
+.match-banner__art {
+  width: min(92vw, 560px);
+  height: auto;
+  animation: banner-slam 1.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.35));
+}
+
+.match-banner__art--warn {
+  width: min(84vw, 460px);
+  margin-top: -28vh;
+}
+
+/* Sign in with Bazaar as art; the official logo sits in its empty square (16–26 % × 31–67 %) */
+.bazaar-art {
+  position: relative;
+  width: min(100%, 300px);
+  padding: 0;
+  border: 0;
+  background: none;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.3));
+}
+
+.bazaar-art > img:first-child {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.bazaar-art__logo {
+  position: absolute;
+  left: 16.6%;
+  top: 33%;
+  width: 9.4%;
+  height: auto;
+}
+
+.bazaar-art[aria-disabled="true"] {
+  filter: grayscale(0.6) brightness(0.9);
+}
+
+.bazaar-art:active {
+  transform: translateY(2px);
+}
+
+/* About (Bazaar build): the review scroll and the art buttons */
+.about-panel__review-icon {
+  width: 56px;
+  height: 56px;
+}
+
+.about-panel__btn {
+  width: min(100%, 220px);
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.about-panel__btn img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Welcome (451×479): the content fills the parchment (19–81 % × 24–85 %, below the tassels)
+   and sits in its middle */
+.welcome-dialog__inner {
+  left: 21%;
+  top: 30%;
+  width: 58%;
+  height: 52%;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Close buttons sit on each frame's top-right gold corner (centre measured from the art);
+   on the shrine panels, on the roof's top-right cap */
+.dialog__close,
+.board-dialog__close,
+.sub-dialog__close,
+.editname-dialog__close,
+.notice-popup__close {
+  right: auto;
+  transform: translate(-50%, -50%);
+}
+
+.dialog__close:active,
+.board-dialog__close:active,
+.sub-dialog__close:active,
+.editname-dialog__close:active,
+.notice-popup__close:active {
+  transform: translate(-50%, -50%) scale(0.94);
+}
+
+/* header.webp 1152×674 placed at -2.7cqw / -23.4cqw, 105.4cqw wide: roof cap at (1074, 151) */
+.dialog__close {
+  left: 95.6cqw;
+  top: -9.6cqw;
+}
+
+/* lb-panel 700×597, borders 72 / 175 px: corner at (646, 71) */
+.board-dialog__close {
+  left: 82cqw;
+  top: -14.9cqw;
+  width: max(40px, 11cqw);
+  height: max(40px, 11cqw);
+}
+
+/* popup-sub 485×827: the board's corner at (447, 240) */
+.sub-dialog__close {
+  left: 92.2%;
+  top: 29%;
+}
+
+/* edit-name-frame 800×411: corner at (736, 72) */
+.editname-dialog__close {
+  left: 92%;
+  top: 17.5%;
+}
+
+/* the top beam's right corner, as drawn in the popup box */
+.notice-popup__close {
+  left: 92.4%;
+  top: 9.6%;
+}
+
+/* Titles on the plank: bigger, and down on the frame's top bar */
+.art-title {
+  font-size: clamp(1.1rem, 7cqw, 1.75rem);
+  padding: 2px 24px 4px;
+}
+
+.art-title--board {
+  top: -14.3cqw;
+  transform: translate(-50%, -50%);
+}
+
+.art-title--editname {
+  top: 17.5%;
+  transform: translate(-50%, -50%);
+}
+
+.art-title--welcome {
+  top: 5%;
+  transform: translate(-50%, -50%);
+}
+
+.sub-dialog__title {
+  font-size: max(0.95rem, 6.2cqw);
+}
+
+/* Vibration: the on/off switch art on its own (97×58), no long frame */
+.vib-toggle,
+.dlg-settings .vib-toggle,
+.dlg-settings-match .vib-toggle {
+  width: 76px;
+}
+
+.vib-toggle .vib-toggle__switch {
+  position: static;
+  width: 100%;
+  height: auto;
+}
+
+/* Coin counters that only show a balance (buy window, wardrobe): the frame without the +
+   (coin-frame-static, 469×143, field 30–90 % across), never stretched, amount centred */
+.coin-frame--static,
+.buy-confirm__coins.coin-frame,
+.notice-popup__title-extra .buy-confirm__coins.coin-frame,
+.wardrobe__balance.coin-frame {
+  height: auto;
+  max-height: none;
+  aspect-ratio: 469 / 143;
+  padding: 0 9.6% 0 30%;
+  background-image: var(--ui-coin-frame-static);
+  background-size: 100% 100%;
+  justify-content: center;
+}
+
+.buy-confirm__coins.coin-frame,
+.notice-popup__title-extra .buy-confirm__coins.coin-frame {
+  width: min(100%, 160px);
+}
+
+.wardrobe__balance.coin-frame {
+  width: 151px;
+}
+
+.coin-frame--static .coin-frame__amount {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.coin-frame--static .coin-frame__plus {
+  display: none;
+}
+
+/* Customise: room above the first row for the equipped frame (taller, with its ✓ on top)
+   and the locks, so the list doesn't cut them off */
+.wardrobe__items .items {
+  padding-top: 16px;
+}
+
+/* Training / private room popup on the tall sub frame (popup-sub, 485×827): the title on the
+   plaque, the picture, details, difficulty and PLAY one under the other on the parchment */
+.mode-card__box {
+  width: min(90vw, 400px, calc((100dvh - 32px) * 485 / 827));
+  aspect-ratio: 485 / 827;
+  background: var(--ui-popup-sub) center / 100% 100% no-repeat;
+  container-type: inline-size;
+  filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.35));
+}
+
+.mode-card__title {
+  position: absolute;
+  left: 14%;
+  top: 12.6%;
+  width: 72%;
+  height: 10%;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  color: #fff4dc;
+  font-size: max(0.95rem, 6.2cqw);
+  font-weight: 900;
+  -webkit-text-stroke: 3px #4a2408;
+  paint-order: stroke fill;
+  white-space: nowrap;
+}
+
+.mode-card__close {
+  top: 29%;
+  left: 92.2%;
+  right: auto;
+  width: max(40px, 11cqw);
+  height: max(40px, 11cqw);
+  transform: translate(-50%, -50%);
+}
+
+.mode-card__list {
+  position: absolute;
+  left: 12.5%;
+  top: 36%;
+  width: 75%;
+  height: 54%;
+}
+
+.mode-card__list .arena-tile,
+.home--hub .mode-card__list .arena-tile {
+  height: 100%;
+  aspect-ratio: auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2.2cqw;
+  background: none;
+  filter: none;
+  container-type: normal;
+}
+
+.mode-card__list .arena-tile .arena-tile__art {
+  position: static;
+  flex: none;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 960 / 536;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px #6b3d17;
+}
+
+.mode-card__list .arena-tile .arena-tile__name {
+  display: none;
+}
+
+.mode-card__list .arena-tile .arena-tile__body {
+  position: static;
+  flex: 1;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  gap: 1.6cqw;
+  overflow: visible;
+}
+
+.mode-card__list .arena-tile .arena-tile__mood {
+  font-size: max(0.75rem, 4cqw);
+}
+
+.mode-card__list .arena-tile .arena-tile__facts {
+  font-size: max(0.75rem, 4.2cqw);
+}
+
+.mode-card__list .arena-tile .arena-tile__facts dt {
+  font-size: max(0.65rem, 3.4cqw);
+}
+
+.mode-card__list .arena-tile .arena-tile__status {
+  font-size: max(0.65rem, 3.4cqw);
+}
+
+.mode-card__list .arena-tile .arena-tile__body .level-picker {
+  margin: auto auto 0;
+  width: 78%;
+  gap: 2cqw;
+}
+
+.mode-card__list .arena-tile .arena-tile__play {
+  position: static;
+  flex: none;
+  width: 58%;
+  align-self: center;
+}
+
+/* Waiting room: START keeps its proportions; while it isn't ready, the button without the
+   painted word (btn-start-blank) carries the text on its green (9–91 % × 26–72 %) */
+.start-btn:not(.start-btn--ready) {
+  background-image: var(--ui-btn-start-blank);
+}
+
+.start-btn__text,
+.start-btn:not(.start-btn--ready) .start-btn__text {
+  left: 9%;
+  top: 26%;
+  width: 82%;
+  height: 46%;
+  border-radius: 0;
+  background: none;
+  font-size: clamp(0.85rem, 2.4vh, 1.1rem);
+}
+
+/* Waiting room: tall enough for all four seats without scrolling (the frame grows with them,
+   up to the screen's height); the seats a little more compact */
+.dlg-lobby .dialog {
+  height: auto;
+  max-height: calc(100dvh - 23.4cqw - 20px);
+}
+
+.dlg-lobby .roster {
+  gap: 4px;
+}
+
+.dlg-lobby .roster__item {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.dlg-lobby .start-btn {
+  max-width: 260px;
+}
+
+/* Training popup: a little smaller picture and difficulty row so PLAY has its own room */
+.mode-card__list .arena-tile .arena-tile__art {
+  width: 90%;
+  align-self: center;
+}
+
+.mode-card__list .arena-tile .arena-tile__body .level-picker {
+  width: 62%;
+}
+
+/* (padding in % follows the parent's width, so the amount is placed in the field itself) */
+.coin-frame--static,
+.buy-confirm__coins.coin-frame,
+.notice-popup__title-extra .buy-confirm__coins.coin-frame {
+  position: relative;
+  padding: 0;
+}
+
+.wardrobe__balance.coin-frame {
+  padding: 0;
+}
+
+.coin-frame--static .coin-frame__amount {
+  position: absolute;
+  left: 30%;
+  right: 9.6%;
+  top: 0;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+}
+
+/* The ✕ art keeps its own proportions in every close button */
+img[src$="ui/close.webp"] {
+  object-fit: contain;
+}
+
+/* Art drawn as a background keeps its proportions: the arena's level tag (label-empty, 240×54),
+   the item name plate (166×50) and the name field (554×116) grow in height with their width */
+.arena-tile__label {
+  left: 62%;
+  width: 26%;
+  height: auto;
+}
+
+.arena-tile__label .label-empty {
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 240 / 54;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+.item__frame .item__name--plate,
+.wardrobe__items .items .item__frame .item__name--plate {
+  height: auto;
+  aspect-ratio: 166 / 50;
+  padding: 0 3px;
+  display: grid;
+  place-items: center;
+}
+
+.input--art {
+  height: auto;
+  aspect-ratio: 554 / 116;
+}
+
+.item__frame .item__name--plate {
+  flex: none;
+}
+
+.wardrobe__items .items .item__frame .item__text {
+  overflow: visible;
+}
+
+/* Close buttons are centred on the frame's gold corner with translate(-50%, -50%): hover and
+   press keep that and only scale, so the ✕ doesn't jump off the corner */
+.dialog__close:not(:disabled):not([aria-disabled="true"]):hover,
+.board-dialog__close:not(:disabled):not([aria-disabled="true"]):hover,
+.sub-dialog__close:not(:disabled):not([aria-disabled="true"]):hover,
+.editname-dialog__close:not(:disabled):not([aria-disabled="true"]):hover,
+.notice-popup__close:not(:disabled):not([aria-disabled="true"]):hover,
+.mode-card__close:not(:disabled):not([aria-disabled="true"]):hover {
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+.dialog__close:not(:disabled):not([aria-disabled="true"]):active,
+.board-dialog__close:not(:disabled):not([aria-disabled="true"]):active,
+.sub-dialog__close:not(:disabled):not([aria-disabled="true"]):active,
+.editname-dialog__close:not(:disabled):not([aria-disabled="true"]):active,
+.notice-popup__close:not(:disabled):not([aria-disabled="true"]):active,
+.mode-card__close:not(:disabled):not([aria-disabled="true"]):active {
+  transform: translate(-50%, -50%) scale(0.94);
+}
+
+/* Arena card: the picture inside the frame's window (13–87 % × 16–52 %, cut corners), a little
+   in from the gold trim, with its corners cut to match */
+.arena-tile .arena-tile__art {
+  left: 14.6%;
+  top: 17.4%;
+  width: 70.8%;
+  height: 33.4%;
+  border-radius: 0;
+  box-shadow: none;
+  clip-path: polygon(6% 0, 94% 0, 100% 8%, 100% 92%, 94% 100%, 6% 100%, 0 92%, 0 8%);
+}
+
+/* Soon / locked: the level tag (label-empty, 240×54) where the status line was */
+.arena-tile__tag {
+  display: block;
+  width: 42%;
+  margin-top: 0.4cqw;
+}
+
+.arena-tile__tag .label-empty {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 240 / 54;
+  padding: 0;
+  font-size: max(0.72rem, 4.6cqw);
+  white-space: nowrap;
+}
+
+/* BUY (439×147): the price centred in the dark field (48.7–83.8 % across); the art has no
+   coin in the field, so no room is kept for one */
+.art--buy__price {
+  left: 48.7%;
+  width: 35.1%;
+  padding: 0;
+  text-align: center;
+}
+
+/* Buy window: the question, your coins, the item and BUY centred on the parchment
+   (28–91 % down), so BUY has room under it */
+.notice-popup:has(.notice-popup__title--with-extra) .notice-popup__title {
+  top: 31.5%;
+}
+
+.notice-popup:has(.notice-popup__title--with-extra) .notice-popup__title-extra {
+  top: 42%;
+}
+
+.notice-popup:has(.notice-popup__title--with-extra) .notice-popup__body {
+  top: 54.4%;
+}
+
+/* Arena card: the level tag on the name's line, at the right; PLAY inside the lower panel
+   (56.7–88.7 % down): 44 % wide (9 % tall), its bottom 1.5 % above the panel's edge */
+.arena-tile .arena-tile__body {
+  height: 20%;
+}
+
+.arena-tile__tag {
+  position: absolute;
+  top: 1.6cqw;
+  right: 0;
+  width: 30%;
+  margin: 0;
+}
+
+.arena-tile:has(.arena-tile__tag) .arena-tile__name {
+  padding-right: 32%;
+}
+
+.arena-tile .arena-tile__play {
+  left: 28%;
+  top: 78.2%;
+  width: 44%;
+}
+
+.mode-card__list .arena-tile .arena-tile__play {
+  width: 58%;
+}
+
+/* The frame drawn again over the picture with its cream cut out (arena-panel-over,
+   popup-sub-over): the tassels and the gold trim stay on top of the picture, and the picture can
+   fill its whole window (the trim hides its edges) */
+.arena-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--ui-arena-panel-over) center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+.arena-tile .arena-tile__art {
+  left: 12.6%;
+  top: 15.5%;
+  width: 74.8%;
+  height: 37.2%;
+  clip-path: none;
+}
+
+.arena-tile .arena-tile__body,
+.arena-tile .arena-tile__play {
+  z-index: 2;
+}
+
+.mode-card__list .arena-tile::after {
+  display: none;
+}
+
+.mode-card__box::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--ui-popup-sub-over) center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+.mode-card__title,
+.mode-card__close {
+  z-index: 2;
+}
+
+.mode-card__list .arena-tile .arena-tile__body,
+.mode-card__list .arena-tile .arena-tile__play {
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: 2;
+}
+
+/* Training popup: the content starts under the frame's tassels (they hang to 40 % down) */
+.mode-card__list {
+  top: 41%;
+  height: 50%;
+}
+
+.mode-card__list .arena-tile .arena-tile__art {
+  width: 78%;
+}
+
+.mode-card__list .arena-tile {
+  gap: 1.6cqw;
+}
+
+/* ======================================================================
+   Leaderboard row (lb-row 700×139, lb-row-you 700×146): everything inside the cream strip
+   (24–72 % down) and clear of the gold corners (the left and right ~11 %), each art at its
+   own proportions. The parts are placed on the row itself (the profile button fills it).
+   ====================================================================== */
+.lb-row {
+  aspect-ratio: 700 / 139;
+  padding: 0;
+  container-type: inline-size;
+}
+
+.lb-row--you,
+.lb-row--pinned {
+  aspect-ratio: 700 / 146;
+}
+
+.lb-row__open {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.lb-row__rank,
+.lb-row__avatar,
+.lb-row__who,
+.lb-row__score {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+}
+
+/* Rank: the medal (top 3) or the number in its round frame, 11–21 % across */
+.lb-row__rank {
+  left: 11.2%;
+  width: 10.4%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.lb-row__rank img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: contain;
+}
+
+.lb-row__num {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--ink-red);
+  font-size: 4.4cqw;
+  font-weight: 900;
+  text-shadow: none;
+}
+
+/* Avatar 22.6–31.6 % */
+.lb-row__avatar {
+  left: 22.6%;
+  width: 9%;
+  box-shadow: 0 0 0 1.5px #f2c14e;
+  border-width: 1.5px;
+}
+
+/* Name and level 33.5–67 % */
+.lb-row__who {
+  left: 33.5%;
+  right: 33%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.lb-row__who strong {
+  overflow: hidden;
+  font-size: 4.2cqw;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.lb-row__who span {
+  font-size: 3.2cqw;
+}
+
+/* Score frame (lb-score 300×121) 68–89 %, the number in its field */
+.lb-row__score {
+  right: 10.6%;
+  width: 21.4%;
+  height: auto;
+  aspect-ratio: 300 / 121;
+}
+
+.lb-row__score-value {
+  left: 14%;
+  width: 72%;
+  font-size: 3.6cqw;
+}
+
+/* Titles on the plank fit on phones too (the leaderboard's was cut to "Leaderbo…") */
+.art-title {
+  font-size: clamp(1rem, 5.6cqw, 1.6rem);
+  padding: 2px 16px 4px;
+}
+
+/* ======================================================================
+   Friend row on its card (friend-card 961×285): the avatar in the round frame (10–28 % across,
+   19–79 % down), name / level / status in the left of the cream panel (34–60 %), the buttons
+   in its right part (61–87 %), all inside the panel (27–72 % down). The card keeps its shape.
+   ====================================================================== */
+.friend-row {
+  position: relative;
+  display: block;
+  min-height: 0;
+  height: auto;
+  aspect-ratio: 961 / 285;
+  padding: 0;
+  container-type: inline-size;
+}
+
+.friend-row__who {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: auto;
+  height: auto;
+  padding: 0;
+}
+
+.friend-row__avatar {
+  position: absolute;
+  left: 10.6%;
+  top: 19.6%;
+  width: 17.6%;
+  height: auto;
+  aspect-ratio: 1;
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+.friend-row__avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.friend-row__text {
+  position: absolute;
+  left: 34%;
+  right: 40%;
+  top: 27%;
+  bottom: 28%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  text-align: left;
+}
+
+.friend-row__text strong {
+  overflow: hidden;
+  font-size: 4.6cqw;
+  line-height: 1.1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.friend-row__text .friend-row__level,
+.friend-row__text .friend-row__status {
+  overflow: hidden;
+  font-size: 3.4cqw;
+  line-height: 1.15;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.friend-row__status img {
+  width: 3.2cqw;
+  height: 3.2cqw;
+}
+
+.friend-row__actions {
+  position: absolute;
+  left: 61%;
+  right: 13%;
+  top: 27%;
+  bottom: 28%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.5cqw;
+  margin: 0;
+}
+
+.friend-row__actions > * {
+  flex: 0 1 auto;
+  max-height: 100%;
+}
+
+.friend-row__actions .art,
+.friend-row__actions .art img {
+  width: auto;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100%;
+}
+
+/* Edit name: the field and SAVE inside the frame's cream panel (12–88 % × 34–73 %) */
+.editname-dialog__inner {
+  left: 14%;
+  top: 35%;
+  width: 72%;
+  height: 37%;
+}
+
+.editname-dialog .edit-name__form {
+  gap: 1.2cqw;
+}
+
+.editname-dialog .edit-name__form .input {
+  width: 64%;
+  font-size: max(0.95rem, 3.6cqw);
+}
+
+.editname-dialog .edit-name__form .art--save {
+  width: 24%;
+}
+
+/* Friend's code field: the text clear of the rope ends, the placeholder small enough to fit */
+.code-field--input {
+  padding: 0 15%;
+}
+
+.code-field--input::placeholder {
+  font-size: 0.62em;
+  letter-spacing: 0.06em;
+}
+
+/* Phones: a tap marks the button .is-pressed (the general rule presses it down without the
+   centring), so the ✕ keeps its centring there too */
+button.dialog__close.is-pressed:not(:disabled):not([aria-disabled="true"]),
+button.board-dialog__close.is-pressed:not(:disabled):not([aria-disabled="true"]),
+button.sub-dialog__close.is-pressed:not(:disabled):not([aria-disabled="true"]),
+button.editname-dialog__close.is-pressed:not(:disabled):not([aria-disabled="true"]),
+button.notice-popup__close.is-pressed:not(:disabled):not([aria-disabled="true"]),
+button.mode-card__close.is-pressed:not(:disabled):not([aria-disabled="true"]) {
+  transform: translate(-50%, -50%) scale(0.94);
+}
+
+/* Store price button (btn-start-blank, 720×201): the whole price on the green face
+   (9–91 % across, 26–72 % down), no BUY */
+.art--price {
+  position: relative;
+  container-type: inline-size;
+}
+
+.art--price img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.art--price__text {
+  position: absolute;
+  left: 9%;
+  top: 26%;
+  width: 82%;
+  height: 46%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-family: "Vazirmatn", Tahoma, "Segoe UI", sans-serif;
+  font-size: 11.5cqw;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  color: #fff8e1;
+  -webkit-text-stroke: 0.9cqw #1d5a1f;
+  paint-order: stroke fill;
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+
+.pack__buy.art--price {
+  max-width: calc(560px * var(--art-scale));
+}

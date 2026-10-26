@@ -14,6 +14,7 @@ import type {
 import { Friends } from "../social/Friends.js";
 import type { BazaarVerifier } from "../economy/bazaar.js";
 import type { AccountRecovery } from "../account/Recovery.js";
+import type { BazaarLogin } from "../account/BazaarLogin.js";
 import { versionInfo } from "./version.js";
 import { CATALOG, listArenas } from "../economy/config.js";
 import { EconomyError, type Economy } from "../economy/Economy.js";
@@ -34,6 +35,10 @@ import type { PaymentService } from "../economy/payments.js";
  *   POST /api/account/email/verify { email, code }  save your progress with it   (Bearer token)
  *   POST /api/account/restore/start { email, lang } email a code to restore      (no token)
  *   POST /api/account/restore/verify { email, code } -> { accountId, token }     (no token)
+ *   GET  /api/account/bazaar                 { linked } Bazaar saves your progress (Bearer token)
+ *   POST /api/account/bazaar/start { returnUrl } -> { url } sign in with Bazaar (web) (Bearer token)
+ *   GET  /api/account/bazaar/callback        Bazaar's OAuth answer -> back to the game (no token)
+ *   POST /api/account/bazaar/claim { ticket } -> { outcome, accountId, token? }       (no token)
  *   POST /api/purchases/bazaar { productId, purchaseToken }  a Cafe Bazaar coin pack (Bearer token)
  *   POST /api/daily-gift                    the free daily coins (once a day) (Bearer token)
  *   GET  /api/version                       latest app version, minimum to play (no token)
@@ -146,6 +151,8 @@ export function createApiHandler(
   bazaar: BazaarVerifier | null = null,
   /** Saving progress with an email; null when there's no database. */
   recovery: AccountRecovery | null = null,
+  /** Sign in with Cafe Bazaar on the web; null when its keys aren't set. */
+  bazaarLogin: BazaarLogin | null = null,
 ) {
   return async function handleApi(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
     const url = new URL(req.url ?? "/", "http://localhost");
@@ -178,6 +185,7 @@ export function createApiHandler(
         items: CATALOG.map((item) => ({ ...item })),
         stores: { bazaar: Boolean(economy && bazaar) },
         emailRecovery: Boolean(economy && recovery?.available),
+        bazaarLogin: Boolean(economy && bazaarLogin),
       };
       send(res, 200, body);
       return true;
@@ -222,6 +230,27 @@ export function createApiHandler(
       return true;
     }
 
+    // Sign in with Bazaar (web): Bazaar's answer, then the game claims the outcome (no token yet).
+    if (bazaarLogin && route === "GET /api/account/bazaar/callback") {
+      const location = await bazaarLogin.callback(url.searchParams);
+      res.writeHead(302, { Location: location, "Cache-Control": "no-store" });
+      res.end();
+      return true;
+    }
+    if (bazaarLogin && route === "POST /api/account/bazaar/claim") {
+      if (!restoreLimiter.allow(ip)) {
+        send(res, 429, { error: "rate_limited", message: "Too many tries from this address. Try again later." });
+        return true;
+      }
+      try {
+        const body = ((await readJson(req)) ?? {}) as Record<string, unknown>;
+        send(res, 200, bazaarLogin.claim(body.ticket));
+      } catch (error) {
+        sendError(res, error);
+      }
+      return true;
+    }
+
     const token = req.headers.authorization?.replace(/^Bearer\s+/i, "");
     const accountId = economy.authenticate(token);
     if (!accountId) {
@@ -250,6 +279,11 @@ export function createApiHandler(
         const body = await readJson(req);
         if (!body) send(res, 400, { error: "bad_request", message: "Invalid request." });
         else send(res, 200, { appearance: economy.saveAppearance(accountId, body) });
+      } else if (bazaarLogin && route === "GET /api/account/bazaar") {
+        send(res, 200, { linked: bazaarLogin.linked(accountId) });
+      } else if (bazaarLogin && route === "POST /api/account/bazaar/start") {
+        const body = ((await readJson(req)) ?? {}) as Record<string, unknown>;
+        send(res, 200, bazaarLogin.start(accountId, body.returnUrl));
       } else if (recovery && route === "GET /api/account/email") {
         send(res, 200, { email: recovery.linkedEmail(accountId), available: recovery.available });
       } else if (recovery && route === "POST /api/account/email/start") {

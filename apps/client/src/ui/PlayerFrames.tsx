@@ -17,7 +17,7 @@ export function PlayerFrames({ players }: { players: readonly UIPlayer[] }) {
         .map((p) => (
           <li
             key={p.id}
-            className={`frame${p.alive ? "" : " frame--out"}${p.isYou ? " frame--you" : ""}`}
+            className={`frame frame--${FRAMES[p.colorIndex % FRAMES.length]}${p.alive ? "" : " frame--out"}${p.isYou ? " frame--you" : ""}`}
             style={{ backgroundImage: `url("${BASE}hud/player-${FRAMES[p.colorIndex % FRAMES.length]}.webp")` }}
           >
             <img className="frame__avatar" src={avatarSrc(p.appearance.avatar)} alt="" width={160} height={160} />

@@ -8,6 +8,16 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Added
 
+- **Sign in with Cafe Bazaar on the web** (the browser game, next to Google Play and email): OAuth2 on the game server (`account/BazaarLogin.ts`). A new Bazaar account is linked to the player; one that already saves another player signs this device in as them. The browser only ever sees a one-time ticket (5 minutes), never a key; states expire after 10 minutes and come back only to the game's own pages. Server keys `BAZAAR_LOGIN_CLIENT_ID` / `BAZAAR_LOGIN_SECRET` (`tools/server-bazaar-login-setup.sh`); the catalog says `bazaarLogin` when it's on. 6 new tests (188 total).
+- Cafe Bazaar build:
+  - **Sign in with Bazaar** replaces saving with an email: the save (the game server account, name, look and, when it fits, this device's progress) is kept in Bazaar's in-app storage (10 KB per player), so a new or reset phone plays as the same player. Returning players are signed in at start; Bazaar's own install / update screens show when Bazaar is missing or too old, and its login page when the player isn't logged in to Bazaar (the login-check service).
+  - **Updates from Bazaar**: at start the game asks Bazaar (BazaarUpdater) whether a newer version is out, online or not, and Update opens Bazaar's update page in the game. About offers **Turn on auto-update** while it's off.
+  - **About → Rate & review** opens the game's review page in Bazaar, and **More games** the developer's page (with a developer id in `apps/mobile/bazaar.config.json` or the variable `BAZAAR_DEVELOPER_ID`).
+  - **Automatic release in Cafe Bazaar**: with the secret `BAZAAR_PISHKHAN_TOKEN`, every successful build of the `bazaar` branch sends the signed APK through the Pishkhan API and asks for review (`tools/pishkhan-release.mjs`; skipped when Bazaar already has that versionCode; variable `BAZAAR_AUTO_PUBLISH`; release notes required, see below). A manual run on another branch builds without publishing.
+  - **Release notes are required**, checked before anything is built (`tools/bazaar-notes.mjs`): a push needs `apps/mobile/bazaar-release-notes.json` with `version` equal to the version being built and `fa` / `en` filled in (edited on the `bazaar` branch); a manual run asks for both in its form instead. Missing, empty or for another version: the build fails. After a successful release the file is emptied again (a `[skip ci]` commit on `bazaar`). The notes go to Bazaar and into the Bazaar GitHub Release.
+  - **Alpha releases**: `BAZAAR_CHANNEL=alpha` (or Run workflow → channel alpha) uploads the build as a draft only; the Pishkhan API can't choose the release group, so you pick the alpha group in the panel and send it for review. A draft of the same version isn't sent again.
+  - The sign-in button carries the Cafe Bazaar logo (`public/icons/bazaar.png`, 30 px, as Bazaar's guide asks).
+  - Native: CafeBazaarAuth 1.0.2 and BazaarUpdater 1.2.0 next to Poolakey, the `ILoginCheckService` AIDL, and the plugin methods behind all this. The Google Play cloud save and the Bazaar one share `network/cloudSave.ts`.
 - The web game is on GitHub Pages (https://jolly-panda-works.github.io/mini-sumo-3d/): every push to `main` deploys the Web build there (a Pages job after Web; online play through the usual game server).
 - Desktop builds are back in every GitHub Release: Windows (`-Windows-Setup.exe` installer and `-Windows-Portable.exe`) and Linux (`.AppImage` and `.deb`), built by a new Desktop job next to Web and Android. Unsigned, so Windows asks once. On desktop, "Update available" opens the game's page (a reload can't update the bundled files).
 - Keyboard players (web and desktop) get UI made for them: in a bout, the dash drum with its recharge bar and a Space key, and the controls as keycaps (WASD / arrows, Space, Esc); when you're out, H goes home; on the results board, H for Home and Enter for Rematch or Play again, each button showing its key.
@@ -19,6 +29,14 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 - The desktop app couldn't load the game's sounds and some fonts: its built-in file server now knows audio and font files.
 
 ### Changed
+
+- **New UI art (Japanese UI v1)**: 144 images replaced (buttons, frames, panels, HUD, icons, loading screen, arena pictures), encoded as quality WebP (4.8 MB in all; the generated lossless files were 21.7 MB). Layouts are unchanged; the CSS is fitted to the new art (one block at the end of `styles.css`): each panel's windows measured from the art, dark ink on the new cream parchment, the dialog 9-slices re-cut, titles that the old art had painted on (leaderboard, edit name, welcome, LEVEL UP!, MESSAGE / WARNING / ERROR) now written on a plank, the painted START and coin + used as they are, and the player frames positioned per colour. The old results board is kept: the new one has no room for the rewards and buttons.
+- New art in use: RETURN HOME, the notice plank, the OSHIDASHI! / RING OUT! / RING SHRINKING! banners, Sign in with Bazaar (with the official logo in its square), Rate & review, More games, Auto-update and the review icon in About, and an Update button for update prompts.
+
+### Fixed
+
+- Update prompts showed the OK (or LEAVE) art on their Update button; it has its own art now.
+- The touch DASH button's cooldown sweep was drawn as a plain white disc over the art.
 
 - Hits throw harder (+25%: restitution 0.45, push 6.5), with rope resistance 8 so the pace stays the same (first ring-out median 9.9 s over 100 bouts, none within 3 s).
 - Juicier hits: a split-second hit-stop on strong hits (40–110 ms, the wrestlers freeze then snap on) and a camera punch (a quick dip toward the ring), on top of the shake.

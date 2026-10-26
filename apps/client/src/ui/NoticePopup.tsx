@@ -11,6 +11,8 @@ const BASE = import.meta.env.BASE_URL;
 /** Actions drawn with their own button art (by id, or id:label). */
 // One matching set (public/ui/notice-*.webp). Actions not listed use the plank with text.
 const ART: Record<string, string> = {
+  "ok:update": "btn-update",
+  "leave:update": "btn-update",
   ok: "notice-ok",
   leave: "notice-leave",
   "cancel:stay": "notice-stay",

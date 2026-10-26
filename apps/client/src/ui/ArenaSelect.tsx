@@ -192,13 +192,6 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
               style={{ ["--accent" as string]: theme.accent, ["--tile-ink" as string]: theme.ink, ["--tile-sky" as string]: theme.sky }}
             >
               <img className="arena-tile__art" src={arenaImage(arena.id)} alt="" width={960} height={536} decoding="async" />
-              <span className="arena-tile__label">
-                {soon ? (
-                  <span className="label-empty">Soon</span>
-                ) : locked ? (
-                  <span className="label-empty">Lvl {arena.requires.level}</span>
-                ) : null}
-              </span>
               <div className="arena-tile__body">
                 <h3 className="arena-tile__name">{arena.name}</h3>
                 <p className="arena-tile__mood">{theme.title}</p>
@@ -212,7 +205,14 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
                     <dd>{free ? "Bots & players" : <Coins amount={arena.maxPrize} />}</dd>
                   </div>
                 </dl>
-                {status && !soon && <p className="arena-tile__status">{status}</p>}
+                {/* Soon / locked: the tag in place of the status line (not on the picture) */}
+                {soon || locked ? (
+                  <span className="arena-tile__tag" title={status}>
+                    <span className="label-empty">{soon ? "Soon" : `Lvl ${arena.requires.level}`}</span>
+                  </span>
+                ) : (
+                  status && <p className="arena-tile__status">{status}</p>
+                )}
                 {free && <BotLevelPicker />}
               </div>
               <button
@@ -372,6 +372,7 @@ export function ModeCardPopup({ mode, onClose }: { mode: "training" | "private";
         <button className="mode-card__close" onClick={onClose} aria-label="Close">
           <img src={`${import.meta.env.BASE_URL}ui/close.webp`} alt="" draggable={false} />
         </button>
+        <h2 className="mode-card__title">{mode === "training" ? "Training Arena" : "Private Room"}</h2>
         <ul className="mode-card__list">
           {mode === "training" ? <TrainingCard busy={busy} onPlay={onClose} /> : <PrivateRoomCard busy={busy} onPlay={onClose} />}
         </ul>

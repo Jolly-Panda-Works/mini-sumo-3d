@@ -9,8 +9,9 @@ import { audio } from "../audio/AudioManager";
 import { useStore } from "../store";
 import { setShopOpen } from "../uiStore";
 import { Coins } from "./Coins";
+import { devSamples } from "./devSamples";
 import { Dialog } from "./Dialog";
-import { BuyButton, ComingSoonButton } from "./ArtButtons";
+import { ComingSoonButton, PriceButton } from "./ArtButtons";
 
 /** Coin shop: daily free coins and coin packs (bought through Cafe Bazaar in the Bazaar build). */
 export function CoinShop() {
@@ -25,27 +26,35 @@ export function CoinShop() {
   // Cafe Bazaar build: packs are bought with real money through Bazaar.
   // Cafe Bazaar build: offline the coins go to this device; online the server verifies the
   // purchase and credits your account (COMING SOON until the server has its Bazaar keys).
-  const store = bazaarBuyable() && (local || Boolean(economy.catalog?.stores?.bazaar));
+  const storeLive = bazaarBuyable() && (local || Boolean(economy.catalog?.stores?.bazaar));
+  // Dev mode: the store's BUY buttons with sample prices (buying does nothing).
+  const samplePrices = useStore(devSamples).storePrices;
+  const store = storeLive || samplePrices !== null;
   const [buying, setBuying] = useState<string | null>(null);
   // The packs' prices as Cafe Bazaar shows them (shown on BUY instead of a coin amount).
-  const [prices, setPrices] = useState<Record<string, string>>({});
+  const [livePrices, setPrices] = useState<Record<string, string>>({});
+  const prices = samplePrices ?? livePrices;
   useEffect(() => {
-    if (!store) return;
+    if (!storeLive) return;
     void bazaarPrices().then(setPrices);
-  }, [store]);
+  }, [storeLive]);
 
   // Finish any purchase that was paid but not credited (e.g. the app closed mid-purchase).
   useEffect(() => {
-    if (!store) return;
+    if (!storeLive) return;
     void restoreBazaarPurchases().then((coins) => {
       if (coins > 0) {
         audio.sample("purchase");
         pushToast(`+${coins.toLocaleString("en-US")} Sumo Coins`, "info");
       }
     });
-  }, [store]);
+  }, [storeLive]);
 
   const buy = async (pack: CoinPack) => {
+    if (samplePrices) {
+      pushToast("Preview: coins are bought in the Cafe Bazaar app", "info");
+      return;
+    }
     setBuying(pack.id);
     try {
       const result = await buyCoinPack(pack);
@@ -125,7 +134,7 @@ export function CoinShop() {
               <Coins amount={pack.coins} />
             </p>
             {store ? (
-              <BuyButton
+              <PriceButton
                 className="pack__buy"
                 priceText={prices[pack.id] ?? ""}
                 label={`Buy ${pack.name}, ${pack.coins} Sumo Coins, in Cafe Bazaar${prices[pack.id] ? ` for ${prices[pack.id]}` : ""}`}

@@ -5,6 +5,7 @@ import { networkStore } from "../network/networkMode";
 import { useStore } from "../store";
 import { setLeaderboardOpen } from "../uiStore";
 import { avatarSrc } from "./Avatar";
+import { devSamples } from "./devSamples";
 import { Dialog } from "./Dialog";
 import { FriendProfilePopup } from "./FriendProfilePopup";
 
@@ -18,8 +19,11 @@ const MEDALS = ["gold", "silver", "bronze"] as const;
  */
 export function LeaderboardPanel() {
   const network = useStore(networkStore);
-  const online = network.mode === "online";
-  const [board, setBoard] = useState<LeaderboardResponse | null>(null);
+  // Dev mode: sample rows instead of the server's.
+  const sample = useStore(devSamples).leaderboard;
+  const online = network.mode === "online" || sample !== null;
+  const [fetched, setBoard] = useState<LeaderboardResponse | null>(null);
+  const board = sample ?? fetched;
   const [error, setError] = useState<string | null>(null);
   const listRef = useRef<HTMLOListElement>(null);
   const meRef = useRef<HTMLLIElement>(null);
@@ -27,11 +31,11 @@ export function LeaderboardPanel() {
   const [viewing, setViewing] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!online) return;
+    if (!online || sample) return;
     void request<LeaderboardResponse>("/leaderboard?limit=100")
       .then(setBoard)
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "Couldn't load the leaderboard."));
-  }, [online]);
+  }, [online, sample]);
 
   const meInList = Boolean(board?.top.some((e) => e.accountId === board.you.accountId));
 

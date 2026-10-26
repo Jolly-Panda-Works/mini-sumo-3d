@@ -13,6 +13,7 @@ import { createApiHandler } from "./http/api.js";
 import { Friends } from "./social/Friends.js";
 import { BazaarVerifier, bazaarConfigFromEnv } from "./economy/bazaar.js";
 import { AccountRecovery } from "./account/Recovery.js";
+import { BazaarLogin } from "./account/BazaarLogin.js";
 import { EmailJsMailer, LogMailer, emailJsConfigFromEnv } from "./account/mailer.js";
 import { createStaticHandler } from "./http/static.js";
 
@@ -49,7 +50,27 @@ const emailConfig = emailJsConfigFromEnv();
 const mailer = emailConfig ? new EmailJsMailer(emailConfig) : process.env.EMAIL_DEV_LOG === "true" ? new LogMailer() : null;
 const recovery = economy ? new AccountRecovery(economy, mailer, emailConfig?.publicUrl ?? process.env.PUBLIC_URL ?? "https://sumo.ryujin.fans/") : null;
 console.log(mailer ? `[email] saving progress with email on (${emailConfig ? "EmailJS" : "log only"})` : "[email] saving progress with email off (no EmailJS keys)");
-const handleApi = createApiHandler(economy, new PaymentService(flags), friends, bazaar, recovery);
+// Sign in with Cafe Bazaar on the web (OAuth keys from the Bazaar panel, "ورود با بازار")
+const bazaarLoginId = process.env.BAZAAR_LOGIN_CLIENT_ID?.trim();
+const bazaarLoginSecret = process.env.BAZAAR_LOGIN_SECRET?.trim();
+const serverPublicUrl = process.env.PUBLIC_URL || "https://sumo.ryujin.fans/";
+const bazaarLogin =
+  economy && bazaarLoginId && bazaarLoginSecret
+    ? new BazaarLogin(economy, {
+        clientId: bazaarLoginId,
+        secret: bazaarLoginSecret,
+        publicUrl: serverPublicUrl,
+        // The game's pages that may come back from Bazaar: this server's and GitHub Pages
+        // (BAZAAR_LOGIN_RETURN_ORIGINS adds more, comma-separated).
+        returnOrigins: [
+          new URL(serverPublicUrl).origin,
+          "https://jolly-panda-works.github.io",
+          ...(process.env.BAZAAR_LOGIN_RETURN_ORIGINS ?? "").split(",").map((o) => o.trim()).filter(Boolean),
+        ],
+      })
+    : null;
+console.log(bazaarLogin ? `[bazaar-login] web sign-in on (callback ${bazaarLogin.callbackUrl})` : "[bazaar-login] web sign-in off (no BAZAAR_LOGIN_CLIENT_ID / SECRET)");
+const handleApi = createApiHandler(economy, new PaymentService(flags), friends, bazaar, recovery, bazaarLogin);
 // The built web game, when this server also hosts it (STATIC_DIR, set in the Docker image).
 const handleStatic = createStaticHandler(process.env.STATIC_DIR);
 

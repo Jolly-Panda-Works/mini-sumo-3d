@@ -215,6 +215,8 @@ export interface CatalogResponse {
   stores?: { bazaar: boolean };
   /** Progress can be saved with an email (and restored on another device). */
   emailRecovery?: boolean;
+  /** Sign in with Cafe Bazaar on the web (the server has its OAuth keys). */
+  bazaarLogin?: boolean;
 }
 
 /** Cafe Bazaar product ids (Bazaar developer panel) for each coin pack. */

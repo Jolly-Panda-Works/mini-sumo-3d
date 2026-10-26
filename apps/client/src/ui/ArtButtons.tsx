@@ -49,6 +49,18 @@ export function BuyButton({ price, priceText, ...props }: Props & { price?: numb
   );
 }
 
+/**
+ * A store price on its own (e.g. Cafe Bazaar's "۱۹٬۰۰۰ تومان"), on the blank green button so the
+ * whole price fits. An empty priceText leaves it blank (the price is still loading).
+ */
+export function PriceButton({ priceText, ...props }: Props & { priceText: string }) {
+  return (
+    <ArtButton art="btn-start-blank" {...props} className={`art--price ${props.className ?? ""}`}>
+      <span className="art--price__text">{priceText}</span>
+    </ArtButton>
+  );
+}
+
 export function NotNowButton(props: Props) {
   return <ArtButton art="btn-not-now" {...props} className={`art--not-now ${props.className ?? ""}`} />;
 }
@@ -65,11 +77,10 @@ export function FreeLabel({ className = "" }: { className?: string }) {
   return <img className={`art-label-free ${className}`} src={`${BASE}ui/label-free.webp`} alt="Free" draggable={false} />;
 }
 
-/** The vibration switch: the phone frame with the on/off switch art; tap to toggle. */
+/** The vibration switch: the on/off switch art on its own; tap to toggle. */
 export function VibrationToggle({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {
   return (
     <button type="button" className="vib-toggle" role="switch" aria-checked={on} aria-label="Vibration" onClick={() => onChange(!on)}>
-      <img className="vib-toggle__frame" src={`${BASE}ui/vibration-frame.webp`} alt="" draggable={false} />
       <img className="vib-toggle__switch" src={`${BASE}ui/vibration-${on ? "on" : "off"}.webp`} alt="" draggable={false} />
     </button>
   );

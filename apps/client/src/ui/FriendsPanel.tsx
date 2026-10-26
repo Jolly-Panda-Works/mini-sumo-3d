@@ -7,6 +7,7 @@ import { settingsStore } from "../settings";
 import { useStore } from "../store";
 import { pushToast, setFriendsOpen, setModeCard, showError } from "../uiStore";
 import { avatarSrc } from "./Avatar";
+import { devSamples } from "./devSamples";
 import { Dialog } from "./Dialog";
 import { FriendProfilePopup } from "./FriendProfilePopup";
 
@@ -19,15 +20,17 @@ export function FriendsPanel() {
   const friends = useStore(friendsStore);
   const [code, setCode] = useState("");
   const [viewing, setViewing] = useState<string | null>(null);
-  const online = network.mode === "online";
+  // Dev mode: a sample list instead of the server's.
+  const sample = useStore(devSamples).friends;
+  const online = network.mode === "online" || sample !== null;
 
   useEffect(() => {
-    if (!online) return;
+    if (!online || sample) return;
     void loadFriends().catch(() => undefined);
     // Keep who's online fresh while the list is open.
     const timer = window.setInterval(() => void loadFriends().catch(() => undefined), 15_000);
     return () => window.clearInterval(timer);
-  }, [online]);
+  }, [online, sample]);
 
 
   const add = async (event: FormEvent) => {
@@ -43,7 +46,7 @@ export function FriendsPanel() {
   };
 
   const copyCode = async () => {
-    const mine = friends.data?.code;
+    const mine = (sample ?? friends.data)?.code;
     if (!mine) return;
     try {
       await navigator.clipboard.writeText(mine);
@@ -53,7 +56,7 @@ export function FriendsPanel() {
     }
   };
 
-  const data = friends.data;
+  const data = sample ?? friends.data;
   return (
     <Dialog title="Friends" onClose={() => setFriendsOpen(false)} className="friends">
       {!online ? (

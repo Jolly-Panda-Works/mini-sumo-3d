@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { LATE_GAME_MS, Phase } from "@mini-sumo/shared";
 import { GameCanvas } from "./game/GameCanvas";
 import { HomeBackground } from "./ui/HomeBackground";
@@ -24,7 +24,8 @@ import { NoticePopup } from "./ui/NoticePopup";
 import { ServerWait } from "./ui/ServerWait";
 import { restoreBazaarPurchases } from "./network/bazaar";
 import { codeFromLink } from "./network/accountEmail";
-import { checkForUpdate } from "./network/updateCheck";
+import { checkBazaarUpdate, checkForUpdate } from "./network/updateCheck";
+import { bazaarTicketFromLink, finishBazaarWebLogin } from "./network/bazaarWeb";
 import { networkStore } from "./network/networkMode";
 import { EmailSavePopup } from "./ui/EmailSavePopup";
 import { ModeCardPopup } from "./ui/ArenaSelect";
@@ -49,6 +50,26 @@ export function App() {
   useEffect(() => {
     if (networkMode === "online") void checkForUpdate();
   }, [networkMode]);
+  // The Bazaar build also asks Bazaar (online or not).
+  useEffect(() => {
+    void checkBazaarUpdate();
+  }, []);
+
+  // Back from signing in with Bazaar on the web (?bazaarLogin=…): finish it once online.
+  const [bazaarTicket] = useState(() => bazaarTicketFromLink());
+  const bazaarTicketUsed = useRef(false); // a ticket works once
+  useEffect(() => {
+    if (!bazaarTicket || networkMode !== "online" || bazaarTicketUsed.current) return;
+    bazaarTicketUsed.current = true;
+    void finishBazaarWebLogin(bazaarTicket)
+      .then((outcome) => {
+        if (outcome === "linked") pushToast("Signed in with Bazaar", "info");
+        else if (outcome === "cancelled") pushToast("Sign in with Bazaar was cancelled", "info");
+        else if (outcome === "failed") pushToast("Sign in with Bazaar failed. Try again later.", "error");
+        // "restore": the game restarts as the player this Bazaar account saves.
+      })
+      .catch((error: unknown) => pushToast(error instanceof Error ? error.message : "Sign in with Bazaar failed.", "error"));
+  }, [bazaarTicket, networkMode]);
 
   // Cafe Bazaar: purchases paid but not credited yet (the app closed mid-way, or the server was
   // unreachable) are finished once the game is connected.
