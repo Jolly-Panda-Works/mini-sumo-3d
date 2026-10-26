@@ -85,3 +85,44 @@ describe("Cafe Bazaar purchase verification", () => {
     expect(economy.creditedStorePurchase("bazaar", "tok2")).toBe(false);
   });
 });
+
+describe("Cafe Bazaar purchase verification with the Pishkhan API token", () => {
+  /** A fake Cafe Bazaar that only accepts the app's token in its header. */
+  function fakeWithSecret(purchases: Record<string, { purchaseState: number; consumptionState: number }>) {
+    const seen: string[] = [];
+    const reply = (status: number, body: unknown) => ({ ok: status >= 200 && status < 300, status, json: async () => body, text: async () => JSON.stringify(body) });
+    const fetchImpl = async (url: string, init?: { headers?: Record<string, string> }) => {
+      seen.push(url);
+      if (init?.headers?.["CAFEBAZAAR-PISHKHAN-API-SECRET"] !== "app-token") return reply(401, { error: "invalid_token" });
+      const token = decodeURIComponent(url.split("/purchases/")[1]!.replace(/\/$/, ""));
+      const p = purchases[token];
+      return p ? reply(200, p) : reply(404, { error: "not_found" });
+    };
+    return { fetchImpl, seen };
+  }
+
+  it("checks purchases with the token in its header, no OAuth", async () => {
+    const { fetchImpl, seen } = fakeWithSecret({ good: { purchaseState: 0, consumptionState: 1 }, used: { purchaseState: 0, consumptionState: 0 } });
+    const v = new BazaarVerifier({ apiSecret: "app-token", packageName: "com.jollypanda.mini_sumo" }, fetchImpl);
+    expect(await v.check("coins_500", "good")).toEqual({ ok: true });
+    expect(await v.check("coins_500", "used")).toMatchObject({ ok: false, reason: "consumed" });
+    expect(await v.check("coins_500", "made-up")).toMatchObject({ ok: false, reason: "not_found" });
+    expect(seen.every((u) => u.includes("/api/validate/com.jollypanda.mini_sumo/inapp/coins_500/purchases/"))).toBe(true);
+    expect(seen.some((u) => u.includes("/auth/token/"))).toBe(false);
+  });
+
+  it("a wrong token is Cafe Bazaar being unavailable, not a refused purchase", async () => {
+    const { fetchImpl } = fakeWithSecret({ good: { purchaseState: 0, consumptionState: 1 } });
+    const v = new BazaarVerifier({ apiSecret: "wrong", packageName: "com.jollypanda.mini_sumo" }, fetchImpl);
+    expect(await v.check("coins_500", "good")).toMatchObject({ ok: false, reason: "unavailable" });
+  });
+
+  it("uses the token when it's set, the OAuth client otherwise", () => {
+    expect(bazaarConfigFromEnv({ BAZAAR_PISHKHAN_TOKEN: " t ", BAZAAR_CLIENT_ID: "c", BAZAAR_CLIENT_SECRET: "s", BAZAAR_REFRESH_TOKEN: "r" })).toEqual({
+      apiSecret: "t",
+      packageName: "com.jollypanda.mini_sumo",
+    });
+    expect(bazaarConfigFromEnv({ BAZAAR_CLIENT_ID: "c", BAZAAR_CLIENT_SECRET: "s", BAZAAR_REFRESH_TOKEN: "r" })).toMatchObject({ clientId: "c" });
+    expect(bazaarConfigFromEnv({})).toBeNull();
+  });
+});

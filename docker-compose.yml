@@ -24,7 +24,9 @@ services:
       - "${WEB_PORT:-6803}:80"
     environment:
       ECONOMY_EVENT_LOG: ${ECONOMY_EVENT_LOG:-true}
-      # Cafe Bazaar purchase validation (set by tools/bazaar-api-setup.cmd; empty = off)
+      # Cafe Bazaar purchase validation (tools/server-bazaar-setup.sh; empty = off): the app's
+      # Pishkhan API token, or the older OAuth client (BAZAAR_CLIENT_ID / SECRET / REFRESH_TOKEN)
+      BAZAAR_PISHKHAN_TOKEN: ${BAZAAR_PISHKHAN_TOKEN:-}
       BAZAAR_CLIENT_ID: ${BAZAAR_CLIENT_ID:-}
       BAZAAR_CLIENT_SECRET: ${BAZAAR_CLIENT_SECRET:-}
       BAZAAR_REFRESH_TOKEN: ${BAZAAR_REFRESH_TOKEN:-}
