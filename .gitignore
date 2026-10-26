@@ -19,3 +19,8 @@ apps/mobile/ios/
 # Screenshot tooling
 server.log
 preview.log
+
+# Local only: preview config, raw generated art (the game uses the copies in apps/client/public)
+.claude/
+docs/art-generated/
+docs/art-samples/
