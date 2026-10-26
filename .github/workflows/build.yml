@@ -1,5 +1,6 @@
-# Builds Mini Sumo for Android and the web, and publishes a GitHub Release with both: the
-# Android app (APK/AAB) and a ready-to-host web build (MiniSumo-X.Y.Z-Web.zip).
+# Builds Mini Sumo for Android, the web and desktop, and publishes a GitHub Release with all
+# of them: the Android app (APK/AAB), a ready-to-host web build (MiniSumo-X.Y.Z-Web.zip) and the
+# desktop app (Windows installer and portable .exe, Linux AppImage and .deb).
 #
 # Versions (automatic): every push to main that changes the game is released.
 #   The commits since the last release decide the bump (Conventional Commits):
@@ -192,6 +193,65 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  # ------------------------------------------------------------------ desktop
+  # The Electron app around the web client (apps/desktop). Unsigned: Windows SmartScreen asks
+  # once ("More info" -> "Run anyway").
+  desktop:
+    name: Desktop (${{ matrix.name }})
+    needs: [version, test]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            target: --win
+          - name: Linux
+            os: ubuntu-latest
+            target: --linux
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      VITE_APP_VERSION: ${{ needs.version.outputs.version }}
+      # The desktop shell serves the game from the root of a local address.
+      VITE_BASE: /
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.version.outputs.sha }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: "**/package.json"
+      - name: Install dependencies
+        run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - run: npm run build:web
+      - name: Install desktop dependencies
+        run: npm ci --prefix apps/desktop
+      - name: Set version
+        run: node -e "const f='apps/desktop/package.json',fs=require('fs'),p=JSON.parse(fs.readFileSync(f));p.version=process.env.VERSION;fs.writeFileSync(f,JSON.stringify(p,null,2))"
+      - name: Build the desktop app
+        env:
+          # Unsigned builds: don't look for a code-signing certificate.
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npm run prepare:web --prefix apps/desktop && node apps/desktop/scripts/package.mjs ${{ matrix.target }}
+      - name: Collect outputs
+        run: |
+          mkdir -p out
+          cp apps/desktop/release/*.exe apps/desktop/release/*.AppImage apps/desktop/release/*.deb out/ 2>/dev/null || true
+          ls -la out
+          [ -n "$(ls -A out)" ] || { echo "::error::No desktop files were built."; exit 1; }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mini-sumo-desktop-${{ matrix.name }}
+          path: out/*
+          if-no-files-found: error
+          retention-days: 1
+
   # ------------------------------------------------------------------ android
   android:
     name: Android
@@ -307,7 +367,7 @@ jobs:
   # ------------------------------------------------------------------ release
   release:
     name: GitHub Release
-    needs: [version, web, android]
+    needs: [version, web, android, desktop]
     if: needs.version.outputs.release == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -327,9 +387,10 @@ jobs:
       - name: Collect files and checksums
         run: |
           mkdir -p release
-          # The Android app and the ready-to-host web build.
+          # The Android app, the ready-to-host web build and the desktop app.
           cp artifacts/mini-sumo-android/* release/
           cp artifacts/mini-sumo-web/* release/
+          cp artifacts/mini-sumo-desktop-*/* release/
           (cd release && sha256sum * > SHA256SUMS.txt)
           ls -la release
       - name: Write release notes

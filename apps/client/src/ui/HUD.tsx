@@ -5,6 +5,9 @@ import { useStore } from "../store";
 import { setSettingsOpen } from "../uiStore";
 import { GearIcon } from "./MainMenu";
 import { PlayerFrames } from "./PlayerFrames";
+import { KeyCap } from "./Hotkey";
+
+const BASE = import.meta.env.BASE_URL;
 
 function formatTime(ms: number): string {
   const total = Math.ceil(ms / 1000);
@@ -50,11 +53,29 @@ export function HUD({ touch }: { touch: boolean }) {
 
       {!touch && you?.alive !== false && (
         <div className="hud__bottom">
-          <div className={`dash-meter${dashReady ? " dash-meter--ready" : ""}`} aria-label={dashReady ? "Dash ready" : "Dash recharging"}>
-            <span className="dash-meter__fill" style={{ transform: `scaleX(${dashProgress})` }} />
-            <span className="dash-meter__label">{dashReady ? "Dash ready" : `Dash ${(you!.dashCooldownMs / 1000).toFixed(1)}s`}</span>
+          {/* Keyboard: the dash drum, its recharge bar and the key */}
+          <div className={`kb-dash${dashReady ? " kb-dash--ready" : ""}`} role="status" aria-label={dashReady ? "Dash ready: press Space" : "Dash recharging"}>
+            <img className="kb-dash__icon" src={`${BASE}hud/dash.webp`} alt="" width={256} height={256} draggable={false} />
+            <span className="kb-dash__bar">
+              <span className="kb-dash__fill" style={{ transform: `scaleX(${dashProgress})` }} />
+              <span className="kb-dash__label">{dashReady ? "DASH READY" : `DASH ${(you!.dashCooldownMs / 1000).toFixed(1)}s`}</span>
+            </span>
+            <KeyCap>Space</KeyCap>
           </div>
-          <p className="hud__hint">WASD or arrows to move, Space to dash, Esc for settings</p>
+          <p className="hud__keys">
+            <span>
+              <KeyCap>W</KeyCap>
+              <KeyCap>A</KeyCap>
+              <KeyCap>S</KeyCap>
+              <KeyCap>D</KeyCap> or arrows: move
+            </span>
+            <span>
+              <KeyCap>Space</KeyCap> dash
+            </span>
+            <span>
+              <KeyCap>Esc</KeyCap> settings
+            </span>
+          </p>
         </div>
       )}
     </div>

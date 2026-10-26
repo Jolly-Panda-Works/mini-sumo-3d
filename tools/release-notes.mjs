@@ -21,6 +21,11 @@ ${serverNote}
 | Android (install on a phone) | \`${f("Android.apk")}\` (signed; if missing, use \`${f("Android-debug.apk")}\`) |
 | Android (Google Play upload) | \`${f("Android.aab")}\` |
 | Web (WebGL, ready to host) | \`${f("Web.zip")}\`: unzip onto any HTTPS web host; see \`HOSTING.txt\` inside |
+| Windows (installer) | \`${f("Windows-Setup.exe")}\` |
+| Windows (no install) | \`${f("Windows-Portable.exe")}\` |
+| Linux | \`${f("Linux-x86_64.AppImage")}\` or \`${f("Linux-amd64.deb")}\` |
+
+The desktop builds aren't code-signed: on Windows, choose "More info" and then "Run anyway" the first time.
 
 Verify a download with \`SHA256SUMS.txt\`.
 `);

@@ -9116,3 +9116,134 @@ html.in-match .toast {
 html.in-match .toast-layer .toasts {
   bottom: calc(150px + var(--safe-bottom, 0px));
 }
+
+/* ======================================================================
+   Keyboard players (web and desktop): keycaps on buttons, the dash drum
+   with its recharge bar, and the key hints
+   ====================================================================== */
+
+.keycap {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.7em;
+  height: 1.7em;
+  padding: 0 0.45em;
+  border: 2px solid #2b1a10;
+  border-bottom-width: 4px;
+  border-radius: 7px;
+  background: linear-gradient(#fff4dc, #e7c996);
+  color: #3a1d05;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+/* On an art button: a small key in the top-right corner */
+.art-btn .keycap,
+.art .keycap {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35));
+}
+
+.art-btn,
+.art.art--out-home {
+  position: relative;
+}
+
+.kb-dash {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.kb-dash__icon {
+  width: 52px;
+  height: 52px;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35)) saturate(0.55) brightness(0.85);
+  transition: filter 0.2s;
+}
+
+.kb-dash--ready .kb-dash__icon {
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+  animation: kb-dash-ready 1.2s ease-in-out infinite;
+}
+
+@keyframes kb-dash-ready {
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.kb-dash__bar {
+  position: relative;
+  width: 190px;
+  height: 30px;
+  overflow: hidden;
+  border: 3px solid #2b1a10;
+  border-radius: 10px;
+  background: #4a2a16;
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.3), 0 3px 0 rgba(0, 0, 0, 0.35);
+}
+
+.kb-dash__fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#c98a55, #a0663c);
+  transform-origin: left center;
+}
+
+.kb-dash--ready .kb-dash__fill {
+  background: linear-gradient(#ffd75e, #f2b21e);
+}
+
+.kb-dash__label {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: #fff4dc;
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 0 rgba(43, 26, 16, 0.85);
+}
+
+.kb-dash--ready .kb-dash__label {
+  color: #3a1d05;
+  text-shadow: none;
+}
+
+.kb-dash .keycap {
+  font-size: 0.8rem;
+}
+
+.hud__keys {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 16px;
+  margin: 0;
+  color: #fff4dc;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-shadow: 0 2px 0 rgba(43, 35, 64, 0.8);
+}
+
+.hud__keys span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kb-dash--ready .kb-dash__icon {
+    animation: none;
+  }
+}

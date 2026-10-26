@@ -7,6 +7,7 @@ import { economyStore } from "../network/economyClient";
 import { settingsStore } from "../settings";
 import { audio } from "../audio/AudioManager";
 import { avatarSrc } from "./Avatar";
+import { KeyCap, useHotkey, useKeyboardUi } from "./Hotkey";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -41,6 +42,12 @@ export function Results() {
     const arenaId = game.arenaId;
     void roomManager.leave().then(() => roomManager.enterArena(arenaId, settingsStore.get().name));
   };
+  // Keyboard: H for Home, Enter for Play again / Rematch.
+  const keyboard = useKeyboardUi();
+  const goHome = () => void roomManager.leave();
+  const next = paid ? playAgain : isHost ? () => roomManager.rematch() : null;
+  useHotkey(["KeyH"], goHome);
+  useHotkey(["Enter", "NumpadEnter"], () => next?.(), next !== null);
 
   return (
     <div className="overlay">
@@ -76,16 +83,19 @@ export function Results() {
 
         <div className="results-board__bottom">
           <div className="results-board__buttons">
-            <button className="art-btn" onClick={() => void roomManager.leave()} aria-label="Home">
+            <button className="art-btn" onClick={goHome} aria-label="Home" aria-keyshortcuts="H">
               <img src={`${BASE}ui/btn-home.webp`} alt="" width={360} height={114} draggable={false} />
+              {keyboard && <KeyCap>H</KeyCap>}
             </button>
             {paid ? (
-              <button className="art-btn" onClick={playAgain} aria-label={`Play again for ${arena?.entryFee ?? 0} Sumo Coins`}>
+              <button className="art-btn" onClick={playAgain} aria-label={`Play again for ${arena?.entryFee ?? 0} Sumo Coins`} aria-keyshortcuts="Enter">
                 <img src={`${BASE}ui/btn-play-again.webp`} alt="" width={360} height={113} draggable={false} />
+                {keyboard && <KeyCap>Enter</KeyCap>}
               </button>
             ) : isHost ? (
-              <button className="art-btn" onClick={() => roomManager.rematch()} aria-label="Rematch">
+              <button className="art-btn" onClick={() => roomManager.rematch()} aria-label="Rematch" aria-keyshortcuts="Enter">
                 <img src={`${BASE}ui/btn-rematch.webp`} alt="" width={360} height={110} draggable={false} />
+                {keyboard && <KeyCap>Enter</KeyCap>}
               </button>
             ) : null}
           </div>

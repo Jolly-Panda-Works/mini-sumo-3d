@@ -6,6 +6,16 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ## [Unreleased]
 
+### Added
+
+- Desktop builds are back in every GitHub Release: Windows (`-Windows-Setup.exe` installer and `-Windows-Portable.exe`) and Linux (`.AppImage` and `.deb`), built by a new Desktop job next to Web and Android. Unsigned, so Windows asks once. On desktop, "Update available" opens the game's page (a reload can't update the bundled files).
+- Keyboard players (web and desktop) get UI made for them: in a bout, the dash drum with its recharge bar and a Space key, and the controls as keycaps (WASD / arrows, Space, Esc); when you're out, H goes home; on the results board, H for Home and Enter for Rematch or Play again, each button showing its key.
+
+### Fixed
+
+- Laptops and desktops with a touch screen got the phone controls (on-screen stick, no keyboard hints): touch controls now follow the main pointer, so only phones and tablets get them.
+- The desktop app couldn't load the game's sounds and some fonts: its built-in file server now knows audio and font files.
+
 ### Changed
 
 - Hits throw harder (+25%: restitution 0.45, push 6.5), with rope resistance 8 so the pace stays the same (first ring-out median 9.9 s over 100 bouts, none within 3 s).

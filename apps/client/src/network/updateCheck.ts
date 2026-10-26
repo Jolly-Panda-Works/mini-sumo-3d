@@ -1,11 +1,12 @@
+import { CREDITS } from "@mini-sumo/shared";
 import { request } from "./economyClient";
 import { showMessage, showWarning } from "../uiStore";
 
 /**
  * Update check at startup: the game server says which version is the latest (and, optionally,
  * the oldest that may still play). Older apps are sent to their store page to update:
- * Cafe Bazaar or Google Play for the Android builds; the web game just reloads (the server
- * always serves the latest). Self-updating outside the store isn't allowed by the stores.
+ * Cafe Bazaar or Google Play for the Android builds, the game's web page for the desktop app; the web game just reloads (the server always serves the latest). Self-updating outside
+ * the store isn't allowed by the stores.
  */
 const PACKAGE = "com.jollypanda.mini_sumo";
 const LATER_KEY = "mini-sumo:update-later";
@@ -21,11 +22,15 @@ function older(a: [number, number, number], b: [number, number, number]): boolea
   return false;
 }
 
+/** The desktop app (Electron): its files are bundled, so a reload can't update it. */
+const isDesktopApp = (): boolean => /Electron\//.test(navigator.userAgent);
+
 const isNative = (): boolean =>
   Boolean((window as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.());
 
 /** Where this build updates. */
 function updateTarget(): { kind: "store"; url: string; name: string } | { kind: "reload" } {
+  if (isDesktopApp()) return { kind: "store", url: CREDITS.projectUrl, name: "the Mini Sumo page" };
   if (!isNative()) return { kind: "reload" };
   if (import.meta.env.VITE_STORE === "bazaar") return { kind: "store", url: `https://cafebazaar.ir/app/${PACKAGE}`, name: "Cafe Bazaar" };
   return { kind: "store", url: `https://play.google.com/store/apps/details?id=${PACKAGE}`, name: "Google Play" };

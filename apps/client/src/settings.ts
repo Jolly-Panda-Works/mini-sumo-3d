@@ -60,8 +60,13 @@ settingsStore.subscribe(() => {
   }
 });
 
+/**
+ * Phones and tablets: the main pointer is a finger. A laptop or desktop with a touch screen
+ * still has a mouse as its main pointer, so it gets the keyboard controls and hints.
+ */
 export function isCoarsePointer(): boolean {
-  return window.matchMedia?.("(pointer: coarse)").matches || "ontouchstart" in window;
+  if (typeof window.matchMedia === "function") return window.matchMedia("(pointer: coarse)").matches;
+  return "ontouchstart" in window;
 }
 
 export function touchControlsEnabled(mode: TouchMode): boolean {

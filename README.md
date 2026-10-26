@@ -177,7 +177,7 @@ Offline, *Play now* searches for a few seconds and fills the ring with bots; *Cr
 - **Android:** open the [**latest release**](https://github.com/Jolly-Panda-Works/mini-sumo-3d/releases/latest) and install `MiniSumo-<version>-Android.apk` (signed; the `.aab` is for Google Play). Every release ships `SHA256SUMS.txt` to verify the download.
 - **Web:** play at [sumo.ryujin.fans](https://sumo.ryujin.fans/), or host it yourself: every Release has `MiniSumo-X.Y.Z-Web.zip`, the whole game for the browser (WebGL). Unzip it onto any HTTPS web host, in any folder; `HOSTING.txt` inside explains caching and gives an nginx example.
 
-The desktop app (`apps/desktop`, Electron) is still in the repository but is no longer built by CI.
+- **Desktop:** every Release also has the desktop app: `MiniSumo-X.Y.Z-Windows-Setup.exe` (installer), `MiniSumo-X.Y.Z-Windows-Portable.exe` (no install), and `MiniSumo-X.Y.Z-Linux-x86_64.AppImage` / `-Linux-amd64.deb`. They aren't code-signed, so Windows asks once ("More info" → "Run anyway"). The desktop app plays with the keyboard (WASD or arrows, Space to dash, Esc for settings, H for Home, Enter for Rematch).
 
 **Game server:** `https://sumo.ryujin.fans` (web game, API and websockets on one address). Android, Cafe Bazaar and web builds connect to `wss://sumo.ryujin.fans` by default; the repository variables `VITE_SERVER_URL` / `VITE_PUBLIC_URL` override it. `npm run dev` still uses a local server.
 
@@ -273,7 +273,7 @@ Configure under *Settings → Secrets and variables → Actions*:
 
 ## Releases and versions
 
-Releases are automatic: **every push to `main` that changes the game becomes a GitHub Release** with the final Android builds (signed APK and the Play Store AAB) and a ready-to-host web build (`MiniSumo-X.Y.Z-Web.zip`). Desktop builds are no longer made. The version comes from the commit messages since the last release ([Conventional Commits](https://www.conventionalcommits.org/)):
+Releases are automatic: **every push to `main` that changes the game becomes a GitHub Release** with the final Android builds (signed APK and the Play Store AAB), a ready-to-host web build (`MiniSumo-X.Y.Z-Web.zip`) and the desktop app (Windows installer and portable, Linux AppImage and .deb). The version comes from the commit messages since the last release ([Conventional Commits](https://www.conventionalcommits.org/)):
 
 | Commit messages since the last release | Next version (from 1.4.2) |
 | --- | --- |
