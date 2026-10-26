@@ -14,6 +14,7 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Fixed
 
+- The hosted web build (`Web.zip` and GitHub Pages) was missing its backgrounds and frames: the art set through CSS variables resolved against the stylesheet folder (`assets/ui/…`, 404) with the relative base. Those URLs are now absolute.
 - Laptops and desktops with a touch screen got the phone controls (on-screen stick, no keyboard hints): touch controls now follow the main pointer, so only phones and tablets get them.
 - The desktop app couldn't load the game's sounds and some fonts: its built-in file server now knows audio and font files.
 
