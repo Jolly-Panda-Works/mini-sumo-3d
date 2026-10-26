@@ -175,7 +175,7 @@ Offline, *Play now* searches for a few seconds and fills the ring with bots; *Cr
 ## Download and install
 
 - **Android:** open the [**latest release**](https://github.com/Jolly-Panda-Works/mini-sumo-3d/releases/latest) and install `MiniSumo-<version>-Android.apk` (signed; the `.aab` is for Google Play). Every release ships `SHA256SUMS.txt` to verify the download.
-- **Web:** play at [sumo.ryujin.fans](https://sumo.ryujin.fans/), or host it yourself: every Release has `MiniSumo-X.Y.Z-Web.zip`, the whole game for the browser (WebGL). Unzip it onto any HTTPS web host, in any folder; `HOSTING.txt` inside explains caching and gives an nginx example.
+- **Web:** play at [sumo.ryujin.fans](https://sumo.ryujin.fans/) or on [GitHub Pages](https://jolly-panda-works.github.io/mini-sumo-3d/) (updated on every push to `main`), or host it yourself: every Release has `MiniSumo-X.Y.Z-Web.zip`, the whole game for the browser (WebGL). Unzip it onto any HTTPS web host, in any folder; `HOSTING.txt` inside explains caching and gives an nginx example.
 
 - **Desktop:** every Release also has the desktop app: `MiniSumo-X.Y.Z-Windows-Setup.exe` (installer), `MiniSumo-X.Y.Z-Windows-Portable.exe` (no install), and `MiniSumo-X.Y.Z-Linux-x86_64.AppImage` / `-Linux-amd64.deb`. They aren't code-signed, so Windows asks once ("More info" → "Run anyway"). The desktop app plays with the keyboard (WASD or arrows, Space to dash, Esc for settings, H for Home, Enter for Rematch).
 

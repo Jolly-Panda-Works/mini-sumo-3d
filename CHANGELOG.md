@@ -8,6 +8,7 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Added
 
+- The web game is on GitHub Pages (https://jolly-panda-works.github.io/mini-sumo-3d/): every push to `main` deploys the Web build there (a Pages job after Web; online play through the usual game server).
 - Desktop builds are back in every GitHub Release: Windows (`-Windows-Setup.exe` installer and `-Windows-Portable.exe`) and Linux (`.AppImage` and `.deb`), built by a new Desktop job next to Web and Android. Unsigned, so Windows asks once. On desktop, "Update available" opens the game's page (a reload can't update the bundled files).
 - Keyboard players (web and desktop) get UI made for them: in a bout, the dash drum with its recharge bar and a Space key, and the controls as keycaps (WASD / arrows, Space, Esc); when you're out, H goes home; on the results board, H for Home and Enter for Rematch or Play again, each button showing its key.
 

@@ -1,6 +1,8 @@
 # Builds Mini Sumo for Android, the web and desktop, and publishes a GitHub Release with all
 # of them: the Android app (APK/AAB), a ready-to-host web build (MiniSumo-X.Y.Z-Web.zip) and the
 # desktop app (Windows installer and portable .exe, Linux AppImage and .deb).
+# Every push to main also puts the web build on GitHub Pages (https://<owner>.github.io/<repo>/;
+# Settings -> Pages -> Source: GitHub Actions).
 #
 # Versions (automatic): every push to main that changes the game is released.
 #   The commits since the last release decide the bump (Conventional Commits):
@@ -192,6 +194,31 @@ jobs:
           path: out/*.zip
           if-no-files-found: error
           retention-days: 1
+      # The same build, for GitHub Pages (relative paths, so it works under /<repo>/).
+      - name: Upload for GitHub Pages
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/client/dist
+
+  # ------------------------------------------------------------------ pages
+  pages:
+    name: GitHub Pages
+    needs: [version, web]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
 
   # ------------------------------------------------------------------ desktop
   # The Electron app around the web client (apps/desktop). Unsigned: Windows SmartScreen asks
