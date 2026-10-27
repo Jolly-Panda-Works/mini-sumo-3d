@@ -39,7 +39,7 @@ export function PlayerFrames({ players }: { players: readonly UIPlayer[] }) {
               (p.elimReason === "left" ? (
                 <span className="frame__state">Left</span>
               ) : (
-                <img className="frame__state frame__state--out" src={`${import.meta.env.BASE_URL}hud/out.webp`} alt="Out" width={220} height={68} draggable={false} />
+                <img className="frame__state frame__state--out" src={`${import.meta.env.BASE_URL}hud/out.webp`} alt="Out" width={220} height={102} draggable={false} />
               ))}
           </li>
         ))}

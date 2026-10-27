@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { audio, SAMPLES, type SampleName } from "../audio/AudioManager";
 import { DEFAULT_APPEARANCE, Phase } from "@mini-sumo/shared";
 import { economyStore, refreshProfile } from "../network/economyClient";
 import { localEconomy } from "../network/localEconomy";
@@ -273,7 +274,7 @@ export function DevPanel() {
               void showMessage("Friend request", "Kenta (level 4) wants to be your friend.", [
                 { id: "ok", label: "Accept", primary: true },
                 { id: "cancel", label: "Not now" },
-              ])
+              ], { sound: "friend" })
             }
           >
             Friend request
@@ -298,7 +299,7 @@ export function DevPanel() {
               void showWarning("Not enough coins", "You need more Sumo Coins for this. Get some in the coin shop.", [
                 { id: "shop", label: "Coin shop", primary: true },
                 { id: "cancel", label: "Not now" },
-              ])
+              ], { sound: "no-coins" })
             }
           >
             Not enough coins
@@ -355,7 +356,7 @@ export function DevPanel() {
               void showMessage("Game invite", "Kenta invites you to play. Join the game?", [
                 { id: "ok", label: "Join", primary: true },
                 { id: "cancel", label: "Not now" },
-              ]).then((choice) => pushToast(`Chose: ${choice}`, "info"))
+              ], { sound: "invite" }).then((choice) => pushToast(`Chose: ${choice}`, "info"))
             }
           >
             Game invite
@@ -388,6 +389,22 @@ export function DevPanel() {
         </div>
       </section>
 
+      <section className="dev-panel__group">
+        <h3 className="settings__heading">Sounds</h3>
+        <div className="dev-panel__grid">
+          {(Object.keys(SAMPLES) as SampleName[]).map((name) => (
+            <button key={name} className="btn" data-sfx="none" onClick={() => audio.sample(name)}>
+              {name}
+            </button>
+          ))}
+          <button className="btn" data-sfx="none" onClick={() => audio.impact(12)}>
+            hit (hard)
+          </button>
+          <button className="btn" data-sfx="none" onClick={() => audio.eliminated()}>
+            eliminated
+          </button>
+        </div>
+      </section>
       <section className="dev-panel__group">
         <h3 className="settings__heading">Tools</h3>
         <div className="dev-panel__grid">

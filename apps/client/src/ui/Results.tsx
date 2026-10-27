@@ -94,7 +94,7 @@ export function Results() {
               </button>
             ) : isHost ? (
               <button className="art-btn" onClick={() => roomManager.rematch()} aria-label="Rematch" aria-keyshortcuts="Enter">
-                <img src={`${BASE}ui/btn-rematch.webp`} alt="" width={360} height={110} draggable={false} />
+                <img src={`${BASE}ui/btn-rematch.webp`} alt="" width={360} height={114} draggable={false} />
                 {keyboard && <KeyCap>Enter</KeyCap>}
               </button>
             ) : null}

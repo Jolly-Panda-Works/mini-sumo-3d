@@ -140,7 +140,7 @@ export function SettingsPanel() {
               return;
             }}
           >
-            <img src={`${import.meta.env.BASE_URL}ui/btn-leave.webp`} alt="" width={503} height={139} draggable={false} />
+            <img src={`${import.meta.env.BASE_URL}ui/btn-leave.webp`} alt="" width={503} height={152} draggable={false} />
           </button>
         </div>
       )}

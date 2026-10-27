@@ -83,7 +83,7 @@ export function CoinShop() {
         : (await request<{ granted: number; balance: number }>("/daily-gift", { method: "POST" })).granted;
       setClaimedNow(true);
       if (amount > 0) {
-        audio.sample("purchase");
+        audio.sample("coins");
         pushToast(`+${amount} Sumo Coins`, "info");
       }
       void refreshProfile();
@@ -113,7 +113,7 @@ export function CoinShop() {
               data-sfx="none"
               aria-label={giftReady ? "Claim the daily coins" : "Daily coins claimed"}
             >
-              <img src={`${import.meta.env.BASE_URL}ui/${giftReady ? "btn-claim" : "btn-claimed"}.webp`} alt="" width={440} height={147} draggable={false} />
+              <img src={`${import.meta.env.BASE_URL}ui/${giftReady ? "btn-claim" : "btn-claimed"}.webp`} alt="" width={440} height={140} draggable={false} />
             </button>
           </div>
         </li>

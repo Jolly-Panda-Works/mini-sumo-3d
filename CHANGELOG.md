@@ -8,6 +8,7 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Added
 
+- **New sound effects** from the studio's sound packs (trimmed, mono 24 kHz, loudness-matched; 745 KB in all): a punch for each push (louder and lower when harder), a swish for the dash, "Fight!" at GO, a tick for 3-2-1, "Wow!" when you push someone out and "Oh!" when you're out, win and lose jingles at the end of a round, "Level up!", and new UI sounds (click, not available, menus, purchase, power-ups). Sounds for moments that had none: daily coins, not enough coins, equipping an item, error and warning popups, game invites and friend requests. The dev panel lists every sound under Sounds to try them.
 - **Sign in with Cafe Bazaar on the web** (the browser game, next to Google Play and email): OAuth2 on the game server (`account/BazaarLogin.ts`). A new Bazaar account is linked to the player; one that already saves another player signs this device in as them. The browser only ever sees a one-time ticket (5 minutes), never a key; states expire after 10 minutes and come back only to the game's own pages. Server keys `BAZAAR_LOGIN_CLIENT_ID` / `BAZAAR_LOGIN_SECRET` in `.env`; the catalog says `bazaarLogin` when it's on. 6 new tests (188 total).
 - Cafe Bazaar build:
   - **Sign in with Bazaar** replaces saving with an email: the save (the game server account, name, look and, when it fits, this device's progress) is kept in Bazaar's in-app storage (10 KB per player), so a new or reset phone plays as the same player. Returning players are signed in at start; Bazaar's own install / update screens show when Bazaar is missing or too old, and its login page when the player isn't logged in to Bazaar (the login-check service).
@@ -24,6 +25,10 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Fixed
 
+- **76 images of the new art were stretched or squashed** (3–175 %): the art export resized each to the old file's size, whatever its shape. They are re-exported from the originals at their true shape (same width, the right height), and every size, ratio and 9-slice cut in the CSS follows: player frames, START, the notice plank, OUT, leaderboard rows, the name field and many buttons. The blank START, the silver and bronze medals and the loading-bar fill are made again from the corrected images; the fill, thicker than the frame's slot, is trimmed to it instead of squeezed. The old art kept on purpose (arena pictures, Private Room, results board) is unchanged.
+- Player frames in a bout: each colour's frame at its own shape, the avatar filling the oval socket, name and level inside their bars, text sized to the frame; OUT and Left inside the frame.
+- The red notice plank (notices and "You're out!") keeps its gold ends' shape: one line at a fixed height.
+- The final-stretch glow reaches the window's edges (it was inset with the HUD).
 - The hosted web build (`Web.zip` and GitHub Pages) was missing its backgrounds and frames: the art set through CSS variables resolved against the stylesheet folder (`assets/ui/…`, 404) with the relative base. Those URLs are now absolute.
 - Laptops and desktops with a touch screen got the phone controls (on-screen stick, no keyboard hints): touch controls now follow the main pointer, so only phones and tablets get them.
 - The desktop app couldn't load the game's sounds and some fonts: its built-in file server now knows audio and font files.

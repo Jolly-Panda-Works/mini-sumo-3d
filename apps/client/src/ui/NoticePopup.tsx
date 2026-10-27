@@ -38,7 +38,7 @@ export function NoticePopup() {
 function NoticeView({ notice }: { notice: Notice }) {
   const zIndex = useStackLevel();
   useEffect(() => {
-    audio.sample(notice.kind === "message" ? "menu-open" : "reject");
+    audio.sample(notice.sound ?? (notice.kind === "message" ? "menu-open" : notice.kind === "warning" ? "warning" : "error"));
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation();

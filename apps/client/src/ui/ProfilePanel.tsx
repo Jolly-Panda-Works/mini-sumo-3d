@@ -42,7 +42,7 @@ function EditName({ onClose }: { onClose: () => void }) {
           autoFocus
         />
         <button type="submit" className="art art--save" aria-label="Save" disabled={!trimmed || trimmed === settings.name}>
-          <img src={`${import.meta.env.BASE_URL}ui/btn-save.webp`} alt="" width={329} height={124} draggable={false} />
+          <img src={`${import.meta.env.BASE_URL}ui/btn-save.webp`} alt="" width={329} height={119} draggable={false} />
         </button>
       </form>
     </Dialog>
@@ -150,13 +150,13 @@ export function ProfilePanel() {
             <span className="level-label" aria-label={`Level ${level.level}`}>
               <span className="level-label__value">{level.level}</span>
             </span>
-            <img className="profile__avatar-edit" src={`${import.meta.env.BASE_URL}ui/btn-edit.webp`} alt="" width={140} height={146} aria-hidden="true" />
+            <img className="profile__avatar-edit" src={`${import.meta.env.BASE_URL}ui/btn-edit.webp`} alt="" width={140} height={138} aria-hidden="true" />
           </button>
           <div className="profile__xp">
             <div className="profile__name-row">
               <p className="profile__name">{settings.name}</p>
               <button className="profile__edit profile__edit--art" onClick={() => setEditing(true)} aria-label="Edit name">
-                <img src={`${import.meta.env.BASE_URL}ui/btn-edit.webp`} alt="" width={140} height={146} draggable={false} />
+                <img src={`${import.meta.env.BASE_URL}ui/btn-edit.webp`} alt="" width={140} height={138} draggable={false} />
               </button>
             </div>
             <div
@@ -203,7 +203,7 @@ export function ProfilePanel() {
               }
               aria-label="Sign in with Google Play"
             >
-              <img src={`${base}ui/gplay-sign-in.webp`} alt="" width={480} height={132} draggable={false} />
+              <img src={`${base}ui/gplay-sign-in.webp`} alt="" width={480} height={152} draggable={false} />
             </button>
           )}
           <p className="hint">
@@ -219,7 +219,7 @@ export function ProfilePanel() {
           <section className="profile__bazaar" aria-label="Cafe Bazaar">
             {bazaarLogin.status === "connected" ? (
               <button className="art bazaar-art" onClick={() => void askBazaarLogOut()} aria-label="Signed in with Bazaar: log out">
-                <img src={`${base}ui/btn-bazaar-connected.webp`} alt="" width={480} height={125} draggable={false} />
+                <img src={`${base}ui/btn-bazaar-connected.webp`} alt="" width={480} height={146} draggable={false} />
               </button>
             ) : (
               <button
@@ -228,7 +228,7 @@ export function ProfilePanel() {
                 aria-label={bazaarLogin.status === "working" ? "Signing in with Bazaar…" : "Sign in with Bazaar"}
                 onClick={() => (bazaarAppAvailable() ? void signInWithBazaar() : pushToast("Sign in with Bazaar works in the Cafe Bazaar app", "info"))}
               >
-                <img src={`${base}ui/btn-bazaar-signin.webp`} alt="" width={480} height={135} draggable={false} />
+                <img src={`${base}ui/btn-bazaar-signin.webp`} alt="" width={480} height={147} draggable={false} />
                 <img className="bazaar-art__logo" src={`${base}icons/bazaar.png`} alt="" width={256} height={256} draggable={false} />
               </button>
             )}
@@ -245,7 +245,7 @@ export function ProfilePanel() {
           <section className="profile__bazaar" aria-label="Cafe Bazaar">
             {bazaarWeb === "linked" ? (
               <button className="art bazaar-art" onClick={() => void askBazaarWebLogOut()} aria-label="Signed in with Bazaar: log out">
-                <img src={`${base}ui/btn-bazaar-connected.webp`} alt="" width={480} height={125} draggable={false} />
+                <img src={`${base}ui/btn-bazaar-connected.webp`} alt="" width={480} height={146} draggable={false} />
               </button>
             ) : (
               <button
@@ -260,7 +260,7 @@ export function ProfilePanel() {
                   });
                 }}
               >
-                <img src={`${base}ui/btn-bazaar-signin.webp`} alt="" width={480} height={135} draggable={false} />
+                <img src={`${base}ui/btn-bazaar-signin.webp`} alt="" width={480} height={147} draggable={false} />
                 <img className="bazaar-art__logo" src={`${base}icons/bazaar.png`} alt="" width={256} height={256} draggable={false} />
               </button>
             )}
@@ -281,7 +281,7 @@ export function ProfilePanel() {
               </button>
             ) : (
               <button className="gplay-btn" onClick={() => setEmailMode(true)} aria-label="Sign in with email">
-                <img src={`${base}ui/btn-email-signin.webp`} alt="" width={480} height={135} draggable={false} />
+                <img src={`${base}ui/btn-email-signin.webp`} alt="" width={480} height={142} draggable={false} />
               </button>
             )}
             <p className="hint">
@@ -349,7 +349,7 @@ function AvatarPicker({ onPicked }: { onPicked: () => void }) {
       const next = await showWarning("Not enough coins", "You need more Sumo Coins for this. Get some in the coin shop.", [
         { id: "shop", label: "Coin shop", primary: true },
         { id: "cancel", label: "Not now" },
-      ]);
+      ], { sound: "no-coins" });
       if (next === "shop") setShopOpen(true);
       return;
     }

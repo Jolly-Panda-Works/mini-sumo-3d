@@ -252,7 +252,7 @@ export function ArenaRow({ variant = "row" }: { variant?: "row" | "carousel" }) 
           className="confirm"
           footer={
             <button className="art art--enter" disabled={busy} onClick={() => void enter(confirm)} aria-label={`Enter ${confirm.name}`}>
-              <img src={`${import.meta.env.BASE_URL}ui/btn-enter.webp`} alt="" width={360} height={95} draggable={false} />
+              <img src={`${import.meta.env.BASE_URL}ui/btn-enter.webp`} alt="" width={360} height={110} draggable={false} />
             </button>
           }
         >

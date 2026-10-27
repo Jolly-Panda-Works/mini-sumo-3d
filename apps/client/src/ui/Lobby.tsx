@@ -106,8 +106,8 @@ export function Lobby() {
               <li key={p.id} className={`roster__item${p.isYou ? " roster__item--you" : ""}`}>
                 <PlayerBadge colorIndex={p.colorIndex} />
                 <span className="roster__name">{p.name}</span>
-                {p.isYou && <img className="tag tag--you-art" src={`${import.meta.env.BASE_URL}ui/label-you.webp`} alt="You" width={220} height={80} draggable={false} />}
-                {p.isHost && <img className="tag-host" src={`${import.meta.env.BASE_URL}ui/label-host.webp`} alt="Host" width={200} height={114} />}
+                {p.isYou && <img className="tag tag--you-art" src={`${import.meta.env.BASE_URL}ui/label-you.webp`} alt="You" width={220} height={82} draggable={false} />}
+                {p.isHost && <img className="tag-host" src={`${import.meta.env.BASE_URL}ui/label-host.webp`} alt="Host" width={200} height={98} />}
                 {p.isBot && isHost && (
                   <button className="roster__remove" onClick={() => roomManager.removeBot(p.id)} aria-label={`Remove ${p.name}`}>
                     Remove
@@ -262,11 +262,11 @@ function InvitePicker({
           {isPrivate && (
             <div className="invite-picker__links">
               <button className="art art--invite" onClick={() => void copy()} aria-label={copied ? "Invite link copied" : "Copy invite link"}>
-                <img src={`${import.meta.env.BASE_URL}ui/btn-copy-invite.webp`} alt="" width={480} height={130} draggable={false} />
+                <img src={`${import.meta.env.BASE_URL}ui/btn-copy-invite.webp`} alt="" width={480} height={150} draggable={false} />
               </button>
               {"share" in navigator && (
                 <button className="art art--share" onClick={() => void share()} aria-label="Share">
-                  <img src={`${import.meta.env.BASE_URL}ui/btn-share.webp`} alt="" width={360} height={160} draggable={false} />
+                  <img src={`${import.meta.env.BASE_URL}ui/btn-share.webp`} alt="" width={360} height={123} draggable={false} />
                 </button>
               )}
             </div>
@@ -278,7 +278,7 @@ function InvitePicker({
               onClick={() => roomManager.addBot()}
               aria-label={full ? "The room is full" : "Add a random player"}
             >
-              <img src={`${import.meta.env.BASE_URL}ui/btn-add-random.webp`} alt="" width={460} height={155} draggable={false} />
+              <img src={`${import.meta.env.BASE_URL}ui/btn-add-random.webp`} alt="" width={460} height={142} draggable={false} />
             </button>
           )}
         </div>

@@ -252,6 +252,7 @@ function ItemGrid({ tab, look, color, value, worn, owned, priceOf, onPick, tryin
           <button
             type="button"
             className="item__pick"
+            data-sfx="none"
             aria-pressed={index === value}
             aria-label={`${option.label}, ${isOwned ? (index === worn ? "wearing" : "owned") : index === trying ? "trying on" : `try on, ${price} Sumo Coins`}`}
             onClick={() => onPick(index)}
@@ -333,6 +334,7 @@ export function Wardrobe() {
   const pick = (category: CosmeticCategory, index: number) => {
     if (owned.has(cosmeticItemId(category, index))) {
       setTrying(null);
+      audio.sample("equip");
       wear({ ...appearance, [category]: index } as Appearance);
       react(category);
     } else {
@@ -382,7 +384,7 @@ export function Wardrobe() {
       void showWarning("Not enough coins", "You need more Sumo Coins for this. Get some in the coin shop.", [
         { id: "shop", label: "Coin shop", primary: true },
         { id: "cancel", label: "Not now" },
-      ]).then((choice) => choice === "shop" && setShopOpen(true));
+      ], { sound: "no-coins" }).then((choice) => choice === "shop" && setShopOpen(true));
       return;
     }
     try {

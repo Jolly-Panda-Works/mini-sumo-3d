@@ -32,7 +32,7 @@ export function NameGate() {
           />
         </label>
         <button type="submit" className="art art--save" aria-label="Save name" disabled={!trimmed}>
-          <img src={`${import.meta.env.BASE_URL}ui/btn-save.webp`} alt="" width={329} height={124} draggable={false} />
+          <img src={`${import.meta.env.BASE_URL}ui/btn-save.webp`} alt="" width={329} height={119} draggable={false} />
         </button>
       </form>
     </Dialog>

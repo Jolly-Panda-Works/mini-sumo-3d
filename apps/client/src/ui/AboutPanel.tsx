@@ -33,7 +33,7 @@ export function AboutPanel() {
           </button>
           {moreGamesAvailable() && (
             <button className="art about-panel__btn" onClick={() => void openMoreGames()} aria-label="More games">
-              <img src={`${BASE}ui/btn-more-games.webp`} alt="" width={360} height={114} draggable={false} />
+              <img src={`${BASE}ui/btn-more-games.webp`} alt="" width={360} height={106} draggable={false} />
             </button>
           )}
           {autoUpdate === "disabled" && (
@@ -46,7 +46,7 @@ export function AboutPanel() {
                 window.setTimeout(() => void bazaarAutoUpdate().then(setAutoUpdate), 4000);
               }}
             >
-              <img src={`${BASE}ui/btn-auto-update.webp`} alt="" width={360} height={114} draggable={false} />
+              <img src={`${BASE}ui/btn-auto-update.webp`} alt="" width={360} height={109} draggable={false} />
             </button>
           )}
           {autoUpdate === "enabled" && <p className="hint">Auto-update is on: Bazaar keeps the game up to date.</p>}

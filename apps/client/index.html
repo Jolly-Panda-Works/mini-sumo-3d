@@ -76,7 +76,7 @@
       .boot__bar {
         position: relative;
         width: 100%;
-        aspect-ratio: 828 / 254;
+        aspect-ratio: 828 / 272;
       }
       .boot__frame {
         position: absolute;
@@ -84,20 +84,21 @@
         width: 100%;
         height: 100%;
       }
-      /* The slot inside the frame (bar-frame 828×254: 78–752 across, 87–148 down), at the fill's
-         own proportions (bar-fill 970×94) so the bar isn't stretched */
+      /* The slot inside the frame (bar-frame: 9.4–90.8 % across, 34.3–58.3 % down). The fill
+         art is thicker than the slot, so it is trimmed top and bottom (cover), never stretched */
       .boot__track {
         position: absolute;
         left: 9.42%;
         right: 9.18%;
-        top: 33.4%;
-        bottom: 40.88%;
+        top: 34.25%;
+        bottom: 41.73%;
       }
       .boot__fill {
         position: absolute;
         inset: 0;
         width: 100%;
         height: 100%;
+        object-fit: cover;
         clip-path: inset(0 99% 0 0);
         filter: drop-shadow(0 0 6px rgba(255, 190, 40, 0.7));
       }

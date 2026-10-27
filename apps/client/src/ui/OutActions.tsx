@@ -17,7 +17,7 @@ export function OutActions() {
         You're out! Watching the rest of the bout
       </p>
       <button type="button" className="art art--out-home" onClick={goHome} aria-label="Return home" aria-keyshortcuts="H">
-        <img src={`${BASE}ui/btn-return-home.webp`} alt="" width={360} height={114} draggable={false} />
+        <img src={`${BASE}ui/btn-return-home.webp`} alt="" width={360} height={110} draggable={false} />
         {keyboard && <KeyCap>H</KeyCap>}
       </button>
     </div>

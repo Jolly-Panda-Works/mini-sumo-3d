@@ -4021,7 +4021,7 @@ dl.profile__stats {
   right: calc(8px + var(--safe-right, 0px));
   top: 30%;
   width: 84px;
-  aspect-ratio: 174 / 436;
+  aspect-ratio: 174 / 425;
   background: var(--ui-powerup-frame) center / 100% 100% no-repeat;
   filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.4));
   animation: powerup-in-right 0.35s cubic-bezier(0.34, 1.5, 0.64, 1);
@@ -4980,7 +4980,7 @@ dl.profile__stats {
   position: relative;
   display: block;
   width: calc(430px * var(--art-scale));
-  aspect-ratio: 430 / 113;
+  aspect-ratio: 430 / 157;
   background: var(--ui-label-version) center / 100% 100% no-repeat;
 }
 
@@ -5056,7 +5056,7 @@ dl.profile__stats {
   right: -14px;
   bottom: -10px;
   width: 58px;
-  aspect-ratio: 202 / 91;
+  aspect-ratio: 202 / 87;
   background: var(--ui-label-level) center / 100% 100% no-repeat;
 }
 
@@ -5101,7 +5101,7 @@ dl.profile__stats {
   width: 100%;
   max-width: 360px;
   margin: 4px auto 0;
-  aspect-ratio: 720 / 201;
+  aspect-ratio: 720 / 247;
   padding: 0;
   border: 0;
   background: var(--ui-btn-start) center / 100% 100% no-repeat;
@@ -5370,7 +5370,7 @@ dl.profile__stats {
 .plank-btn {
   width: 100%;
   max-width: 220px;
-  aspect-ratio: 240 / 54;
+  aspect-ratio: 240 / 67;
   padding: 0;
   border: 0;
   background: var(--ui-label-empty) center / 100% 100% no-repeat;
@@ -6415,7 +6415,7 @@ button.is-pressed:not(:disabled):not([aria-disabled="true"]) {
   place-items: center;
   width: 100%;
   max-width: 240px;
-  aspect-ratio: 314 / 103;
+  aspect-ratio: 314 / 96;
   padding: 0 7%;
   border: 0;
   background: var(--ui-friend-code) center / 100% 100% no-repeat;
@@ -7008,7 +7008,7 @@ button.code-field {
 .lb-row__score {
   position: relative;
   width: 27%;
-  aspect-ratio: 300 / 121;
+  aspect-ratio: 300 / 116;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -8147,7 +8147,7 @@ button.code-field {
 }
 
 /* ======================================================================
-   Edit name (public/ui/edit-name-frame.webp, 800×411; the board inside is
+   Edit name (public/ui/edit-name-frame.webp, 800×353; the board inside is
    5.6–94.2 % × 20.2–90 %): the name field with SAVE under it
    ====================================================================== */
 
@@ -8160,7 +8160,7 @@ button.code-field {
 .editname-dialog {
   position: relative;
   width: 100%;
-  aspect-ratio: 800 / 411;
+  aspect-ratio: 800 / 353;
   background: var(--ui-edit-name-frame) center / 100% 100% no-repeat;
   filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.35));
 }
@@ -9065,7 +9065,7 @@ html.in-match .toast {
 }
 
 /* ======================================================================
-   Plank labels: the red label art (public/ui/label-empty.webp, 240×54) as a
+   Plank labels: the red label art (public/ui/label-empty.webp, 240×67) as a
    9-slice frame, so it stretches to any text without bending its gold
    corners. Notices (toasts) and the "you're out" note use it.
    ====================================================================== */
@@ -9077,7 +9077,7 @@ html.in-match .toast {
   padding: 2px 14px 4px;
   border-style: solid;
   border-width: 10px 18px;
-  border-image: var(--ui-label-empty) 12 22 fill / 10px 18px / 0 stretch;
+  border-image: var(--ui-label-empty) 15 22 fill / 12px 18px / 0 stretch;
   border-radius: 0;
   background: none;
   box-shadow: none;
@@ -9538,7 +9538,7 @@ html.in-match .toast-layer .toasts {
   padding: 1px 18px 3px;
   border-style: solid;
   border-width: 10px 18px;
-  border-image: var(--ui-label-empty) 12 22 fill / 10px 18px / 0 stretch;
+  border-image: var(--ui-label-empty) 15 22 fill / 12px 18px / 0 stretch;
   color: #fff4dc;
   font-size: clamp(0.95rem, 5.4cqw, 1.35rem);
   font-weight: 900;
@@ -9601,7 +9601,7 @@ html.in-match .toast-layer .toasts {
   color: var(--ink-red);
 }
 
-/* Text field (554×116): the writing area is 12.5–87.4 % across, between the end caps */
+/* Text field (554×166): the writing area is 12.5–87.4 % across, between the end caps */
 .input.input--art {
   padding: 0 14%;
 }
@@ -9625,7 +9625,7 @@ html.in-match .toast-layer .toasts {
   padding: 1px 22px 3px;
   border-style: solid;
   border-width: 10px 18px;
-  border-image: var(--ui-label-empty) 12 22 fill / 10px 18px / 0 stretch;
+  border-image: var(--ui-label-empty) 15 22 fill / 12px 18px / 0 stretch;
   color: #fff4dc;
   font-size: clamp(1.1rem, 6cqw, 1.6rem);
   font-weight: 900;
@@ -9681,7 +9681,7 @@ html.in-match .toast-layer .toasts {
   color: #b8344a;
 }
 
-/* START (720×201) has START painted on it: ready, that word is the label; otherwise ("Start match
+/* START (720×247) has START painted on it: ready, that word is the label; otherwise ("Start match
    in 6…", "Waiting for others…") the text sits on a patch of the button's green (9–91 % × 24–71 %) */
 .start-btn__text {
   left: 9.5%;
@@ -9922,7 +9922,7 @@ html.in-match .toast-layer .toasts {
   top: 29%;
 }
 
-/* edit-name-frame 800×411: corner at (736, 72) */
+/* edit-name-frame 800×353: corner at (736, 72) */
 .editname-dialog__close {
   left: 92%;
   top: 17.5%;
@@ -10199,8 +10199,8 @@ img[src$="ui/close.webp"] {
   object-fit: contain;
 }
 
-/* Art drawn as a background keeps its proportions: the arena's level tag (label-empty, 240×54),
-   the item name plate (166×50) and the name field (554×116) grow in height with their width */
+/* Art drawn as a background keeps its proportions: the arena's level tag (label-empty, 240×67),
+   the item name plate (166×50) and the name field (554×166) grow in height with their width */
 .arena-tile__label {
   left: 62%;
   width: 26%;
@@ -10211,7 +10211,7 @@ img[src$="ui/close.webp"] {
   box-sizing: border-box;
   width: 100%;
   height: auto;
-  aspect-ratio: 240 / 54;
+  aspect-ratio: 240 / 67;
   padding: 0;
   display: grid;
   place-items: center;
@@ -10228,7 +10228,7 @@ img[src$="ui/close.webp"] {
 
 .input--art {
   height: auto;
-  aspect-ratio: 554 / 116;
+  aspect-ratio: 554 / 166;
 }
 
 .item__frame .item__name--plate {
@@ -10271,7 +10271,7 @@ img[src$="ui/close.webp"] {
   clip-path: polygon(6% 0, 94% 0, 100% 8%, 100% 92%, 94% 100%, 6% 100%, 0 92%, 0 8%);
 }
 
-/* Soon / locked: the level tag (label-empty, 240×54) where the status line was */
+/* Soon / locked: the level tag (label-empty, 240×67) where the status line was */
 .arena-tile__tag {
   display: block;
   width: 42%;
@@ -10284,13 +10284,13 @@ img[src$="ui/close.webp"] {
   place-items: center;
   width: 100%;
   height: auto;
-  aspect-ratio: 240 / 54;
+  aspect-ratio: 240 / 67;
   padding: 0;
   font-size: max(0.72rem, 4.6cqw);
   white-space: nowrap;
 }
 
-/* BUY (439×147): the price centred in the dark field (48.7–83.8 % across); the art has no
+/* BUY (439×138): the price centred in the dark field (48.7–83.8 % across); the art has no
    coin in the field, so no room is kept for one */
 .art--buy__price {
   left: 48.7%;
@@ -10407,19 +10407,19 @@ img[src$="ui/close.webp"] {
 }
 
 /* ======================================================================
-   Leaderboard row (lb-row 700×139, lb-row-you 700×146): everything inside the cream strip
+   Leaderboard row (lb-row and lb-row-you 700×216): everything inside the cream strip
    (24–72 % down) and clear of the gold corners (the left and right ~11 %), each art at its
    own proportions. The parts are placed on the row itself (the profile button fills it).
    ====================================================================== */
 .lb-row {
-  aspect-ratio: 700 / 139;
+  aspect-ratio: 700 / 216;
   padding: 0;
   container-type: inline-size;
 }
 
 .lb-row--you,
 .lb-row--pinned {
-  aspect-ratio: 700 / 146;
+  aspect-ratio: 700 / 216;
 }
 
 .lb-row__open {
@@ -10493,12 +10493,12 @@ img[src$="ui/close.webp"] {
   font-size: 3.2cqw;
 }
 
-/* Score frame (lb-score 300×121) 68–89 %, the number in its field */
+/* Score frame (lb-score 300×116) 68–89 %, the number in its field */
 .lb-row__score {
   right: 10.6%;
   width: 21.4%;
   height: auto;
-  aspect-ratio: 300 / 121;
+  aspect-ratio: 300 / 116;
 }
 
 .lb-row__score-value {
@@ -10660,7 +10660,7 @@ button.mode-card__close.is-pressed:not(:disabled):not([aria-disabled="true"]) {
   transform: translate(-50%, -50%) scale(0.94);
 }
 
-/* Store price button (btn-start-blank, 720×201): the whole price on the green face
+/* Store price button (btn-start-blank, 720×247): the whole price on the green face
    (9–91 % across, 26–72 % down), no BUY */
 .art--price {
   position: relative;
@@ -10696,4 +10696,142 @@ button.mode-card__close.is-pressed:not(:disabled):not([aria-disabled="true"]) {
 
 .pack__buy.art--price {
   max-width: calc(560px * var(--art-scale));
+}
+
+/* ======================================================================
+   Player frames in a bout (hud/player-*.webp, 700×164): the art's own shape, the avatar
+   filling the oval socket, name and level inside their bars (each colour's art places them a
+   little differently), text sized to the frame
+   ====================================================================== */
+.frames,
+html .frames {
+  width: min(44vw, 280px);
+}
+
+.frame {
+  aspect-ratio: 700 / 164;
+  container-type: inline-size;
+}
+
+.frame__avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+
+.frame__name,
+.frame--you .frame__name {
+  font-size: 4.6cqw;
+  justify-content: flex-start;
+}
+
+.frame__level,
+.frame--green .frame__level,
+.frame--yellow .frame__level {
+  justify-content: flex-start;
+  overflow: hidden;
+  font-size: 3.6cqw;
+  white-space: nowrap;
+}
+
+/* red: oval 7.5–29 % × 16–81 %, name 35–93 % × 30–49 %, level 37–90 % × 59–75 % */
+.frame--red .frame__avatar { left: 7.5%; top: 16%; width: 21.5%; height: 65%; }
+.frame--red .frame__name { left: 37%; width: 54%; top: 30%; height: 19%; }
+.frame--red .frame__level { left: 40%; width: 48%; top: 59%; height: 16%; }
+
+/* blue: oval 7.5–27.5 % × 14–81 %, name 33–93 % × 21–49 %, level 34.5–92.5 % × 56–76 % */
+.frame--blue .frame__avatar { left: 7.5%; top: 14%; width: 20%; height: 67%; }
+.frame--blue .frame__name { left: 35%; width: 56%; top: 21%; height: 28%; }
+.frame--blue .frame__level { left: 37%; width: 53%; top: 56%; height: 20%; }
+
+/* green: oval 7–27.5 % × 17–79 %, name 34.5–90 % × 27–52 %, level (cream) 40–84.5 % × 58–70 % */
+.frame--green .frame__avatar { left: 7%; top: 17%; width: 20.5%; height: 62%; }
+.frame--green .frame__name { left: 36.5%; width: 52%; top: 27%; height: 25%; }
+.frame--green .frame__level { left: 42%; width: 41%; top: 58%; height: 12%; font-size: 3.2cqw; }
+
+/* yellow: oval 7–26 % × 15–70 %, name 32–93.5 % × 23–46 %, level 33–92 % × 53–67 % */
+.frame--yellow .frame__avatar { left: 7%; top: 15%; width: 19%; height: 55%; }
+.frame--yellow .frame__name { left: 34%; width: 57%; top: 23%; height: 23%; }
+.frame--yellow .frame__level { left: 35.5%; width: 54%; top: 53%; height: 14%; font-size: 3.2cqw; }
+
+/* OUT (hud/out.webp, 220×102) at its own shape, over the right of the level bar; "Left" too */
+.frame__state,
+.frame__state.frame__state--out {
+  top: auto;
+  bottom: 14%;
+  right: 7%;
+}
+
+.frame__state.frame__state--out {
+  width: 24%;
+  height: auto;
+  aspect-ratio: 220 / 102;
+}
+
+/* The red plank (toast-plank) for notices and "You're out!": one line at a fixed
+   height, so its gold ends keep their shape (64 px of the art = 0.8 × the height); only the
+   plain middle grows with the text */
+.plank-label,
+.toast-layer .toast {
+  box-sizing: border-box;
+  height: 34px;
+  max-width: calc(100vw - 24px);
+  padding: 0 8px;
+  border-width: 0 27px;
+  border-image: var(--ui-toast-plank) 0 64 fill / 0 27px / 0 stretch;
+  overflow: hidden;
+  font-size: clamp(0.72rem, 2.6vw, 0.9rem);
+  line-height: 34px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* The yellow frame's art ends higher (its lower edge is empty) */
+.frame--yellow .frame__state {
+  bottom: 30%;
+}
+
+/* Each player frame colour at its own shape (the parts inside are placed in % of the frame) */
+.frame--red { aspect-ratio: 700 / 233; }
+.frame--blue { aspect-ratio: 700 / 213; }
+.frame--green { aspect-ratio: 700 / 227; }
+.frame--yellow { aspect-ratio: 700 / 244; }
+
+/* START / price button at its true shape (720×247): the green face is 9–91 % × 30–72 % */
+.start-btn__text,
+.start-btn:not(.start-btn--ready) .start-btn__text,
+.art--price__text {
+  top: 30%;
+  height: 42%;
+}
+
+/* The plank at its true shape (toast-plank 720×140; the gold ends are 64 px of it): at 34 px
+   tall the ends are 16 px wide */
+.plank-label,
+.toast-layer .toast {
+  border-width: 0 16px;
+  border-image: var(--ui-toast-plank) 0 64 fill / 0 16px / 0 stretch;
+  padding: 0 10px;
+}
+
+/* The final-stretch glow sits on the window's own edges (not the HUD box, which is inset) */
+.vignette {
+  position: fixed;
+  inset: 0;
+}
+
+/* Friend row buttons share the panel's right part; each art keeps its own shape */
+.friend-row__actions .art {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 62%;
+  height: 100%;
+  width: auto;
+}
+
+.friend-row__actions .art img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
 }
