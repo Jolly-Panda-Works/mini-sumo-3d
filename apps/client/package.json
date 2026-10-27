@@ -30,7 +30,7 @@
     "@types/three": "^0.177.0",
     "@vitejs/plugin-react": "^4.5.0",
     "typescript": "^5.8.3",
-    "vite": "^6.3.5"
+    "vite": "^8.3.4"
   },
   "license": "MIT",
   "repository": {
