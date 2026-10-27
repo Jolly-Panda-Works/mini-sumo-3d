@@ -48,7 +48,16 @@ if (!rootGradle.includes("jitpack.io")) {
     `$1\n        maven { url "https://jitpack.io"; content { includeGroupByRegex "com\\\\.github\\\\.cafebazaar.*" } }$2`,
   );
 }
+// CafeBazaarAuth brings androidx.core 1.17, which needs the Android Gradle plugin 8.9.1+ and
+// compiling against API 36 (only the compile SDK; the target SDK, i.e. runtime behaviour, stays).
+const versionKey = (v) => v.split(".").reduce((key, n) => key * 1000 + Number(n), 0);
+rootGradle = rootGradle.replace(/(com\.android\.tools\.build:gradle:)(\d+\.\d+\.\d+)/, (m, pre, v) =>
+  versionKey(v) < versionKey("8.9.1") ? `${pre}8.9.1` : m,
+);
 write("android/build.gradle", rootGradle);
+let variables = read("android/variables.gradle");
+variables = variables.replace(/(compileSdkVersion\s*=\s*)(\d+)/, (m, pre, v) => (Number(v) < 36 ? `${pre}36` : m));
+write("android/variables.gradle", variables);
 
 let appGradle = read("android/app/build.gradle");
 if (!appGradle.includes("kotlin-android")) {
