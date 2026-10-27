@@ -1,7 +1,7 @@
 # Mini Sumo: one container with the game server and the web game.
 #
-#   cp .env.docker.example .env      # optional: port, mirrors, proxy
-#   docker compose up -d --build
+#   cp .env.docker.example .env      # once; afterwards only edit the values in .env
+#   docker compose up -d --build     # every deploy: git pull, then this
 #
 # The game: http://<host>:6803 (WEB_PORT). The database is kept in the "mini-sumo-data" volume.
 
@@ -24,8 +24,8 @@ services:
       - "${WEB_PORT:-6803}:80"
     environment:
       ECONOMY_EVENT_LOG: ${ECONOMY_EVENT_LOG:-true}
-      # Cafe Bazaar purchase validation (tools/server-bazaar-setup.sh; empty = off): the app's
-      # Pishkhan API token, or the older OAuth client (BAZAAR_CLIENT_ID / SECRET / REFRESH_TOKEN)
+      # Cafe Bazaar purchase validation (empty = off): the app's Pishkhan API token, or the older
+      # OAuth client (BAZAAR_CLIENT_ID / SECRET / REFRESH_TOKEN). All values: .env.docker.example
       BAZAAR_PISHKHAN_TOKEN: ${BAZAAR_PISHKHAN_TOKEN:-}
       BAZAAR_CLIENT_ID: ${BAZAAR_CLIENT_ID:-}
       BAZAAR_CLIENT_SECRET: ${BAZAAR_CLIENT_SECRET:-}

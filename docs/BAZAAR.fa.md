@@ -81,9 +81,10 @@ git checkout main
 سرور خریدها را با «روش جدید» API بازار بررسی می‌کند: فقط **توکن API پیشخان** همان برنامه لازم است (همان توکنی که برای رهانش خودکار در GitHub گذاشته‌اید). کلاینت OAuth و رفرش‌توکن دیگر لازم نیست.
 
 ۱. پیشخان بازار ← برنامه ← **API پیشخان بازار** ← «دریافت توکن جدید» (اگر قبلاً گرفته‌اید، همان توکن کافی است).
-۲. روی سرور، در پوشه‌ی پروژه: `git pull` و بعد `bash tools/server-bazaar-setup.sh` (توکن را می‌پرسد، از خود سرور با بازار بررسی می‌کند، در `.env` سرور می‌گذارد و بازی را دوباره اجرا می‌کند).
-۳. در لاگ سرور (`docker compose logs web`) باید این خط را ببینید:
+۲. توکن را در `.env` سرور بگذارید: `BAZAAR_PISHKHAN_TOKEN=...` (همه‌ی مقدارها در `.env.docker.example`)، بعد `git pull` و `docker compose up -d --build`.
+۳. در لاگ سرور (`docker compose logs web`) باید این دو خط را ببینید (دومی یعنی بازار توکن را از همین سرور پذیرفته):
    `[bazaar] purchase verification on (com.jollypanda.mini_sumo)`
+   `[bazaar] Cafe Bazaar accepts the keys from this server`
 
 تا وقتی کلیدها روی سرور نباشند، فروشگاه در حالت آنلاین **COMING SOON** نشان می‌دهد و هیچ پولی گرفته نمی‌شود. در حالت آفلاین، خرید مثل قبل روی خود دستگاه ثبت می‌شود.
 
@@ -175,6 +176,6 @@ git checkout main
 
 1. پیشخان ← برنامه ← **ورود با بازار**: کلاینت آی‌دی و رمز (secret) را بردارید.
 2. در همان صفحه، این آدرس بازگشت را اضافه کنید: `https://sumo.ryujin.fans/api/account/bazaar/callback`
-3. روی سرور، در پوشه‌ی پروژه: `bash tools/server-bazaar-login-setup.sh` (مقدارها را در `.env` می‌نویسد و بازی را دوباره راه می‌اندازد).
+3. در `.env` سرور: `BAZAAR_LOGIN_CLIENT_ID=...` و `BAZAAR_LOGIN_SECRET=...`، بعد `git pull` و `docker compose up -d --build`. در لاگ: `[bazaar-login] web sign-in on (callback …)`.
 
 بعد از آن دکمه خودکار در نسخه‌ی وب (sumo.ryujin.fans و GitHub Pages) ظاهر می‌شود. برای آدرس‌های دیگر بازی، `BAZAAR_LOGIN_RETURN_ORIGINS` را (با کاما) در `.env` سرور بگذارید. نسخه‌ی اندروید بازار از خود برنامه‌ی بازار وارد می‌شود؛ نسخه‌ی دسکتاپ و اندروید گوگل‌پلی این دکمه را ندارند (برگشت از صفحه‌ی بازار به برنامه ممکن نیست).

@@ -117,6 +117,17 @@ describe("Cafe Bazaar purchase verification with the Pishkhan API token", () => 
     expect(await v.check("coins_500", "good")).toMatchObject({ ok: false, reason: "unavailable" });
   });
 
+  it("says at startup whether Cafe Bazaar accepts the token", async () => {
+    const { fetchImpl } = fakeWithSecret({});
+    const pkg = "com.jollypanda.mini_sumo";
+    expect(await new BazaarVerifier({ apiSecret: "app-token", packageName: pkg }, fetchImpl).selfCheck()).toBe("ok");
+    expect(await new BazaarVerifier({ apiSecret: "wrong", packageName: pkg }, fetchImpl).selfCheck()).toBe("refused");
+    const offline = async () => {
+      throw new Error("getaddrinfo ENOTFOUND pardakht.cafebazaar.ir");
+    };
+    expect(await new BazaarVerifier({ apiSecret: "app-token", packageName: pkg }, offline).selfCheck()).toBe("unreachable");
+  });
+
   it("uses the token when it's set, the OAuth client otherwise", () => {
     expect(bazaarConfigFromEnv({ BAZAAR_PISHKHAN_TOKEN: " t ", BAZAAR_CLIENT_ID: "c", BAZAAR_CLIENT_SECRET: "s", BAZAAR_REFRESH_TOKEN: "r" })).toEqual({
       apiSecret: "t",

@@ -7,12 +7,16 @@ in the `mini-sumo-data` volume. The web game is built with `VITE_SERVER_URL=same
 finds the server on the same address as the page.
 
 ```bash
-cp .env.docker.example .env   # optional
+cp .env.docker.example .env   # once: every setting and key the server uses, with notes
 docker compose up -d --build
 # open http://<server-ip>:6803
 ```
 
-Logs: `docker compose logs -f web`. Update: `git pull && docker compose up -d --build`.
+Deploying an update is only `git pull` and `docker compose up -d --build`: the image builds
+everything and nothing else runs on the server. Settings and keys are changed by editing
+values in `.env` (then the same two commands); no setup scripts. At startup the log
+(`docker compose logs -f web`) says which features are on and whether Cafe Bazaar accepts the
+keys from this server.
 The database survives rebuilds (volume `mini-sumo-data`); back it up with
 `docker compose cp web:/data/mini-sumo.db ./backup.db`.
 

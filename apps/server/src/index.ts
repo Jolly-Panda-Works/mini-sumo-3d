@@ -41,10 +41,20 @@ if (friends) {
     room.addFriendBot(botAccountId);
   };
 }
-// Cafe Bazaar purchases: on when its keys are set (tools/server-bazaar-setup.sh)
+// Cafe Bazaar purchases: on when its keys are in .env (BAZAAR_PISHKHAN_TOKEN). The log says at
+// startup whether Bazaar accepts them from this server.
 const bazaarConfig = bazaarConfigFromEnv();
 const bazaar = bazaarConfig ? new BazaarVerifier(bazaarConfig) : null;
 console.log(bazaar ? `[bazaar] purchase verification on (${bazaarConfig!.packageName})` : "[bazaar] purchase verification off (no keys)");
+void bazaar?.selfCheck().then((state) =>
+  console.log(
+    state === "ok"
+      ? "[bazaar] Cafe Bazaar accepts the keys from this server"
+      : state === "refused"
+        ? "[bazaar] WARNING: Cafe Bazaar refused BAZAAR_PISHKHAN_TOKEN: make a new one in the panel (API پیشخان بازار) and put it in .env"
+        : "[bazaar] WARNING: Cafe Bazaar can't be reached from this server (network / firewall): purchases can't be checked",
+  ),
+);
 // Saving progress with an email (EmailJS; EMAIL_DEV_LOG=true prints codes instead, for testing)
 const emailConfig = emailJsConfigFromEnv();
 const mailer = emailConfig ? new EmailJsMailer(emailConfig) : process.env.EMAIL_DEV_LOG === "true" ? new LogMailer() : null;

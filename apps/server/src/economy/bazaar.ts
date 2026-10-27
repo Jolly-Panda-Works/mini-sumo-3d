@@ -71,6 +71,17 @@ export class BazaarVerifier {
     return this.accessToken;
   }
 
+  /**
+   * At startup: does Cafe Bazaar accept these keys from this server? Asks about a made-up
+   * purchase, so "not found" means the keys work.
+   */
+  async selfCheck(): Promise<"ok" | "refused" | "unreachable"> {
+    const result = await this.check("coins_500", "startup-check");
+    if (result.ok || result.reason === "not_found") return "ok";
+    if (result.reason === "unavailable" && /HTTP 40[13]|refused/.test(result.detail ?? "")) return "refused";
+    return result.reason === "unavailable" ? "unreachable" : "ok";
+  }
+
   /** Checks one purchase with Cafe Bazaar. */
   async check(productId: string, purchaseToken: string): Promise<BazaarCheck> {
     const url = `${API}/api/validate/${encodeURIComponent(this.config.packageName)}/inapp/${encodeURIComponent(productId)}/purchases/${encodeURIComponent(purchaseToken)}/`;
