@@ -1,6 +1,6 @@
 {
   "name": "mini-sumo",
-  "version": "1.36.1",
+  "version": "1.36.3",
   "private": true,
   "type": "module",
   "description": "Mini Sumo: a browser-based 3D multiplayer party game built with React Three Fiber and Colyseus.",
