@@ -10961,3 +10961,32 @@ html .frames {
   font-size: 5.2cqw;
   overflow: visible;
 }
+
+/* Sign in with Bazaar (btn-bazaar-signin 480×147): the official logo centred in the button's
+   empty square (16–26 % across, 30–63 % down). Specific enough to beat ".art img" (which made
+   the logo full width under the button). */
+.bazaar-art img.bazaar-art__logo {
+  position: absolute;
+  left: 16.8%;
+  top: 32.9%;
+  width: 8.4%;
+  height: auto;
+  max-width: none;
+  display: block;
+}
+
+/* About (Bazaar build): the Bazaar section uses the panel's full width (its inline-size
+   containment made it shrink to nothing, one word per line) */
+.about-panel__bazaar {
+  width: 100%;
+  container-type: normal;
+}
+
+.about-panel__bazaar .hint {
+  max-width: 28ch;
+  margin-inline: auto;
+}
+
+.about-panel__btn {
+  width: min(70%, 220px);
+}
