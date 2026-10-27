@@ -70,8 +70,9 @@ if (!appGradle.includes("CafeBazaarAuth")) {
 if (!/buildFeatures\s*\{[^}]*aidl/.test(appGradle)) {
   appGradle = appGradle.replace(/android\s*\{/, (m) => `${m}\n    buildFeatures { aidl true }`);
 }
-if (!appGradle.includes("kotlinOptions")) {
-  appGradle = appGradle.replace(/android\s*\{/, (m) => `${m}\n    kotlinOptions { jvmTarget = '21' }`);
+// Kotlin's JVM target (Kotlin 2.2: compilerOptions; the old kotlinOptions block is an error)
+if (!appGradle.includes("JvmTarget.JVM_21")) {
+  appGradle += `\nkotlin {\n    compilerOptions {\n        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)\n    }\n}\n`;
 }
 write("android/app/build.gradle", appGradle);
 
