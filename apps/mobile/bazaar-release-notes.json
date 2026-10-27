@@ -1,6 +1,6 @@
 {
   "$comment": "What's new in Cafe Bazaar for the next version (required: a Bazaar build fails without it). Set version to the version being released (package.json) and write fa and en, on the bazaar branch. Emptied after each release.",
-  "version": "",
-  "fa": "",
-  "en": ""
+  "version": "1.36.4",
+  "fa": "• ظاهر تازه با طرح ژاپنی برای همه‌ی صفحه‌ها، دکمه‌ها و قاب‌ها\n• ورود با بازار: پیشرفتت با حساب بازار ذخیره می‌شود و روی گوشی تازه برمی‌گردد\n• ثبت نظر و امتیاز، و دیدن بازی‌های دیگر ما از بخش About\n• خبر نسخه‌ی تازه و به‌روزرسانی از داخل بازی\n• قاب بازیکنان، جدول امتیازها و فهرست دوستان مرتب‌تر و خواناتر\n• رفع مشکلات نمایشی و بهبودهای کوچک",
+  "en": "• A new Japanese-style look for every screen, button and frame\n• Sign in with Bazaar: your progress is saved with your Bazaar account and comes back on a new phone\n• Rate & review and More games in About\n• New-version notice and updating from inside the game\n• Clearer player frames, leaderboard and friends list\n• Display fixes and small improvements"
 }
