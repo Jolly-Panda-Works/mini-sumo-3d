@@ -83,7 +83,7 @@ export function CoinShop() {
         : (await request<{ granted: number; balance: number }>("/daily-gift", { method: "POST" })).granted;
       setClaimedNow(true);
       if (amount > 0) {
-        audio.sample("coins");
+        audio.sample("purchase");
         pushToast(`+${amount} Sumo Coins`, "info");
       }
       void refreshProfile();

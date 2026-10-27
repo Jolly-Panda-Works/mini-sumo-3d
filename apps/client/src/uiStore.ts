@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import type { SampleName } from "./audio/AudioManager";
 import { createStore } from "./store";
 
 export interface Toast {
@@ -55,12 +54,8 @@ export interface Notice {
   body?: ReactNode;
   /** Shown under the title (e.g. your coins). */
   titleExtra?: ReactNode;
-  /** The sound it opens with (default: by kind). */
-  sound?: SampleName;
   resolve: (actionId: string) => void;
 }
-
-export type NoticeOptions = { closable?: boolean; body?: ReactNode; titleExtra?: ReactNode; sound?: SampleName };
 
 export const uiStore = createStore<UIState>({
   settingsOpen: false,
@@ -91,7 +86,7 @@ export function showNotice(
   title: string,
   message: string,
   actions?: NoticeAction[],
-  options: NoticeOptions = {},
+  options: { closable?: boolean; body?: ReactNode; titleExtra?: ReactNode } = {},
 ): Promise<string> {
   return new Promise((resolve) => {
     const id = ++noticeId;
@@ -104,7 +99,6 @@ export function showNotice(
       closable: options.closable,
       body: options.body,
       titleExtra: options.titleExtra,
-      sound: options.sound,
       resolve: (actionId) => {
         uiStore.update({ notices: uiStore.get().notices.filter((n) => n.id !== id) });
         resolve(actionId);
@@ -114,12 +108,15 @@ export function showNotice(
   });
 }
 
-export const showMessage = (title: string, message: string, actions?: NoticeAction[], options?: NoticeOptions) =>
+export const showMessage = (
+  title: string,
+  message: string,
+  actions?: NoticeAction[],
+  options?: { closable?: boolean; body?: ReactNode; titleExtra?: ReactNode },
+) =>
   showNotice("message", title, message, actions, options);
-export const showWarning = (title: string, message: string, actions?: NoticeAction[], options?: NoticeOptions) =>
-  showNotice("warning", title, message, actions, options);
-export const showError = (title: string, message: string, actions?: NoticeAction[], options?: NoticeOptions) =>
-  showNotice("error", title, message, actions, options);
+export const showWarning = (title: string, message: string, actions?: NoticeAction[]) => showNotice("warning", title, message, actions);
+export const showError = (title: string, message: string, actions?: NoticeAction[]) => showNotice("error", title, message, actions);
 
 export const setDevOpen = (devOpen: boolean) => uiStore.update({ devOpen });
 export const setInviteUiOpen = (invitePickerOpen: boolean) => uiStore.update({ invitePickerOpen });

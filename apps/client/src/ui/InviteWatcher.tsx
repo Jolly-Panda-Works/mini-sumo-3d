@@ -36,7 +36,7 @@ export function InviteWatcher() {
           const choice = await showMessage("Friend request", `${request.name} (level ${request.level}) wants to be your friend.`, [
             { id: "ok", label: "Accept", primary: true },
             { id: "cancel", label: "Not now" },
-          ], { sound: "friend" });
+          ]);
           if (choice === "ok") {
             try {
               await answerFriend(request.accountId, true);
@@ -59,7 +59,7 @@ export function InviteWatcher() {
         const choice = await showMessage("Game invite", `${invite.from.name} invites you to play. Join the game?`, [
           { id: "ok", label: "Join", primary: true },
           { id: "cancel", label: "Not now" },
-        ], { sound: "invite" });
+        ]);
         void dismissInvite(invite.id);
         if (choice === "ok") {
           if (sessionStore.get().status === "connected") await roomManager.leave();

@@ -349,7 +349,7 @@ function AvatarPicker({ onPicked }: { onPicked: () => void }) {
       const next = await showWarning("Not enough coins", "You need more Sumo Coins for this. Get some in the coin shop.", [
         { id: "shop", label: "Coin shop", primary: true },
         { id: "cancel", label: "Not now" },
-      ], { sound: "no-coins" });
+      ]);
       if (next === "shop") setShopOpen(true);
       return;
     }

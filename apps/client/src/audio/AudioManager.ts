@@ -1,52 +1,34 @@
 import { settingsStore } from "../settings";
 
 /**
- * Game audio via Web Audio: sound files for UI and match moments, plus a few synthesized
- * effects. Graph: sources -> sfx bus / music bus -> master -> speakers.
+ * Synthesized audio via Web Audio: no files to load or fail, no licensing.
+ * Graph: sources -> sfx bus / music bus -> master -> speakers.
  * The context is created on the first user gesture to respect autoplay rules.
  */
-/**
- * Sound files in public/sfx: [level, format]. Levels make them sit together; the files are
- * trimmed, mono 24 kHz and loudness-matched (from the studio's sound packs). Short,
- * timing-critical sounds are WAV (no MP3 start delay); longer ones MP3.
- */
+/** Sound files in public/sfx (short MP3s), with a level per file so they sit together. */
 export const SAMPLES = {
-  // UI
-  click: [0.5, "wav"],
-  reject: [0.6, "wav"],
-  "menu-open": [0.55, "wav"],
-  "menu-close": [0.45, "wav"],
-  purchase: [0.7, "mp3"],
-  coins: [0.7, "wav"],
-  "no-coins": [0.6, "wav"],
-  equip: [0.6, "wav"],
-  error: [0.6, "wav"],
-  warning: [0.6, "wav"],
-  invite: [0.7, "wav"],
-  friend: [0.65, "wav"],
-  "level-up": [0.85, "wav"],
-  "powerup-on": [0.7, "mp3"],
-  "powerup-off": [0.6, "wav"],
-  // Match moments
-  countdown: [0.55, "wav"],
-  go: [0.8, "wav"],
-  hit: [0.6, "wav"],
-  dash: [0.45, "wav"],
-  cheer: [0.6, "wav"],
-  aww: [0.6, "wav"],
-  win: [0.7, "mp3"],
-  lose: [0.6, "mp3"],
-  "ringout-final": [0.9, "wav"],
-  "fly-out": [0.45, "wav"],
-  thud: [0.55, "wav"],
-  counter: [0.75, "wav"],
-  clash: [0.7, "wav"],
-  combo: [0.4, "wav"],
-  saved: [0.55, "wav"],
-  "ring-shrink": [0.6, "wav"],
-  "edge-alert": [0.3, "wav"],
-} as const satisfies Record<string, readonly [number, "wav" | "mp3"]>;
+  click: 0.55,
+  reject: 0.7,
+  "menu-open": 0.75,
+  "menu-close": 0.55,
+  purchase: 0.8,
+  "level-up": 0.9,
+  "powerup-on": 0.85,
+  "powerup-off": 0.75,
+  // Match moments (trimmed from the studio's sound packs; WAV, see WAV_SAMPLES).
+  "ringout-final": 0.9,
+  "fly-out": 0.45,
+  thud: 0.55,
+  counter: 0.75,
+  clash: 0.7,
+  combo: 0.4,
+  saved: 0.55,
+  "ring-shrink": 0.6,
+  "edge-alert": 0.3,
+} as const;
 export type SampleName = keyof typeof SAMPLES;
+/** Samples stored as WAV (short, mono 24 kHz); the rest are MP3. */
+const WAV_SAMPLES: ReadonlySet<SampleName> = new Set(["ringout-final", "fly-out", "thud", "counter", "clash", "combo", "saved", "ring-shrink", "edge-alert"]);
 
 class AudioManager {
   private sampleFiles = new Map<SampleName, Promise<ArrayBuffer | null>>();
@@ -124,7 +106,7 @@ class AudioManager {
   private sampleFile(name: SampleName): Promise<ArrayBuffer | null> {
     let pending = this.sampleFiles.get(name);
     if (!pending) {
-      pending = fetch(`${import.meta.env.BASE_URL}sfx/${name}.${SAMPLES[name][1]}`)
+      pending = fetch(`${import.meta.env.BASE_URL}sfx/${name}.${WAV_SAMPLES.has(name) ? "wav" : "mp3"}`)
         .then((r) => (r.ok ? r.arrayBuffer() : null))
         .catch(() => null);
       this.sampleFiles.set(name, pending);
@@ -132,11 +114,8 @@ class AudioManager {
     return pending;
   }
 
-  /**
-   * Plays a sound file (decoded once, then reused). `rate` above 1 plays it faster and higher;
-   * `volume` scales its level.
-   */
-  sample(name: SampleName, rate = 1, volume = 1): void {
+  /** Plays a sound file (decoded once, then reused). `rate` above 1 plays it faster and higher. */
+  sample(name: SampleName, rate = 1): void {
     const ctx = this.ready;
     if (!ctx || !this.sfxBus) return;
     let decoded = this.sampleBuffers.get(name);
@@ -157,7 +136,7 @@ class AudioManager {
       src.buffer = buffer;
       src.playbackRate.value = rate;
       const gain = ctx.createGain();
-      gain.gain.value = SAMPLES[name][0] * volume;
+      gain.gain.value = SAMPLES[name];
       src.connect(gain).connect(this.sfxBus);
       src.start();
     });
@@ -202,48 +181,171 @@ class AudioManager {
     osc.stop(t + duration + 0.05);
   }
 
-  /** A push landing: harder hits are louder and a little lower. */
+  private thud(duration: number, gain: number, cutoff: number): void {
+    const ctx = this.ready;
+    if (!ctx || !this.sfxBus || !this.noise) return;
+    const t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noise;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = cutoff;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(gain, t);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+    src.connect(filter).connect(env).connect(this.sfxBus);
+    src.start(t);
+    src.stop(t + duration + 0.05);
+  }
+
   impact(strength: number): void {
     const s = Math.min(1, strength / 12);
-    this.sample("hit", 1.12 - s * 0.24, 0.55 + s * 0.45);
+    this.thud(0.18, 0.25 + s * 0.5, 500 + s * 900);
+    this.tone(140 - s * 40, 0.18, "sine", 0.35 + s * 0.3, 55);
   }
 
   dash(): void {
-    this.sample("dash", 0.95 + Math.random() * 0.1);
+    this.tone(260, 0.16, "triangle", 0.22, 720);
+    this.thud(0.12, 0.12, 2400);
   }
 
-  /** Someone is knocked out: a falling tone. */
   eliminated(): void {
     this.tone(620, 0.55, "square", 0.12, 90);
   }
 
-  /** The 3-2-1 ticks. */
   countdown(): void {
-    this.sample("countdown");
+    this.tone(660, 0.12, "square", 0.14);
   }
 
-  /** The bout starts: "Fight!". */
+  /** Referee's whistle: the bout starts. */
   go(): void {
-    this.sample("go");
+    this.whistle();
   }
 
-  /** You pushed someone out. */
+  whistle(): void {
+    const ctx = this.ready;
+    if (!ctx || !this.sfxBus) return;
+    const t = ctx.currentTime;
+    const dur = 0.62;
+    // Pea whistle: a bright tone warbled fast by the rolling pea, plus a little breath.
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(2850, t);
+    osc.frequency.linearRampToValueAtTime(3050, t + 0.08);
+    const trill = ctx.createOscillator();
+    trill.frequency.value = 34;
+    const trillDepth = ctx.createGain();
+    trillDepth.gain.value = 140;
+    trill.connect(trillDepth).connect(osc.frequency);
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(0.32, t + 0.03);
+    env.gain.setValueAtTime(0.32, t + dur - 0.12);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(env).connect(this.sfxBus);
+    osc.start(t);
+    trill.start(t);
+    osc.stop(t + dur + 0.05);
+    trill.stop(t + dur + 0.05);
+    this.noiseBurst(t, dur, 3200, 0.08, "bandpass");
+  }
+
+  /** Crowd cheering (you pushed someone out). */
   crowdCheer(): void {
-    this.sample("cheer");
+    const ctx = this.ready;
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    this.crowd(t, 1.8, 900, 1500, 0.32);
+    // A few voices whooping on top.
+    for (let i = 0; i < 6; i++) {
+      const start = t + 0.1 + Math.random() * 0.6;
+      const f = 420 + Math.random() * 380;
+      this.voice(start, 0.35 + Math.random() * 0.3, f, f * (1.25 + Math.random() * 0.3), 0.05);
+    }
   }
 
-  /** You were pushed out. */
+  /** Crowd groaning "aww" (you were pushed out). */
   crowdAww(): void {
-    this.sample("aww");
+    const ctx = this.ready;
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    this.crowd(t, 1.5, 700, 380, 0.24);
+    for (let i = 0; i < 7; i++) {
+      const start = t + Math.random() * 0.15;
+      const f = 230 + Math.random() * 180;
+      this.voice(start, 0.9 + Math.random() * 0.3, f, f * 0.7, 0.05);
+    }
+  }
+
+  /** Many voices: band-passed noise with a swell, sweeping the band from one pitch to another. */
+  private crowd(t: number, dur: number, fromHz: number, toHz: number, gain: number): void {
+    const ctx = this.ctx;
+    if (!ctx || !this.sfxBus || !this.noise) return;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noise;
+    src.loop = true;
+    const band = ctx.createBiquadFilter();
+    band.type = "bandpass";
+    band.Q.value = 0.9;
+    band.frequency.setValueAtTime(fromHz, t);
+    band.frequency.exponentialRampToValueAtTime(toHz, t + dur);
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(gain, t + dur * 0.25);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(band).connect(env).connect(this.sfxBus);
+    src.start(t);
+    src.stop(t + dur + 0.05);
+  }
+
+  /** One voice: a vowel-ish tone (saw through a formant filter) gliding between pitches. */
+  private voice(t: number, dur: number, fromHz: number, toHz: number, gain: number): void {
+    const ctx = this.ctx;
+    if (!ctx || !this.sfxBus) return;
+    const osc = ctx.createOscillator();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(fromHz, t);
+    osc.frequency.exponentialRampToValueAtTime(toHz, t + dur);
+    const formant = ctx.createBiquadFilter();
+    formant.type = "bandpass";
+    formant.frequency.value = 800;
+    formant.Q.value = 3;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(gain, t + 0.06);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(formant).connect(env).connect(this.sfxBus);
+    osc.start(t);
+    osc.stop(t + dur + 0.05);
+  }
+
+  private noiseBurst(t: number, dur: number, hz: number, gain: number, type: BiquadFilterType): void {
+    const ctx = this.ctx;
+    if (!ctx || !this.sfxBus || !this.noise) return;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noise;
+    src.loop = true;
+    const filter = ctx.createBiquadFilter();
+    filter.type = type;
+    filter.frequency.value = hz;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(gain, t);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(filter).connect(env).connect(this.sfxBus);
+    src.start(t);
+    src.stop(t + dur + 0.05);
   }
 
   victory(): void {
-    this.sample("win");
+    [523, 659, 784, 1047].forEach((f, i) => this.tone(f, 0.22, "triangle", 0.2, undefined, i * 0.11));
   }
 
   roundEnd(): void {
-    this.sample("lose");
+    this.tone(392, 0.25, "triangle", 0.18);
+    this.tone(330, 0.35, "triangle", 0.16, undefined, 0.18);
   }
+
+
 }
 
 export const audio = new AudioManager();
