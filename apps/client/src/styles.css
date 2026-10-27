@@ -10843,7 +10843,7 @@ html .frames {
    ====================================================================== */
 .frames,
 html .frames {
-  width: min(56vw, 280px);
+  width: min(42vw, 230px);
 }
 
 .frame,
@@ -10902,6 +10902,62 @@ html .frames {
    frames and the gear (centred there) instead of the exact centre */
 @media (max-width: 653px) {
   .hud__timer {
-    left: calc((12px + min(56vw, 280px) + 100vw - 60px) / 2 - 50vw);
+    left: calc((12px + min(42vw, 230px) + 100vw - 60px) / 2 - 50vw);
   }
+}
+
+/* Invite picker: the same friend card as in Friends (its own shape, the avatar in the round
+   socket), the status label centred in the right part of the panel */
+.dlg-invite-picker .friend-row {
+  aspect-ratio: 961 / 285;
+}
+
+.dlg-invite-picker .friend-row__avatar {
+  width: 17.6%;
+  height: auto;
+}
+
+.dlg-invite-picker .friend-row__text strong {
+  font-size: 4.6cqw;
+}
+
+.dlg-invite-picker .friend-row__actions {
+  justify-content: center;
+}
+
+.dlg-invite-picker .friend-row__state {
+  font-size: max(0.7rem, 3.6cqw);
+  line-height: 1.2;
+}
+
+/* The friend avatar: a square sized by both sides (17.6 % of the card's width = 59.3 % of its
+   height on the 961×285 card), so the picture inside can't make it taller */
+.friend-row__avatar,
+.dlg-invite-picker .friend-row__avatar {
+  left: 10.6%;
+  top: 19.6%;
+  width: 17.6%;
+  height: 59.3%;
+  aspect-ratio: auto;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+/* Smaller frames: the name and level text a little larger relative to the frame, so they
+   stay readable on phones */
+.frame .frame__name,
+.frame--red .frame__name,
+.frame--blue .frame__name,
+.frame--green .frame__name,
+.frame--yellow .frame__name {
+  font-size: 5.6cqw;
+}
+
+.frame .frame__level,
+.frame--red .frame__level,
+.frame--blue .frame__level,
+.frame--green .frame__level,
+.frame--yellow .frame__level {
+  font-size: 5.2cqw;
+  overflow: visible;
 }

@@ -1,0 +1,13 @@
+Animate the attached image as the exact first frame of an 8-second vertical 9:16 promotional video for Mini Sumo.
+
+Preserve the original hand-painted 2D cartoon style, bold dark-brown outlines, warm Japanese festival lighting, character identities, body proportions, topknots, and red and blue mawashi. Keep the shrine, arena, and background characters consistent.
+
+One continuous shot, no cuts.
+0–2 seconds: slow subtle camera push-in. The red and blue wrestlers bend their knees and shift their weight, preparing to clash. Lanterns sway gently and a few cherry petals drift through the scene.
+2–5 seconds: both wrestlers take one short step forward and press their palms together in a playful sumo clash. Their bodies squash slightly with cartoon anticipation and recoil. A small stylized puff of golden dust rises from their feet.
+5–7 seconds: they push back and forth once, keeping their feet on the dohyo. The yellow and green wrestlers in the background cheer with small arm movements.
+7–8 seconds: settle into a clear energetic hero pose, palms pressed together. Ease the camera to a stop and hold the final frame.
+
+Maintain stable anatomy and consistent faces. Hands stay attached to arms; no extra limbs, duplicated characters, morphing, sudden costume changes, flicker, or exaggerated camera shake. Keep both main wrestlers fully visible. Do not add text, logos, captions, UI, or watermarks. Keep the upper sky area uncluttered for a title overlay added later.
+
+Audio direction if supported: a short playful taiko rhythm, soft foot shuffles, one cartoon impact sound, and a brief crowd cheer. No speech or voiceover.
