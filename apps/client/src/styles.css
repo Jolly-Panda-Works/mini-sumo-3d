@@ -10835,3 +10835,73 @@ html .frames {
   max-width: none;
   object-fit: contain;
 }
+
+/* ======================================================================
+   Player frames: one design in four colours (the red frame, its oval and level bar
+   recoloured; 700×233), so every player's frame has the same shape and layout. Bigger on
+   phones, level text larger with a dark outline so it reads on every colour.
+   ====================================================================== */
+.frames,
+html .frames {
+  width: min(56vw, 280px);
+}
+
+.frame,
+.frame--red,
+.frame--blue,
+.frame--green,
+.frame--yellow {
+  aspect-ratio: 700 / 233;
+}
+
+.frame .frame__avatar,
+.frame--red .frame__avatar,
+.frame--blue .frame__avatar,
+.frame--green .frame__avatar,
+.frame--yellow .frame__avatar {
+  left: 7.5%;
+  top: 16%;
+  width: 21.5%;
+  height: 65%;
+}
+
+.frame .frame__name,
+.frame--red .frame__name,
+.frame--blue .frame__name,
+.frame--green .frame__name,
+.frame--yellow .frame__name {
+  left: 37%;
+  width: 54%;
+  top: 30%;
+  height: 19%;
+  font-size: 5cqw;
+}
+
+.frame .frame__level,
+.frame--red .frame__level,
+.frame--blue .frame__level,
+.frame--green .frame__level,
+.frame--yellow .frame__level {
+  left: 39%;
+  width: 49%;
+  top: 57%;
+  height: 20%;
+  color: #fff;
+  font-size: 4.4cqw;
+  font-weight: 900;
+  -webkit-text-stroke: 0.7cqw #3a1d05;
+  paint-order: stroke fill;
+  text-shadow: none;
+}
+
+.frame--yellow .frame__state {
+  bottom: 14%;
+}
+
+/* Narrow screens: the frames reach the middle, so the timer sits in the space between the
+   frames and the gear (centred there) instead of the exact centre */
+@media (max-width: 653px) {
+  .hud__timer {
+    left: calc((12px + min(56vw, 280px) + 100vw - 60px) / 2 - 50vw);
+  }
+}

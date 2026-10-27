@@ -8,6 +8,7 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 
 ### Added
 
+- **Link preview**: a shared link to the game shows the Mini Sumo banner ("Push. Dash. Win.", 1200 × 630) with a title and description (Open Graph and Twitter card tags; `public/social/mini-sumo-social-v1.jpg`). The other banner formats and the intro banner are in `docs/marketing/`, outside the builds.
 - Dev panel: a **Sounds** section plays each of the game's sounds, to try them.
 - **Sign in with Cafe Bazaar on the web** (the browser game, next to Google Play and email): OAuth2 on the game server (`account/BazaarLogin.ts`). A new Bazaar account is linked to the player; one that already saves another player signs this device in as them. The browser only ever sees a one-time ticket (5 minutes), never a key; states expire after 10 minutes and come back only to the game's own pages. Server keys `BAZAAR_LOGIN_CLIENT_ID` / `BAZAAR_LOGIN_SECRET` in `.env`; the catalog says `bazaarLogin` when it's on. 6 new tests (188 total).
 - Cafe Bazaar build:
@@ -26,7 +27,7 @@ Releases use the root `package.json` version and are tagged `vX.Y.Z` automatical
 ### Fixed
 
 - **76 images of the new art were stretched or squashed** (3–175 %): the art export resized each to the old file's size, whatever its shape. They are re-exported from the originals at their true shape (same width, the right height), and every size, ratio and 9-slice cut in the CSS follows: player frames, START, the notice plank, OUT, leaderboard rows, the name field and many buttons. The blank START, the silver and bronze medals and the loading-bar fill are made again from the corrected images; the fill, thicker than the frame's slot, is trimmed to it instead of squeezed. The old art kept on purpose (arena pictures, Private Room, results board) is unchanged.
-- Player frames in a bout: each colour's frame at its own shape, the avatar filling the oval socket, name and level inside their bars, text sized to the frame; OUT and Left inside the frame.
+- Player frames in a bout: one frame design in the four player colours (the red frame with its oval and level bar recoloured), so all four have the same size and layout; the avatar fills the oval, the level text is larger with a dark outline, and the frames are bigger on phones (the timer moves beside them there). OUT and Left sit inside the frame.
 - The red notice plank (notices and "You're out!") keeps its gold ends' shape: one line at a fixed height.
 - The final-stretch glow reaches the window's edges (it was inset with the HUD).
 - The hosted web build (`Web.zip` and GitHub Pages) was missing its backgrounds and frames: the art set through CSS variables resolved against the stylesheet folder (`assets/ui/…`, 404) with the relative base. Those URLs are now absolute.
