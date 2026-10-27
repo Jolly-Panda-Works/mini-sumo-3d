@@ -44,7 +44,7 @@ if (!changelogFile || !existsSync(changelogFile)) fail("Pass --changelog (the no
 const notes = JSON.parse(readFileSync(changelogFile, "utf8"));
 if (!String(notes.fa ?? "").trim() || !String(notes.en ?? "").trim()) fail("The release notes are empty.");
 
-/** One API call; retries a few times when Bazaar says "too many requests". */
+/** One API call; retries a few times when Bazaar says "too many requests". `ok`: any 2xx (Bazaar answers 200 or 201). */
 async function call(method, path = "", body) {
   for (let attempt = 1; ; attempt++) {
     const headers = { "CAFEBAZAAR-PISHKHAN-API-SECRET": token };
@@ -67,7 +67,7 @@ async function call(method, path = "", body) {
       await new Promise((r) => setTimeout(r, attempt * 20_000));
       continue;
     }
-    return { status: res.status, json };
+    return { status: res.status, ok: res.status >= 200 && res.status < 300, json };
   }
 }
 
@@ -92,12 +92,12 @@ if (draft.json.type === "success" && highestCode(draft.json.release) >= code) {
 if (draft.json.type === "success") {
   console.log(`Removing an unfinished draft release (versionCode ${highestCode(draft.json.release) || "none"}).`);
   const removed = await call("DELETE");
-  if (removed.status !== 200) fail(`Couldn't remove the draft release: ${removed.json.message ?? removed.status}`);
+  if (!removed.ok) fail(`Couldn't remove the draft release: ${removed.json.message ?? removed.status}`);
 }
 
 // 3. New release.
 const created = await call("POST");
-if (created.status !== 201 && created.status !== 200) fail(`Couldn't create the release: ${created.json.message ?? created.status}`);
+if (!created.ok) fail(`Couldn't create the release: ${created.json.message ?? created.status}`);
 console.log("Release created.");
 
 // 4. The APK.
@@ -105,7 +105,7 @@ const form = new FormData();
 form.append("architecture", "all");
 form.append("apk", await openAsBlob(apk, { type: "application/vnd.android.package-archive" }), apk.split(/[\\/]/).pop());
 const uploaded = await call("POST", "upload/", form);
-if (uploaded.status !== 200) fail(`Couldn't upload the APK: ${uploaded.json.message ?? uploaded.status}`);
+if (!uploaded.ok) fail(`Couldn't upload the APK: ${uploaded.json.message ?? uploaded.status}`);
 const pkg = uploaded.json.package ?? {};
 console.log(`APK uploaded: version ${pkg.version_name} (${pkg.version_code}), ${pkg.apk_size} bytes.`);
 
@@ -125,7 +125,7 @@ const committed = await call("POST", "commit/", {
   auto_publish: autoPublish,
   staged_rollout_percentage: 100,
 });
-if (committed.status !== 200) fail(`Couldn't send the release for review: ${committed.json.message ?? committed.status}`);
+if (!committed.ok) fail(`Couldn't send the release for review: ${committed.json.message ?? committed.status}`);
 console.log(
   `::notice::Mini Sumo ${version} is with Cafe Bazaar for review${autoPublish ? "; it's published as soon as it's approved" : "; publish it in the panel once approved"}.`,
 );
